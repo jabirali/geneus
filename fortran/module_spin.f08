@@ -20,6 +20,15 @@ module module_spin
                      spin_construct_rvector, &
                      spin_construct_spin
   end interface
+
+  ! Assignment operator
+  interface assignment(=)
+    module procedure spin_import_rscalar, spin_import_cscalar, &
+                     spin_import_cmatrix, spin_export_cmatrix, &
+                     spin_import_cvector, spin_export_cvector, &
+                     spin_import_rvector, spin_export_cvector, &
+                     spin_assign_spin
+  end interface
   
   ! Multiplication operator
   interface operator(*)
@@ -81,6 +90,14 @@ contains
     type(spin), intent(in) :: other
 
     this%matrix = other%matrix
+  end function
+
+  pure subroutine spin_import_rscalar(this, scalar)
+    ! This function assigns a spin object from a real scalar
+    type(spin)       :: this
+    real, intent(in) :: scalar
+
+    this%matrix = scalar * pauli0%matrix
   end function
 
   pure function spin_multl_rscalar(a,b) result(r)
