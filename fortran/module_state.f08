@@ -124,32 +124,3 @@ contains
     ldos = real(g%trace(), kind=dp)/2.0_dp
   end function
 end module
-
-program test
-  use module_precision
-  use module_spin
-  use module_state
-  type(state) :: mystate, newstate
-  real(dp)    :: vec(32)
-
-  !print *,mystate
-
-  mystate = state(spin(1.0_dp),spin(2.0_dp),spin(3.0_dp),spin(4.0_dp))
-
-  !print *,mystate%g
-  !print *,mystate%gt
-  !print *,mystate%dg
-  !print *,mystate%dgt
-  
-  !print *,'Result:'
-  vec = mystate
-  !print *,vec
-  newstate = mystate
-  !print *,newstate
-  
-  !print *,'New:'
-  mystate = state( (1.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
-  print *,mystate%g
-
-  print *,mystate%get_ldos()
-end program
