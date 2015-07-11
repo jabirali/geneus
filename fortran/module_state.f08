@@ -5,19 +5,20 @@ module module_state
 
   ! Class declaration
   type state
-    type(spin) :: g    ! Riccati parameter γ  
-    type(spin) :: gt   ! Riccati parameter γ~
-    type(spin) :: dg   ! Derivative dγ /dx
-    type(spin) :: dgt  ! Derivative dγ~/dx
+    type(spin) :: g   = state(0_dp) ! Riccati parameter γ  
+    type(spin) :: gt  = state(0_dp) ! Riccati parameter γ~
+    type(spin) :: dg  = state(0_dp) ! Derivative dγ /dx
+    type(spin) :: dgt = state(0_dp) ! Derivative dγ~/dx
   end type
 
   ! Class constructor
   !interface state
-  !  module procedure state_construct
+  !  module procedure state_construct_superconductor, 
   !end interface
 
   ! writew
 
+  ! Assignment operator
   interface assignment(=)
     module procedure state_import_rvector, state_export_rvector
   end interface
