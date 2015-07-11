@@ -26,4 +26,11 @@ program mytest
   print *,test
   test = reshape([ (2,0), (0,0), (0,0), (2,0) ], [2,2]) * test * reshape([ (2,0), (0,0), (0,0), (2,0) ], [2,2])
   print *,test
+  test = spin([ 1., 0., 0., -1., 0., 1., 1., 0.])
+  test = spin(test+test)
+  print *,test
+  print *,test*test
+  print *,pauli3
+  test = spin(0) + reshape([ (2,0), (0,0), (0,0), (2,0) ],[2,2])
+  print *,test
 end program
