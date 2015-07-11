@@ -37,6 +37,14 @@ module module_spin
                      spin_add_spin
   end interface
 
+  ! Subtraction operator
+  interface operator(-)
+    module procedure spin_subl_rscalar, spin_subr_rscalar, &
+                     spin_subl_cscalar, spin_subr_cscalar, &
+                     spin_subl_cmatrix, spin_subr_cmatrix, &
+                     spin_sub_spin
+  end interface
+
   ! Exported constants
   type(spin), parameter :: pauli0 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2]))
   type(spin), parameter :: pauli1 = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2]))
@@ -197,5 +205,67 @@ contains
     type(spin), intent(in) :: a, b
 
     r = spin(a%matrix + b%matrix)
+  end function
+
+  pure function spin_subl_rscalar(a,b) result(r)
+    ! Defines left subtraction of a spin matrix and a real scalar
+    type(spin)             :: r
+    real,       intent(in) :: a
+    type(spin), intent(in) :: b
+
+    r = spin(a*pauli0%matrix - b%matrix)
+  end function
+
+  pure function spin_subr_rscalar(a,b) result(r)
+    ! Defines right subtraction of a spin matrix and a real scalar
+    type(spin)             :: r
+    type(spin), intent(in) :: a
+    real,       intent(in) :: b
+
+    r = spin(a%matrix - b*pauli0%matrix)
+  end function
+
+  pure function spin_subl_cscalar(a,b) result(r)
+    ! Defines left subtraction of a spin matrix and a complex scalar
+    type(spin)             :: r
+    complex,    intent(in) :: a
+    type(spin), intent(in) :: b
+
+    r = spin(a*pauli0%matrix - b%matrix)
+  end function
+
+  pure function spin_subr_cscalar(a,b) result(r)
+    ! Defines right subtraction of a spin matrix and a complex scalar
+    type(spin)             :: r
+    type(spin), intent(in) :: a
+    complex,    intent(in) :: b
+
+    r = spin(a%matrix - b*pauli0%matrix)
+  end function
+
+  pure function spin_subl_cmatrix(a,b) result(r)
+    ! Defines left subtraction of a spin matrix and a complex matrix
+    type(spin)             :: r
+    complex,    intent(in) :: a(2,2)
+    type(spin), intent(in) :: b
+
+    r = spin(a - b%matrix)
+  end function
+
+  pure function spin_subr_cmatrix(a,b) result(r)
+    ! Defines right subtraction of a spin matrix and a complex matrix
+    type(spin)             :: r
+    type(spin), intent(in) :: a
+    complex,    intent(in) :: b(2,2)
+
+    r = spin(a%matrix - b)
+  end function
+
+  pure function spin_sub_spin(a,b) result(r)
+    ! Defines subtraction of two spin matrices
+    type(spin)             :: r
+    type(spin), intent(in) :: a, b
+
+    r = spin(a%matrix - b%matrix)
   end function
 end module

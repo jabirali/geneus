@@ -31,6 +31,6 @@ program mytest
   print *,test
   print *,test*test
   print *,pauli3
-  test = spin(0) + reshape([ (2,0), (0,0), (0,0), (2,0) ],[2,2])
+  test = 1. - pauli2 
   print *,test
 end program
