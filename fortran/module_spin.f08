@@ -26,7 +26,7 @@ module module_spin
     module procedure spin_import_rscalar, spin_import_cscalar, &
                      spin_import_cmatrix, spin_export_cmatrix, &
                      spin_import_cvector, spin_export_cvector, &
-                     spin_import_rvector, spin_export_cvector, &
+                     spin_import_rvector, spin_export_rvector, &
                      spin_assign_spin
   end interface
   
@@ -93,12 +93,77 @@ contains
   end function
 
   pure subroutine spin_import_rscalar(this, scalar)
-    ! This function assigns a spin object from a real scalar
-    type(spin)       :: this
-    real, intent(in) :: scalar
+    ! This function assigns a spin object data from a real scalar
+    type(spin), intent(out) :: this
+    real,       intent(in)  :: scalar
 
     this%matrix = scalar * pauli0%matrix
-  end function
+  end subroutine
+
+  pure subroutine spin_import_cscalar(this, scalar)
+    ! This function assigns a spin object data from a complex scalar
+    type(spin), intent(out) :: this
+    complex,    intent(in)  :: scalar
+
+    this%matrix = scalar * pauli0%matrix
+  end subroutine
+
+  pure subroutine spin_import_cmatrix(this, matrix)
+    ! This function assigns a spin object data from a complex matrix
+    type(spin), intent(out) :: this
+    complex,    intent(in)  :: matrix(2,2)
+
+    this%matrix = matrix
+  end subroutine
+
+  pure subroutine spin_import_cvector(this, vector)
+    ! This function assigns a spin object data from a complex vector
+    type(spin), intent(out) :: this
+    complex,    intent(in)  :: vector(4)
+
+    this%matrix = reshape(vector,[2,2])
+  end subroutine
+
+  pure subroutine spin_import_rvector(this, vector)
+    ! This function assigns a spin object data from a real vector
+    type(spin), intent(out) :: this
+    real,       intent(in)  :: vector(8)
+
+    this%matrix = cmplx( reshape(vector(1:7:2),[2,2]), reshape(vector(2:8:2),[2,2]) )
+  end subroutine
+
+  pure subroutine spin_export_cmatrix(matrix, this)
+    ! This function assigns a complex matrix from a spin object
+    complex,    intent(out) :: matrix(2,2)
+    type(spin), intent(in)  :: this
+
+    matrix = this%matrix 
+  end subroutine
+
+  pure subroutine spin_export_cvector(vector, this)
+    ! This function assigns a complex vector from a spin object
+    complex,    intent(out) :: vector(4)
+    type(spin), intent(in)  :: this
+
+    vector = reshape(this%matrix,[4])
+  end subroutine
+
+  pure subroutine spin_export_rvector(vector, this)
+    ! This function assigns a real vector from a spin object
+    real,       intent(out) :: vector(8)
+    type(spin), intent(in)  :: this
+
+    vector(1:7:2) =  real(reshape(this%matrix,[4]))
+    vector(2:8:2) = aimag(reshape(this%matrix,[4]))
+  end subroutine
+
+  pure subroutine spin_assign_spin(lhs, rhs)
+    ! This function assigns a spin object from another
+    type(spin), intent(out) :: lhs
+    type(spin), intent(in)  :: rhs
+
+    lhs%matrix = rhs%matrix
+  end subroutine
 
   pure function spin_multl_rscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a real scalar
