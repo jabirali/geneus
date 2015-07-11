@@ -15,10 +15,16 @@ module module_state
 
   ! Class declaration
   type state
-    type(spin) :: g      ! Riccati parameter γ  
-    type(spin) :: gt     ! Riccati parameter γ~
-    type(spin) :: dg     ! Derivative dγ /dx
-    type(spin) :: dgt    ! Derivative dγ~/dx
+    type(spin) :: g                          ! Riccati parameter γ  
+    type(spin) :: gt                         ! Riccati parameter γ~
+    type(spin) :: dg                         ! Derivative dγ /dx
+    type(spin) :: dgt                        ! Derivative dγ~/dx
+    contains
+    procedure  :: get_g    => state_get_g    ! Returns the normal Green's function g
+    procedure  :: get_gt   => state_get_gt   ! Returns the normal Green's function g    (tilde conjugated)
+    procedure  :: get_f    => state_get_f    ! Returns the anomalous Green's function g
+    procedure  :: get_ft   => state_get_ft   ! Returns the anomalous Green's function g (tilde conjugated)
+    procedure  :: get_ldos => state_get_ldos ! Returns the anomalous Green's function g (tilde conjugated)
   end type
 
   ! Class constructor
@@ -38,15 +44,19 @@ contains
     complex(dp), intent(in) :: energy    ! Quasiparticle energy (including inelastic scattering contribution)
     complex(dp), intent(in) :: gap       ! Superconducting order parameter (including superconducting phase)
 
-    ! Calculate the θ-parameter t, and then the scalar Riccati parameters a and b
-    complex(dp)             :: t, a, b 
-    t = atanh(gap/energy)
-    a = sinh(t)/(1+cosh(t))
-    b = conjg(a)
+    ! Calculate the θ-parameter (t), superconducting phase (p), and scalar Riccati parameters (a,b)
+    complex(dp) :: t
+    real(dp)    :: p
+    complex(dp) :: a, b
 
-    ! Fill out the matrix Riccati parameters g and gt
-    this%g  = [(0.0_dp,0.0_dp),  a, -a, (0.0_dp,0.0_dp)]
-    this%gt = [(0.0_dp,0.0_dp), -b,  b, (0.0_dp,0.0_dp)]
+    t = atanh(abs(gap)/energy)
+    p = atan(aimag(gap)/real(gap))
+    a =  sinh(t)/(1+cosh(t)) * exp( (0, 1) * p )
+    b = -sinh(t)/(1+cosh(t)) * exp( (0,-1) * p )
+
+    ! Calculate the matrix Riccati parameters γ and γ~
+    this%g  = [(0.0_dp,0.0_dp), a, -a, (0.0_dp,0.0_dp)]
+    this%gt = [(0.0_dp,0.0_dp), b, -b, (0.0_dp,0.0_dp)]
   end function
 
   pure subroutine state_export_rvector(a, b)
@@ -70,6 +80,49 @@ contains
     a%dg  = b(17:24) 
     a%dgt = b(25:32) 
   end subroutine
+
+  function state_get_g(this) result(g)
+    ! Calculates the normal Green's function g
+    type(spin)               :: g
+    class(state), intent(in) :: this
+
+    g = ( pauli0 - this%g * this%gt ) .divl. ( pauli0 + this%g * this%gt )
+  end function
+
+  function state_get_gt(this) result(gt)
+    ! Calculates the tilde-conjugated normal Green's function g~
+    type(spin)               :: gt
+    class(state), intent(in) :: this
+
+    gt = ( pauli0 - this%gt * this%g ) .divl. ( pauli0 + this%gt * this%g )
+  end function
+
+  function state_get_f(this) result(f)
+    ! Calculates the anomalous Green's function f
+    type(spin)               :: f
+    class(state), intent(in) :: this
+
+    f = ( pauli0 - this%g * this%gt ) .divl. ( 2.0_dp * this%g )
+  end function
+
+  function state_get_ft(this) result(ft)
+    ! Calculates the tilde-conjugated anomalous Green's function f~
+    type(spin)               :: ft
+    class(state), intent(in) :: this
+
+    ft = ( pauli0 - this%gt * this%g ) .divl. ( 2.0_dp * this%gt )
+  end function
+
+  function state_get_ldos(this) result(ldos)
+    ! Calculates the local density of states
+    real(dp)                 :: ldos
+    class(state), intent(in) :: this
+
+    type(spin) :: g
+    g = this%get_g()
+
+    ldos = real(g%trace(), kind=dp)/2.0_dp
+  end function
 end module
 
 program test
@@ -79,22 +132,24 @@ program test
   type(state) :: mystate, newstate
   real(dp)    :: vec(32)
 
-  print *,mystate
+  !print *,mystate
 
   mystate = state(spin(1.0_dp),spin(2.0_dp),spin(3.0_dp),spin(4.0_dp))
 
-  print *,mystate%g
-  print *,mystate%gt
-  print *,mystate%dg
-  print *,mystate%dgt
+  !print *,mystate%g
+  !print *,mystate%gt
+  !print *,mystate%dg
+  !print *,mystate%dgt
   
-  print *,'Result:'
+  !print *,'Result:'
   vec = mystate
-  print *,vec
+  !print *,vec
   newstate = mystate
-  print *,newstate
+  !print *,newstate
   
-  print *,'New:'
-  mystate = state( (1.2_dp,0.001_dp), (1.0_dp,0.0_dp) )
-  print *,mystate
+  !print *,'New:'
+  mystate = state( (1.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  print *,mystate%g
+
+  print *,mystate%get_ldos()
 end program

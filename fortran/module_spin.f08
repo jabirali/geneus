@@ -14,7 +14,9 @@ module module_spin
 
   ! Class declaration
   type spin
-    complex(dp) :: matrix(2,2) = 0
+    complex(dp) :: matrix(2,2) = 0        ! Stores the spin matrix
+    contains
+    procedure   :: trace => spin_trace    ! Calculates the trace of the spin matrix
   end type
 
   ! Class constructor
@@ -55,6 +57,11 @@ module module_spin
                      spin_subl_cscalar, spin_subr_cscalar, &
                      spin_subl_cmatrix, spin_subr_cmatrix, &
                      spin_sub_spin
+  end interface
+
+  ! Matrix division operator (left)
+  interface operator(.divl.)
+    module procedure spin_divl_spin
   end interface
 
   ! Exported constants
@@ -344,5 +351,35 @@ contains
     type(spin), intent(in) :: a, b
 
     r = spin(a%matrix - b%matrix)
+  end function
+
+  function spin_divl_spin(a,b) result(r)
+    ! Defines left matrix division of two spin matrices
+    type(spin)             :: r
+    type(spin), intent(in) :: a, b
+    
+    integer, parameter     :: n = 2      ! Size of matrices A and B
+    complex(dp)            :: la(n,n)    ! Copy of A sent to LAPACK
+    complex(dp)            :: lb(n,n)    ! Copy of B sent to LAPACK
+    integer                :: ipiv(n)    ! Pivot indices that define the permutation matrix P
+    integer                :: info       ! Nonzero if any errors occured
+
+    ! Copy the contents of A and B to mutable matrices
+    la = a
+    lb = b
+
+    ! Call LAPACK to solve the equation AX=B
+    call zgesv( n, n, la, n, ipiv, lb, n, info )
+
+    ! Return the result as a spin object
+    r = lb
+  end function
+
+  pure function spin_trace(this) result(r)
+    ! Calculates the trace of the spin matrix
+    complex(dp)             :: r
+    class(spin), intent(in) :: this
+
+    r = this%matrix(1,1) + this%matrix(2,2)
   end function
 end module
