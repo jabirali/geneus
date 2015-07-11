@@ -38,7 +38,7 @@ contains
     complex(dp), intent(in) :: energy    ! Quasiparticle energy (including inelastic scattering contribution)
     complex(dp), intent(in) :: gap       ! Superconducting order parameter (including superconducting phase)
 
-    ! Calculate the scalar Riccati parameters a and b
+    ! Calculate the θ-parameter t, and then the scalar Riccati parameters a and b
     complex(dp)             :: t, a, b 
     t = atanh(gap/energy)
     a = sinh(t)/(1+cosh(t))
