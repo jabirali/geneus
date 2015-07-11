@@ -1,8 +1,12 @@
-! This module defines the data type 'spin', which can be used to represent 2×2 complex spin matrices.
+! This module defines the data type 'spin', which can be used to represent 2×2 complex spin matrices,
+! and overloads some common arithmetic operators to work for the new data type. The module then uses
+! the data type to define and export the Pauli matrices ('pauli0', 'pauli1', 'pauli2', and 'pauli3').
+! To make it easier to interact with common ODE solvers, which often operate on real state vectors,
+! the assignment operator is also overloaded in such a way that 'spin' becomes isomorphic to real(8).
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-07-10
+! Updated: 2015-07-11
 
 module module_spin
   use module_precision
@@ -26,8 +30,7 @@ module module_spin
     module procedure spin_import_rscalar, spin_import_cscalar, &
                      spin_import_cmatrix, spin_export_cmatrix, &
                      spin_import_cvector, spin_export_cvector, &
-                     spin_import_rvector, spin_export_rvector, &
-                     spin_assign_spin
+                     spin_import_rvector, spin_export_rvector 
   end interface
   
   ! Multiplication operator
@@ -155,14 +158,6 @@ contains
 
     vector(1:7:2) =  real(reshape(this%matrix,[4]))
     vector(2:8:2) = aimag(reshape(this%matrix,[4]))
-  end subroutine
-
-  pure subroutine spin_assign_spin(lhs, rhs)
-    ! This function assigns a spin object from another
-    type(spin), intent(out) :: lhs
-    type(spin), intent(in)  :: rhs
-
-    lhs%matrix = rhs%matrix
   end subroutine
 
   pure function spin_multl_rscalar(a,b) result(r)
