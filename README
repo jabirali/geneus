@@ -1,7 +1,7 @@
 The project requires features from Fortran 2008, which have been successfully tested with GFortran version 5.1+.
 
 To compile the project in release mode (enable optimizations):
-    cmake -DCMAKE_BUILD_TYPE=Release . 
+    cmake -DCMAKE_BUILD_TYPE=Release .
     make
 
 To compile the project in debug mode (disable optimizations, enable debug symbols):
