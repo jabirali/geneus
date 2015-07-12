@@ -446,6 +446,11 @@ contains
     write(*,'(ss,4x,a,2x,es11.4,1x,a,1x,es11.4,1x,a,4x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
             '⎝',real(this%matrix(2,1)),'+',aimag(this%matrix(2,1)),'i',                & 
                 real(this%matrix(2,2)),'+',aimag(this%matrix(2,2)),'i','⎠'
+
+    ! Print extra whitespace
+    if(present(title)) then
+      print *,''
+    end if
   end subroutine
 
  !subroutine spin_read(this, unit, iotype, v_list, iostat, iomsg)
