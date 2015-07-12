@@ -3279,13 +3279,15 @@ c------------------------------------------------------
        common /factored_ABD/ pivot, top, blocks, bot
 
        double precision est, work1(200000), work2(200000)
+       double precision w12(100000), w3(100000)
        integer isign(200000), factor
 
 c-------------------------------------------------------
 
        call bspnormmax((Nsub+1)*neqns, top, leftbc, neqns, blocks,
      +                 neqns, 2*neqns, Nsub, bot, neqns-leftbc,
-     +                 est, work1, isign, work2, pivot, factor)
+     +                 est, work1, isign, work2, pivot, w12, w3,
+     +                 factor)
 
        write(6,100) 'kappa =', est
 c      write(20,100) 'kappa =', est
