@@ -15,16 +15,16 @@ module module_state
 
   ! Class declaration
   type state
-    type(spin) :: g                          ! Riccati parameter γ  
-    type(spin) :: gt                         ! Riccati parameter γ~
-    type(spin) :: dg                         ! Derivative dγ /dx
-    type(spin) :: dgt                        ! Derivative dγ~/dx
+    type(spin) :: g                         ! Riccati parameter γ  
+    type(spin) :: gt                        ! Riccati parameter γ~
+    type(spin) :: dg                        ! Derivative dγ /dx
+    type(spin) :: dgt                       ! Derivative dγ~/dx
     contains
-    procedure  :: get_g    => state_get_g    ! Returns the normal Green's function g
-    procedure  :: get_gt   => state_get_gt   ! Returns the normal Green's function g (tilde conjugated)
-    procedure  :: get_f    => state_get_f    ! Returns the anomalous Green's function g
-    procedure  :: get_ft   => state_get_ft   ! Returns the anomalous Green's function g (tilde conjugated)
-    procedure  :: get_ldos => state_get_ldos ! Returns the local density of states
+    procedure  :: get_g   => state_get_g    ! Returns the normal Green's function g
+    procedure  :: get_gt  => state_get_gt   ! Returns the normal Green's function g (tilde conjugated)
+    procedure  :: get_f   => state_get_f    ! Returns the anomalous Green's function g
+    procedure  :: get_ft  => state_get_ft   ! Returns the anomalous Green's function g (tilde conjugated)
+    procedure  :: get_dos => state_get_dos  ! Returns the local density of states
   end type
 
   ! Class constructor
@@ -113,7 +113,7 @@ contains
     ft = ( pauli0 - this%gt * this%g ) .divl. ( 2.0_dp * this%gt )
   end function
 
-  function state_get_ldos(this) result(ldos)
+  function state_get_dos(this) result(ldos)
     ! Calculates the local density of states
     real(dp)                 :: ldos
     class(state), intent(in) :: this

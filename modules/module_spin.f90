@@ -14,9 +14,13 @@ module module_spin
 
   ! Class declaration
   type spin
-    complex(dp) :: matrix(2,2) = 0        ! Stores the spin matrix
+    complex(dp) :: matrix(2,2) = 0                   ! Stores the spin matrix
     contains
-    procedure   :: trace => spin_trace    ! Calculates the trace of the spin matrix
+    procedure   :: trace            => spin_trace    ! Calculates the trace of the spin matrix
+    procedure   :: inv              => spin_inv      ! Calculates the inverse of the spin matrix
+    procedure   :: print            => spin_print    ! Prints the spin matrix to standard out
+   !generic     :: write(formatted) => spin_write    ! Modifies the output format (used by 'write' and 'print')
+   !generic     :: read(formatted)  => spin_write    ! Modifies the input format (used by 'read')
   end type
 
   ! Class constructor
@@ -64,10 +68,15 @@ module module_spin
     module procedure spin_divl_spin
   end interface
 
+  ! Matrix division operator (right)
+  interface operator(.divr.)
+    module procedure spin_divr_spin
+  end interface
+
   ! Exported constants
   type(spin), parameter :: pauli0 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2]))
   type(spin), parameter :: pauli1 = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2]))
-  type(spin), parameter :: pauli2 = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2]))
+  type(spin), parameter :: pauli2 = spin(reshape([ ( 0, 0), ( 0, 1), ( 0,-1), ( 0, 0) ], [2,2]))
   type(spin), parameter :: pauli3 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2]))
 contains
   pure function spin_construct_cmatrix(matrix) result(this)
@@ -208,7 +217,8 @@ contains
     type(spin)              :: r
     complex(dp), intent(in) :: a(2,2)
     type(spin),  intent(in) :: b
-
+ 
+    ! TODO: Compare this to 'zgemm'
     r = spin(matmul(a, b%matrix))
   end function
 
@@ -218,6 +228,7 @@ contains
     type(spin),  intent(in) :: a
     complex(dp), intent(in) :: b(2,2)
 
+    ! TODO: Compare this to 'zgemm'
     r = spin(matmul(a%matrix, b))
   end function
 
@@ -226,6 +237,7 @@ contains
     type(spin)             :: r
     type(spin), intent(in) :: a, b
 
+    ! TODO: Compare this to 'zgemm'
     r = spin(matmul(a%matrix, b%matrix))
   end function
 
@@ -361,7 +373,7 @@ contains
     integer, parameter     :: n = 2      ! Size of matrices A and B
     complex(dp)            :: la(n,n)    ! Copy of A sent to LAPACK
     complex(dp)            :: lb(n,n)    ! Copy of B sent to LAPACK
-    integer                :: ipiv(n)    ! Pivot indices that define the permutation matrix P
+    integer                :: ipiv(n)    ! Pivot indices 
     integer                :: info       ! Nonzero if any errors occured
 
     ! Copy the contents of A and B to mutable matrices
@@ -375,6 +387,15 @@ contains
     r = lb
   end function
 
+  function spin_divr_spin(a,b) result(r)
+    ! Defines right matrix division of two spin matrices
+    type(spin)             :: r
+    type(spin), intent(in) :: a, b
+
+    r = a * b%inv()
+  end function
+
+
   pure function spin_trace(this) result(r)
     ! Calculates the trace of the spin matrix
     complex(dp)             :: r
@@ -382,4 +403,72 @@ contains
 
     r = this%matrix(1,1) + this%matrix(2,2)
   end function
+
+  function spin_inv(this) result(r)
+    ! Calculates the inverse of the spin matrix
+    type(spin)              :: r
+    class(spin), intent(in) :: this
+
+    integer, parameter      :: n = 2    ! Size of the matrix
+    integer, parameter      :: m = 64*n ! Size of the work array
+    complex(dp)             :: a(n,n)   ! Local copy of the matrix
+    complex(dp)             :: work(m)  ! Local work array
+    integer                 :: ipiv(n)  ! Pivot indices
+    integer                 :: info     ! Nonzero if any errors occured
+
+    ! Copy the contents of this to a mutable matrix
+    a = this
+
+    ! Call LAPACK to perform an LU factorization of the matrix
+    call zgetrf( n, n, a, n, ipiv, info )
+
+    ! Call LAPACK to invert the matrix
+    call zgetri( n, a, n, ipiv, work, m, info )
+
+    ! Return the result as a spin object
+    r = a
+  end function
+
+  subroutine spin_print(this, title)
+    ! Prints the spin matrix to stdout
+    class(spin),  intent(in)           :: this 
+    character(*), intent(in), optional :: title
+
+    ! Print the name of the matrix if provided
+    if(present(title)) then
+      print *,title,' = '
+    end if
+
+    ! Print the matrix elements
+    write(*,'(ss,4x,a,2x,es11.4,1x,a,1x,es11.4,1x,a,4x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
+            '⎛',real(this%matrix(1,1)),'+',aimag(this%matrix(1,1)),'i',                & 
+                real(this%matrix(1,2)),'+',aimag(this%matrix(1,2)),'i','⎞'
+    write(*,'(ss,4x,a,2x,es11.4,1x,a,1x,es11.4,1x,a,4x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
+            '⎝',real(this%matrix(2,1)),'+',aimag(this%matrix(2,1)),'i',                & 
+                real(this%matrix(2,2)),'+',aimag(this%matrix(2,2)),'i','⎠'
+  end subroutine
+
+ !subroutine spin_read(this, unit, iotype, v_list, iostat, iomsg)
+ !  ! This method is used to overload the builtin 'read'
+ !  class(spin),  intent(inout) :: this
+ !  integer,      intent(in   ) :: unit
+ !  character(*), intent(in   ) :: iotype
+ !  integer,      intent(in   ) :: v_list(:)
+ !  integer,      intent(  out) :: iostat
+ !  character(*), intent(inout) :: iomsg
+ !
+ !  read(unit, fmt=*, iostat=iostat, iomsg=iomsg) this%matrix
+ !end subroutine
+
+ !subroutine spin_write(this, unit, iotype, v_list, iostat, iomsg)
+ !  ! This method is used to overload the builtin 'write'
+ !  class(spin),  intent(in   ) :: this
+ !  integer,      intent(in   ) :: unit
+ !  character(*), intent(in   ) :: iotype
+ !  integer,      intent(  out) :: v_list(:)
+ !  integer,      intent(  out) :: iostat
+ !  character(*), intent(inout) :: iomsg
+ !
+ !  write(unit, fmt=*, iostat=iostat, iomsg=iomsg) this%matrix
+ !end subroutine
 end module
