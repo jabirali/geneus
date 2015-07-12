@@ -8,8 +8,8 @@ cmake_minimum_required(VERSION 2.6)
 
 # Programming languages
 enable_language(Fortran)
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -fno-f2c -funroll-all-loops")
-set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -fno-f2c -g")
+set (CMAKE_Fortran_FLAGS_RELEASE "-std=legacy -O3 -fno-f2c")
+set (CMAKE_Fortran_FLAGS_DEBUG   "-std=legacy -O0 -fno-f2c -g")
 
 # System libraries
 find_package(BLAS   REQUIRED)

@@ -66,10 +66,10 @@ contains
     this%erg = erg
     forall (n=lbound(erg,1):ubound(erg,1))
       forall (m = lbound(erg,1):ubound(pos,1))
-        this%state(n,m) = state( complex(erg(n),seps), sgap )
+        this%state(n,m) = state( cmplx(erg(n),seps,kind=dp), sgap )
       end forall
-      this%bcl(n) = state( complex(erg(n),seps), sgap )
-      this%bcr(n) = state( complex(erg(n),seps), sgap )
+      this%bcl(n) = state( cmplx(erg(n),seps,kind=dp), sgap )
+      this%bcr(n) = state( cmplx(erg(n),seps,kind=dp), sgap )
     end forall
   end function
 
