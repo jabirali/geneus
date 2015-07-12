@@ -6,7 +6,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-11
+! Updated: 2015-07-12
 
 module module_state
   use module_precision
@@ -21,10 +21,10 @@ module module_state
     type(spin) :: dgt                        ! Derivative dγ~/dx
     contains
     procedure  :: get_g    => state_get_g    ! Returns the normal Green's function g
-    procedure  :: get_gt   => state_get_gt   ! Returns the normal Green's function g    (tilde conjugated)
+    procedure  :: get_gt   => state_get_gt   ! Returns the normal Green's function g (tilde conjugated)
     procedure  :: get_f    => state_get_f    ! Returns the anomalous Green's function g
     procedure  :: get_ft   => state_get_ft   ! Returns the anomalous Green's function g (tilde conjugated)
-    procedure  :: get_ldos => state_get_ldos ! Returns the anomalous Green's function g (tilde conjugated)
+    procedure  :: get_ldos => state_get_ldos ! Returns the local density of states
   end type
 
   ! Class constructor
