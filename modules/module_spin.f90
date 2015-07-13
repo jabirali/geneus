@@ -16,8 +16,8 @@ module module_spin
   type spin
     complex(dp) :: matrix(2,2) = 0                   ! Stores the spin matrix
     contains
-    procedure   :: trace            => spin_trace    ! Calculates the trace of the spin matrix
     procedure   :: inv              => spin_inv      ! Calculates the inverse of the spin matrix
+    procedure   :: trace            => spin_trace    ! Calculates the trace of the spin matrix
     procedure   :: print            => spin_print    ! Prints the spin matrix to standard out
    !generic     :: write(formatted) => spin_write    ! Modifies the output format (used by 'write' and 'print')
    !generic     :: read(formatted)  => spin_read     ! Modifies the input format (used by 'read')
@@ -25,7 +25,9 @@ module module_spin
 
   ! Class constructor
   interface spin
-    module procedure spin_construct_cmatrix, &
+    module procedure spin_construct_rscalar, &
+                     spin_construct_cscalar, &
+                     spin_construct_cmatrix, &
                      spin_construct_cvector, &
                      spin_construct_rvector, &
                      spin_construct_spin
@@ -79,6 +81,22 @@ module module_spin
   type(spin), parameter :: pauli2 = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
   type(spin), parameter :: pauli3 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
 contains
+  pure function spin_construct_rscalar(scalar) result(this)
+    ! This function constructs a spin object from a real scalar
+    type(spin)             :: this
+    real(dp),  intent(in)  :: scalar
+
+    this%matrix = scalar * pauli0%matrix
+  end function
+
+  pure function spin_construct_cscalar(scalar) result(this)
+    ! This function constructs a spin object from a complex scalar
+    type(spin)               :: this
+    complex(dp), intent(in)  :: scalar
+
+    this%matrix = scalar * pauli0%matrix
+  end function
+
   pure function spin_construct_cmatrix(matrix) result(this)
     ! This function constructs a spin object from a 2×2 complex matrix
     type(spin)              :: this
@@ -101,7 +119,8 @@ contains
     real(dp), intent(in) :: vector(8)
 
     this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
-                         reshape(vector(2:8:2),[2,2],order=[2,1]) )
+                         reshape(vector(2:8:2),[2,2],order=[2,1]),&
+                         kind=dp )
   end function
 
   pure function spin_construct_spin(other) result(this)
@@ -150,7 +169,8 @@ contains
     real(dp),   intent(in)  :: vector(8)
 
     this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
-                         reshape(vector(2:8:2),[2,2],order=[2,1]) )
+                         reshape(vector(2:8:2),[2,2],order=[2,1]),&
+                         kind=dp )
   end subroutine
 
   pure subroutine spin_export_cmatrix(matrix, this)
@@ -397,15 +417,6 @@ contains
     r = a * b%inv()
   end function
 
-
-  pure function spin_trace(this) result(r)
-    ! Calculates the trace of the spin matrix
-    complex(dp)             :: r
-    class(spin), intent(in) :: this
-
-    r = this%matrix(1,1) + this%matrix(2,2)
-  end function
-
   function spin_inv(this) result(r)
     ! Calculates the inverse of the spin matrix
     type(spin)              :: r
@@ -429,6 +440,14 @@ contains
 
     ! Return the result as a spin object
     r = a
+  end function
+
+  pure function spin_trace(this) result(r)
+    ! Calculates the trace of the spin matrix
+    complex(dp)             :: r
+    class(spin), intent(in) :: this
+
+    r = this%matrix(1,1) + this%matrix(2,2)
   end function
 
   subroutine spin_print(this, title)
