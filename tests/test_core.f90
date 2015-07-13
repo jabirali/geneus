@@ -46,6 +46,7 @@ program test_core
 
   ! Test the properties of the Pauli matrices in 'module_spin'
   call section('Pauli matrices')
+  call subsection('Testing output:')
   call pauli0%print(' pauli0')
   call pauli1%print(' pauli1')
   call pauli2%print(' pauli2')
@@ -78,6 +79,7 @@ program test_core
 
   ! Test the constructors and assignment operators in 'module_spin'
   call section('Construction and assignment of spin matrices')
+  call subsection('Testing construction and assignment:')
   q%matrix(1,1) = (1.0_dp,2.0_dp)
   q%matrix(1,2) = (3.0_dp,4.0_dp)
   q%matrix(2,1) = (5.0_dp,6.0_dp)
@@ -118,6 +120,7 @@ program test_core
 
   ! Test the matrix algebra operators in 'module_spin'
   call section('Overloaded operators for matrix algebra')
+  call subsection('Testing elementary matrix operations:')
   p = [ ( 1.00_dp, 1.00_dp), ( 1.00_dp,-1.00_dp), ( 2.00_dp, 3.00_dp), ( 2.00_dp,-3.00_dp) ]
   q = [ ( 1.00_dp, 2.00_dp), ( 2.00_dp,-1.00_dp), ( 3.00_dp,-3.00_dp), ( 2.00_dp, 2.00_dp) ]
   r = [ ( 2.00_dp, 3.00_dp), ( 3.00_dp,-2.00_dp), ( 5.00_dp, 0.00_dp), ( 4.00_dp,-1.00_dp) ]
