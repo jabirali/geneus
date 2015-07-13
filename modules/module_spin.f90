@@ -240,7 +240,6 @@ contains
     complex(dp), intent(in) :: a(2,2)
     type(spin),  intent(in) :: b
  
-    ! TODO: Compare this to 'zgemm'
     r = spin(matmul(a, b%matrix))
   end function
 
@@ -250,7 +249,6 @@ contains
     type(spin),  intent(in) :: a
     complex(dp), intent(in) :: b(2,2)
 
-    ! TODO: Compare this to 'zgemm'
     r = spin(matmul(a%matrix, b))
   end function
 
@@ -259,7 +257,6 @@ contains
     type(spin)             :: r
     type(spin), intent(in) :: a, b
 
-    ! TODO: Compare this to 'zgemm'
     r = spin(matmul(a%matrix, b%matrix))
   end function
 
@@ -457,7 +454,7 @@ contains
 
     ! Print the name of the matrix if provided
     if(present(title)) then
-      print *,title,' = '
+      print *,' ',title,' = '
     end if
 
     ! Print the matrix elements

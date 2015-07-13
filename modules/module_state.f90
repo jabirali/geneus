@@ -15,16 +15,25 @@ module module_state
 
   ! Class declaration
   type state
-    type(spin) :: g                         ! Riccati parameter γ  
-    type(spin) :: gt                        ! Riccati parameter γ~
-    type(spin) :: dg                        ! Derivative dγ /dx
-    type(spin) :: dgt                       ! Derivative dγ~/dx
+    type(spin) :: g                            ! Riccati parameter γ  
+    type(spin) :: gt                           ! Riccati parameter γ~
+    type(spin) :: dg                           ! Derivative dγ /dz
+    type(spin) :: dgt                          ! Derivative dγ~/dz
     contains
-    procedure  :: get_g   => state_get_g    ! Returns the normal Green's function g
-    procedure  :: get_gt  => state_get_gt   ! Returns the normal Green's function g (tilde conjugated)
-    procedure  :: get_f   => state_get_f    ! Returns the anomalous Green's function g
-    procedure  :: get_ft  => state_get_ft   ! Returns the anomalous Green's function g (tilde conjugated)
-    procedure  :: get_dos => state_get_dos  ! Returns the local density of states
+    procedure  :: get_g     => state_get_g     ! Normal Green's function g
+    procedure  :: get_gt    => state_get_gt    ! Normal Green's function g~
+    procedure  :: get_f     => state_get_f     ! Anomalous Green's function f
+    procedure  :: get_ft    => state_get_ft    ! Anomalous Green's function f~
+    procedure  :: get_f_s   => state_get_f_s   ! Singlet component of f
+    procedure  :: get_ft_s  => state_get_ft_s  ! Singlet component of f~
+    procedure  :: get_f_t   => state_get_f_t   ! Triplet component of f
+    procedure  :: get_ft_t  => state_get_ft_t  ! Triplet component of f~
+    procedure  :: get_f_ts  => state_get_f_ts  ! Short-range triplet component of f
+    procedure  :: get_ft_ts => state_get_ft_ts ! Short-range triplet component of f~
+    procedure  :: get_f_tl  => state_get_f_tl  ! Long-range triplet component of f
+    procedure  :: get_ft_tl => state_get_ft_tl ! Long-range triplet component of f~
+    procedure  :: get_dos   => state_get_dos   ! Local density of states
+    procedure  :: print     => state_print     ! Prints the state object to standard out
   end type
 
   ! Class constructor
@@ -45,9 +54,9 @@ contains
     complex(dp), intent(in) :: gap       ! Superconducting order parameter (including superconducting phase)
 
     ! Calculate the θ-parameter (t), superconducting phase (p), and scalar Riccati parameters (a,b)
-    complex(dp) :: t
-    real(dp)    :: p
-    complex(dp) :: a, b
+    complex(dp)             :: t
+    real(dp)                :: p
+    complex(dp)             :: a, b
 
     t = atanh(abs(gap)/energy)
     p = atan(aimag(gap)/real(gap))
@@ -113,14 +122,119 @@ contains
     ft = ( pauli0 - this%gt * this%g ) .divl. ( 2.0_dp * this%gt )
   end function
 
+  function state_get_f_s(this) result(r)
+    ! Calculates the singlet component of the anomalous Green's function f.
+    complex(dp)              :: r
+    class(state), intent(in) :: this
+    
+    type(spin)               :: f
+    f = this%get_f()
+
+    r = (f%matrix(1,2) - f%matrix(2,1))/2
+  end function
+
+  function state_get_ft_s(this) result(r)
+    ! Calculates the singlet component of the tilde-conjugated anomalous Green's function f~.
+    complex(dp)              :: r
+    class(state), intent(in) :: this
+    
+    type(spin)               :: f
+    f = this%get_ft()
+
+    r = (f%matrix(1,2) - f%matrix(2,1))/2
+  end function
+
+  function state_get_f_t(this) result(r)
+    ! Calculates the triplet component of the anomalous Green's function f.
+    complex(dp)              :: r(3)
+    class(state), intent(in) :: this
+
+    type(spin)               :: f
+    f = this%get_f()
+
+    r = [ (f%matrix(2,2) - f%matrix(1,1))/(2.0_dp,0.0_dp), &
+          (f%matrix(1,1) + f%matrix(2,2))/(0.0_dp,2.0_dp), &
+          (f%matrix(1,2) + f%matrix(2,1))/(2.0_dp,0.0_dp)  ];
+  end function
+
+  function state_get_ft_t(this) result(r)
+    ! Calculates the triplet component of the tilde-conjugated anomalous Green's function f~.
+    complex(dp)              :: r(3)
+    class(state), intent(in) :: this
+
+    type(spin)               :: ft
+    ft = this%get_ft()
+
+    r = [ (ft%matrix(2,2) - ft%matrix(1,1))/(2.0_dp,0.0_dp), &
+          (ft%matrix(1,1) + ft%matrix(2,2))/(0.0_dp,2.0_dp), &
+          (ft%matrix(1,2) + ft%matrix(2,1))/(2.0_dp,0.0_dp)  ];
+  end function
+
+  function state_get_f_ts(this, h) result(r)
+    ! Calculates the short-range triplet component of the anomalous Green's function f,
+    ! i.e. the component of f along the magnetic exchange field vector h.
+    complex(dp)              :: r(3)
+    real(dp),     intent(in) :: h(3)
+    class(state), intent(in) :: this
+
+    real(dp)                 :: u(3)
+    u = h/(norm2(h)+1e-16_dp)
+
+    r = dot_product(u,this%get_f_t()) * u
+  end function
+
+  function state_get_ft_ts(this, h) result(r)
+    ! Calculates the short-range triplet component of the tilde-conjugated anomalous Green's function f~,
+    ! i.e. the component of f~ along the magnetic exchange field h.
+    complex(dp)              :: r(3)
+    real(dp),     intent(in) :: h(3)
+    class(state), intent(in) :: this
+
+    real(dp)                 :: u(3)
+    u = h/(norm2(h)+1e-16_dp)
+
+    r = dot_product(u,this%get_ft_t()) * u
+  end function
+
+  function state_get_f_tl(this, h) result(r)
+    ! Calculates the long-range triplet component of the anomalous Green's function f,
+    ! i.e. the component of f perpendicular to the magnetic exchange field h.
+    complex(dp)              :: r(3)
+    real(dp),     intent(in) :: h(3)
+    class(state), intent(in) :: this
+
+    r = this%get_f_t() - this%get_f_ts(h)
+  end function
+
+  function state_get_ft_tl(this, h) result(r)
+    ! Calculates the long-range triplet component of the tilde-conjugated anomalous Green's function f~,
+    ! i.e. the component of f~ perpendicular to the magnetic exchange field h.
+    complex(dp)              :: r(3)
+    real(dp),     intent(in) :: h(3)
+    class(state), intent(in) :: this
+
+    r = this%get_ft_t() - this%get_ft_ts(h)
+  end function
+
   function state_get_dos(this) result(ldos)
     ! Calculates the local density of states
     real(dp)                 :: ldos
     class(state), intent(in) :: this
 
-    type(spin) :: g
+    type(spin)               :: g
     g = this%get_g()
 
     ldos = real(g%trace(), kind=dp)/2.0_dp
   end function
+
+  subroutine state_print(this)
+    ! Prints the state object to stdout
+    class(state), intent(in) :: this 
+
+    ! Print the matrix elements
+    call this%g%print('Riccati parameter γ ')
+    call this%gt%print('Riccati parameter γ~')
+    call this%dg%print('Derivative dγ / dz')
+    call this%dgt%print('Derivative dγ~/ dz')
+  end subroutine
 end module

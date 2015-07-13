@@ -7,10 +7,12 @@
 program test_core
   use module_assert
   use module_spin
+  use module_state
 
   real(dp)    :: rs, rv(8)
   complex(dp) :: cs, cv(4), cm(2,2)
   type(spin)  :: p, q, r
+  type(state) :: s0, s1, s2
 
 
   ! Calibrate the test procedures in 'module_assert'
@@ -45,12 +47,12 @@ program test_core
 
 
   ! Test the properties of the Pauli matrices in 'module_spin'
-  call section('Pauli matrices')
+  call section('Spin: Pauli matrices')
   call subsection('Testing output:')
-  call pauli0%print(' pauli0')
-  call pauli1%print(' pauli1')
-  call pauli2%print(' pauli2')
-  call pauli3%print(' pauli3')
+  call pauli0%print('pauli0')
+  call pauli1%print('pauli1')
+  call pauli2%print('pauli2')
+  call pauli3%print('pauli3')
 
   call subsection('Testing squares:')
   call assert(pauli0*pauli0 - pauli0, 'pauli0^2 = pauli0')
@@ -78,7 +80,7 @@ program test_core
 
 
   ! Test the constructors and assignment operators in 'module_spin'
-  call section('Construction and assignment of spin matrices')
+  call section('Spin: Construction and assignment')
   call subsection('Testing construction and assignment:')
   q%matrix(1,1) = (1.0_dp,2.0_dp)
   q%matrix(1,2) = (3.0_dp,4.0_dp)
@@ -119,7 +121,7 @@ program test_core
 
 
   ! Test the matrix algebra operators in 'module_spin'
-  call section('Overloaded operators for matrix algebra')
+  call section('Spin: Overloaded operators')
   call subsection('Testing elementary matrix operations:')
   p = [ ( 1.00_dp, 1.00_dp), ( 1.00_dp,-1.00_dp), ( 2.00_dp, 3.00_dp), ( 2.00_dp,-3.00_dp) ]
   q = [ ( 1.00_dp, 2.00_dp), ( 2.00_dp,-1.00_dp), ( 3.00_dp,-3.00_dp), ( 2.00_dp, 2.00_dp) ]
@@ -133,4 +135,122 @@ program test_core
   call assert((p .divr. q) - r, 'Matrix division (right)')
   r = [ (-3.50_dp,+4.00_dp), ( 4.00_dp,-1.50_dp), ( 3.50_dp,+5.00_dp), ( 0.00_dp,-3.50_dp) ]
   call assert((p .divl. q) - r, 'Matrix division (left)')
+
+
+  ! Test construction and assignment in 'module_spin'
+  call section('State: Construction and assignment')
+  call subsection('Testing output:')
+  s0 = state(pauli0, pauli1, pauli2, pauli3)
+  call s0%print
+
+  call subsection('Testing construction of a BCS state with ϵ=0 and Δ=1:')
+  s0 = state( (0.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp,-0.999000499999875_dp),   &
+                    ( 0.000000000000000_dp, 0.999000499999875_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.999000499999875_dp),   &
+                    ( 0.000000000000000_dp,-0.999000499999875_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
+  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
+  call assert(s0%get_dos() - 9.999995000002913e-04_dp, 'Density of states　')
+
+  call subsection('Testing construction of a BCS state with ϵ=1 and Δ=1:')
+  s0 = state( (1.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.968385128104009_dp,-0.030630683283800_dp),   &
+                    (-0.968385128104009_dp, 0.030630683283800_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), (-0.968385128104009_dp, 0.030630683283800_dp),   &
+                    ( 0.968385128104009_dp,-0.030630683283800_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
+  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
+  call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states　')
+
+  call subsection('Testing construction of a BCS state with ϵ=1 and Δ=i:')
+  s0 = state( (1.0_dp,0.001_dp), (0.0_dp,1.0_dp) )
+  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.030630683283800_dp, 0.968385128104009_dp),   &
+                    (-0.030630683283800_dp,-0.968385128104009_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.030630683283800_dp, 0.968385128104009_dp),   &
+                    (-0.030630683283800_dp,-0.968385128104009_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
+  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
+  call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states　')
+
+  call subsection('Testing construction of a BCS state with ϵ=2 and Δ=1:')
+  s0 = state( (2.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.267949096206123_dp,-0.000154700474229_dp),   &
+                    (-0.267949096206123_dp, 0.000154700474229_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), (-0.267949096206123_dp, 0.000154700474229_dp),   &
+                    ( 0.267949096206123_dp,-0.000154700474229_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
+              spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
+                    ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
+  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
+  call assert(s0%get_dos() - 1.154700345929331_dp,     'Density of states　')
+
+  call section("State: Calculation of Green's functions")
+  s0%g  = (0.05_dp,0.10_dp)*pauli0 + (0.15_dp,0.20_dp)*pauli1 + (0.25_dp,0.30_dp)*pauli2 + (0.35_dp,0.40_dp)*pauli3
+  s0%gt = (0.07_dp,0.08_dp)*pauli0 + (0.17_dp,0.18_dp)*pauli1 + (0.27_dp,0.28_dp)*pauli2 + (0.37_dp,0.38_dp)*pauli3
+  p = s0%get_g()
+  q = [ ( 0.405054515669019_dp, 0.780842410470802_dp), (-0.007173683883726_dp, 0.148657413387066_dp),&
+        (-0.128531295454375_dp,-0.092454113122009_dp), ( 0.697757267837770_dp, 0.639249425699371_dp) ]
+  call assert(p - q, 'Extraction of g :')
+  p = s0%get_gt()
+  q = [ ( 0.396085295417136_dp, 0.788328900154937_dp), (-0.031115883503879_dp, 0.138205462567435_dp),&
+        (-0.122527536337988_dp,-0.067029182934108_dp), ( 0.706726488089653_dp, 0.631762936015236_dp) ]
+  call assert(p - q, 'Extraction of g~:')
+  p = s0%get_f()
+  q = [ ( 0.105780817590586_dp, 0.989337452267094_dp), ( 0.718065981755837_dp, 0.238681240077408_dp),&
+        (-0.547511293361128_dp, 0.566856063696100_dp), (-0.380014141252089_dp,-0.736279794193328_dp) ]
+  call assert(p - q, 'Extraction of f :')
+  p = s0%get_ft()
+  q = [ ( 0.192876524942350_dp, 0.959859203500891_dp), ( 0.749984387773050_dp, 0.196973454763113_dp),&
+        (-0.495111926735743_dp, 0.612677489472185_dp), (-0.383659083438489_dp,-0.720682481281396_dp) ]
+  call assert(p - q, 'Extraction of f~:')
+  call assert(s0%get_f_s()  - (0.632788637558482_dp,-0.164087411809346_dp), 'Extraction of the singlet component of f :')
+  call assert(s0%get_ft_s() - (0.622548157254396_dp,-0.207852017354536_dp), 'Extraction of the singlet component of f~:')
+  call assert(s0%get_f_t()  - [(-0.242897479421337_dp,-0.862808623230211_dp), &
+                               ( 0.126528829036883_dp, 0.137116661830751_dp), &
+                               ( 0.085277344197354_dp, 0.402768651886754_dp)],&
+              'Extraction of the triplet component of f :')
+  call assert(s0%get_ft_t() - [(-0.288267804190420_dp,-0.840270842391144_dp), &
+                               ( 0.119588361109748_dp, 0.095391279248070_dp), &
+                               ( 0.127436230518653_dp, 0.404825472117649_dp)],&
+              'Extraction of the triplet component of f~:')
+  call assert(s0%get_f_ts([1.0_dp, 2.0_dp, 3.0_dp])  - [( 0.018999443660321_dp, 0.044266475435111_dp), &
+                                                        ( 0.037998887320642_dp, 0.088532950870222_dp), &
+                                                        ( 0.056998330980962_dp, 0.132799426305333_dp)],&
+              'Extraction of the short-range triplet component of f :')
+  call assert(s0%get_ft_ts([1.0_dp, 2.0_dp, 3.0_dp]) - [( 0.023801257827502_dp, 0.040356295175567_dp), &
+                                                        ( 0.047602515655005_dp, 0.080712590351135_dp), &
+                                                        ( 0.071403773482507_dp, 0.121068885526702_dp)],&
+              'Extraction of the short-range triplet component of f~:')
+  call assert(s0%get_f_tl([1.0_dp, 2.0_dp, 3.0_dp])  - [(-0.261896923081658_dp,-0.907075098665322_dp), &
+                                                        ( 0.088529941716241_dp, 0.048583710960530_dp), &
+                                                        ( 0.028279013216392_dp, 0.269969225581421_dp)],&
+              'Extraction of the long-range triplet component of f :')
+  call assert(s0%get_ft_tl([1.0_dp, 2.0_dp, 3.0_dp]) - [(-0.312069062017922_dp,-0.880627137566711_dp), &
+                                                        ( 0.071985845454743_dp, 0.014678688896935_dp), &
+                                                        ( 0.056032457036146_dp, 0.283756586590947_dp)],&
+              'Extraction of the long-range triplet component of f~:')
+  call assert(s0%get_dos() - 0.551405891753394_dp, 'Extraction of the density of states:')
 end program

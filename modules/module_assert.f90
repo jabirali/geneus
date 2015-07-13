@@ -75,14 +75,14 @@ module module_assert
       real(dp),     intent(in) :: expr
       character(*), intent(in) :: msg
 
-      call assert(expr < 1e-8, msg)
+      call assert(abs(expr) < 1e-8, msg)
     end subroutine
 
     subroutine assert_real_array(expr, msg)
       real(dp),     intent(in) :: expr(:)
       character(*), intent(in) :: msg
 
-      call assert(all(expr < 1e-8), msg)
+      call assert(all(abs(expr) < 1e-8), msg)
     end subroutine
 
     subroutine assert_complex(expr, msg)
