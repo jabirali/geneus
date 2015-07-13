@@ -4,6 +4,7 @@
 # Created: 2015-07-12
 # Updated: 2015-07-12
 
+project(s4tran)
 cmake_minimum_required(VERSION 2.6)
 
 # Programming languages

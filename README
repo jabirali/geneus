@@ -1,4 +1,4 @@
-Superconducting Spintronics Simulation Suite in Fortran (S4tran)
+Superconducting Spintronics Simulation Suite in Fortran (s4tran)
 
 The project requires features from Fortran 2008, which have been successfully tested with GFortran version 5.1+.
 
