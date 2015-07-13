@@ -11,41 +11,69 @@ module module_assert
   implicit none
 
   interface assert
-    module procedure assert_real, assert_spin
+    module procedure assert_logical, assert_integer, assert_real, assert_complex, assert_spin
   end interface
 
   contains
-    subroutine assert_print_success(msg)
+    subroutine section(msg)
       character(*),  intent(in) :: msg
-      character(50)             :: str
+      character(56)             :: str
 
       str = msg
-      print *,str,achar(27),'[32;1mSUCCESS',achar(27),'[0m'
+
+      print *,''
+      print *,'┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
+              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓'
+      print *,'┃  ',achar(27),'[1m',str,achar(27),'[0m','┃'
+      print *,'┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
+              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛'
     end subroutine
 
-    subroutine assert_print_failure(msg)
-      character(*),  intent(in) :: msg
-      character(50)             :: str
+    subroutine subsection(msg)
+      character(*), intent(in) :: msg
+
+      print *,' '
+      print *,msg
+    end subroutine
+
+    subroutine assert_logical(expr, msg)
+      logical,      intent(in) :: expr
+      character(*), intent(in) :: msg
+      character(49)            :: str
 
       str = msg
-      print *,str,achar(27),'[31;1mFAILURE',achar(27),'[0m'
-    end subroutine
-
-    subroutine assert_real(expr, msg)
-      real(dp),      intent(in) :: expr
-      character(*),  intent(in) :: msg
-
-      if (expr < 1e-8) then
-        call assert_print_failure(msg)
+      if (expr) then
+        print *,':: ',str,achar(27),'[32;1mSUCCESS',achar(27),'[0m'
       else
-        call assert_print_success(msg)
+        print *,':: ',str,achar(27),'[31;1mFAILURE',achar(27),'[0m'
       end if
     end subroutine
 
-    subroutine assert_spin(a,b,msg)
-      type(spin),    intent(in) :: a, b
+    subroutine assert_integer(expr, msg)
+      integer,      intent(in) :: expr
+      character(*), intent(in) :: msg
+
+      call assert(expr == 0, msg)
+    end subroutine
+
+    subroutine assert_real(expr, msg)
+      real(dp),     intent(in) :: expr
+      character(*), intent(in) :: msg
+
+      call assert(expr < 1e-8, msg)
+    end subroutine
+
+    subroutine assert_complex(expr, msg)
+      complex(dp),  intent(in) :: expr
+      character(*), intent(in) :: msg
+
+      call assert(abs(expr) < 1e-8, msg)
+    end subroutine
+
+    subroutine assert_spin(expr,msg)
+      type(spin),    intent(in) :: expr
       character(*),  intent(in) :: msg
 
-      call assert(maxval(abs(a%matrix-b%matrix)), msg)
+      call assert(maxval(abs(expr%matrix)), msg)
     end subroutine
 end module
