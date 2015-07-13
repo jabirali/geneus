@@ -20,7 +20,7 @@ module module_spin
     procedure   :: inv              => spin_inv      ! Calculates the inverse of the spin matrix
     procedure   :: print            => spin_print    ! Prints the spin matrix to standard out
    !generic     :: write(formatted) => spin_write    ! Modifies the output format (used by 'write' and 'print')
-   !generic     :: read(formatted)  => spin_write    ! Modifies the input format (used by 'read')
+   !generic     :: read(formatted)  => spin_read     ! Modifies the input format (used by 'read')
   end type
 
   ! Class constructor
@@ -74,10 +74,10 @@ module module_spin
   end interface
 
   ! Exported constants
-  type(spin), parameter :: pauli0 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2]))
-  type(spin), parameter :: pauli1 = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2]))
-  type(spin), parameter :: pauli2 = spin(reshape([ ( 0, 0), ( 0, 1), ( 0,-1), ( 0, 0) ], [2,2]))
-  type(spin), parameter :: pauli3 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2]))
+  type(spin), parameter :: pauli0 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli1 = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli2 = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli3 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
 contains
   pure function spin_construct_cmatrix(matrix) result(this)
     ! This function constructs a spin object from a 2×2 complex matrix
@@ -92,7 +92,7 @@ contains
     type(spin)              :: this
     complex(dp), intent(in) :: vector(4)
 
-    this%matrix = reshape(vector,[2,2])
+    this%matrix = reshape(vector,[2,2],order=[2,1])
   end function
 
   pure function spin_construct_rvector(vector) result(this)
@@ -100,7 +100,8 @@ contains
     type(spin)           :: this
     real(dp), intent(in) :: vector(8)
 
-    this%matrix = cmplx( reshape(vector(1:7:2),[2,2]), reshape(vector(2:8:2),[2,2]) )
+    this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
+                         reshape(vector(2:8:2),[2,2],order=[2,1]) )
   end function
 
   pure function spin_construct_spin(other) result(this)
@@ -140,7 +141,7 @@ contains
     type(spin),  intent(out) :: this
     complex(dp), intent(in)  :: vector(4)
 
-    this%matrix = reshape(vector,[2,2])
+    this%matrix = reshape(vector,[2,2],order=[2,1])
   end subroutine
 
   pure subroutine spin_import_rvector(this, vector)
@@ -148,7 +149,8 @@ contains
     type(spin), intent(out) :: this
     real(dp),   intent(in)  :: vector(8)
 
-    this%matrix = cmplx( reshape(vector(1:7:2),[2,2]), reshape(vector(2:8:2),[2,2]) )
+    this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
+                         reshape(vector(2:8:2),[2,2],order=[2,1]) )
   end subroutine
 
   pure subroutine spin_export_cmatrix(matrix, this)
@@ -164,7 +166,7 @@ contains
     complex(dp), intent(out) :: vector(4)
     type(spin),  intent(in)  :: this
 
-    vector = reshape(this%matrix,[4])
+    vector = [ this%matrix(1,:), this%matrix(2,:) ]
   end subroutine
 
   pure subroutine spin_export_rvector(vector, this)
@@ -172,8 +174,8 @@ contains
     real(dp),  intent(out) :: vector(8)
     type(spin), intent(in) :: this
 
-    vector(1:7:2) =  real(reshape(this%matrix,[4]))
-    vector(2:8:2) = aimag(reshape(this%matrix,[4]))
+    vector(1:7:2) =  real([ this%matrix(1,:), this%matrix(2,:) ])
+    vector(2:8:2) = aimag([ this%matrix(1,:), this%matrix(2,:) ])
   end subroutine
 
   pure function spin_multl_rscalar(a,b) result(r)
