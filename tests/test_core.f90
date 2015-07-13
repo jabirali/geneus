@@ -10,7 +10,7 @@ program test_core
 
   real(dp)    :: rs, rv(8)
   complex(dp) :: cs, cv(4), cm(2,2)
-  type(spin)  :: p, q
+  type(spin)  :: p, q, r
 
   call section('Calibration of assert subroutines')
   call subsection('Subroutines operating on a single value:')
@@ -98,4 +98,18 @@ program test_core
   cs = (2.0_dp,1.0_dp)
   p  = spin(cs)
   call assert(p - (2.0_dp,1.0_dp)*pauli0, 'Construction from a complex scalar')
+
+  call section('Overloaded operators for matrix algebra')
+  p = [ ( 1.00_dp, 1.00_dp), ( 1.00_dp,-1.00_dp), ( 2.00_dp, 3.00_dp), ( 2.00_dp,-3.00_dp) ]
+  q = [ ( 1.00_dp, 2.00_dp), ( 2.00_dp,-1.00_dp), ( 3.00_dp,-3.00_dp), ( 2.00_dp, 2.00_dp) ]
+  r = [ ( 2.00_dp, 3.00_dp), ( 3.00_dp,-2.00_dp), ( 5.00_dp, 0.00_dp), ( 4.00_dp,-1.00_dp) ]
+  call assert(p+q - r, 'Matrix addition')
+  r = [ ( 0.00_dp,-1.00_dp), (-1.00_dp, 0.00_dp), (-1.00_dp, 6.00_dp), ( 0.00_dp,-5.00_dp) ]
+  call assert(p-q - r, 'Matrix subtraction')
+  r = [ (-1.00_dp,-3.00_dp), ( 7.00_dp, 1.00_dp), (-7.00_dp,-8.00_dp), (17.00_dp, 2.00_dp) ]
+  call assert(p*q - r, 'Matrix multiplication')
+  r = [ ( 0.60_dp,-0.20_dp), ( 0.00_dp, 0.00_dp), ( 1.48_dp,-0.56_dp), (-0.20_dp, 0.00_dp) ]
+  call assert((p .divr. q) - r, 'Matrix division (right)')
+  r = [ (-3.50_dp,+4.00_dp), ( 4.00_dp,-1.50_dp), ( 3.50_dp,+5.00_dp), ( 0.00_dp,-3.50_dp) ]
+  call assert((p .divl. q) - r, 'Matrix division (left)')
 end program
