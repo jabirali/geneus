@@ -18,16 +18,16 @@ module module_assert
   contains
     subroutine section(msg)
       character(*),  intent(in) :: msg
-      character(56)             :: str
+      character(68)             :: str
 
       str = msg
 
       print *,''
-      print *,'┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
-              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓'
+      print *,'┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
+              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓'
       print *,'┃  ',achar(27),'[1m',str,achar(27),'[0m','┃'
-      print *,'┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
-              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛'
+      print *,'┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
+              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛'
     end subroutine
 
     subroutine subsection(msg)
@@ -40,13 +40,13 @@ module module_assert
     subroutine assert_logical(expr, msg)
       logical,      intent(in) :: expr
       character(*), intent(in) :: msg
-      character(49)            :: str
+      character(60)            :: str
 
       str = msg
       if (expr) then
-        print *,':: ',str,achar(27),'[32;1mSUCCESS',achar(27),'[0m'
+        print *,' :: ',str,achar(27),'[32;1mSUCCESS',achar(27),'[0m'
       else
-        print *,':: ',str,achar(27),'[31;1mFAILURE',achar(27),'[0m'
+        print *,' :: ',str,achar(27),'[31;1mFAILURE',achar(27),'[0m'
       end if
     end subroutine
 
