@@ -16,8 +16,11 @@ module module_spin
   type spin
     complex(dp) :: matrix(2,2) = 0                   ! Stores the spin matrix
     contains
-    procedure   :: inv              => spin_inv      ! Calculates the inverse of the spin matrix
-    procedure   :: trace            => spin_trace    ! Calculates the trace of the spin matrix
+    procedure   :: inv              => spin_inv      ! Inverse of the matrix
+    procedure   :: trace            => spin_trace    ! Trace of the matrix
+    procedure   :: norm             => spin_norm     ! Frobenius norm of the matrix
+    procedure   :: min              => spin_min      ! Size of the smallest element
+    procedure   :: max              => spin_max      ! Size of the largest element
     procedure   :: print            => spin_print    ! Prints the spin matrix to standard out
    !generic     :: write(formatted) => spin_write    ! Modifies the output format (used by 'write' and 'print')
    !generic     :: read(formatted)  => spin_read     ! Modifies the input format (used by 'read')
@@ -40,6 +43,11 @@ module module_spin
                      spin_import_cvector, spin_export_cvector, &
                      spin_import_rvector, spin_export_rvector 
   end interface
+
+  ! Exponentiation operator
+  interface operator(**)
+    module procedure spin_exp_integer
+  end interface
   
   ! Multiplication operator
   interface operator(*)
@@ -47,6 +55,11 @@ module module_spin
                      spin_multl_cscalar, spin_multr_cscalar, &
                      spin_multl_cmatrix, spin_multr_cmatrix, &
                      spin_mult_spin
+  end interface
+
+  ! Division operator
+  interface operator(/)
+    module procedure spin_div_rscalar, spin_div_cscalar
   end interface
 
   ! Addition operator
@@ -198,6 +211,19 @@ contains
     vector(2:8:2) = aimag([ this%matrix(1,:), this%matrix(2,:) ])
   end subroutine
 
+  pure function spin_exp_integer(a,b) result(r)
+    ! Defines exponentiation of a spin matrix by an integer (assumption: positive exponent)
+    type(spin)             :: r
+    type(spin), intent(in) :: a
+    integer,    intent(in) :: b
+    integer                :: n
+
+    r = a
+    do n=2,b
+      r%matrix = r%matrix * a
+    end do
+  end function
+
   pure function spin_multl_rscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a real scalar
     type(spin)             :: r
@@ -258,6 +284,24 @@ contains
     type(spin), intent(in) :: a, b
 
     r = spin(matmul(a%matrix, b%matrix))
+  end function
+
+  pure function spin_div_rscalar(a,b) result(r)
+    ! Defines division of a spin matrix by a real scalar
+    type(spin)             :: r
+    type(spin), intent(in) :: a
+    real(dp),   intent(in) :: b
+
+    r = spin(a%matrix / b)
+  end function
+
+  pure function spin_div_cscalar(a,b) result(r)
+    ! Defines division of a spin matrix by a real scalar
+    type(spin)             :: r
+    type(spin), intent(in) :: a
+    complex(dp),intent(in) :: b
+
+    r = spin(a%matrix / b)
   end function
 
   pure function spin_addl_rscalar(a,b) result(r)
@@ -445,6 +489,31 @@ contains
     class(spin), intent(in) :: this
 
     r = this%matrix(1,1) + this%matrix(2,2)
+  end function
+
+  pure function spin_norm(this) result(r)
+    ! Calculates the Frobenius norm of the spin matrix
+    real(dp)                :: r, w(8)
+    class(spin), intent(in) :: this
+
+    w = this
+    r = norm2(w)
+  end function
+
+  pure function spin_min(this) result(r)
+    ! Calculates the size of the smallest element in the spin matrix
+    real(dp)                :: r
+    class(spin), intent(in) :: this
+
+    r = minval(abs(this%matrix))
+  end function
+
+  pure function spin_max(this) result(r)
+    ! Calculates the size of the largest element in the spin matrix
+    real(dp)                :: r
+    class(spin), intent(in) :: this
+
+    r = maxval(abs(this%matrix))
   end function
 
   subroutine spin_print(this, title)

@@ -121,10 +121,24 @@ program test_core
 
 
   ! Test the matrix algebra operators in 'module_spin'
-  call section('Spin: Overloaded operators')
-  call subsection('Testing elementary matrix operations:')
-  p = [ ( 1.00_dp, 1.00_dp), ( 1.00_dp,-1.00_dp), ( 2.00_dp, 3.00_dp), ( 2.00_dp,-3.00_dp) ]
-  q = [ ( 1.00_dp, 2.00_dp), ( 2.00_dp,-1.00_dp), ( 3.00_dp,-3.00_dp), ( 2.00_dp, 2.00_dp) ]
+  call section('Spin: Arithmetic operators and methods')
+  call subsection('Testing matrix operations with scalars:')
+  p = [ ( 1.00_dp, 1.00_dp), ( 1.00_dp,-1.00_dp), ( 2.00_dp, 3.00_dp), ( 2.00_dp,- 3.00_dp) ]
+  q = [ ( 1.00_dp, 2.00_dp), ( 2.00_dp,-1.00_dp), ( 3.00_dp,-3.00_dp), ( 2.00_dp,  2.00_dp) ]
+  r = [ ( 5.00_dp, 3.00_dp), ( 1.00_dp,-5.00_dp), (12.00_dp, 5.00_dp), ( 0.00_dp,-11.00_dp) ]
+  call assert(p**2  - r, 'Exponentiation by an integer')
+  r = [ ( 2.00_dp, 2.00_dp), ( 2.00_dp,-2.00_dp), ( 4.00_dp, 6.00_dp), ( 4.00_dp,-6.00_dp) ]
+  call assert(2.0_dp*p - r, 'Multiplication by a real scalar (left)')
+  call assert(p*2.0_dp - r, 'Multiplication by a real scalar (right)')
+  r = [ (-2.00_dp, 2.00_dp), ( 2.00_dp, 2.00_dp), (-6.00_dp, 4.00_dp), ( 6.00_dp, 4.00_dp) ]
+  call assert((0.0_dp,2.0_dp)*p - r, 'Multiplication by a complex scalar (left)')
+  call assert(p*(0.0_dp,2.0_dp) - r, 'Multiplication by a complex scalar (right)')
+  r = [ ( 0.50_dp, 0.50_dp), ( 0.50_dp,-0.50_dp), ( 1.00_dp, 1.50_dp), ( 1.00_dp,-1.50_dp) ]
+  call assert(p/2.0_dp - r, 'Division by a real scalar')
+  r = [ ( 0.50_dp,-0.50_dp), (-0.50_dp,-0.50_dp), ( 1.50_dp,-1.00_dp), (-1.50_dp,-1.00_dp) ]
+  call assert(p/(0.0_dp,2.0_dp) - r, 'Division by a complex scalar')
+
+  call subsection('Testing matrix operations with matrices:')
   r = [ ( 2.00_dp, 3.00_dp), ( 3.00_dp,-2.00_dp), ( 5.00_dp, 0.00_dp), ( 4.00_dp,-1.00_dp) ]
   call assert(p+q - r, 'Matrix addition')
   r = [ ( 0.00_dp,-1.00_dp), (-1.00_dp, 0.00_dp), (-1.00_dp, 6.00_dp), ( 0.00_dp,-5.00_dp) ]
@@ -133,8 +147,17 @@ program test_core
   call assert(p*q - r, 'Matrix multiplication')
   r = [ ( 0.60_dp,-0.20_dp), ( 0.00_dp, 0.00_dp), ( 1.48_dp,-0.56_dp), (-0.20_dp, 0.00_dp) ]
   call assert((p .divr. q) - r, 'Matrix division (right)')
-  r = [ (-3.50_dp,+4.00_dp), ( 4.00_dp,-1.50_dp), ( 3.50_dp,+5.00_dp), ( 0.00_dp,-3.50_dp) ]
+  r = [ (-3.50_dp, 4.00_dp), ( 4.00_dp,-1.50_dp), ( 3.50_dp, 5.00_dp), ( 0.00_dp,-3.50_dp) ]
   call assert((p .divl. q) - r, 'Matrix division (left)')
+
+  call subsection('Testing matrix methods:')
+  r = [ ( 1.0000_dp, 2.0000_dp), ( 3.0000_dp, 4.0000_dp), ( 5.0000_dp, 6.0000_dp), ( 7.0000_dp, 8.0000_dp) ]
+  q = [ (-0.5000_dp, 0.4375_dp), ( 0.2500_dp,-0.1875_dp), ( 0.3750_dp,-0.3125_dp), (-0.1250_dp, 0.0625_dp) ]
+  call assert(r%inv()   - q,                     'Inverse:')
+  call assert(r%trace() - (8.0_dp,10.0_dp),      'Trace:')
+  call assert(r%norm()  - 14.282856857085701_dp, 'Norm:')
+  call assert(r%min()   -  2.236067977499790_dp, 'Minimum:')
+  call assert(r%max()   - 10.630145812734650_dp, 'Maximum:')
 
 
   ! Test construction and assignment in 'module_spin'
