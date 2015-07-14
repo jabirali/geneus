@@ -1,12 +1,14 @@
-! This module defines the data type 'state', which can be used to represent the physical state of a
-! conductor at a given position and energy. This is done by storing the Riccati parameters γ and γ~,
+! This module defines the data structure 'state', which represents the physical state of a metallic
+! conductor at a given position and energy. This structure contains the Riccati parameters γ and γ~,
 ! and their first derivatives dγ/dx and dγ~/dx, which is equivalent to knowledge about the retarded 
-! Green's function at the given location and energy. To make it easier to interact with ODE solvers, 
+! Green's function at the given location and energy. It also contains a number of methods which can
+! be used to calculate other physical information from the Riccati parameters, such as the various
+! Green's functions and the local density of states. To make it easier to interact with ODE solvers, 
 ! the assignment operator is overloaded in such a way that 'state' becomes isomorphic to real(32).
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-12
+! Updated: 2015-07-14
 
 module module_state
   use module_precision
@@ -22,8 +24,8 @@ module module_state
     contains
     procedure  :: get_g     => state_get_g     ! Normal Green's function g
     procedure  :: get_gt    => state_get_gt    ! Normal Green's function g~
-    procedure  :: get_f     => state_get_f     ! Anomalous Green's function f
-    procedure  :: get_ft    => state_get_ft    ! Anomalous Green's function f~
+    procedure  :: get_f     => state_get_f     ! Anomal Green's function f
+    procedure  :: get_ft    => state_get_ft    ! Anomal Green's function f~
     procedure  :: get_f_s   => state_get_f_s   ! Singlet component of f
     procedure  :: get_ft_s  => state_get_ft_s  ! Singlet component of f~
     procedure  :: get_f_t   => state_get_f_t   ! Triplet component of f
@@ -138,10 +140,10 @@ contains
     complex(dp)              :: r
     class(state), intent(in) :: this
     
-    type(spin)               :: f
-    f = this%get_ft()
+    type(spin)               :: ft
+    ft = this%get_ft()
 
-    r = (f%matrix(1,2) - f%matrix(2,1))/2
+    r = (ft%matrix(1,2) - ft%matrix(2,1))/2
   end function
 
   function state_get_f_t(this) result(r)

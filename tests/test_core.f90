@@ -9,7 +9,7 @@ program test_core
   use module_spin
   use module_state
 
-  real(dp)    :: rs, rv(8)
+  real(dp)    :: rs, rv(8), rw(32)
   complex(dp) :: cs, cv(4), cm(2,2)
   type(spin)  :: p, q, r
   type(state) :: s0, s1, s2
@@ -142,6 +142,24 @@ program test_core
   call subsection('Testing output:')
   s0 = state(pauli0, pauli1, pauli2, pauli3)
   call s0%print
+
+  call subsection('Testing assignment operator:')
+  rw = [ (n, n=1,32) ]
+  s0 = rw
+  s1 = state( spin([( 1.000000000000000_dp, 2.000000000000000_dp), ( 3.000000000000000_dp, 4.000000000000000_dp),   &
+                    ( 5.000000000000000_dp, 6.000000000000000_dp), ( 7.000000000000000_dp, 8.000000000000000_dp)]), &
+              spin([( 9.000000000000000_dp,10.000000000000000_dp), (11.000000000000000_dp,12.000000000000000_dp),   &
+                    (13.000000000000000_dp,14.000000000000000_dp), (15.000000000000000_dp,16.000000000000000_dp)]), &
+              spin([(17.000000000000000_dp,18.000000000000000_dp), (19.000000000000000_dp,20.000000000000000_dp),   &
+                    (21.000000000000000_dp,22.000000000000000_dp), (23.000000000000000_dp,24.000000000000000_dp)]), &
+              spin([(25.000000000000000_dp,26.000000000000000_dp), (27.000000000000000_dp,28.000000000000000_dp),   &
+                    (29.000000000000000_dp,30.000000000000000_dp), (31.000000000000000_dp,32.000000000000000_dp)]))
+  call assert(s0%g         - s1%g,                     'Importing from a real vector (γ )')
+  call assert(s0%gt        - s1%gt,                    'Importing from a real vector (γ~)')
+  call assert(s0%dg        - s1%dg,                    'Importing from a real vector (dγ / dz)')
+  call assert(s0%dgt       - s1%dgt,                   'Importing from a real vector (dγ~/ dz)')
+  rw = s0
+  call assert(rw - [ (n, n=1,32) ],                    'Exporting to a real vector　')
 
   call subsection('Testing construction of a BCS state with ϵ=0 and Δ=1:')
   s0 = state( (0.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
