@@ -8,7 +8,10 @@
 
 module module_precision
   use, intrinsic :: iso_fortran_env
-  integer, parameter :: sp = REAL32
-  integer, parameter :: dp = REAL64
-  integer, parameter :: qp = REAL128
+  integer,  parameter :: sp  = REAL32
+  integer,  parameter :: dp  = REAL64
+  integer,  parameter :: qp  = REAL128
+
+  real(dp), parameter :: inf = huge(1.0_dp)
+  real(dp), parameter :: pi  = atan(1.0_dp)*4.0_dp
 end module 

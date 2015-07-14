@@ -24,6 +24,9 @@ file(GLOB src_mod "modules/*.f90")
 add_executable(test_core "tests/test_core.f90" ${src_mod} ${src_bvp})
 target_link_libraries(test_core ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
+add_executable(test_materials "tests/test_materials.f90" ${src_mod} ${src_bvp})
+target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+
 # Compiler flags
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
