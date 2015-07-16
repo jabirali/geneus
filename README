@@ -2,10 +2,14 @@ Superconducting Spintronics Simulation Suite in Fortran (s4tran)
 
 The project requires features from Fortran 2008, which have been successfully tested with GFortran version 5.1+.
 
-To compile the project in release mode (enable optimizations):
-    cmake -DCMAKE_BUILD_TYPE=Release .
+To compile the project in release mode, which enables full optimization and thus provides the best performance, run:
+    cmake .
     make
 
-To compile the project in debug mode (disable optimizations, enable debug symbols):
+To compile the project in debug mode, run the commands:
     cmake -DCMAKE_BUILD_TYPE=Debug .
     make
+Note that compiling the project in debug mode will make it significantly slower; typical applications require around
+twice the computation time of similar applications compiled in release mode. However, as the name implies, this also
+makes it significantly easier to debug the program, as it enables the use of the GDB debugger and GProf profiler, as
+well as several runtime checks (such as checking that array indices are within allowed bounds).
