@@ -15,29 +15,43 @@ module module_conductor
 
   ! Class declaration
   type conductor
-    ! User-defined parameters: these control the physical characteristics of the material
-    real(dp)  :: thouless        = 1.000_dp        ! Thouless energy of the material
-    real(dp)  :: scattering      = 0.001_dp        ! Imaginary energy contribution due to inelastic scattering
+    ! Physical parameters: these control the physical characteristics of the material (should be modified by the user before simulations)
+    real(dp)  :: thouless        = 1.000_dp        ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(dp)  :: scattering      = 0.001_dp        ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
     real(dp)  :: conductance_a   = 1.0_dp/3.0_dp   ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
     real(dp)  :: conductance_b   = 0.0_dp          ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
+  
+    ! Simulation parameters: these control the behaviour of the boundary value problem solver (can be modified by the user if necessary)
+    integer   :: scaling         = 128             ! How much larger than the provided position mesh the largest internal mesh can be (range: >1)
+    integer   :: information     = 0               ! Amount of debug information that the BVP solver should write to standard out (range: [-1,2])
+    real(dp)  :: tolerance       = 1e-6_dp         ! Error tolerance level (determines the maximum defect or global error, depends on the above)
 
-    ! Core internal structure: these essential variables store the physical state of the material
-    type(state), allocatable :: state(:,:)         ! Physical state as a function of position and energy
+    ! Core structure: these essential variables store the physical state of the material (can be accessed by the user)
+    type(state), allocatable :: state(:,:)         ! Physical state as a function of energy and position (respectively)
     type(state), allocatable :: state_a(:)         ! Boundary condition on the left  as function of energy
     type(state), allocatable :: state_b(:)         ! Boundary condition on the right as function of energy
     real(dp),    allocatable :: pos(:)             ! Discretized position domain 
     real(dp),    allocatable :: erg(:)             ! Discretized energy domain 
 
-    ! Temp internal structure: these private variables are only used by internal subroutines
+    type(conductor), pointer :: material_a
+    type(conductor), pointer :: material_b
+
+    ! Temp structure: these private variables are only used by internal subroutines (can not be accessed by the user)
     type(state), private     :: work_state_a
     type(state), private     :: work_state_b
     complex(dp), private     :: work_erg
 
     contains
-    final     :: conductor_destruct       ! Class destructor
+    ! Physical methods: these methods extract physical information about the material (should be invoked by the user after simulations)
+
+    ! Simulation methods: these methods control the simulation itself (should be invoked by the user during simulations)
     procedure :: update => conductor_update
-    !TODO class(conductor), pointer :: material_a, material_right
+
+    ! Core methods: these methods are used internally (should not be necessary to explicitly invoke)
+    final     :: conductor_destruct                ! Class destructor
+
     !TODO procedure Connect_Left / Connect_Right
+    !TODO procedure connect(conductor* a, conductor* b) instead of left/right
   end type
 
   ! Class constructor
@@ -131,10 +145,10 @@ contains
       this%work_erg = cmplx(this%erg(n)/this%thouless, this%scattering/this%thouless, kind=dp)
 
       ! Initialize the boundary value problem solver
-      sol = bvp_init(32, 16, this%pos, u)
+      sol = bvp_init(32, 16, this%pos, u, max_num_subintervals=size(this%pos)*this%scaling)
 
       ! Solve the differential equation
-      sol = bvp_solver(sol, ode, bc, method=6, error_control=1, tol=1.0e-6_dp, trace=0)
+      sol = bvp_solver(sol, ode, bc, method=6, error_control=1, tol=this%tolerance, trace=this%information)
 
       ! Use the results to update the current state of the system
       forall (m=1:size(this%pos))
