@@ -13,6 +13,7 @@ program test_core
   complex(dp) :: cs, cv(4), cm(2,2)
   type(spin)  :: p, q, r
   type(state) :: s0, s1, s2
+  integer     :: n
 
 
   ! Calibrate the test procedures in 'module_assert'
