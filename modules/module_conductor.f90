@@ -294,35 +294,22 @@ contains
     material_b%conductance_a = conductance_b
   end subroutine
 
-  subroutine conductor_write_dos(this, unit, scaling, offset)
+  subroutine conductor_write_dos(this, unit)
     ! Writes the density of states as a function of position and energy to a given output unit.
     class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
     integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
-    real(dp), optional, intent(in) :: scaling   ! Scaling factor that determines the size of the material
-    real(dp), optional, intent(in) :: offset    ! Offset that determines the absolute position of the material
-
-    real(dp)                       :: sscaling
-    real(dp)                       :: soffset
-    integer                        :: n, m
-
-    ! Handle optional arguments
-    if (present(scaling)) then
-      sscaling = scaling
-    else
-      sscaling = 1.0_dp
-    end if
-
-    if (present(offset)) then
-      soffset = offset
-    else
-      soffset = 0.0_dp
-    end if
+    integer                        :: n, m      ! Temporary loop variables
 
     ! Write the information to output
     do m=1,size(this%location)
-      do n=1,size(this%energy)
-        write(unit,'(f20.16,4x,f20.16,4x,f20.16)') (soffset + sscaling*this%location(m)), this%energy(n), this%state(n,m)%get_dos()
-      end do
+      if (minval(this%energy) < 0.0_dp) then
+        ! If we have data for both positive and negative energies, simply write out the data
+        write(unit,*) (this%state(n,m)%get_dos(), n=1,size(this%energy))
+      else
+        ! If we only have data for positive energies, assume that the regions are symmetric
+        write(unit,*) (this%state(n,m)%get_dos(), n=size(this%energy),1,-1),&
+                      (this%state(n,m)%get_dos(), n=1,size(this%energy),+1)
+      end if
     end do
   end subroutine
 end module
