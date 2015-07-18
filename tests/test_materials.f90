@@ -14,18 +14,18 @@
         s = superconductor(erg)
         call connect(a, b, 1/3.0_dp, 1/3.0_dp)
         call connect(c, s, 0.3_dp, 0.3_dp)
+
         call connect(s, c, 0.3_dp, 0.3_dp)
 
         do n=1,128
           print *,s%get_gap(s%location(n))
         end do
+        call c%update
         call s%update
-        
-        call a%update
 
         open(unit=1, file='test_materials.dat', status='NEW')
-        call a%write_dos(1)
-        call b%write_dos(1)
+        call c%write_dos(1)
+        call s%write_dos(1)
         close(unit=1)
 
         !call b%update

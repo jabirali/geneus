@@ -35,26 +35,26 @@ module module_conductor
     real(dp),    allocatable  :: location(:)                                 ! Discretized position domain that will be considered
 
     ! Temp structure: these private variables are only used by internal subroutines (should not be accessed by the user)
-    type(state), private      :: state_a                                     ! Temporary storage for the left  boundary condition
-    type(state), private      :: state_b                                     ! Temporary storage for the right boundary condition
-    complex(dp), private      :: erg                                         ! Temporary storage for the current working energy
+    type(state)               :: state_a                                     ! Temporary storage for the left  boundary condition
+    type(state)               :: state_b                                     ! Temporary storage for the right boundary condition
+    complex(dp)               :: erg                                         ! Temporary storage for the current working energy
 
     contains
     ! Simulation methods: these methods control the simulation process (should be invoked by the user)
     procedure          :: update             => conductor_update             ! Updates the state of the material
 
     ! 
-    procedure, private :: usadel_equation    => conductor_usadel_equation    ! Defines the differential equation that describes this material
+    procedure, private :: usadel_equation    => conductor_usadel_equation    ! Differential equation that describes the conductor
     procedure, private :: interface_vacuum_a => conductor_interface_vacuum_a ! Defines the left  boundary condition for a vacuum interface
     procedure, private :: interface_vacuum_b => conductor_interface_vacuum_b ! Defines the right boundary condition for a vacuum interface
     procedure, private :: interface_tunnel_a => conductor_interface_tunnel_a ! Defines the left  boundary condition for a tunnel interface
     procedure, private :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
 
     ! Output methods: these methods are used to export physical results to files (can be invoked by the user)
-    procedure          :: write_dos => conductor_write_dos ! Writes the density of states to a given output unit
+    procedure          :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
 
     ! Core methods: these methods are only used by internal subroutines (should not be directly invoked by the user)
-    final              :: conductor_destruct               ! Destructor that deallocates dynamic memory
+    final              :: conductor_destruct                                 ! Destructor that deallocates dynamic memory
   end type
 
   ! Constructs a conductor and initializes it a superconducting state
