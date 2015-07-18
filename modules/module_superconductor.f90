@@ -15,8 +15,8 @@ module module_superconductor
 
   ! Type declaration
   type, extends(conductor) :: superconductor
-    real(dp)                 :: temperature = 0.0_dp               ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(dp)                 :: coupling    = 0.2_dp               ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    real(dp)                 :: temperature = 1e-6_dp         ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(dp)                 :: coupling    = 0.20_dp               ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
     complex(dp), allocatable :: gap(:)                             ! Superconducting gap as a function of position (relative to the zero-temperature gap of a bulk superconductor)
     contains
     procedure                :: get_gap          => superconductor_get_gap
@@ -122,8 +122,8 @@ contains
       do m = 1,size(this%energy)
         singlet  = ( this%state(m,n)%get_f_s() - conjg(this%state(m,n)%get_ft_s()) )/2.0_dp
 
-        gap_real =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
-        gap_imag = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+        gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+        gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
       end do
 
       ! Create cubic interpolations of the numerical data above

@@ -22,17 +22,17 @@ find_package(BLAS   REQUIRED)
 find_package(LAPACK REQUIRED)
 
 # Source files
-file(GLOB src_bvp "external/*.f" "external/*.f90")
+file(GLOB src_ext "external/*.f" "external/*.f90")
 file(GLOB src_mod "modules/*.f90")
-file(GLOB src_exe "tests/*.f90")
+file(GLOB src_bin "tests/*.f90")
 
 # Executables
 
 # Module tests
-add_executable(test_core "tests/test_core.f90" ${src_mod} ${src_bvp})
+add_executable(test_core "tests/test_core.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_core ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_executable(test_materials "tests/test_materials.f90" ${src_mod} ${src_bvp})
+add_executable(test_materials "tests/test_materials.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 
@@ -61,13 +61,13 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program")
 
   # Flags that apply to external files (imported from other projects)
-  set_source_files_properties(${src_bvp} PROPERTIES COMPILE_FLAGS "-std=legacy")
+  set_source_files_properties(${src_ext} PROPERTIES COMPILE_FLAGS "-std=legacy")
 
   # Flags that apply to internal files (produced as part of this project)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -Wconversion -pedantic -fimplicit-none -fcheck=all")
+    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008 -Wconversion -pedantic -fimplicit-none -fcheck=all")
   elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008")
+    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008")
   endif()
 endif()
 
