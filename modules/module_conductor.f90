@@ -49,6 +49,7 @@ module module_conductor
     procedure, private :: interface_vacuum_b => conductor_interface_vacuum_b ! Defines the right boundary condition for a vacuum interface
     procedure, private :: interface_tunnel_a => conductor_interface_tunnel_a ! Defines the left  boundary condition for a tunnel interface
     procedure, private :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
+    procedure, private :: internals_update   => conductor_internals_update   ! 
 
     ! Output methods: these methods are used to export physical results to files (can be invoked by the user)
     procedure          :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
@@ -173,6 +174,9 @@ contains
       forall (m=1:size(this%location))
         this%state(n,m) = sol%y(:,m)
       end forall
+
+      ! Update other internal variables if necessary
+      call this%internals_update
     end do
 
     ! Clean up
@@ -324,6 +328,12 @@ contains
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r2  = dg2  - this%conductance_b*( pauli0 - g2*gt3 )*N3*(  g3  - g2  )
     rt2 = dgt2 - this%conductance_b*( pauli0 - gt2*g3 )*Nt3*( gt3 - gt2 )
+  end subroutine
+
+  subroutine conductor_internals_update(this)
+    class(conductor), intent(inout) :: this
+
+    continue
   end subroutine
 
   subroutine connect_tunneling(material_a, material_b, conductance_a, conductance_b)

@@ -61,7 +61,7 @@ contains
     complex(dp)             :: a, b
 
     t = atanh(abs(gap)/energy)
-    p = atan(aimag(gap)/real(gap))
+    p = atan(aimag(gap)/dble(gap))
     a =  sinh(t)/(1+cosh(t)) * exp( (0, 1) * p )
     b = -sinh(t)/(1+cosh(t)) * exp( (0,-1) * p )
 

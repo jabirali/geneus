@@ -22,7 +22,7 @@ find_package(BLAS   REQUIRED)
 find_package(LAPACK REQUIRED)
 
 # Source files
-file(GLOB src_bvp "bvp/*.f" "bvp/*.f90")
+file(GLOB src_bvp "external/*.f" "external/*.f90")
 file(GLOB src_mod "modules/*.f90")
 file(GLOB src_exe "tests/*.f90")
 

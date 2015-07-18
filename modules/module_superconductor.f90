@@ -19,8 +19,9 @@ module module_superconductor
     real(dp)                 :: coupling    = 0.2_dp               ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
     complex(dp), allocatable :: gap(:)                             ! Superconducting gap as a function of position (relative to the zero-temperature gap of a bulk superconductor)
     contains
-    procedure                :: get_gap         => superconductor_get_gap
-    procedure                :: usadel_equation => superconductor_usadel_equation
+    procedure                :: get_gap          => superconductor_get_gap
+    procedure                :: usadel_equation  => superconductor_usadel_equation
+    procedure                :: internals_update => superconductor_internals_update
   end type
 
   ! Type constructor
@@ -100,5 +101,44 @@ contains
     ! Calculate the second derivatives of the Riccati parameters
     d2g  = (-2.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g  - gap  * pauli2 + gapt * g*pauli2*g
     d2gt = (-2.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + gapt * pauli2 - gap  * gt*pauli2*gt
+  end subroutine
+
+  subroutine superconductor_internals_update(this)
+    class(superconductor), intent(inout) :: this
+
+    real(dp), allocatable                :: gap_real(:), dgap_real(:)
+    real(dp), allocatable                :: gap_imag(:), dgap_imag(:)
+    complex(dp)                          :: singlet
+    integer                              :: n, m, err
+    real(dp), external                   :: dpchqa
+
+    allocate(gap_real(size(this%energy)))
+    allocate(gap_imag(size(this%energy)))
+    allocate(dgap_real(size(this%energy)))
+    allocate(dgap_imag(size(this%energy)))
+
+    do n = 1,size(this%location)
+      ! Calculate the real and imaginary parts of the gap equation integrand
+      do m = 1,size(this%energy)
+        singlet  = ( this%state(m,n)%get_f_s() - conjg(this%state(m,n)%get_ft_s()) )/2.0_dp
+
+        gap_real =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+        gap_imag = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+      end do
+
+      ! Create cubic interpolations of the numerical data above
+      call dpchez(size(this%energy), this%energy, gap_real, dgap_real, .false., 0, 0, err)
+      call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
+
+      ! Perform a numerical integration of the interpolation up to the Debye cutoff
+      this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
+                           dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
+                           kind=dp )
+    end do
+
+    deallocate(gap_real)
+    deallocate(gap_imag)
+    deallocate(dgap_real)
+    deallocate(dgap_imag)
   end subroutine
 end module
