@@ -42,7 +42,7 @@ target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 ###############################################################################
 
 # Set the target directory
-set(EXECUTABLE_OUTPUT_PATH "bin")
+#set(EXECUTABLE_OUTPUT_PATH "bin")
 
 # Set the build type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -65,7 +65,7 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
   # Flags that apply to internal files (produced as part of this project)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -Wall -Wextra -Wconversion -pedantic -fimplicit-none -fcheck=all")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -Wconversion -pedantic -fimplicit-none -fcheck=all")
   elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008")
   endif()
