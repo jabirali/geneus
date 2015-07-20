@@ -1,12 +1,11 @@
-! This module defines the data type 'spin', which can be used to represent 2×2 complex spin matrices,
-! and overloads some common arithmetic operators to work for the new data type. The module then uses
-! the data type to define and export the Pauli matrices ('pauli0', 'pauli1', 'pauli2', and 'pauli3').
-! To make it easier to interact with common ODE solvers, which often operate on real state vectors,
-! the assignment operator is also overloaded in such a way that 'spin' becomes isomorphic to real(8).
+! This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads
+! common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
+! To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
+! the assignment operator is overloaded in such a way that 'spin' can be imported/exported from a real(8) vector.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-07-11
+! Updated: 2015-07-20
 
 module module_spin
   use module_precision
@@ -14,7 +13,7 @@ module module_spin
 
   ! Class declaration
   type spin
-    complex(dp) :: matrix(2,2) = 0                   ! Stores the spin matrix
+    complex(dp) :: matrix(2,2)      =  0.0_dp        ! Stores the spin matrix
     contains
     procedure   :: inv              => spin_inv      ! Inverse of the matrix
     procedure   :: trace            => spin_trace    ! Trace of the matrix
@@ -23,7 +22,7 @@ module module_spin
     procedure   :: max              => spin_max      ! Size of the largest element
     procedure   :: print            => spin_print    ! Prints the spin matrix to standard out
    !generic     :: write(formatted) => spin_write    ! Modifies the output format (used by 'write' and 'print')
-   !generic     :: read(formatted)  => spin_read     ! Modifies the input format (used by 'read')
+   !generic     :: read(formatted)  => spin_read     ! Modifies the  input format (used by 'read')
   end type
 
   ! Class constructor
