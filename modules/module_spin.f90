@@ -11,7 +11,7 @@ module module_spin
   use module_precision
   implicit none
 
-  ! Class declaration
+  ! Type declaration
   type spin
     complex(dp) :: matrix(2,2)      =  0.0_dp        ! Stores the spin matrix
     contains
@@ -25,7 +25,7 @@ module module_spin
    !generic     :: read(formatted)  => spin_read     ! Modifies the  input format (used by 'read')
   end type
 
-  ! Class constructor
+  ! Type constructor
   interface spin
     module procedure spin_construct_rscalar, &
                      spin_construct_cscalar, &
