@@ -7,12 +7,12 @@
 program test_core
   use module_assert
   use module_spin
-  use module_state
+  use module_green
 
   real(dp)    :: rs, rv(8), rw(32)
   complex(dp) :: cs, cv(4), cm(2,2)
   type(spin)  :: p, q, r
-  type(state) :: s0, s1, s2
+  type(green) :: s0, s1, s2
   integer     :: n
 
 
@@ -164,13 +164,13 @@ program test_core
   ! Test construction and assignment in 'module_spin'
   call section('State: Construction and assignment')
   call subsection('Testing output:')
-  s0 = state(pauli0, pauli1, pauli2, pauli3)
+  s0 = green(pauli0, pauli1, pauli2, pauli3)
   call s0%print
 
   call subsection('Testing assignment operator:')
   rw = [ (n, n=1,32) ]
   s0 = rw
-  s1 = state( spin([( 1.000000000000000_dp, 2.000000000000000_dp), ( 3.000000000000000_dp, 4.000000000000000_dp),   &
+  s1 = green( spin([( 1.000000000000000_dp, 2.000000000000000_dp), ( 3.000000000000000_dp, 4.000000000000000_dp),   &
                     ( 5.000000000000000_dp, 6.000000000000000_dp), ( 7.000000000000000_dp, 8.000000000000000_dp)]), &
               spin([( 9.000000000000000_dp,10.000000000000000_dp), (11.000000000000000_dp,12.000000000000000_dp),   &
                     (13.000000000000000_dp,14.000000000000000_dp), (15.000000000000000_dp,16.000000000000000_dp)]), &
@@ -186,8 +186,8 @@ program test_core
   call assert(rw - [ (n, n=1,32) ],                    'Exporting to a real vector　')
 
   call subsection('Testing construction of a BCS state with ϵ=0 and Δ=1:')
-  s0 = state( (0.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
-  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp,-0.999000499999875_dp),   &
+  s0 = green( (0.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp,-0.999000499999875_dp),   &
                     ( 0.000000000000000_dp, 0.999000499999875_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.999000499999875_dp),   &
                     ( 0.000000000000000_dp,-0.999000499999875_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -202,8 +202,8 @@ program test_core
   call assert(s0%get_dos() - 9.999995000002913e-04_dp, 'Density of states　')
 
   call subsection('Testing construction of a BCS state with ϵ=1 and Δ=1:')
-  s0 = state( (1.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
-  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.968385128104009_dp,-0.030630683283800_dp),   &
+  s0 = green( (1.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.968385128104009_dp,-0.030630683283800_dp),   &
                     (-0.968385128104009_dp, 0.030630683283800_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), (-0.968385128104009_dp, 0.030630683283800_dp),   &
                     ( 0.968385128104009_dp,-0.030630683283800_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -218,8 +218,8 @@ program test_core
   call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states　')
 
   call subsection('Testing construction of a BCS state with ϵ=1 and Δ=i:')
-  s0 = state( (1.0_dp,0.001_dp), (0.0_dp,1.0_dp) )
-  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.030630683283800_dp, 0.968385128104009_dp),   &
+  s0 = green( (1.0_dp,0.001_dp), (0.0_dp,1.0_dp) )
+  s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.030630683283800_dp, 0.968385128104009_dp),   &
                     (-0.030630683283800_dp,-0.968385128104009_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.030630683283800_dp, 0.968385128104009_dp),   &
                     (-0.030630683283800_dp,-0.968385128104009_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -234,8 +234,8 @@ program test_core
   call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states　')
 
   call subsection('Testing construction of a BCS state with ϵ=2 and Δ=1:')
-  s0 = state( (2.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
-  s1 = state( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.267949096206123_dp,-0.000154700474229_dp),   &
+  s0 = green( (2.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
+  s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.267949096206123_dp,-0.000154700474229_dp),   &
                     (-0.267949096206123_dp, 0.000154700474229_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), (-0.267949096206123_dp, 0.000154700474229_dp),   &
                     ( 0.267949096206123_dp,-0.000154700474229_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
