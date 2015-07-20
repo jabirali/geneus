@@ -583,8 +583,8 @@
             	PRINT *, "where: "
             	PRINT *, "1: Defect control"
             	PRINT *, "2: Global error control"
-            	PRINT *, "1: Defect the global error control"
-            	PRINT *, "1: Hybrid defect and global error control"
+            	PRINT *, "3: Defect then global error control"
+            	PRINT *, "4: Hybrid defect and global error control"
             	STOP
            END IF !(ERROR_CONTROL >= 1 .OR. <=4 ) 
         ELSE
@@ -605,10 +605,10 @@
         	ELSE
             	UCO = .FALSE.
         	END IF !(PRESENT(COND) .OR. PRESENT(CERROR))
-        ELSE
-        	PRINT *, "An estimate of the defect must be obtained in order to estimate"
-        	PRINT *, "a conditioning constant.  Please choose ERROR_CONTROL=1." 
-        	STOP
+        !ELSE
+        !	PRINT *, "An estimate of the defect must be obtained in order to estimate"
+        !	PRINT *, "a conditioning constant.  Please choose ERROR_CONTROL=1." 
+        !	STOP
         END IF !(USE_MESH_STRAT .EQ. 1)
 	
  
@@ -935,7 +935,7 @@
         ELSE IF (USE_MESH_STRAT .EQ. 4) THEN
             ! Set parameters for linear combination of errors
             IF (PROFILE > 0) THEN
-                PRINT *,'Use a Hybrid mesh selection strategy.' 
+                PRINT *,'Use a hybrid mesh selection strategy.' 
             END IF
             COMPUTE_GE = .TRUE.
             COMPUTE_DE=.TRUE.
