@@ -40,7 +40,7 @@ module module_conductor
     type(green)               :: state_b                                     ! Temporary storage for the right boundary condition
     complex(dp)               :: erg                                         ! Temporary storage for the current working energy
 
-    contains
+  contains
     ! These methods control the simulation process (should be invoked by the user)
     procedure          :: update             => conductor_update             ! Updates the state of the material
 
@@ -52,7 +52,7 @@ module module_conductor
     procedure, private :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
     procedure, private :: update_fields      => conductor_update_fields      ! Updates the physical fields based on stored Green's functions
 
-    ! These methods are used to write physical results to output (should be invoked by the user)
+    ! These methods are used to output physical results (should be invoked by the user)
     procedure          :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
 
     ! These methods are used by internal subroutines (should not be invoked by the user)

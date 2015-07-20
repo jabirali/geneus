@@ -1,61 +1,59 @@
-! This module defines the data structure 'superconductor', which models the physical state of such
-! materials as a function of position and energy. This data type inherits the internal structure of
-! the 'conductor' type that was defined in module_conductor, and thus belongs to class(conductor).
+! This module defines the data type 'superconductor', which models the physical state of a superconductor. The type is
+! a member of class(conductor), and thus inherits internal structure and generic methods defined in module_conductor.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-07-20
+! Updated: 2015-07-21
 
 module module_superconductor
   use module_precision
   use module_spin
-  use module_state
+  use module_green
   use module_conductor
   implicit none
 
   ! Type declaration
   type, extends(conductor) :: superconductor
-    real(dp)                 :: temperature = 1e-6_dp         ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(dp)                 :: coupling    = 0.20_dp               ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
-    complex(dp), allocatable :: gap(:)                             ! Superconducting gap as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    contains
-    procedure                :: get_gap          => superconductor_get_gap
-    procedure                :: usadel_equation  => superconductor_usadel_equation
-    procedure                :: update_fields    => superconductor_update_fields   
+    real(dp)                 :: temperature = 1e-6_dp                               ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(dp)                 :: coupling    = 0.20_dp                               ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    complex(dp), allocatable :: gap(:)                                              ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
+  contains
+    procedure                :: usadel_equation  => superconductor_usadel_equation  ! Differential equation that describes the superconductor
+    procedure                :: update_fields    => superconductor_update_fields    ! Updates the superconducting order parameter from the Green's function
+    procedure                :: get_gap          => superconductor_get_gap          ! Returns the superconducting order parameter at a given position
   end type
 
   ! Type constructor
   interface superconductor
-    module procedure superconductor_construct_bcs
+    module procedure superconductor_construct
   end interface
 
 contains
-  pure function superconductor_construct_bcs(energy, gap, scattering, points) result(this)
-    ! Constructs a superconductor object corresponding to a BCS superconductor with a given position and energy range
+  pure function superconductor_construct(energy, gap, scattering, points) result(this)
+    ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this        ! Superconductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap 
-    integer,     intent(in), optional :: points      ! Number of positions 
+    complex(dp), intent(in)           :: gap         ! Superconducting order parameter
+    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: conductor default)
+    integer,     intent(in), optional :: points      ! Number of positions   (default: conductor default)
+    integer                           :: n           ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct_bcs(energy, gap=gap, scattering=scattering, points=points)
+    this%conductor = conductor_construct(energy, gap=gap, scattering=scattering, points=points)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then
-      allocate(this%gap(size(this%conductor%location)))
+      allocate(this%gap(size(this%location)))
     end if
 
-    ! Initialize the superconducting gap
-    if (present(gap)) then
-      this%gap = gap
-    else
-      this%gap = (1.0_dp,0.0_dp)
-    end if
+    ! Initialize the superconducting order parameter
+    forall (n = 1:size(this%location))
+      this%gap(n) = gap
+    end forall
   end function
 
   pure subroutine superconductor_destruct(this)
-    ! Define the type destructor
+    ! Define the type destructor.
     type(superconductor), intent(inout) :: this
 
     ! Deallocate memory (if necessary)
@@ -104,29 +102,32 @@ contains
   end subroutine
 
   subroutine superconductor_update_fields(this)
-    class(superconductor), intent(inout) :: this
+    ! Updates the superconducting order parameter based on the Green's functions of the system.
+    class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
+    real(dp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
+    real(dp), allocatable                :: gap_imag(:), dgap_imag(:) ! Imag part of the superconducting order parameter and its derivative
+    complex(dp)                          :: singlet                   ! Singlet component of the anomalous Green's function at a given point
+    real(dp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
+    integer                              :: err                       ! PCHIP error status
+    integer                              :: n, m                      ! Loop variables
 
-    real(dp), allocatable                :: gap_real(:), dgap_real(:)
-    real(dp), allocatable                :: gap_imag(:), dgap_imag(:)
-    complex(dp)                          :: singlet
-    integer                              :: n, m, err
-    real(dp), external                   :: dpchqa
-
+    ! Allocate workspace memory
     allocate(gap_real(size(this%energy)))
     allocate(gap_imag(size(this%energy)))
     allocate(dgap_real(size(this%energy)))
     allocate(dgap_imag(size(this%energy)))
 
     do n = 1,size(this%location)
-      ! Calculate the real and imaginary parts of the gap equation integrand
       do m = 1,size(this%energy)
-        singlet  = ( this%state(m,n)%get_f_s() - conjg(this%state(m,n)%get_ft_s()) )/2.0_dp
+        ! Calculate the singlet component of the anomalous Green's function at this point
+        singlet     = ( this%state(m,n)%get_f_s() - conjg(this%state(m,n)%get_ft_s()) )/2.0_dp
 
+        ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
         gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
         gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
       end do
 
-      ! Create a Piecewise Cubic Hermitian Interpolation of the numerical results above
+      ! Create a PCHIP interpolation of the numerical results above
       call dpchez(size(this%energy), this%energy, gap_real, dgap_real, .false., 0, 0, err)
       call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
 
@@ -136,6 +137,7 @@ contains
                            kind=dp )
     end do
 
+    ! Deallocate workspace memory
     deallocate(gap_real)
     deallocate(gap_imag)
     deallocate(dgap_real)
