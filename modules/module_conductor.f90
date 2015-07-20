@@ -26,8 +26,10 @@ module module_conductor
   
     ! Simulation parameters: these control the behaviour of the boundary value problem solver (can be modified by the user)
     integer                   :: scaling       = 128                         ! How much larger than the initial position mesh the largest internal mesh can be (range: >1)
+    integer                   :: order         = 4                           ! Order of the employed Runge--Kutta method (range: 2, 4, 6)
+    integer                   :: control       = 2                           ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                   :: information   = 0                           ! Amount of status information that should be written to standard out (range: [-1,2])
-    real(dp)                  :: tolerance     = 1e-6_dp                     ! Error tolerance level (determines the maximum allowed defect in the solution)
+    real(dp)                  :: tolerance     = 1e-4_dp                     ! Error tolerance level (determines the maximum allowed defect in the solution)
 
     ! Core structure: these essential variables store the physical state of the material (can be accessed by the user)
     type(state), allocatable  :: state(:,:)                                  ! Physical state as a function of energy and position
@@ -165,14 +167,15 @@ contains
       end if
 
       ! Initialize the boundary value problem solver
-      sol = bvp_init(32, 16, this%location, u, max_num_subintervals=size(this%location)*this%scaling)
+      sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
 
       ! Solve the differential equation
-      sol = bvp_solver(sol, ode, bc, method=6, error_control=1, tol=this%tolerance, trace=this%information)
+      sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
 
       ! Use the results to update the current state of the system
+      call bvp_eval(sol, this%location, u)
       forall (m=1:size(this%location))
-        this%state(n,m) = sol%y(:,m)
+        this%state(n,m) = u(:,m)
       end forall
     end do
 
@@ -262,8 +265,8 @@ contains
     Nt  = spin_inv( pauli0 - gt*g )
 
     ! Calculate the second derivatives of the Riccati parameters
-    d2g  = (-2.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g
-    d2gt = (-2.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt
+    d2g  = (-2.0_dp,0.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g
+    d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt
   end subroutine
 
   subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
@@ -352,22 +355,45 @@ contains
     material_b%conductance_a = conductance_b
   end subroutine
 
-  subroutine conductor_write_dos(this, unit)
+  subroutine conductor_write_dos(this, unit, offset, scaling)
     ! Writes the density of states as a function of position and energy to a given output unit.
     class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
     integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
+    real(dp),           intent(in) :: offset
+    real(dp),           intent(in) :: scaling
     integer                        :: n, m      ! Temporary loop variables
 
+    if (minval(this%energy) < 0.0_dp) then
+      ! If we have data for both positive and negative energies, simply write out the data
+      do m=1,size(this%location)
+        do n=1,size(this%energy)
+          write(unit,*) offset+scaling*this%location(m), this%energy(n), this%state(n,m)%get_dos()
+        end do
+        write(unit,*)
+      end do
+    else
+      ! If we only have data for positive energies, assume that the negative region is symmetric
+      do m=1,size(this%location)
+        do n=size(this%energy),1,-1
+          write(unit,*) offset+scaling*this%location(m), -this%energy(n), this%state(n,m)%get_dos()
+        end do
+        do n=1,size(this%energy),+1
+          write(unit,*) offset+scaling*this%location(m), +this%energy(n), this%state(n,m)%get_dos()
+        end do
+        write(unit,*)
+      end do
+    end if
+
     ! Write the information to output
-    do m=1,size(this%location)
-      if (minval(this%energy) < 0.0_dp) then
-        ! If we have data for both positive and negative energies, simply write out the data
-        write(unit,*) (this%state(n,m)%get_dos(), n=1,size(this%energy))
-      else
-        ! If we only have data for positive energies, assume that the regions are symmetric
-        write(unit,*) (this%state(n,m)%get_dos(), n=size(this%energy),1,-1),&
-                      (this%state(n,m)%get_dos(), n=1,size(this%energy),+1)
-      end if
-    end do
+    !do m=1,size(this%location)
+    !  if (minval(this%energy) < 0.0_dp) then
+    !    ! If we have data for both positive and negative energies, simply write out the data
+    !    write(unit,*) (this%state(n,m)%get_dos(), n=1,size(this%energy))
+    !  else
+    !    ! If we only have data for positive energies, assume that the regions are symmetric
+    !    write(unit,*) (this%state(n,m)%get_dos(), n=size(this%energy),1,-1),&
+    !                  (this%state(n,m)%get_dos(), n=1,size(this%energy),+1)
+    !  end if
+    !end do
   end subroutine
 end module

@@ -50,7 +50,7 @@ contains
     if (present(gap)) then
       this%gap = gap
     else
-      this%gap = 1.0_dp
+      this%gap = (1.0_dp,0.0_dp)
     end if
   end function
 
@@ -99,8 +99,8 @@ contains
     Nt  = spin_inv( pauli0 - gt*g )
 
     ! Calculate the second derivatives of the Riccati parameters
-    d2g  = (-2.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g  - gap  * pauli2 + gapt * g*pauli2*g
-    d2gt = (-2.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + gapt * pauli2 - gap  * gt*pauli2*gt
+    d2g  = (-2.0_dp,0.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g  - gap  * pauli2 + gapt * g*pauli2*g
+    d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + gapt * pauli2 - gap  * gt*pauli2*gt
   end subroutine
 
   subroutine superconductor_internals_update(this)
@@ -126,11 +126,11 @@ contains
         gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
       end do
 
-      ! Create cubic interpolations of the numerical data above
+      ! Create a Piecewise Cubic Hermitian Interpolation of the numerical results above
       call dpchez(size(this%energy), this%energy, gap_real, dgap_real, .false., 0, 0, err)
       call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
 
-      ! Perform a numerical integration of the interpolation up to the Debye cutoff
+      ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
       this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
                            dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
                            kind=dp )
