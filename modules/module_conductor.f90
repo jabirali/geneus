@@ -1,110 +1,109 @@
-! This module defines the data structure 'conductor', which models the physical state of a metallic 
-! conductor as a function of position and energy. The purpose of this structure is mainly to be used
-! as a base class for more interesting material classes, such as those that describe superconductors
-! and ferromagnets, or to be used in conjunction with such materials to describe hybrid structures.
-! The module also defines some functions that can be applied to any objects of the class 'conductor'.
+! This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
+! of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
+! such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in mesoscopic hybrid
+! structures. The module also defines helper functions like 'connect' which operate on general class(conductor) objects.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-17
+! Updated: 2015-07-20
 
 module module_conductor
   use module_precision
   use module_spin
-  use module_state
+  use module_green
   implicit none
 
   ! Type declaration
   type conductor
-    ! Physical parameters: these control the physical characteristics of the material (should be modified by the user)
+    ! These parameters control the physical characteristics of the material (should be modified by the user)
     real(dp)                  :: thouless      = 1.000_dp                    ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(dp)                  :: scattering    = 0.001_dp                    ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    class(conductor), pointer :: material_a                                  ! Material connected to this one at the left  interface (default: null pointer)
-    class(conductor), pointer :: material_b                                  ! Material connected to this one at the right interface (default: null pointer)
     real(dp)                  :: conductance_a = 0.0_dp                      ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
     real(dp)                  :: conductance_b = 0.0_dp                      ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
+    class(conductor), pointer :: material_a                                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
+    class(conductor), pointer :: material_b                                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
   
-    ! Simulation parameters: these control the behaviour of the boundary value problem solver (can be modified by the user)
-    integer                   :: scaling       = 128                         ! How much larger than the initial position mesh the largest internal mesh can be (range: >1)
-    integer                   :: order         = 4                           ! Order of the employed Runge--Kutta method (range: 2, 4, 6)
+    ! These parameters control the boundary value problem solver (can be modified by the user)
+    integer                   :: scaling       = 64                          ! Maximal allowed scaling of the mesh resolution (range: 2^N, N>1)
+    integer                   :: order         = 4                           ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                   :: control       = 2                           ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
-    integer                   :: information   = 0                           ! Amount of status information that should be written to standard out (range: [-1,2])
-    real(dp)                  :: tolerance     = 1e-4_dp                     ! Error tolerance level (determines the maximum allowed defect in the solution)
+    integer                   :: information   = 0                           ! Information amount that should be written to standard out (range: [-1,2])
+    real(dp)                  :: tolerance     = 1e-4_dp                     ! Error tolerance (determines the maximum allowed defect or error)
 
-    ! Core structure: these essential variables store the physical state of the material (can be accessed by the user)
-    type(state), allocatable  :: state(:,:)                                  ! Physical state as a function of energy and position
+    ! These variables store the physical state of the material (should not be modified by the user)
+    type(green), allocatable  :: state(:,:)                                  ! Physical state as a function of energy and position
     real(dp),    allocatable  :: energy(:)                                   ! Discretized  energy  domain that will be considered
     real(dp),    allocatable  :: location(:)                                 ! Discretized position domain that will be considered
 
-    ! Temp structure: these private variables are only used by internal subroutines (should not be accessed by the user)
-    type(state)               :: state_a                                     ! Temporary storage for the left  boundary condition
-    type(state)               :: state_b                                     ! Temporary storage for the right boundary condition
+    ! These variables are used by internal subroutines (should not be accessed by the user)
+    type(green)               :: state_a                                     ! Temporary storage for the left  boundary condition
+    type(green)               :: state_b                                     ! Temporary storage for the right boundary condition
     complex(dp)               :: erg                                         ! Temporary storage for the current working energy
 
     contains
-    ! Simulation methods: these methods control the simulation process (should be invoked by the user)
+    ! These methods control the simulation process (should be invoked by the user)
     procedure          :: update             => conductor_update             ! Updates the state of the material
 
-    ! 
+    ! These methods contain the equations that describe the material (should not be invoked by the user)
     procedure, private :: usadel_equation    => conductor_usadel_equation    ! Differential equation that describes the conductor
     procedure, private :: interface_vacuum_a => conductor_interface_vacuum_a ! Defines the left  boundary condition for a vacuum interface
     procedure, private :: interface_vacuum_b => conductor_interface_vacuum_b ! Defines the right boundary condition for a vacuum interface
     procedure, private :: interface_tunnel_a => conductor_interface_tunnel_a ! Defines the left  boundary condition for a tunnel interface
     procedure, private :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
-    procedure, private :: update_fields      => conductor_update_fields      ! 
+    procedure, private :: update_fields      => conductor_update_fields      ! Updates the physical fields based on stored Green's functions
 
-    ! Output methods: these methods are used to export physical results to files (can be invoked by the user)
+    ! These methods are used to write physical results to output (should be invoked by the user)
     procedure          :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
 
-    ! Core methods: these methods are only used by internal subroutines (should not be directly invoked by the user)
-    final              :: conductor_destruct                                 ! Destructor that deallocates dynamic memory
+    ! These methods are used by internal subroutines (should not be invoked by the user)
+    final              :: conductor_destruct                                 ! Type destructor
   end type
 
-  ! Constructs a conductor and initializes it a superconducting state
+  ! Type constructor
   interface conductor
-    module procedure conductor_construct_bcs
+    module procedure conductor_construct
   end interface
 
-  ! Constructs an interface by connecting two conductor objects
+  ! Connecting two class(conductor) objects by creating a tunneling interface between them
   interface connect
     module procedure connect_tunneling
   end interface
 contains
-  pure function conductor_construct_bcs(energy, gap, scattering, points) result(this)
-    ! Constructs a conductor object corresponding to a BCS superconductor with a given position and energy range
+  pure function conductor_construct(energy, gap, scattering, points) result(this)
+    ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this        ! Conductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
     real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: 0.001)
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap (default: 1.0)
-    integer,     intent(in), optional :: points      ! Number of positions (default: 128)
+    complex(dp), intent(in), optional :: gap         ! Superconducting gap (default: 0.1)
+    integer,     intent(in), optional :: points      ! Number of positions (default: 150)
 
     real(dp)                          :: seps
     complex(dp)                       :: sgap
     integer                           :: spts
     integer                           :: n, m
-
-    ! Optional argument: imaginary energy contribution due to inelastic scattering
-    if (present(scattering)) then
-      seps = scattering
-    else
-      seps = 0.001_dp
-    end if
    
     ! Optional argument: superconducting order parameter
     if (present(gap)) then
       sgap = gap
     else
-      sgap = (1.0_dp,0.0_dp)
+      sgap = (0.1_dp,0.0_dp)
     end if
 
-    ! Optional argument: number of positions to use
+    ! Optional argument: imaginary energy term
+    if (present(scattering)) then
+      seps = scattering
+    else
+      seps = 0.001_dp
+    end if
+
+    ! Optional argument: number of positions
     if (present(points)) then
       spts = points
     else
-      spts = 128
+      spts = 150
     end if
 
-    ! Make sure pointers are initialized to null pointers
+    ! Make sure pointers are initialized to null
     nullify(this%material_a)
     nullify(this%material_b)
 
@@ -120,7 +119,7 @@ contains
     this%energy = energy
     forall (n = 1:size(this%energy))
       forall (m = 1:size(this%location))
-        this%state(n,m) = state( cmplx(energy(n),seps,kind=dp), sgap )
+        this%state(n,m) = green( cmplx(energy(n),seps,kind=dp), sgap )
       end forall
     end forall
   end function
@@ -166,13 +165,13 @@ contains
         this%state_b = this%material_b%state(n,lbound(this%material_b%state,2))
       end if
 
-      ! Initialize the boundary value problem solver
+      ! Initialize the BVP solver
       sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
 
       ! Solve the differential equation
       sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
 
-      ! Use the results to update the current state of the system
+      ! Use the results to update the state
       call bvp_eval(sol, this%location, u)
       forall (m=1:size(this%location))
         this%state(n,m) = u(:,m)
@@ -270,7 +269,7 @@ contains
   end subroutine
 
   subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Defines a vacuum boundary condition for the left interface
+    ! Defines a vacuum boundary condition for the left interface.
     class(conductor), intent(in)  :: this
     type(spin),       intent(in)  :: g1, gt1, dg1, dgt1
     type(spin),       intent(out) :: r1, rt1
@@ -280,7 +279,7 @@ contains
   end subroutine
 
   subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Defines a vacuum boundary condition for the right interface
+    ! Defines a vacuum boundary condition for the right interface.
     class(conductor), intent(in)  :: this
     type(spin),       intent(in)  :: g2, gt2, dg2, dgt2
     type(spin),       intent(out) :: r2, rt2
@@ -290,7 +289,7 @@ contains
   end subroutine
 
   subroutine conductor_interface_tunnel_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Defines a tunneling boundary condition for the left interface 
+    ! Defines a tunneling boundary condition for the left interface.
     class(conductor), intent(in)  :: this
     type(spin),       intent(out) :: r1, rt1
     type(spin),       intent(in)  :: g1, gt1, dg1, dgt1
@@ -312,7 +311,7 @@ contains
   end subroutine
 
   subroutine conductor_interface_tunnel_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Defines a tunneling boundary condition for the right interface 
+    ! Defines a tunneling boundary condition for the right interface.
     class(conductor), intent(in)  :: this
     type(spin),       intent(out) :: r2, rt2
     type(spin),       intent(in)  :: g2, gt2, dg2, dgt2
@@ -355,19 +354,18 @@ contains
     material_b%conductance_a = conductance_b
   end subroutine
 
-  subroutine conductor_write_dos(this, unit, offset, scaling)
+  subroutine conductor_write_dos(this, unit, a, b)
     ! Writes the density of states as a function of position and energy to a given output unit.
     class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
     integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
-    real(dp),           intent(in) :: offset
-    real(dp),           intent(in) :: scaling
+    real(dp),           intent(in) :: a, b      ! Left and right end points of the material
     integer                        :: n, m      ! Temporary loop variables
 
     if (minval(this%energy) < 0.0_dp) then
       ! If we have data for both positive and negative energies, simply write out the data
       do m=1,size(this%location)
         do n=1,size(this%energy)
-          write(unit,*) offset+scaling*this%location(m), this%energy(n), this%state(n,m)%get_dos()
+          write(unit,*) a+(b-a)*this%location(m), this%energy(n), this%state(n,m)%get_dos()
         end do
         write(unit,*)
       end do
@@ -375,25 +373,13 @@ contains
       ! If we only have data for positive energies, assume that the negative region is symmetric
       do m=1,size(this%location)
         do n=size(this%energy),1,-1
-          write(unit,*) offset+scaling*this%location(m), -this%energy(n), this%state(n,m)%get_dos()
+          write(unit,*) a+(b-a)*this%location(m), -this%energy(n), this%state(n,m)%get_dos()
         end do
         do n=1,size(this%energy),+1
-          write(unit,*) offset+scaling*this%location(m), +this%energy(n), this%state(n,m)%get_dos()
+          write(unit,*) a+(b-a)*this%location(m), +this%energy(n), this%state(n,m)%get_dos()
         end do
         write(unit,*)
       end do
     end if
-
-    ! Write the information to output
-    !do m=1,size(this%location)
-    !  if (minval(this%energy) < 0.0_dp) then
-    !    ! If we have data for both positive and negative energies, simply write out the data
-    !    write(unit,*) (this%state(n,m)%get_dos(), n=1,size(this%energy))
-    !  else
-    !    ! If we only have data for positive energies, assume that the regions are symmetric
-    !    write(unit,*) (this%state(n,m)%get_dos(), n=size(this%energy),1,-1),&
-    !                  (this%state(n,m)%get_dos(), n=1,size(this%energy),+1)
-    !  end if
-    !end do
   end subroutine
 end module
