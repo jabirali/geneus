@@ -51,7 +51,7 @@ module module_conductor
     procedure, private :: interface_vacuum_b => conductor_interface_vacuum_b ! Defines the right boundary condition for a vacuum interface
     procedure, private :: interface_tunnel_a => conductor_interface_tunnel_a ! Defines the left  boundary condition for a tunnel interface
     procedure, private :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
-    procedure, private :: internals_update   => conductor_internals_update   ! 
+    procedure, private :: update_fields      => conductor_update_fields      ! 
 
     ! Output methods: these methods are used to export physical results to files (can be invoked by the user)
     procedure          :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
@@ -183,7 +183,7 @@ contains
     call bvp_terminate(sol)
 
     ! Update other internal variables if necessary
-    call this%internals_update
+    call this%update_fields   
   contains
     subroutine ode(z, u, f)
       ! Definition of the differential equation u'=f(z,u)
@@ -333,7 +333,7 @@ contains
     rt2 = dgt2 - this%conductance_b*( pauli0 - gt2*g3 )*Nt3*( gt3 - gt2 )
   end subroutine
 
-  subroutine conductor_internals_update(this)
+  subroutine conductor_update_fields(this)
     class(conductor), intent(inout) :: this
 
     continue

@@ -4,7 +4,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-07-17
+! Updated: 2015-07-20
 
 module module_superconductor
   use module_precision
@@ -21,7 +21,7 @@ module module_superconductor
     contains
     procedure                :: get_gap          => superconductor_get_gap
     procedure                :: usadel_equation  => superconductor_usadel_equation
-    procedure                :: internals_update => superconductor_internals_update
+    procedure                :: update_fields    => superconductor_update_fields   
   end type
 
   ! Type constructor
@@ -103,7 +103,7 @@ contains
     d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + gapt * pauli2 - gap  * gt*pauli2*gt
   end subroutine
 
-  subroutine superconductor_internals_update(this)
+  subroutine superconductor_update_fields(this)
     class(superconductor), intent(inout) :: this
 
     real(dp), allocatable                :: gap_real(:), dgap_real(:)
