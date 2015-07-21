@@ -73,8 +73,8 @@ contains
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this        ! Conductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: 0.001)
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap (default: 0.1)
+    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: 0.01)
+    complex(dp), intent(in), optional :: gap         ! Superconducting gap (default: 1.0)
     integer,     intent(in), optional :: points      ! Number of positions (default: 150)
 
     real(dp)                          :: seps
@@ -86,14 +86,14 @@ contains
     if (present(gap)) then
       sgap = gap
     else
-      sgap = (0.1_dp,0.0_dp)
+      sgap = (1.0_dp,0.0_dp)
     end if
 
     ! Optional argument: imaginary energy term
     if (present(scattering)) then
       seps = scattering
     else
-      seps = 0.001_dp
+      seps = 0.01_dp
     end if
 
     ! Optional argument: number of positions
@@ -338,22 +338,6 @@ contains
     continue
   end subroutine
 
-  subroutine connect_tunneling(material_a, material_b, conductance_a, conductance_b)
-    ! Creates a tunneling interface between two conductive materials.
-    class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
-    class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
-    real(dp),                 intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
-    real(dp),                 intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
-    
-    ! Update the internal material pointers
-    material_a%material_b => material_b
-    material_b%material_a => material_a
-
-    ! Update the interface parameters
-    material_a%conductance_b = conductance_a
-    material_b%conductance_a = conductance_b
-  end subroutine
-
   subroutine conductor_write_dos(this, unit, a, b)
     ! Writes the density of states as a function of position and energy to a given output unit.
     class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
@@ -381,5 +365,38 @@ contains
         write(unit,*)
       end do
     end if
+  end subroutine
+
+  subroutine connect_tunneling(material_a, material_b, conductance_a, conductance_b)
+    ! Creates a tunneling interface between two conductive materials.
+    class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
+    class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
+    real(dp),                 intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
+    real(dp),                 intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
+    
+    ! Update the internal material pointers
+    material_a%material_b => material_b
+    material_b%material_a => material_a
+
+    ! Update the interface parameters
+    material_a%conductance_b = conductance_a
+    material_b%conductance_a = conductance_b
+  end subroutine
+
+  pure subroutine energy_range_positive(array, coupling)
+    ! Initializes an energy array to values from zero to the Debye cutoff, where the cutoff is calculated from a BCS coupling constant.
+    real(dp), intent(out) :: array(:)  ! Array that will be initialized
+    real(dp), intent(in)  :: coupling  ! BCS coupling constant
+    integer               :: n         ! Loop variable
+
+    ! Let the first N-100 elements span the energy range from zero to 1.5Δ
+    do n=1,size(array)-100
+      array(n) = (n-1)*(1.5_dp/(size(array)-100))
+    end do
+
+    ! Let the last 100 elements span the energy range from 1.5Δ to the cutoff
+    do n=1,100
+      array(size(array)-100+n) = 1.5_dp + n*(cosh(1.0_dp/coupling) - 1.5_dp)/100.0_dp
+    end do
   end subroutine
 end module
