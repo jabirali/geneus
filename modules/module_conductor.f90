@@ -42,7 +42,8 @@ module module_conductor
 
   contains
     ! These methods control the simulation process (should be invoked by the user)
-    procedure          :: update             => conductor_update             ! Updates the state of the material
+    procedure          :: initialize         => conductor_initialize         ! Initializes the internal state of the material
+    procedure          :: update             => conductor_update             ! Updates the internal state of the material
 
     ! These methods contain the equations that describe the material (should not be invoked by the user)
     procedure, private :: usadel_equation    => conductor_usadel_equation    ! Differential equation that describes the conductor
@@ -116,12 +117,8 @@ contains
 
     ! Fill the object fields
     this%location = [ ((real(n,kind=dp)/real(spts-1,kind=dp)), n=0,spts-1) ]
-    this%energy = energy
-    forall (n = 1:size(this%energy))
-      forall (m = 1:size(this%location))
-        this%state(n,m) = green( cmplx(energy(n),seps,kind=dp), sgap )
-      end forall
-    end forall
+    this%energy   = energy
+    call this%initialize(sgap)
   end function
 
   pure subroutine conductor_destruct(this)
@@ -134,6 +131,19 @@ contains
       deallocate(this%location)
       deallocate(this%energy)
     end if
+  end subroutine
+
+  pure subroutine conductor_initialize(this, gap)
+    ! Define the default initializer.
+    class(conductor), intent(inout) :: this
+    complex(dp),      intent(in   ) :: gap
+    integer                         :: n, m
+
+    forall (n = 1:size(this%energy))
+      forall (m = 1:size(this%location))
+        this%state(n,m) = green( cmplx(this%energy(n),this%scattering,kind=dp), gap )
+      end forall
+    end forall
   end subroutine
 
   subroutine conductor_update(this)

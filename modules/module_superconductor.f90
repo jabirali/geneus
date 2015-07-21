@@ -20,6 +20,7 @@ module module_superconductor
   contains
     procedure                :: usadel_equation  => superconductor_usadel_equation  ! Differential equation that describes the superconductor
     procedure                :: update_fields    => superconductor_update_fields    ! Updates the superconducting order parameter from the Green's function
+    procedure                :: set_gap          => superconductor_set_gap          ! Updates the superconducting order parameter from a given scalar
     procedure                :: get_gap          => superconductor_get_gap          ! Returns the superconducting order parameter at a given position
     procedure                :: get_gap_mean     => superconductor_get_gap_mean     ! Returns the superconducting order parameter average in the material
   end type
@@ -49,9 +50,7 @@ contains
     end if
 
     ! Initialize the superconducting order parameter
-    forall (n = 1:size(this%location))
-      this%gap(n) = gap
-    end forall
+    call this%set_gap(gap)
 
     ! Initialize the BCS coupling constant
     this%coupling = coupling
@@ -133,6 +132,17 @@ contains
     deallocate(gap_imag)
     deallocate(dgap_real)
     deallocate(dgap_imag)
+  end subroutine
+
+  pure subroutine superconductor_set_gap(this, gap)
+    ! Updates the superconducting order parameter from a scalar.
+    class(superconductor), intent(inout) :: this
+    complex(dp),           intent(in   ) :: gap
+    integer                              :: n
+
+    forall( n = 1:size(this%gap) )
+      this%gap(n) = gap
+    end forall
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)

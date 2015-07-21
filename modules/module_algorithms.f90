@@ -1,6 +1,18 @@
 !
 
 module module_algorithms
+  subroutine dos_bilayer()
+    continue
+  end subroutine
+
+  subroutine dos_trilayer()
+    continue
+  end subroutine
+
+  subroutine dos_multilayer()
+    continue
+  end subroutine
+
   subroutine critical_bilayer(s, m, iterations, stabilization)
     class(superconductor), intent(inout) :: s
     class(conductor),      intent(inout) :: m
