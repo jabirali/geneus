@@ -23,6 +23,8 @@ module module_superconductor
     procedure                :: set_gap          => superconductor_set_gap          ! Updates the superconducting order parameter from a given scalar
     procedure                :: get_gap          => superconductor_get_gap          ! Returns the superconducting order parameter at a given position
     procedure                :: get_gap_mean     => superconductor_get_gap_mean     ! Returns the superconducting order parameter average in the material
+    procedure                :: get_temperature  => superconductor_get_temperature  ! Returns the current temperature of the material
+    procedure                :: set_temperature  => superconductor_set_temperature  ! Updates the current temperature of the material
   end type
 
   ! Type constructor
@@ -31,18 +33,19 @@ module module_superconductor
   end interface
 
 contains
-  pure function superconductor_construct(energy, gap, coupling, scattering, points) result(this)
+  pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this        ! Superconductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
     complex(dp), intent(in)           :: gap         ! Superconducting order parameter
     real(dp),    intent(in)           :: coupling    ! BCS coupling constant
+    real(dp),    intent(in), optional :: thouless    ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points      ! Number of positions   (default: conductor default)
     integer                           :: n           ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, scattering=scattering, points=points)
+    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then
@@ -166,4 +169,20 @@ contains
 
     gap = sum(this%gap)/max(1,size(this%gap)) 
   end function
+
+  pure function superconductor_get_temperature(this) result(temperature)
+    ! Returns the superconductor temperature.
+    class(superconductor), intent(in) :: this
+    real(dp)                          :: temperature
+
+    temperature = this%temperature
+  end function
+
+  pure subroutine superconductor_set_temperature(this, temperature)
+    ! Updates the superconductor temperature.
+    class(superconductor), intent(inout) :: this
+    real(dp),              intent(in   ) :: temperature
+
+    this%temperature = temperature
+  end subroutine
 end module

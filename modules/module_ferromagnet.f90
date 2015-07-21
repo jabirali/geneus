@@ -26,18 +26,19 @@ module module_ferromagnet
   end interface
 
 contains
-  pure function ferromagnet_construct_homogeneous(energy, exchange, gap, scattering, points) result(this)
+  pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor
     type(ferromagnet)                 :: this        ! Ferromagnet object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
     real(dp),    intent(in)           :: exchange(3) ! Magnetic exchange field
     complex(dp), intent(in), optional :: gap         ! Superconducting gap   (default: conductor default)
+    real(dp),    intent(in), optional :: thouless    ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points      ! Number of positions   (default: conductor default)
     integer                           :: n           ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, scattering=scattering, points=points)
+    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%exchange)) then

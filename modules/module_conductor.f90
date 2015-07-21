@@ -16,10 +16,10 @@ module module_conductor
   ! Type declaration
   type conductor
     ! These parameters control the physical characteristics of the material (should be modified by the user)
-    real(dp)                  :: thouless      = 1.000_dp                    ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(dp)                  :: scattering    = 0.001_dp                    ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    real(dp)                  :: conductance_a = 0.0_dp                      ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
-    real(dp)                  :: conductance_b = 0.0_dp                      ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
+    real(dp)                  :: thouless      = 1.00_dp                     ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(dp)                  :: scattering    = 0.01_dp                     ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    real(dp)                  :: conductance_a = 0.00_dp                     ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
+    real(dp)                  :: conductance_b = 0.00_dp                     ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
     class(conductor), pointer :: material_a                                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
     class(conductor), pointer :: material_b                                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
   
@@ -70,55 +70,53 @@ module module_conductor
     module procedure connect_tunneling
   end interface
 contains
-  pure function conductor_construct(energy, gap, scattering, points) result(this)
+  pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this        ! Conductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: 0.01)
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap (default: 1.0)
-    integer,     intent(in), optional :: points      ! Number of positions (default: 150)
+    real(dp),    intent(in), optional :: thouless    ! Thouless energy       (default: see type declaration)
+    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: see type declaration)
+    complex(dp), intent(in), optional :: gap         ! Superconducting gap   (default: see definition below)
+    integer,     intent(in), optional :: points      ! Number of positions   (default: see definition below)
+    integer                           :: n, m        ! Loop variables
 
-    real(dp)                          :: seps
-    complex(dp)                       :: sgap
-    integer                           :: spts
-    integer                           :: n, m
-   
-    ! Optional argument: superconducting order parameter
-    if (present(gap)) then
-      sgap = gap
-    else
-      sgap = (1.0_dp,0.0_dp)
+    ! Optional argument: Thouless energy
+    if (present(thouless)) then
+      this%thouless = thouless
     end if
 
-    ! Optional argument: imaginary energy term
+    ! Optional argument: imaginary energy
     if (present(scattering)) then
-      seps = scattering
-    else
-      seps = 0.01_dp
+      this%scattering = scattering
     end if
-
-    ! Optional argument: number of positions
-    if (present(points)) then
-      spts = points
-    else
-      spts = 150
-    end if
-
-    ! Make sure pointers are initialized to null
+   
+    ! Initialize pointers to null
     nullify(this%material_a)
     nullify(this%material_b)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%state)) then
-      allocate(this%state(size(energy), spts))
-      allocate(this%location(spts))
-      allocate(this%energy(size(energy)))
+      if (present(points)) then
+        allocate(this%state(size(energy), points))
+        allocate(this%location(points))
+        allocate(this%energy(size(energy)))
+      else
+        allocate(this%state(size(energy), 150))
+        allocate(this%location(150))
+        allocate(this%energy(size(energy)))
+      end if
     end if
 
-    ! Fill the object fields
-    this%location = [ ((real(n,kind=dp)/real(spts-1,kind=dp)), n=0,spts-1) ]
+    ! Initialize energy and position arrays
     this%energy   = energy
-    call this%initialize(sgap)
+    this%location = [ ((real(n,kind=dp)/real(size(this%location)-1,kind=dp)), n=0,size(this%location)-1) ]
+
+    ! Initialize the state
+    if (present(gap)) then
+      call this%initialize( gap )
+    else
+      call this%initialize( cmplx(1.0_dp,0.0_dp,kind=dp) )
+    end if
   end function
 
   pure subroutine conductor_destruct(this)
@@ -158,7 +156,7 @@ contains
     do n=1,size(this%energy)
       ! Status information
       if (this%information >= 0) then
-        write (*,'(3x,a,1x,i4,1x,a,1x,i4,1x,a,f8.5)') '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
+        write (*,'(3x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5)') '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
       end if
 
       ! Convert all states at this energy level to real-valued state vectors
