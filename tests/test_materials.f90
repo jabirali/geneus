@@ -19,11 +19,11 @@ program test_materials
   call connect(s, m, 0.25_dp, 0.25_dp)
   !call connect(m, f, 0.3_dp, 0.3_dp)
 
-  !forall (n=1:size(f%location))
+  !do n=1,size(f%location)
   !  f%exchange(1,n) = 0.1_dp*sin(1.57*f%location(n))
   !  f%exchange(2,n) = 0.1_dp*cos(1.57*f%location(n))
   !  f%exchange(3,n) = 0.0_dp
-  !end forall
+  !end do
 
   ! Scalar and array exchange
 

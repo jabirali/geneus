@@ -140,9 +140,9 @@ contains
     complex(dp),           intent(in   ) :: gap
     integer                              :: n
 
-    forall( n = 1:size(this%gap) )
+    do n = 1,size(this%gap)
       this%gap(n) = gap
-    end forall
+    end do
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)

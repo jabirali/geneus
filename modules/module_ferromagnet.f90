@@ -45,9 +45,9 @@ contains
     end if
 
     ! Initialize the exchange field
-    forall (n = 1:size(this%conductor%location))
+    do n = 1,size(this%conductor%location)
       this%exchange(:,n) = exchange
-    end forall
+    end do
   end function
 
   pure subroutine ferromagnet_destruct(this)

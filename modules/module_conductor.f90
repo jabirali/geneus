@@ -139,11 +139,11 @@ contains
     complex(dp),      intent(in   ) :: gap
     integer                         :: n, m
 
-    forall (n = 1:size(this%energy))
-      forall (m = 1:size(this%location))
+    do m = 1,size(this%location)
+      do n = 1,size(this%energy)
         this%state(n,m) = green( cmplx(this%energy(n),this%scattering,kind=dp), gap )
-      end forall
-    end forall
+      end do
+    end do
   end subroutine
 
   subroutine conductor_update(this)
@@ -162,9 +162,9 @@ contains
       end if
 
       ! Convert all states at this energy level to real-valued state vectors
-      forall (m=1:size(this%location))
+      do m=1,size(this%location)
         u(:,m) = this%state(n,m)
-      end forall
+      end do
 
       ! Copy the complex energy and boundary conditions to internal work variables
       this%erg = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=dp)
@@ -183,9 +183,9 @@ contains
 
       ! Use the results to update the state
       call bvp_eval(sol, this%location, u)
-      forall (m=1:size(this%location))
+      do m=1,size(this%location)
         this%state(n,m) = u(:,m)
-      end forall
+      end do
     end do
 
     ! Clean up
