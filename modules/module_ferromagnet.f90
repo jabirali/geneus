@@ -37,7 +37,7 @@ contains
     integer                           :: n           ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct_bcs(energy, gap=gap, scattering=scattering, points=points)
+    this%conductor = conductor_construct(energy, gap=gap, scattering=scattering, points=points)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%exchange)) then
@@ -62,20 +62,6 @@ contains
     ! Call the superclass destructor
     call conductor_destruct(this%conductor)
   end subroutine
-
-  pure function ferromagnet_get_exchange(this, location) result(h)
-    ! Returns the magnetic exchange field at the given location.
-    class(ferromagnet), intent(in) :: this
-    real(dp),           intent(in) :: location
-    real(dp)                       :: h(3)
-    integer                        :: n
-
-    ! Calculate the index corresponding to the given location
-    n = nint(location*(size(this%location)-1) + 1)
-
-    ! Extract the magnetic exchange field at that point
-    h = this%exchange(:,n)
-  end function
 
   subroutine ferromagnet_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
@@ -102,4 +88,18 @@ contains
     d2g  = (-2.0_dp,0.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g  + P*g   + g*Pt
     d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + Pt*gt + gt*P
   end subroutine
+
+  pure function ferromagnet_get_exchange(this, location) result(h)
+    ! Returns the magnetic exchange field at the given location.
+    class(ferromagnet), intent(in) :: this
+    real(dp),           intent(in) :: location
+    real(dp)                       :: h(3)
+    integer                        :: n
+
+    ! Calculate the index corresponding to the given location
+    n = nint(location*(size(this%location)-1) + 1)
+
+    ! Extract the magnetic exchange field at that point
+    h = this%exchange(:,n)
+  end function
 end module

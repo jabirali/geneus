@@ -15,12 +15,13 @@ module module_superconductor
   ! Type declaration
   type, extends(conductor) :: superconductor
     real(dp)                 :: temperature = 1e-6_dp                               ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(dp)                 :: coupling    = 0.20_dp                               ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    real(dp)                 :: coupling                                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
     complex(dp), allocatable :: gap(:)                                              ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
   contains
     procedure                :: usadel_equation  => superconductor_usadel_equation  ! Differential equation that describes the superconductor
     procedure                :: update_fields    => superconductor_update_fields    ! Updates the superconducting order parameter from the Green's function
     procedure                :: get_gap          => superconductor_get_gap          ! Returns the superconducting order parameter at a given position
+    procedure                :: get_gap_mean     => superconductor_get_gap_mean     ! Returns the superconducting order parameter average in the material
   end type
 
   ! Type constructor
@@ -29,11 +30,12 @@ module module_superconductor
   end interface
 
 contains
-  pure function superconductor_construct(energy, gap, scattering, points) result(this)
+  pure function superconductor_construct(energy, gap, coupling, scattering, points) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this        ! Superconductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
     complex(dp), intent(in)           :: gap         ! Superconducting order parameter
+    real(dp),    intent(in)           :: coupling    ! BCS coupling constant
     real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points      ! Number of positions   (default: conductor default)
     integer                           :: n           ! Loop variable
@@ -50,6 +52,9 @@ contains
     forall (n = 1:size(this%location))
       this%gap(n) = gap
     end forall
+
+    ! Initialize the BCS coupling constant
+    this%coupling = coupling
   end function
 
   pure subroutine superconductor_destruct(this)
@@ -64,20 +69,6 @@ contains
     ! Call the superclass destructor
     call conductor_destruct(this%conductor)
   end subroutine
-
-  pure function superconductor_get_gap(this, location) result(gap)
-    ! Returns the superconducting order parameter at the given location.
-    class(superconductor), intent(in) :: this
-    real(dp),              intent(in) :: location
-    complex(dp)                       :: gap
-    integer                           :: n
-
-    ! Calculate the index corresponding to the given location
-    n = nint(location*(size(this%location)-1) + 1)
-
-    ! Extract the superconducting order parameter at that point
-    gap = this%gap(n)
-  end function
 
   subroutine superconductor_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
@@ -143,4 +134,26 @@ contains
     deallocate(dgap_real)
     deallocate(dgap_imag)
   end subroutine
+
+  pure function superconductor_get_gap(this, location) result(gap)
+    ! Returns the superconducting order parameter at the given location.
+    class(superconductor), intent(in) :: this
+    real(dp),              intent(in) :: location
+    complex(dp)                       :: gap
+    integer                           :: n
+
+    ! Calculate the index corresponding to the given location
+    n = nint(location*(size(this%location)-1) + 1)
+
+    ! Extract the superconducting order parameter at that point
+    gap = this%gap(n)
+  end function
+
+  pure function superconductor_get_gap_mean(this) result(gap)
+    ! Returns the superconducting order parameter average in the material.
+    class(superconductor), intent(in)  :: this
+    complex(dp)                        :: gap
+
+    gap = sum(this%gap)/max(1,size(this%gap)) 
+  end function
 end module

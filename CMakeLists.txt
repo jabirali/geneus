@@ -35,6 +35,8 @@ target_link_libraries(test_core ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 add_executable(test_materials "tests/test_materials.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
+add_executable(test_critical "tests/test_critical.f90" ${src_mod} ${src_ext})
+target_link_libraries(test_critical ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 
 ###############################################################################
