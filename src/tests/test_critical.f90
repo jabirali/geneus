@@ -10,21 +10,23 @@ program test_critical
   use mod_superconductor
   implicit none
 
-  type(superconductor) :: s                        ! Superconductor
-  real(dp)             :: erg(600)                 ! Energy array
-  real(dp)             :: coupling   =   0.200_dp  ! BCS coupling constant
-  complex(dp)          :: gap        =   0.001_dp  ! Initial superconducting gap (relative to the zero-temperature bulk value)
-  real(dp)             :: lower      =   0.000_dp  ! Lower limit for the critical temperature (relative to the bulk value)
-  real(dp)             :: upper      =   1.500_dp  ! Upper limit for the critical temperature (relative to the bulk value)
-  real(dp)             :: length     = 100.000_dp  ! Length of the superconductor (relative to the correlation length)
-  integer              :: iterations =  12         ! Number of iterations of the binary search
-  integer              :: n                        ! Loop variable
+  type(superconductor) :: s                           ! Superconductor
+  real(dp)             :: erg(600)                    ! Energy array
+  real(dp)             :: coupling      =  0.2000_dp  ! BCS coupling constant
+  real(dp)             :: scattering    =  0.0100_dp  ! Imaginary energy term due to inelastic scattering
+  complex(dp)          :: gap           =  0.0001_dp  ! Initial superconducting gap (relative to the zero-temperature bulk value)
+  real(dp)             :: lower         =  0.0000_dp  ! Lower limit for the critical temperature (relative to the bulk value)
+  real(dp)             :: upper         =  1.5000_dp  ! Upper limit for the critical temperature (relative to the bulk value)
+  real(dp)             :: length        = 25.0000_dp  ! Length of the superconductor (relative to the correlation length)
+  integer              :: iterations    = 25          ! Number of iterations of the binary search
+  integer              :: stabilization =  2          ! Number of iterations per temperature
+  integer              :: n, m                        ! Loop variables
 
   ! Initialize the energy array
   call energy_range_positive(erg, coupling)
 
   ! Initialize the superconductor
-  s = superconductor(erg, gap = gap, coupling = coupling, thouless = 1/length**2)
+  s = superconductor(erg, gap = gap, coupling = coupling, thouless = 1/length**2, scattering = scattering)
   call s%set_temperature( (upper+lower)/2.0_dp )
 
   ! Perform the binary search for the critical temperature
@@ -37,7 +39,10 @@ program test_critical
     call print_information
 
     ! Update the state of the superconductor
-    call s%update
+    do m=1,stabilization
+      write(*,'(a,i0,a,i0,a)') ' :: Updating superconductor [',m,'/',stabilization, ']'
+      call s%update
+    end do
 
     ! Check whether the mean gap has increased, and update the temperature bounds accordingly
     if (abs(s%get_gap_mean()/gap) >= 1.0_dp) then
@@ -64,7 +69,7 @@ contains
     write(*,'(a)') '│       PROGRESS  INFORMATION       │'
     write(*,'(a)') '├───────────────────────────────────┤'
     write(*,'(a,6x,a,i2.2,a,i2.2,7x,a)')                &
-      '│','Iteration:     ', n, ' / ', iterations,     '│'
+      '│','Binary search: ', n, ' / ', iterations,     '│'
     write(*,'(a,6x,a,f8.6,6x,a)')                       &
       '│','Temperature:   ', s%get_temperature(),      '│'
     write(*,'(a,6x,a,i2.2,a,i2.2,a,i2.2,6x,a)')         &

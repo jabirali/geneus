@@ -156,7 +156,8 @@ contains
     do n=1,size(this%energy)
       ! Status information
       if (this%information >= 0) then
-        write (*,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5)') '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
+        write (*,'(a1,4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5)',advance='no')     &
+              achar(13),'[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
       end if
 
       ! Convert all states at this energy level to real-valued state vectors
@@ -185,6 +186,11 @@ contains
         this%state(n,m) = u(:,m)
       end do
     end do
+
+    ! Clear status information
+    if (this%information >= 0) then
+      write (*,'(a1,80x,a1)',advance='no') achar(13), achar(13)
+    end if
 
     ! Clean up
     call bvp_terminate(sol)
