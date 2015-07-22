@@ -6,7 +6,7 @@
 ! Created: 2015-07-10
 ! Updated: 2015-07-10
 
-module module_precision
+module mod_system
   use, intrinsic :: iso_fortran_env
 
   ! Declare floating-point precisions

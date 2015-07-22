@@ -1,9 +1,9 @@
 
 program test_materials
-  use module_assert
-  use module_conductor
-  use module_superconductor
-  use module_ferromagnet
+  use mod_assert
+  use mod_conductor
+  use mod_superconductor
+  use mod_ferromagnet
   integer              :: n
   real(dp)             :: erg(600)
   type(conductor)      :: m

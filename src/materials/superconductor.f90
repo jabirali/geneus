@@ -5,11 +5,11 @@
 ! Created: 2015-07-17
 ! Updated: 2015-07-21
 
-module module_superconductor
-  use module_precision
-  use module_spin
-  use module_green
-  use module_conductor
+module mod_superconductor
+  use mod_system
+  use mod_spin
+  use mod_green
+  use mod_conductor
   implicit none
 
   ! Type declaration

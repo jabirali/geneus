@@ -7,8 +7,8 @@
 ! Created: 2015-07-10
 ! Updated: 2015-07-20
 
-module module_spin
-  use module_precision
+module mod_spin
+  use mod_system
   implicit none
 
   ! Type declaration

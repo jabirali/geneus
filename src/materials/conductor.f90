@@ -7,10 +7,10 @@
 ! Created: 2015-07-11
 ! Updated: 2015-07-20
 
-module module_conductor
-  use module_precision
-  use module_spin
-  use module_green
+module mod_conductor
+  use mod_system
+  use mod_spin
+  use mod_green
   implicit none
 
   ! Type declaration

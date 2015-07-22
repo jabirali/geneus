@@ -5,9 +5,9 @@
 ! Updated: 2015-07-13
 
 program test_core
-  use module_assert
-  use module_spin
-  use module_green
+  use mod_assert
+  use mod_spin
+  use mod_green
 
   real(dp)    :: rs, rv(8), rw(32)
   complex(dp) :: cs, cv(4), cm(2,2)

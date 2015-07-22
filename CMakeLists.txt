@@ -22,20 +22,20 @@ find_package(BLAS   REQUIRED)
 find_package(LAPACK REQUIRED)
 
 # Source files
-file(GLOB src_ext "external/*.f" "external/*.f90")
-file(GLOB src_mod "modules/*.f90")
-file(GLOB src_bin "tests/*.f90")
+file(GLOB src_ext "src/external/*.f" "src/external/*.f90")
+file(GLOB src_mod "src/foundation/*.f90" "src/materials/*.f90")
+file(GLOB src_bin "src/tests/*.f90")
 
 # Executables
 
 # Module tests
-add_executable(test_core "tests/test_core.f90" ${src_mod} ${src_ext})
+add_executable(test_core "src/tests/test_core.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_core ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_executable(test_materials "tests/test_materials.f90" ${src_mod} ${src_ext})
+add_executable(test_materials "src/tests/test_materials.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_executable(test_critical "tests/test_critical.f90" ${src_mod} ${src_ext})
+add_executable(test_critical "src/tests/test_critical.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_critical ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 

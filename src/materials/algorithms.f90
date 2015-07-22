@@ -1,6 +1,10 @@
 !
 
-module module_algorithms
+module mod_algorithms
+  use mod_conductor
+  use mod_superconductor
+  implicit none
+contains
   subroutine dos_bilayer()
     continue
   end subroutine
@@ -33,10 +37,10 @@ module module_algorithms
       s%temperature = (lower + upper)/2.0_dp
   
       ! Update the state of the hybrid system
-      do m=1,stabilization
+      !do m=1,stabilization
         call m%update
         call s%update
-      end do
+      !end do
   
       ! Check whether the gap has increased, and update the search space
       if (abs(s%get_gap_mean()) >= gap) then

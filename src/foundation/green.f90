@@ -8,9 +8,9 @@
 ! Created: 2015-07-11
 ! Updated: 2015-07-20
 
-module module_green
-  use module_precision
-  use module_spin
+module mod_green
+  use mod_system
+  use mod_spin
   implicit none
 
   ! Type declaration

@@ -5,9 +5,9 @@
 ! Updated: 2015-07-13
 
 
-module module_assert
-  use module_precision
-  use module_spin
+module mod_assert
+  use mod_system
+  use mod_spin
   implicit none
 
   interface assert

@@ -6,19 +6,19 @@
 ! Updated 2015-07-22
 
 program test_critical
-  use module_conductor
-  use module_superconductor
+  use mod_conductor
+  use mod_superconductor
   implicit none
 
-  type(superconductor) :: s                       ! Superconductor
-  real(dp)             :: erg(600)                ! Energy array
-  real(dp)             :: coupling   =  0.200_dp  ! BCS coupling constant
-  complex(dp)          :: gap        =  0.001_dp  ! Initial superconducting gap (relative to the zero-temperature bulk value)
-  real(dp)             :: lower      =  0.000_dp  ! Lower limit for the critical temperature (relative to the bulk value)
-  real(dp)             :: upper      =  1.500_dp  ! Upper limit for the critical temperature (relative to the bulk value)
-  real(dp)             :: length     = 10.000_dp  ! Length of the superconductor (relative to the correlation length)
-  integer              :: iterations = 12         ! Number of iterations of the binary search
-  integer              :: n                       ! Loop variable
+  type(superconductor) :: s                        ! Superconductor
+  real(dp)             :: erg(600)                 ! Energy array
+  real(dp)             :: coupling   =   0.200_dp  ! BCS coupling constant
+  complex(dp)          :: gap        =   0.001_dp  ! Initial superconducting gap (relative to the zero-temperature bulk value)
+  real(dp)             :: lower      =   0.000_dp  ! Lower limit for the critical temperature (relative to the bulk value)
+  real(dp)             :: upper      =   1.500_dp  ! Upper limit for the critical temperature (relative to the bulk value)
+  real(dp)             :: length     = 100.000_dp  ! Length of the superconductor (relative to the correlation length)
+  integer              :: iterations =  12         ! Number of iterations of the binary search
+  integer              :: n                        ! Loop variable
 
   ! Initialize the energy array
   call energy_range_positive(erg, coupling)
@@ -27,7 +27,6 @@ program test_critical
   s = superconductor(erg, gap = gap, coupling = coupling, thouless = 1/length**2)
   call s%set_temperature( (upper+lower)/2.0_dp )
 
-  call print_results
   ! Perform the binary search for the critical temperature
   do n=1,iterations
     ! Initialize a weakly superconducting state
