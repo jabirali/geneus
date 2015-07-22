@@ -156,7 +156,7 @@ contains
     do n=1,size(this%energy)
       ! Status information
       if (this%information >= 0) then
-        write (*,'(3x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5)') '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
+        write (*,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5)') '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
       end if
 
       ! Convert all states at this energy level to real-valued state vectors
