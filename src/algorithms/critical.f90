@@ -7,6 +7,7 @@ module mod_critical
   use mod_multilayer
   implicit none
 contains
+
 subroutine critical_temperature(material, bisections, iterations, lower, upper, gap)
   ! This subroutine calculates the critical temperature of a superconducting material using a binary search algorithm.
   ! The two compulsory arguments are 'material', which is the superconducting material that we will find the critical
@@ -111,7 +112,7 @@ contains
   end subroutine
 
   subroutine print_results
-    write(*,*)
+    write(*,'(a)') '                                     '
     write(*,'(a)') '╒═══════════════════════════════════╕'
     write(*,'(a)') '│           FINAL RESULTS           │'
     write(*,'(a)') '├───────────────────────────────────┤'
@@ -120,4 +121,5 @@ contains
     write(*,'(a)') '╘═══════════════════════════════════╛'
   end subroutine
 end subroutine
+
 end module
