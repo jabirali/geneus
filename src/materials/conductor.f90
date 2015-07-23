@@ -36,9 +36,9 @@ module mod_conductor
     real(dp),    allocatable  :: location(:)                                 ! Discretized position domain that will be considered
 
     ! These variables are used by internal subroutines (should not be accessed by the user)
-    type(green)               :: state_a                                     ! Temporary storage for the left  boundary condition
-    type(green)               :: state_b                                     ! Temporary storage for the right boundary condition
-    complex(dp)               :: erg                                         ! Temporary storage for the current working energy
+    complex(dp)               :: erg                                         ! Temporary storage for the current energy
+    type(green), pointer      :: state_a       => null()                     ! Pointer to the left  interface state for the current energy
+    type(green), pointer      :: state_b       => null()                     ! Pointer to the right interface state for the current energy
 
   contains
     ! These methods control the simulation process (should be invoked by the user)
@@ -164,10 +164,10 @@ contains
       ! Copy the complex energy and boundary conditions to internal work variables
       this%erg = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=dp)
       if (associated(this%material_a)) then
-        this%state_a = this%material_a%state(n,ubound(this%material_a%state,2))
+        this%state_a => this%material_a%state(n,ubound(this%material_a%state,2))
       end if
       if (associated(this%material_b)) then
-        this%state_b = this%material_b%state(n,lbound(this%material_b%state,2))
+        this%state_b => this%material_b%state(n,lbound(this%material_b%state,2))
       end if
 
       ! Initialize the BVP solver
@@ -303,17 +303,18 @@ contains
     class(conductor), intent(in)  :: this
     type(spin),       intent(out) :: r1, rt1
     type(spin),       intent(in)  :: g1, gt1, dg1, dgt1
-    type(spin)                    :: g0, gt0, dg0, dgt0, N0, Nt0
+    type(spin),       pointer     :: g0, gt0, dg0, dgt0
+    type(spin)                    :: N0, Nt0
 
     ! Rename the state in the material to the left
-    g0   = this%state_a%g
-    gt0  = this%state_a%gt
-    dg0  = this%state_a%dg
-    dgt0 = this%state_a%dgt
+    g0   => this%state_a%g
+    gt0  => this%state_a%gt
+    dg0  => this%state_a%dg
+    dgt0 => this%state_a%dgt
 
     ! Calculate the normalization matrices
-    N0   = spin_inv( pauli0 - g0*gt0 )
-    Nt0  = spin_inv( pauli0 - gt0*g0 )
+    N0  = spin_inv( pauli0 - g0*gt0 )
+    Nt0 = spin_inv( pauli0 - gt0*g0 )
 
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r1  = dg1  - this%conductance_a*( pauli0 - g1*gt0 )*N0*(  g1  - g0  )
@@ -325,17 +326,18 @@ contains
     class(conductor), intent(in)  :: this
     type(spin),       intent(out) :: r2, rt2
     type(spin),       intent(in)  :: g2, gt2, dg2, dgt2
-    type(spin)                    :: g3, gt3, dg3, dgt3, N3, Nt3
+    type(spin),       pointer     :: g3, gt3, dg3, dgt3
+    type(spin)                    :: N3, Nt3
 
     ! Rename the state in the material to the right
-    g3   = this%state_b%g;
-    gt3  = this%state_b%gt;
-    dg3  = this%state_b%dg;
-    dgt3 = this%state_b%dgt;
+    g3   => this%state_b%g
+    gt3  => this%state_b%gt
+    dg3  => this%state_b%dg
+    dgt3 => this%state_b%dgt
   
     ! Calculate the normalization matrices
-    N3   = spin_inv( pauli0 - g3*gt3 );
-    Nt3  = spin_inv( pauli0 - gt3*g3 );
+    N3  = spin_inv( pauli0 - g3*gt3 )
+    Nt3 = spin_inv( pauli0 - gt3*g3 )
 
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r2  = dg2  - this%conductance_b*( pauli0 - g2*gt3 )*N3*(  g3  - g2  )
