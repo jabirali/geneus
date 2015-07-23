@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-07-21
+! Updated: 2015-07-23
 
 module mod_superconductor
   use mod_system
@@ -32,6 +32,10 @@ module mod_superconductor
     module procedure superconductor_construct
   end interface
 
+  ! Type string
+  interface type_string
+    module procedure type_string_superconductor
+  end interface
 contains
   pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
@@ -185,4 +189,13 @@ contains
 
     this%temperature = temperature
   end subroutine
+
+  function type_string_superconductor(this) result(str)
+    ! Implementation of the type_string interface, which can be used to ascertain
+    ! whether a class(conductor) object is of the specific type(superconductor).
+    type(superconductor), intent(in) :: this
+    character(len=14)                :: str
+
+    str = 'SUPERCONDUCTOR'
+  end function
 end module

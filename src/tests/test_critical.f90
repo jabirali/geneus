@@ -9,6 +9,7 @@ program test_critical
   use mod_conductor
   use mod_superconductor
   use mod_multilayer
+  use mod_critical
   implicit none
 
   type(superconductor) :: s                           ! Superconductor
@@ -31,33 +32,36 @@ program test_critical
   call s%set_temperature( (upper+lower)/2.0_dp )
 
   ! Perform the binary search for the critical temperature
-  do n=1,iterations
-    ! Initialize a weakly superconducting state
-    call s%initialize( gap )
-    call s%set_gap( gap )
+  call critical_temperature(s, bisections = 10, iterations = 2, lower = 0.0_dp, upper = 1.5_dp, gap = (0.0001_dp,0.0000_dp))
 
-    ! Print status information
-    call print_information
-
-    ! Update the state of the superconductor
-    do m=1,stabilization
-      write(*,'(a,i0,a,i0,a)') ' :: Updating superconductor [',m,'/',stabilization, ']'
-      call s%update
-    end do
-
-    ! Check whether the mean gap has increased, and update the temperature bounds accordingly
-    if (abs(s%get_gap_mean()/gap) >= 1.0_dp) then
-      lower = s%get_temperature()
-    else
-      upper = s%get_temperature()
-    end if
-
-    ! Update the superconductor temperature based on the new bounds
-    call s%set_temperature( (upper+lower)/2.0_dp )
-  end do
-
-  ! Print final results
-  call print_results
+!  ! Perform the binary search for the critical temperature
+!  do n=1,iterations
+!    ! Initialize a weakly superconducting state
+!    call s%initialize( gap )
+!    call s%set_gap( gap )
+!
+!    ! Print status information
+!    call print_information
+!
+!    ! Update the state of the superconductor
+!    do m=1,stabilization
+!      write(*,'(a,i0,a,i0,a)') ' :: Updating superconductor [',m,'/',stabilization, ']'
+!      call s%update
+!    end do
+!
+!    ! Check whether the mean gap has increased, and update the temperature bounds accordingly
+!    if (abs(s%get_gap_mean()/gap) >= 1.0_dp) then
+!      lower = s%get_temperature()
+!    else
+!      upper = s%get_temperature()
+!    end if
+!
+!    ! Update the superconductor temperature based on the new bounds
+!    call s%set_temperature( (upper+lower)/2.0_dp )
+!  end do
+!
+!  ! Print final results
+!  call print_results
 contains
   subroutine print_information
     ! Determine how much CPU time has elapsed

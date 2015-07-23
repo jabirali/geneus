@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-20
+! Updated: 2015-07-23
 
 module mod_conductor
   use mod_system
@@ -63,6 +63,11 @@ module mod_conductor
   ! Type constructors
   interface conductor
     module procedure conductor_construct
+  end interface
+
+  ! Type string
+  interface type_string
+    module procedure type_string_conductor
   end interface
 contains
   pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
@@ -143,6 +148,11 @@ contains
     real(dp)                        :: u(32,size(this%location))  ! Real state vector required by the BVP solver
     type(bvp_sol)                   :: sol                        ! Object with information about the BVP solution
     integer                         :: n, m                       ! Internal loop variables
+
+    ! Status information
+    if (this%information >= 0) then
+      write (*,'(a,a,a)') ' :: ', type_string(this), ': Updating state...'
+    end if
 
     do n=1,size(this%energy)
       ! Status information
@@ -373,4 +383,13 @@ contains
       end do
     end if
   end subroutine
+
+  function type_string_conductor(this) result(str)
+    ! Implementation of the type_string interface, which can be used to ascertain
+    ! whether a class(conductor) object is of the specific type(conductor).
+    type(conductor), intent(in) :: this
+    character(len=9)            :: str
+
+    str = 'CONDUCTOR'
+  end function
 end module

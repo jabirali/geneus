@@ -17,30 +17,25 @@ contains
     ! Finally, 'gap' determines the superconducting gap that is used to reinitialize the materials at all temperatures.
 
     ! Declare data types for input variables
-    class(superconductor), target, intent(inout) :: material
-    integer,     optional, intent(in   ) :: bisections
-    integer,     optional, intent(in   ) :: iterations
-    real(dp),    optional, intent(in   ) :: lower 
-    real(dp),    optional, intent(in   ) :: upper
-    complex(dp), optional, intent(in   ) :: gap
-
-    ! Declare interfaces for input subroutines
-    interface
-      subroutine update
-      end subroutine
-    end interface
+    class(superconductor), target,   intent(inout) :: material
+    integer,               optional, intent(in   ) :: bisections
+    integer,               optional, intent(in   ) :: iterations
+    real(dp),              optional, intent(in   ) :: lower 
+    real(dp),              optional, intent(in   ) :: upper
+    complex(dp),           optional, intent(in   ) :: gap
 
     ! Declare data types for internal variables
-    integer     :: bisections_
-    integer     :: iterations_
-    real(dp)    :: lower_
-    real(dp)    :: upper_
-    complex(dp) :: gap_
-    integer     :: n, m
+    integer                                        :: bisections_ = 12
+    integer                                        :: iterations_ =  5
+    real(dp)                                       :: lower_      =  0.0000_dp
+    real(dp)                                       :: upper_      =  1.0000_dp
+    complex(dp)                                    :: gap_        =  0.0001_dp
+    integer                                        :: n, m
 
     ! Handle optional arguments
     call process_arguments
 
+    ! Perform the binary search
     do n = 1,bisections_
       ! Initialize a weakly superconducting state
       call initialize_all(material, gap_)
@@ -49,6 +44,7 @@ contains
       ! Update the state of the multilayer structure
       do m = 1,iterations_
         call update_all(material)
+        print *,n,m
       end do
 
       ! Check whether the gap has increased or not, and update the search space accordingly
@@ -63,85 +59,62 @@ contains
     end do
   contains
     subroutine process_arguments
-      ! .....
+      ! This nested subroutine processes the optional arguments to the parent subroutine.
       if (present(bisections)) then
         bisections_ = bisections
-      else
-        bisections_ = 12
       end if
 
       if (present(iterations)) then
         iterations_ = iterations
-      else
-        iterations_ = 5
       end if
 
       if (present(lower)) then
         lower_ = lower
-      else
-        lower_ = 0.0_dp
       end if
 
       if (present(upper)) then
         upper_ = upper
-      else
-        upper_ = 1.0_dp
       end if
 
       if (present(gap)) then
         gap_ = gap
-      else
-        gap_ = (1.0_dp,0.0_dp)
       end if
     end subroutine
   end subroutine
 
-  subroutine dos_bilayer()
-    continue
-  end subroutine
-
-  subroutine dos_trilayer()
-    continue
-  end subroutine
-
-  subroutine dos_multilayer()
-    continue
-  end subroutine
-
-
-  subroutine critical_bilayer(s, m, iterations, stabilization)
-    class(superconductor), intent(inout) :: s
-    class(conductor),      intent(inout) :: m
-    integer,               intent(in   ) :: iterations
-    integer,               intent(in   ) :: stabilization
-  
-    real(dp)                             :: gap   = 0.001_dp
-    real(dp)                             :: lower = 0.000_dp
-    real(dp)                             :: upper = 1.000_dp
-    integer                              :: n
-  
-    do n=1,iterations
-      ! Reset both materials to a weakly superconducting state
-      call s%initialize( gap = cmplx(gap,0.000_dp,kind=dp) )
-      call m%initialize( gap = cmplx(gap,0.000_dp,kind=dp) )
-  
-      ! Set the temperature to the midpoint of the current search space
-      s%temperature = (lower + upper)/2.0_dp
-  
-      ! Update the state of the hybrid system
-      !do m=1,stabilization
-        call m%update
-        call s%update
-      !  call update(s)
-      !end do
-  
-      ! Check whether the gap has increased, and update the search space
-      if (abs(s%get_gap_mean()) >= gap) then
-        lower = s%temperature
-      else
-        upper = s%temperature
-      end if
-    end do
-  end subroutine
+  !subroutine critical_bilayer(s, m, iterations, stabilization)
+  !  class(superconductor), intent(inout) :: s
+  !  class(conductor),      intent(inout) :: m
+  !  integer,               intent(in   ) :: iterations
+  !  integer,               intent(in   ) :: stabilization
+  !
+  !  real(dp)                             :: gap   = 0.001_dp
+  !  real(dp)                             :: lower = 0.000_dp
+  !  real(dp)                             :: upper = 1.000_dp
+  !  integer                              :: n
+  !
+  !  do n=1,iterations
+  !    ! Reset both materials to a weakly superconducting state
+  !    call s%initialize( gap = cmplx(gap,0.000_dp,kind=dp) )
+  !    call m%initialize( gap = cmplx(gap,0.000_dp,kind=dp) )
+  !
+  !    ! Set the temperature to the midpoint of the current search space
+  !    s%temperature = (lower + upper)/2.0_dp
+  !
+  !    ! Update the state of the hybrid system
+  !    !do m=1,stabilization
+  !      call m%update
+  !      call s%update
+  !    !  call update(s)
+  !    !end do
+  !
+  !    ! Check whether the gap has increased, and update the search space
+  !    if (abs(s%get_gap_mean()) >= gap) then
+  !      lower = s%temperature
+  !    else
+  !      upper = s%temperature
+  !    end if
+  !  end do
+  !end subroutine
 
 end module

@@ -4,6 +4,8 @@
 module mod_multilayer
   use mod_system
   use mod_conductor
+  use mod_superconductor
+  use mod_ferromagnet
   implicit none
 contains
   subroutine connect(material_a, material_b, conductance_a, conductance_b)

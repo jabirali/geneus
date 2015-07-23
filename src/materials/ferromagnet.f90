@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-07-21
+! Updated: 2015-07-23
 
 module mod_ferromagnet
   use mod_system
@@ -25,6 +25,10 @@ module mod_ferromagnet
     module procedure ferromagnet_construct_homogeneous
   end interface
 
+  ! Type string
+  interface type_string
+    module procedure type_string_ferromagnet
+  end interface
 contains
   pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor
@@ -102,5 +106,14 @@ contains
 
     ! Extract the magnetic exchange field at that point
     h = this%exchange(:,n)
+  end function
+
+  function type_string_ferromagnet(this) result(str)
+    ! Implementation of the type_string interface, which can be used to ascertain
+    ! whether a class(conductor) object is of the specific type(ferromagnet).
+    type(ferromagnet), intent(in) :: this
+    character(len=11)             :: str
+
+    str = 'FERROMAGNET'
   end function
 end module
