@@ -41,44 +41,26 @@ contains
     ! Handle optional arguments
     call process_arguments
 
-    do n = 1,iterations_
+    do n = 1,bisections_
       ! Initialize a weakly superconducting state
+      call initialize_all(material, gap_)
+      call material%set_gap(gap_)
+
+      ! Update the state of the multilayer structure
+      do m = 1,iterations_
+        call update_all(material)
+      end do
+
+      ! Check whether the gap has increased or not, and update the search space accordingly
+      if (abs(material%get_gap_mean()/gap_) >= 1.0_dp) then
+        lower_ = material%get_temperature()
+      else
+        upper_ = material%get_temperature()
+      end if
+
+      ! Set the system temperature to the midpoint of the updated search space
+      call material%set_temperature( (upper_ + lower_)/2.0_dp )
     end do
-
-
-
-    !! Perform the binary search for the critical temperature
-    !do n=1,iterations_
-    !  ! Initialize a weakly superconducting state
-    !  call material%initialize( gap_ )
-    !  call material%set_gap( gap_ )
-
-    !  ! Print status information
-    !  call print_information
-
-    !  ! Update the state of the superconductor
-    !  do m=1,stabilization_
-    !    write(*,'(a,i0,a,i0,a)') ' :: Updating superconductor [',m,'/',stabilization, ']'
-         !call update(material)
-    !    call s%update
-    !  end do
-
-    !  ! Check whether the mean gap has increased, and update the temperature bounds accordingly
-    !  if (abs(s%get_gap_mean()/gap) >= 1.0_dp) then
-    !    lower = s%get_temperature()
-    !  else
-    !    upper = s%get_temperature()
-    !  end if
-
-    !  ! Update the superconductor temperature based on the new bounds
-    !  call s%set_temperature( (upper_+lower_)/2.0_dp )
-    !end do
-
-    !! Print final results
-    !call print_results
-
-    call update
-    
   contains
     subroutine process_arguments
       ! .....
