@@ -16,7 +16,7 @@ program test_critical
   integer              :: n, m
 
   ! Initialize the energy array
-  call energy_range_positive(energy, coupling = 0.200_dp)
+  call energy_range(energy, coupling = 0.200_dp)
 
   ! Initialize the superconductor
   material = superconductor(energy, coupling = 0.200_dp, thouless = 0.001_dp, scattering = 0.001_dp)

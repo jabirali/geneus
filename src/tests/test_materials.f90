@@ -11,7 +11,7 @@ program test_materials
   type(superconductor) :: s
   type(ferromagnet)    :: f
 
-  call energy_range_positive(erg, 0.2_dp)
+  call energy_range(erg, 0.2_dp)
 
   f = ferromagnet(erg, [0.0_dp, 0.0_dp, 0.0_dp])
   s = superconductor(erg, (0.7_dp,0.7_dp), 0.2_dp)

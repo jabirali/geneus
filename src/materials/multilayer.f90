@@ -100,21 +100,54 @@ contains
     call m % update
   end subroutine
 
-  pure subroutine energy_range_positive(array, coupling)
-    ! Initializes an energy array to values from zero to the Debye cutoff,
-    ! where the Debye cutoff is calculated from the BCS coupling constant.
-    real(dp), intent(out) :: array(:)  ! Array that will be initialized
-    real(dp), intent(in)  :: coupling  ! BCS coupling constant
-    integer               :: n         ! Loop variable
+  pure subroutine energy_range(array, maximum, coupling, padding)
+    ! Initializes an array of energies, which can be passed on to class(conductor) constructor methods.  The initialized
+    ! values depend on the optional arguments.  If none of these arguments are provided, then the array is initilized to
+    ! linearly spaced values in the range [0.0,1.5]. If the argument 'positive' is set to false, then the array includes
+    ! negative values as well, resulting in linearly spaced values in the range [-1.5,1.5]. The default limit of 1.5 can
+    ! be changed using the argument 'maximum'.  Finally, if the coupling constant 'coupling' is provided, the array will
+    ! be padded with 100 linearly spaced energies up to the Debye cutoff cosh(1/coupling). If 'positive' is set to false,
+    ! this becomes 100 positive and 100 negative energies. The parameter 'padding' can be used to change the default 100.
+    !
+    ! TODO:  the argument 'positive' has not been implemented yet,  and the other arguments are not checked for validity.
 
-    ! Let the first N-100 elements span the energy range from zero to 1.5Δ
-    do n=1,size(array)-100
-      array(n) = (n-1)*(1.5_dp/(size(array)-100))
-    end do
+    real(dp), intent(out)          :: array(:)
+    real(dp), optional, intent(in) :: maximum
+    real(dp), optional, intent(in) :: coupling
+    integer,  optional, intent(in) :: padding
 
-    ! Let the last 100 elements span the energy range from 1.5Δ to the cutoff
-    do n=1,100
-      array(size(array)-100+n) = 1.5_dp + n*(cosh(1.0_dp/coupling) - 1.5_dp)/100.0_dp
-    end do
+    real(dp)                       :: maximum_
+    integer                        :: padding_
+    integer                        :: n
+
+    ! Handle optional arguments
+    if (present(maximum)) then
+      maximum_ = maximum
+    else
+      maximum_ = 1.5_dp
+    end if
+
+    if (present(padding)) then
+      padding_ = padding
+    else
+      padding_ = 100
+    end if
+
+    ! Initialize the energy array
+    if (present(coupling)) then
+      ! Positive energies from zero to 'maximum'
+      do n = 1,size(array)-padding_
+        array(n) = (n-1) * (maximum_/(size(array)-padding_))
+      end do
+      ! Positive energies from 'maximum' to the Debye cutoff
+      do n = 1,padding_
+        array(size(array)-padding_+n) = maximum_ + n * (cosh(1.0_dp/coupling)-maximum_)/padding_
+      end do
+    else
+      ! Positive energies from zero to 'maximum'
+      do n = 1,size(array)
+        array(n) = (n-1) * (maximum_/size(array))
+      end do
+    end if
   end subroutine
 end module

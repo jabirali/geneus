@@ -45,7 +45,6 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
 
     ! Initialize a weakly superconducting state
     call initialize_all(material, gap_)
-    call material%set_gap(gap_)
 
     ! Update the state of the multilayer structure
     do m = 1,iterations_

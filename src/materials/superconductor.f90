@@ -25,6 +25,7 @@ module mod_superconductor
     procedure                :: get_gap_mean     => superconductor_get_gap_mean     ! Returns the superconducting order parameter average in the material
     procedure                :: get_temperature  => superconductor_get_temperature  ! Returns the current temperature of the material
     procedure                :: set_temperature  => superconductor_set_temperature  ! Updates the current temperature of the material
+    procedure                :: initialize       => superconductor_initialize       ! Initializes the internal state of the material
   end type
 
   ! Type constructor
@@ -190,5 +191,18 @@ contains
     real(dp),              intent(in   ) :: temperature
 
     this%temperature = temperature
+  end subroutine
+
+  pure subroutine superconductor_initialize(this, gap)
+    ! Redefine the default initializer.
+    class(superconductor), intent(inout) :: this
+    complex(dp),           intent(in   ) :: gap
+    integer                              :: n, m
+
+    ! Call the superclass initializer
+    call this%conductor%initialize(gap)
+
+    ! Update the superconducting gap
+    call this%set_gap(gap)
   end subroutine
 end module
