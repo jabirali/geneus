@@ -70,10 +70,12 @@ contains
     end do
 
     ! Move to the right until we get back to the start point, and update the states of all materials on the way
-    do while (.not. associated(p % material_b, m))
-      p => p % material_b
-      call p % update
-    end do
+    if (.not. associated(p, m)) then
+      do while (associated(p % material_b) .and. .not. associated(p % material_b, m))
+        p => p % material_b
+        call p % update
+      end do
+    end if
 
     ! Restart at the specified material
     p => m
@@ -85,10 +87,12 @@ contains
     end do
 
     ! Move to the left until we get back to the start point, and update the states of all materials on the way
-    do while (.not. associated(p % material_a, m))
-      p => p % material_a
-      call p % update
-    end do
+    if (.not. associated(p, m)) then
+      do while (associated(p % material_a) .and. .not. associated(p % material_a, m))
+        p => p % material_a
+        call p % update
+      end do
+    end if
 
     ! Finally, update the state of the specified material itself
     call m % update
