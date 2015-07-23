@@ -4,6 +4,7 @@ program test_materials
   use mod_conductor
   use mod_superconductor
   use mod_ferromagnet
+  use mod_multilayer
   integer              :: n
   real(dp)             :: erg(600)
   type(conductor)      :: m

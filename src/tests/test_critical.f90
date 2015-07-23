@@ -8,6 +8,7 @@
 program test_critical
   use mod_conductor
   use mod_superconductor
+  use mod_multilayer
   implicit none
 
   type(superconductor) :: s                           ! Superconductor

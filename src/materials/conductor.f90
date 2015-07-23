@@ -13,7 +13,7 @@ module mod_conductor
   use mod_green
   implicit none
 
-  ! Type declaration
+  ! Type declarations
   type conductor
     ! These parameters control the physical characteristics of the material (should be modified by the user)
     real(dp)                  :: thouless      =  1.00_dp                    ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
@@ -60,14 +60,9 @@ module mod_conductor
     final              :: conductor_destruct                                 ! Type destructor
   end type
 
-  ! Type constructor
+  ! Type constructors
   interface conductor
     module procedure conductor_construct
-  end interface
-
-  ! Connecting two class(conductor) objects by creating a tunneling interface between them
-  interface connect
-    module procedure connect_tunneling
   end interface
 contains
   pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
@@ -377,38 +372,5 @@ contains
         write(unit,*)
       end do
     end if
-  end subroutine
-
-  subroutine connect_tunneling(material_a, material_b, conductance_a, conductance_b)
-    ! Creates a tunneling interface between two conductive materials.
-    class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
-    class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
-    real(dp),                 intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
-    real(dp),                 intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
-    
-    ! Update the internal material pointers
-    material_a%material_b => material_b
-    material_b%material_a => material_a
-
-    ! Update the interface parameters
-    material_a%conductance_b = conductance_a
-    material_b%conductance_a = conductance_b
-  end subroutine
-
-  pure subroutine energy_range_positive(array, coupling)
-    ! Initializes an energy array to values from zero to the Debye cutoff, where the cutoff is calculated from a BCS coupling constant.
-    real(dp), intent(out) :: array(:)  ! Array that will be initialized
-    real(dp), intent(in)  :: coupling  ! BCS coupling constant
-    integer               :: n         ! Loop variable
-
-    ! Let the first N-100 elements span the energy range from zero to 1.5Δ
-    do n=1,size(array)-100
-      array(n) = (n-1)*(1.5_dp/(size(array)-100))
-    end do
-
-    ! Let the last 100 elements span the energy range from 1.5Δ to the cutoff
-    do n=1,100
-      array(size(array)-100+n) = 1.5_dp + n*(cosh(1.0_dp/coupling) - 1.5_dp)/100.0_dp
-    end do
   end subroutine
 end module
