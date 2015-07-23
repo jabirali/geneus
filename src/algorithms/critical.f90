@@ -1,8 +1,10 @@
-!
+! CR: 2015-07-23
+! UP   -- " --
 
 module mod_critical
   use mod_system
   use mod_superconductor
+  use mod_multilayer
   implicit none
 contains
   subroutine critical_temperature(material, bisections, iterations, lower, upper, gap)
@@ -29,7 +31,6 @@ contains
     end interface
 
     ! Declare data types for internal variables
-    class(conductor), pointer :: p, q, s
     integer     :: bisections_
     integer     :: iterations_
     real(dp)    :: lower_
@@ -40,6 +41,9 @@ contains
     ! Handle optional arguments
     call process_arguments
 
+    do n = 1,iterations_
+      ! Initialize a weakly superconducting state
+    end do
 
 
 
