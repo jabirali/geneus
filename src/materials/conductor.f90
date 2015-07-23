@@ -16,19 +16,19 @@ module mod_conductor
   ! Type declaration
   type conductor
     ! These parameters control the physical characteristics of the material (should be modified by the user)
-    real(dp)                  :: thouless      = 1.00_dp                     ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(dp)                  :: scattering    = 0.01_dp                     ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    real(dp)                  :: conductance_a = 0.00_dp                     ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
-    real(dp)                  :: conductance_b = 0.00_dp                     ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
-    class(conductor), pointer :: material_a                                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
-    class(conductor), pointer :: material_b                                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
+    real(dp)                  :: thouless      =  1.00_dp                    ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(dp)                  :: scattering    =  0.01_dp                    ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    real(dp)                  :: conductance_a =  0.00_dp                    ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
+    real(dp)                  :: conductance_b =  0.00_dp                    ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
+    class(conductor), pointer :: material_a    => null()                     ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
+    class(conductor), pointer :: material_b    => null()                     ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
   
     ! These parameters control the boundary value problem solver (can be modified by the user)
-    integer                   :: scaling       = 64                          ! Maximal allowed scaling of the mesh resolution (range: 2^N, N>1)
-    integer                   :: order         = 4                           ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
-    integer                   :: control       = 2                           ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
-    integer                   :: information   = 0                           ! Information amount that should be written to standard out (range: [-1,2])
-    real(dp)                  :: tolerance     = 1e-4_dp                     ! Error tolerance (determines the maximum allowed defect or error)
+    integer                   :: scaling       =  64                         ! Maximal allowed scaling of the mesh resolution (range: 2^N, N>1)
+    integer                   :: order         =  4                          ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
+    integer                   :: control       =  2                          ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
+    integer                   :: information   =  0                          ! Information amount that should be written to standard out (range: [-1,2])
+    real(dp)                  :: tolerance     =  1e-4_dp                    ! Error tolerance (determines the maximum allowed defect or error)
 
     ! These variables store the physical state of the material (should not be modified by the user)
     type(green), allocatable  :: state(:,:)                                  ! Physical state as a function of energy and position
@@ -89,10 +89,6 @@ contains
     if (present(scattering)) then
       this%scattering = scattering
     end if
-   
-    ! Initialize pointers to null
-    nullify(this%material_a)
-    nullify(this%material_b)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%state)) then
