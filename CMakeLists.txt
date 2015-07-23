@@ -23,8 +23,8 @@ find_package(LAPACK REQUIRED)
 
 # Source files
 file(GLOB src_ext "src/external/*.f" "src/external/*.f90")
-file(GLOB src_mod "src/foundation/*.f90" "src/materials/*.f90")
-file(GLOB src_bin "src/tests/*.f90")
+file(GLOB src_mod "src/foundation/*.f90" "src/materials/*.f90" "src/algorithms/*.f90")
+file(GLOB src_bin "src/tests/*.f90" "src/programs/*.f90")
 
 # Executables
 
