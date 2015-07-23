@@ -24,11 +24,6 @@ module mod_ferromagnet
   interface ferromagnet
     module procedure ferromagnet_construct_homogeneous
   end interface
-
-  ! Type string
-  interface type_string
-    module procedure type_string_ferromagnet
-  end interface
 contains
   pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor
@@ -53,6 +48,9 @@ contains
     do n = 1,size(this%conductor%location)
       this%exchange(:,n) = exchange
     end do
+
+    ! Modify the type string
+    this%type_string = 'FERROMAGNET'
   end function
 
   pure subroutine ferromagnet_destruct(this)
@@ -106,14 +104,5 @@ contains
 
     ! Extract the magnetic exchange field at that point
     h = this%exchange(:,n)
-  end function
-
-  function type_string_ferromagnet(this) result(str)
-    ! Implementation of the type_string interface, which can be used to ascertain
-    ! whether a class(conductor) object is of the specific type(ferromagnet).
-    type(ferromagnet), intent(in) :: this
-    character(len=11)             :: str
-
-    str = 'FERROMAGNET'
   end function
 end module

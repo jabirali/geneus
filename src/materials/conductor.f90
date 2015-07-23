@@ -40,6 +40,8 @@ module mod_conductor
     type(green), pointer      :: state_a       => null()                     ! Pointer to the left  interface state for the current energy
     type(green), pointer      :: state_b       => null()                     ! Pointer to the right interface state for the current energy
 
+    ! Miscellaneous variables
+    character(len=32)         :: type_string   =  'CONDUCTOR'                ! This variable should be modified for class(conductor) subtypes
   contains
     ! These methods control the simulation process (should be invoked by the user)
     procedure          :: initialize         => conductor_initialize         ! Initializes the internal state of the material
@@ -63,11 +65,6 @@ module mod_conductor
   ! Type constructors
   interface conductor
     module procedure conductor_construct
-  end interface
-
-  ! Type string
-  interface type_string
-    module procedure type_string_conductor
   end interface
 contains
   pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
@@ -151,14 +148,14 @@ contains
 
     ! Status information
     if (this%information >= 0) then
-      write (*,'(a,a,a)') ' :: ', type_string(this), ': Updating state...'
+      write (*,'(a,a,a)') ' :: ', trim(this%type_string), ': Updating state...'
     end if
 
     do n=1,size(this%energy)
       ! Status information
       if (this%information >= 0) then
-        write (*,'(a1,4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5)',advance='no')     &
-              achar(13),'[',n,'/',size(this%energy),']  ϵ = ',this%energy(n)
+        write (*,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no')  &
+          '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n), achar(13)
       end if
 
       ! Convert all states at this energy level to real-valued state vectors
@@ -187,11 +184,6 @@ contains
         this%state(n,m) = u(:,m)
       end do
     end do
-
-    ! Clear status information
-    if (this%information >= 0) then
-      write (*,'(a1,80x,a1)',advance='no') achar(13), achar(13)
-    end if
 
     ! Clean up
     call bvp_terminate(sol)
@@ -383,13 +375,4 @@ contains
       end do
     end if
   end subroutine
-
-  function type_string_conductor(this) result(str)
-    ! Implementation of the type_string interface, which can be used to ascertain
-    ! whether a class(conductor) object is of the specific type(conductor).
-    type(conductor), intent(in) :: this
-    character(len=9)            :: str
-
-    str = 'CONDUCTOR'
-  end function
 end module
