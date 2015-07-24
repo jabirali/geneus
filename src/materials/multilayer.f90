@@ -100,7 +100,7 @@ contains
     call m % update
   end subroutine
 
-  pure subroutine energy_range(array, maximum, coupling, padding)
+  pure subroutine energy_range(array, coupling, maximum, padding)
     ! Initializes an array of energies, which can be passed on to class(conductor) constructor methods.  The initialized
     ! values depend on the optional arguments.  If none of these arguments are provided, then the array is initilized to
     ! linearly spaced values in the range [0.0,1.5]. If the argument 'positive' is set to false, then the array includes

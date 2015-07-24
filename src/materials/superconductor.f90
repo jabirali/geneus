@@ -85,20 +85,18 @@ contains
     real(dp),              intent(in)  :: z
     type(spin),            intent(in)  :: g, gt, dg, dgt
     type(spin),            intent(out) :: d2g, d2gt
-    type(spin)                         :: N, Nt
     complex(dp)                        :: gap, gapt
 
     ! Lookup the superconducting order parameter
     gap  = this%get_gap(z)/this%thouless
     gapt = conjg(gap)
 
-    ! Calculate the normalization matrices
-    N   = spin_inv( pauli0 - g*gt )
-    Nt  = spin_inv( pauli0 - gt*g )
+    ! Calculate the second derivatives of the Riccati parameters (conductor terms)
+    call this%conductor%usadel_equation(z, g, gt, dg, dgt, d2g, d2gt)
 
-    ! Calculate the second derivatives of the Riccati parameters
-    d2g  = (-2.0_dp,0.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g  - gap  * pauli2 + gapt * g*pauli2*g
-    d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + gapt * pauli2 - gap  * gt*pauli2*gt
+    ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
+    d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
+    d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
   end subroutine
 
   subroutine superconductor_update_fields(this)

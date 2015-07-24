@@ -16,50 +16,50 @@ module mod_conductor
   ! Type declarations
   type conductor
     ! These parameters control the physical characteristics of the material (should be modified by the user)
-    real(dp)                  :: thouless      =  1.00_dp                    ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(dp)                  :: scattering    =  0.01_dp                    ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    real(dp)                  :: conductance_a =  0.00_dp                    ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
-    real(dp)                  :: conductance_b =  0.00_dp                    ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
-    class(conductor), pointer :: material_a    => null()                     ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
-    class(conductor), pointer :: material_b    => null()                     ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
+    real(dp)                  :: thouless      =  1.00_dp                           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(dp)                  :: scattering    =  0.01_dp                           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    real(dp)                  :: conductance_a =  0.00_dp                           ! Tunneling conductance of the left interface  (relative to the bulk conductance of this material)
+    real(dp)                  :: conductance_b =  0.00_dp                           ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
+    class(conductor), pointer :: material_a    => null()                            ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
+    class(conductor), pointer :: material_b    => null()                            ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
   
     ! These parameters control the boundary value problem solver (can be modified by the user)
-    integer                   :: scaling       =  64                         ! Maximal allowed scaling of the mesh resolution (range: 2^N, N>1)
-    integer                   :: order         =  4                          ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
-    integer                   :: control       =  2                          ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
-    integer                   :: information   =  0                          ! Information amount that should be written to standard out (range: [-1,2])
-    real(dp)                  :: tolerance     =  1e-4_dp                    ! Error tolerance (determines the maximum allowed defect or error)
+    integer                   :: scaling       =  64                                ! Maximal allowed scaling of the mesh resolution (range: 2^N, N>1)
+    integer                   :: order         =  4                                 ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
+    integer                   :: control       =  2                                 ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
+    integer                   :: information   =  0                                 ! Information amount that should be written to standard out (range: [-1,2])
+    real(dp)                  :: tolerance     =  1e-4_dp                           ! Error tolerance (determines the maximum allowed defect or error)
 
     ! These variables store the physical state of the material (should not be modified by the user)
-    type(green), allocatable  :: state(:,:)                                  ! Physical state as a function of energy and position
-    real(dp),    allocatable  :: energy(:)                                   ! Discretized  energy  domain that will be considered
-    real(dp),    allocatable  :: location(:)                                 ! Discretized position domain that will be considered
+    type(green), allocatable  :: state(:,:)                                         ! Physical state as a function of energy and position
+    real(dp),    allocatable  :: energy(:)                                          ! Discretized  energy  domain that will be considered
+    real(dp),    allocatable  :: location(:)                                        ! Discretized position domain that will be considered
 
     ! These variables are used by internal subroutines (should not be accessed by the user)
-    complex(dp)               :: erg                                         ! Temporary storage for the current energy
-    type(green), pointer      :: state_a       => null()                     ! Pointer to the left  interface state for the current energy
-    type(green), pointer      :: state_b       => null()                     ! Pointer to the right interface state for the current energy
+    complex(dp)               :: erg                                                ! Temporary storage for the current energy
+    type(green), pointer      :: state_a       => null()                            ! Pointer to the left  interface state for the current energy
+    type(green), pointer      :: state_b       => null()                            ! Pointer to the right interface state for the current energy
 
     ! Miscellaneous variables
-    character(len=32)         :: type_string   =  'CONDUCTOR'                ! This variable should be modified for class(conductor) subtypes
+    character(len=32)         :: type_string   =  'CONDUCTOR'                       ! This variable should be modified for class(conductor) subtypes
   contains
     ! These methods control the simulation process (should be invoked by the user)
-    procedure          :: initialize         => conductor_initialize         ! Initializes the internal state of the material
-    procedure          :: update             => conductor_update             ! Updates the internal state of the material
+    procedure                 :: initialize         => conductor_initialize         ! Initializes the internal state of the material
+    procedure                 :: update             => conductor_update             ! Updates the internal state of the material
 
     ! These methods contain the equations that describe the material (should not be invoked by the user)
-    procedure, private :: usadel_equation    => conductor_usadel_equation    ! Differential equation that describes the conductor
-    procedure, private :: interface_vacuum_a => conductor_interface_vacuum_a ! Defines the left  boundary condition for a vacuum interface
-    procedure, private :: interface_vacuum_b => conductor_interface_vacuum_b ! Defines the right boundary condition for a vacuum interface
-    procedure, private :: interface_tunnel_a => conductor_interface_tunnel_a ! Defines the left  boundary condition for a tunnel interface
-    procedure, private :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
-    procedure, private :: update_fields      => conductor_update_fields      ! Updates the physical fields based on stored Green's functions
+    procedure                 :: usadel_equation    => conductor_usadel_equation    ! Differential equation that describes the conductor
+    procedure                 :: interface_vacuum_a => conductor_interface_vacuum_a ! Defines the left  boundary condition for a vacuum interface
+    procedure                 :: interface_vacuum_b => conductor_interface_vacuum_b ! Defines the right boundary condition for a vacuum interface
+    procedure                 :: interface_tunnel_a => conductor_interface_tunnel_a ! Defines the left  boundary condition for a tunnel interface
+    procedure                 :: interface_tunnel_b => conductor_interface_tunnel_b ! Defines the right boundary condition for a tunnel interface
+    procedure                 :: update_fields      => conductor_update_fields      ! Updates the physical fields based on stored Green's functions
 
     ! These methods are used to output physical results (should be invoked by the user)
-    procedure          :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
+    procedure                 :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
 
     ! These methods are used by internal subroutines (should not be invoked by the user)
-    final              :: conductor_destruct                                 ! Type destructor
+    final                     :: conductor_destruct                                 ! Type destructor
   end type
 
   ! Type constructors
@@ -148,7 +148,7 @@ contains
 
     ! Status information
     if (this%information >= 0) then
-      write(stdout,'(a,a,a)') ' :: ', trim(this%type_string), ': Updating state...'
+      write(stdout,'(a,a,a,20x)') ' :: ', trim(this%type_string), ': Updating state...'
     end if
 
     do n=1,size(this%energy)

@@ -72,7 +72,6 @@ contains
     real(dp),           intent(in)  :: z
     type(spin),         intent(in)  :: g, gt, dg, dgt
     type(spin),         intent(out) :: d2g, d2gt
-    type(spin)                      :: N, Nt
     type(spin)                      :: P, Pt
     real(dp)                        :: h(3)
 
@@ -83,13 +82,12 @@ contains
     P  = (0.0_dp,-1.0_dp) * (h(1)*pauli1 + h(2)*pauli2 + h(3)*pauli3)
     Pt = (0.0_dp,+1.0_dp) * (h(1)*pauli1 - h(2)*pauli2 + h(3)*pauli3)
 
-    ! Calculate the normalization matrices
-    N   = spin_inv( pauli0 - g*gt )
-    Nt  = spin_inv( pauli0 - gt*g )
+    ! Calculate the second derivatives of the Riccati parameters (conductor terms)
+    call this%conductor%usadel_equation(z, g, gt, dg, dgt, d2g, d2gt)
 
-    ! Calculate the second derivatives of the Riccati parameters
-    d2g  = (-2.0_dp,0.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*this%erg*g  + P*g   + g*Pt
-    d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*this%erg*gt + Pt*gt + gt*P
+    ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
+    d2g  = d2g  + P  * g  + g  * Pt
+    d2gt = d2gt + Pt * gt + gt * P
   end subroutine
 
   pure function ferromagnet_get_exchange(this, location) result(h)

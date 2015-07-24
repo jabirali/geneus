@@ -1,17 +1,17 @@
 
 program test_materials
-  use mod_assert
   use mod_conductor
   use mod_superconductor
   use mod_ferromagnet
   use mod_multilayer
+  use mod_dos
   integer              :: n
   real(dp)             :: erg(600)
   type(conductor)      :: m
   type(superconductor) :: s
   type(ferromagnet)    :: f
 
-  call energy_range(erg, 0.2_dp)
+  call energy_range(erg, coupling = 0.2_dp)
 
   f = ferromagnet(erg, [0.0_dp, 0.0_dp, 0.0_dp])
   s = superconductor(erg, (0.7_dp,0.7_dp), 0.2_dp)
@@ -19,6 +19,11 @@ program test_materials
   call connect(f, s, 0.20_dp, 0.20_dp)
   call connect(s, m, 0.20_dp, 0.20_dp)
   !call connect(m, f, 0.3_dp, 0.3_dp)
+
+  !open(unit=1, file='test_materials.dat')
+  !call calculate_dos(s, iterations=2, unit=1)
+  !close(unit=1)
+ 
 
   do n=1,size(f%location)
     f%exchange(1,n) = 0.1_dp*sin(1.57*f%location(n))
