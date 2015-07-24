@@ -6,21 +6,46 @@
 ! Updated 2015-07-23
 
 program test_critical
+  use mod_system
   use mod_superconductor
   use mod_multilayer
   use mod_critical
   implicit none
 
-  type(superconductor) :: material
-  real(dp)             :: energy(600)
-  integer              :: n, m
+  ! Declare variables and initialize their default values
+  type(superconductor)  :: material              ! Superconductor object
+  real(dp), allocatable :: domain(:)             ! Discretized energy domain
+
+  integer               :: energies   = 600      ! Number of energies to use in the discretization
+  integer               :: bisections = 10       ! Number of bisections (outer loop in the binary search)
+  integer               :: iterations = 2        ! Number of iterations (inner loop in the binary search)
+  real(dp)              :: coupling   = 0.200_dp ! BCS coupling constant (dimensionless)
+  real(dp)              :: lower      = 0.000_dp ! Lower limit for the critical temperature (relative to the critical temperature of a bulk superconductor)
+  real(dp)              :: upper      = 1.500_dp ! Upper limit for the critical temperature (relative to the critical temperature of a bulk superconductor)
+  real(dp)              :: length     = 25.00_dp ! Superconductor length (relative to the superconducting coherence length)
+  real(dp)              :: scattering = 0.001_dp ! Inelastic scattering (imaginary energy contribution)
+
+  ! Process command line options
+  call option
+  call option(energies,   'energies')
+  call option(bisections, 'bisections')
+  call option(iterations, 'iterations')
+  call option(coupling,   'coupling')
+  call option(lower,      'lower')
+  call option(upper,      'upper')
+  call option(length,     'length')
+  call option(scattering, 'scattering')
 
   ! Initialize the energy array
-  call energy_range(energy, coupling = 0.200_dp)
+  allocate(domain(energies))
+  call energy_range(domain, coupling = coupling)
 
   ! Initialize the superconductor
-  material = superconductor(energy, coupling = 0.200_dp, thouless = 0.001_dp, scattering = 0.001_dp)
+  material = superconductor(domain, coupling = coupling, thouless = 1/length**2, scattering = scattering)
 
   ! Perform the binary search for the critical temperature
-  call critical_temperature(material, bisections = 10, iterations = 2, lower = 0.0_dp, upper = 1.5_dp)
+  call critical_temperature(material, bisections = bisections, iterations = iterations, lower = lower, upper = upper)
+
+  ! Deallocate memory
+  deallocate(domain)
 end program

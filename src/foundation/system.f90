@@ -22,9 +22,16 @@ module mod_system
 
   ! Define an interface for obtaining command line arguments
   interface option
-    module procedure option_integer, option_real, option_string
+    module procedure option_header, option_integer, option_real, option_string
   end interface
 contains
+  subroutine option_header
+    ! If the subroutine 'option' is run without arguments, this prints an option header.
+    write(*,'(a)') '╒═══════════════════════════════════╕'
+    write(*,'(a)') '│        RUNTIME  PARAMETERS        │'
+    write(*,'(a)') '╘═══════════════════════════════════╛'
+  end subroutine
+
   subroutine option_integer(variable, option)
     ! Reads a command line option on the form --option=value, where value is an integer.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
@@ -32,6 +39,7 @@ contains
     integer,            intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
+    character(len= 20)                :: output
     
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
@@ -42,6 +50,10 @@ contains
         read( string(len(option)+4:len(string)), '(i10)' ) variable
       end if
     end do
+
+    ! Write the results to standard out for verification purposes
+    output = option
+    write(*,'(a,a,i10)') ' :: ', output, variable
   end subroutine
 
   subroutine option_real(variable, option)
@@ -51,6 +63,7 @@ contains
     real(dp),           intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
+    character(len= 20)                :: output
     
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
@@ -61,6 +74,10 @@ contains
         read( string(len(option)+4:len(string)), '(g24.0)' ) variable
       end if
     end do
+
+    ! Write the results to standard out for verification purposes
+    output = option
+    write(*,'(a,a,f10.5)') ' :: ', output, variable
   end subroutine
 
   subroutine option_string(variable, option)
@@ -70,6 +87,7 @@ contains
     character(len= * ), intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
+    character(len= 20)                :: output
     
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
@@ -80,6 +98,10 @@ contains
         read( string(len(option)+4:len(string)), '(a)' ) variable
       end if
     end do
+
+    ! Write the results to standard out for verification purposes
+    output = option
+    write(*,'(a,a,a)') ' :: ', output, variable
   end subroutine
 
   subroutine print_error(str)
