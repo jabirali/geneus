@@ -150,4 +150,29 @@ contains
       end do
     end if
   end subroutine
+
+  pure function exchange_xy(strength, angle) result(field)
+    ! This function returns a vector that describes an exchange field in the xy-plane,
+    ! where the input arguments describe the exchange field using polar coordinates.
+    real(dp), intent(in) :: strength
+    real(dp), intent(in) :: angle
+    real(dp)             :: field(3)
+
+    field(1) = strength * cos(angle)
+    field(2) = strength * sin(angle)
+    field(3) = 0.0_dp
+  end function
+
+  pure function spinorbit_xy(strength, angle) result(field)
+    ! This function returns an SU(2) vector that describes a Rashba--Dresselhaus coupling
+    ! in the xy-plane. The coupling constants are given in polar coordinates, so that the
+    ! Rashba constant is strength*sin(angle), and the Dresselhaus one strength*cos(angle).
+    real(dp), intent(in) :: strength
+    real(dp), intent(in) :: angle
+    type(spin)           :: field(3)
+
+    field(1) = (+strength) * (cos(angle)*pauli1 + sin(angle)*pauli2)
+    field(2) = (-strength) * (cos(angle)*pauli2 + sin(angle)*pauli1)
+    field(3) =  0.0_dp
+  end function
 end module

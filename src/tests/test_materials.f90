@@ -13,9 +13,10 @@ program test_materials
 
   call energy_range(erg, coupling = 0.2_dp)
 
-  f = ferromagnet(erg, [0.0_dp, 0.0_dp, 0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
-  s = superconductor(erg, coupling = 0.2_dp, spinorbit = [pauli1, pauli2, pauli3])
-  m = conductor(erg, spinorbit = [pauli1, pauli2, pauli3])
+  !f = ferromagnet(erg, [2.0_dp, 1.0_dp, 0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
+  f = ferromagnet(erg, exchange_xy(3.0_dp,0.15*pi), spinorbit = spinorbit_xy(2.0_dp,pi/4))
+  s = superconductor(erg, coupling = 0.2_dp)! spinorbit = [pauli1, pauli2, pauli3])
+  m = conductor(erg)!, spinorbit = [pauli1, pauli2, pauli3])
 
   !call f%spinorbit(1)%print
   !call f%spinorbit(2)%print
