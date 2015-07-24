@@ -40,6 +40,7 @@ contains
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
     character(len= 20)                :: output
+    integer                           :: n
     
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
@@ -64,6 +65,7 @@ contains
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
     character(len= 20)                :: output
+    integer                           :: n
     
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
@@ -88,6 +90,7 @@ contains
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
     character(len= 20)                :: output
+    integer                           :: n
     
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
