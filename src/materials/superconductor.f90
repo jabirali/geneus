@@ -26,6 +26,7 @@ module mod_superconductor
     procedure                :: get_temperature  => superconductor_get_temperature  ! Returns the current temperature of the material
     procedure                :: set_temperature  => superconductor_set_temperature  ! Updates the current temperature of the material
     procedure                :: initialize       => superconductor_initialize       ! Initializes the internal state of the material
+    final                    ::                     superconductor_destruct         ! Type destructor
   end type
 
   ! Type constructor
@@ -33,19 +34,21 @@ module mod_superconductor
     module procedure superconductor_construct
   end interface
 contains
-  pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
+  pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points, spinorbit) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
-    type(superconductor)              :: this        ! Superconductor object that will be constructed
-    real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
-    real(dp),    intent(in)           :: coupling    ! BCS coupling constant
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap   (default: 1.0)
-    real(dp),    intent(in), optional :: thouless    ! Thouless energy       (default: conductor default)
-    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: conductor default)
-    integer,     intent(in), optional :: points      ! Number of positions   (default: conductor default)
-    integer                           :: n           ! Loop variable
+    type(superconductor)              :: this         ! Superconductor object that will be constructed
+    real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(dp),    intent(in)           :: coupling     ! BCS coupling constant
+    complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: 1.0)
+    real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
+    real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
+    integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
+    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: zero coupling)
+    integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
+    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, &
+                                         points=points, spinorbit=spinorbit)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then
@@ -81,11 +84,11 @@ contains
 
   subroutine superconductor_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
-    class(superconductor), intent(in)  :: this
-    real(dp),              intent(in)  :: z
-    type(spin),            intent(in)  :: g, gt, dg, dgt
-    type(spin),            intent(out) :: d2g, d2gt
-    complex(dp)                        :: gap, gapt
+    class(superconductor), intent(in)    :: this
+    real(dp),              intent(in)    :: z
+    type(spin),            intent(in)    :: g, gt, dg, dgt
+    type(spin),            intent(inout) :: d2g, d2gt
+    complex(dp)                          :: gap, gapt
 
     ! Lookup the superconducting order parameter
     gap  = this%get_gap(z)/this%thouless

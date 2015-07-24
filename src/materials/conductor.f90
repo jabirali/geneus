@@ -22,6 +22,7 @@ module mod_conductor
     real(dp)                  :: conductance_b =  0.00_dp                           ! Tunneling conductance of the right interface (relative to the bulk conductance of this material)
     class(conductor), pointer :: material_a    => null()                            ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
     class(conductor), pointer :: material_b    => null()                            ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
+    type(spin),   allocatable :: spinorbit(:)                                       ! This is an SU(2) vector field that describes spin-orbit coupling (default: no spin-orbit coupling)
   
     ! These parameters control the boundary value problem solver (can be modified by the user)
     integer                   :: scaling       =  64                                ! Maximal allowed scaling of the mesh resolution (range: 2^N, N>1)
@@ -37,6 +38,8 @@ module mod_conductor
 
     ! These variables are used by internal subroutines (should not be accessed by the user)
     complex(dp)               :: erg                                                ! Temporary storage for the current energy
+    type(spin)                :: Ax,  Ay,  Az,  A2                                  ! Spin-orbit coupling matrices (Cartesian components and square)
+    type(spin)                :: Axt, Ayt, Azt, A2t                                 ! Spin-orbit coupling matrices (tilde-conjugated versions)
     type(green), pointer      :: state_a       => null()                            ! Pointer to the left  interface state for the current energy
     type(green), pointer      :: state_b       => null()                            ! Pointer to the right interface state for the current energy
 
@@ -59,7 +62,7 @@ module mod_conductor
     procedure                 :: write_dos          => conductor_write_dos          ! Writes the density of states to a given output unit
 
     ! These methods are used by internal subroutines (should not be invoked by the user)
-    final                     :: conductor_destruct                                 ! Type destructor
+    final                     ::                       conductor_destruct           ! Type destructor
   end type
 
   ! Type constructors
@@ -67,15 +70,21 @@ module mod_conductor
     module procedure conductor_construct
   end interface
 contains
-  pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
+
+  !--------------------------------------------------------------------------------!
+  !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
+  !--------------------------------------------------------------------------------!
+
+  pure function conductor_construct(energy, gap, thouless, scattering, points, spinorbit) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
-    type(conductor)                   :: this        ! Conductor object that will be constructed
-    real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: thouless    ! Thouless energy       (default: see type declaration)
-    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: see type declaration)
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap   (default: see definition below)
-    integer,     intent(in), optional :: points      ! Number of positions   (default: see definition below)
-    integer                           :: n, m        ! Loop variables
+    type(conductor)                   :: this         ! Conductor object that will be constructed
+    real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: see type declaration)
+    real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
+    complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
+    integer,     intent(in), optional :: points       ! Number of positions   (default: see definition below)
+    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: zero coupling)
+    integer                           :: n, m         ! Loop variables
 
     ! Optional argument: Thouless energy
     if (present(thouless)) then
@@ -87,6 +96,12 @@ contains
       this%scattering = scattering
     end if
 
+    ! Optional argument: spin-orbit coupling
+    if (present(spinorbit)) then
+      allocate(this%spinorbit(size(spinorbit)))
+      this%spinorbit = spinorbit
+    end if
+    
     ! Allocate memory (if necessary)
     if (.not. allocated(this%state)) then
       if (present(points)) then
@@ -122,6 +137,10 @@ contains
       deallocate(this%location)
       deallocate(this%energy)
     end if
+
+    if (allocated(this%spinorbit)) then
+      deallocate(this%spinorbit)
+    end if
   end subroutine
 
   pure subroutine conductor_initialize(this, gap)
@@ -137,6 +156,10 @@ contains
     end do
   end subroutine
 
+  !--------------------------------------------------------------------------------!
+  !                     IMPLEMENTATION OF BVP SOLVER METHODS                       !
+  !--------------------------------------------------------------------------------!
+
   subroutine conductor_update(this)
     ! This subroutine updates the current estimate for the state of the system.
     use bvp_m
@@ -146,9 +169,14 @@ contains
     type(bvp_sol)                   :: sol                        ! Object with information about the BVP solution
     integer                         :: n, m                       ! Internal loop variables
 
+    ! Prepare variables associated with spin-orbit coupling
+    if (allocated(this%spinorbit)) then
+      call spinorbit_update(this)
+    end if
+
     ! Status information
     if (this%information >= 0) then
-      write(stdout,'(a,a,a,20x)') ' :: ', trim(this%type_string), ': Updating state...'
+      write(stdout,'(a,a,a)') ' :: ', trim(this%type_string), ': Updating state...                                '
     end if
 
     do n=1,size(this%energy)
@@ -208,6 +236,11 @@ contains
 
       ! Calculate the second derivatives of the Riccati parameters
       call this%usadel_equation(z, g, gt, dg, dgt, d2g, d2gt)
+
+      ! Calculate the contribution from a spin-orbit coupling
+      if (allocated(this%spinorbit)) then
+        call spinorbit_usadel_equation(this, g, gt, dg, dgt, d2g, d2gt)
+      end if
             
       ! Pack the results into a state vector
       f( 1: 8) = dg
@@ -240,15 +273,25 @@ contains
 
       ! Calculate residuals from the boundary conditions
       if (associated(this%material_a)) then
+        ! Left interface is a tunnel junction
         call this%interface_tunnel_a(g1, gt1, dg1, dgt1, r1, rt1)
       else
+        ! Left interface is a vacuum junction
         call this%interface_vacuum_a(g1, gt1, dg1, dgt1, r1, rt1)
       end if
 
       if (associated(this%material_b)) then
+        ! Right interface is a tunnel junction
         call this%interface_tunnel_b(g2, gt2, dg2, dgt2, r2, rt2)
       else
+        ! Right interface is a vacuum junction
         call this%interface_vacuum_b(g2, gt2, dg2, dgt2, r2, rt2)
+      end if
+
+      if (allocated(this%spinorbit)) then
+        ! Boundary conditions must include spin-orbit coupling
+        call spinorbit_interface_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+        call spinorbit_interface_b(this, g2, gt2, dg2, dgt2, r2, rt2)
       end if
 
       ! Pack the results into state vectors
@@ -259,13 +302,17 @@ contains
     end subroutine
   end subroutine
 
+  !--------------------------------------------------------------------------------!
+  !                     IMPLEMENTATION OF CONDUCTOR EQUATIONS                      !
+  !--------------------------------------------------------------------------------!
+
   subroutine conductor_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
-    class(conductor), intent(in)  :: this
-    real(dp),         intent(in)  :: z
-    type(spin),       intent(in)  :: g, gt, dg, dgt
-    type(spin),       intent(out) :: d2g, d2gt
-    type(spin)                    :: N, Nt
+    class(conductor), intent(in   ) :: this
+    real(dp),         intent(in   ) :: z
+    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    type(spin),       intent(inout) :: d2g, d2gt
+    type(spin)                      :: N, Nt
 
     ! Calculate the normalization matrices
     N   = spin_inv( pauli0 - g*gt )
@@ -278,9 +325,9 @@ contains
 
   subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a vacuum boundary condition for the left interface.
-    class(conductor), intent(in)  :: this
-    type(spin),       intent(in)  :: g1, gt1, dg1, dgt1
-    type(spin),       intent(out) :: r1, rt1
+    class(conductor), intent(in   ) :: this
+    type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
+    type(spin),       intent(inout) :: r1, rt1
 
     r1  = dg1
     rt1 = dgt1
@@ -288,9 +335,9 @@ contains
 
   subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a vacuum boundary condition for the right interface.
-    class(conductor), intent(in)  :: this
-    type(spin),       intent(in)  :: g2, gt2, dg2, dgt2
-    type(spin),       intent(out) :: r2, rt2
+    class(conductor), intent(in   ) :: this
+    type(spin),       intent(in   ) :: g2, gt2, dg2, dgt2
+    type(spin),       intent(inout) :: r2, rt2
 
     r2  = dg2
     rt2 = dgt2
@@ -298,11 +345,11 @@ contains
 
   subroutine conductor_interface_tunnel_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a tunneling boundary condition for the left interface.
-    class(conductor), intent(in)  :: this
-    type(spin),       intent(out) :: r1, rt1
-    type(spin),       intent(in)  :: g1, gt1, dg1, dgt1
-    type(spin),       pointer     :: g0, gt0, dg0, dgt0
-    type(spin)                    :: N0, Nt0
+    class(conductor), intent(in   ) :: this
+    type(spin),       intent(inout) :: r1, rt1
+    type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
+    type(spin),       pointer       :: g0, gt0, dg0, dgt0
+    type(spin)                      :: N0, Nt0
 
     ! Rename the state in the material to the left
     g0   => this%state_a%g
@@ -321,11 +368,11 @@ contains
 
   subroutine conductor_interface_tunnel_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a tunneling boundary condition for the right interface.
-    class(conductor), intent(in)  :: this
-    type(spin),       intent(out) :: r2, rt2
-    type(spin),       intent(in)  :: g2, gt2, dg2, dgt2
-    type(spin),       pointer     :: g3, gt3, dg3, dgt3
-    type(spin)                    :: N3, Nt3
+    class(conductor), intent(in   ) :: this
+    type(spin),       intent(inout) :: r2, rt2
+    type(spin),       intent(in   ) :: g2, gt2, dg2, dgt2
+    type(spin),       pointer       :: g3, gt3, dg3, dgt3
+    type(spin)                      :: N3, Nt3
 
     ! Rename the state in the material to the right
     g3   => this%state_b%g
@@ -347,6 +394,10 @@ contains
 
     continue
   end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                    IMPLEMENTATION OF INPUT/OUTPUT METHODS                      !
+  !--------------------------------------------------------------------------------!
 
   subroutine conductor_write_dos(this, unit, a, b)
     ! Writes the density of states as a function of position and energy to a given output unit.
@@ -375,5 +426,96 @@ contains
         write(unit,*)
       end do
     end if
+  end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                 IMPLEMENTATION OF SPIN-ORBIT COUPLING METHODS                  !
+  !--------------------------------------------------------------------------------!
+
+  subroutine spinorbit_update(this)
+    ! Updates the internal variables associated with a spin-orbit coupling.
+    class(conductor), intent(inout) :: this 
+
+    ! Spin-orbit coupling terms in the equations for the Riccati parameter γ
+    this%Ax  = this%spinorbit(1)/sqrt(this%thouless)
+    this%Ay  = this%spinorbit(2)/sqrt(this%thouless)
+    this%Az  = this%spinorbit(3)/sqrt(this%thouless)
+    this%A2  = this%Ax**2 + this%Ay**2 + this%Az**2
+
+    ! Spin-orbit coupling terms in the equations for the Riccati parameter γ~
+    this%Axt = spin(conjg(this%Ax%matrix))
+    this%Ayt = spin(conjg(this%Ay%matrix))
+    this%Azt = spin(conjg(this%Az%matrix))
+    this%A2t = spin(conjg(this%A2%matrix))
+  end subroutine
+
+  subroutine spinorbit_usadel_equation(this, g, gt, dg, dgt, d2g, d2gt)
+    ! Calculate the spin-orbit coupling terms in the Usadel equation, and update the second derivatives of the Riccati parameters.
+    type(conductor),  target, intent(in   ) :: this
+    type(spin),               intent(in   ) :: g, gt, dg, dgt
+    type(spin),               intent(inout) :: d2g, d2gt
+
+    type(spin)                              :: N,  Nt
+    type(spin),       pointer               :: Ax, Axt
+    type(spin),       pointer               :: Ay, Ayt
+    type(spin),       pointer               :: Az, Azt
+    type(spin),       pointer               :: A2, A2t
+
+    ! Calculate the normalization matrices
+    N   = spin_inv( pauli0 - g*gt )
+    Nt  = spin_inv( pauli0 - gt*g )
+
+    ! Rename the spin-orbit coupling matrices
+    Ax => this % Ax;  Axt => this % Axt;
+    Ay => this % Ay;  Ayt => this % Ayt;
+    Az => this % Az;  Azt => this % Azt;
+    A2 => this % A2;  A2t => this % A2t;
+
+    ! Update the second derivatives of the Riccati parameters
+    d2g  = d2g             + (A2 * g - g * A2t)                             &
+         + (2.0_dp,0.0_dp) * (Ax * g + g * Axt) * Nt * (Axt + gt * Ax * g)  &
+         + (2.0_dp,0.0_dp) * (Ay * g + g * Ayt) * Nt * (Ayt + gt * Ay * g)  &
+         + (2.0_dp,0.0_dp) * (Az * g + g * Azt) * Nt * (Azt + gt * Az * g)  &
+         + (0.0_dp,2.0_dp) * (Az + g * Azt * gt) * N * dg                   &
+         + (0.0_dp,2.0_dp) * dg * Nt * (gt * Az * g + Azt)
+
+    d2gt = d2gt            + (A2t * gt - gt * A2)                           &
+         + (2.0_dp,0.0_dp) * (Axt * gt + gt * Ax) * N * (Ax + g * Axt * gt) &
+         + (2.0_dp,0.0_dp) * (Ayt * gt + gt * Ay) * N * (Ay + g * Ayt * gt) &
+         + (2.0_dp,0.0_dp) * (Azt * gt + gt * Az) * N * (Az + g * Azt * gt) &
+         - (0.0_dp,2.0_dp) * (Azt + gt * Az * g) * Nt * dgt                 &
+         - (0.0_dp,2.0_dp) * dgt * N * (g * Azt * gt + Az)
+  end subroutine
+
+  subroutine spinorbit_interface_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+    ! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
+    type(conductor), target, intent(in   ) :: this
+    type(spin),              intent(in   ) :: g1, gt1, dg1, dgt1
+    type(spin),              intent(inout) :: r1, rt1
+    type(spin),      pointer               :: Az, Azt
+
+    ! Rename the spin-orbit coupling matrices
+    Az   => this % Az
+    Azt  => this % Azt
+
+    ! Update the residuals
+    r1  = r1  - (0.0_dp,1.0_dp) * (Az  * g1  + g1  * Azt)
+    rt1 = rt1 + (0.0_dp,1.0_dp) * (Azt * gt1 + gt1 * Az )
+  end subroutine
+
+  subroutine spinorbit_interface_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+    ! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
+    type(conductor), target, intent(in   ) :: this
+    type(spin),              intent(in   ) :: g2, gt2, dg2, dgt2
+    type(spin),              intent(inout) :: r2, rt2
+    type(spin),      pointer               :: Az, Azt
+
+    ! Rename the spin-orbit coupling matrices
+    Az   => this % Az
+    Azt  => this % Azt
+
+    ! Update the residuals
+    r2  = r2  - (0.0_dp,1.0_dp) * (Az  * g2  + g2  * Azt)
+    rt2 = rt2 + (0.0_dp,1.0_dp) * (Azt * gt2 + gt2 * Az )  
   end subroutine
 end module

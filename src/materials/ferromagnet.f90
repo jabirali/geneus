@@ -14,10 +14,11 @@ module mod_ferromagnet
 
   ! Type declaration
   type, extends(conductor) :: ferromagnet
-    real(dp), allocatable    :: exchange(:,:)                                   ! Magnetic exchange field as a function of position
+    real(dp), allocatable    :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
   contains
-    procedure                :: usadel_equation => ferromagnet_usadel_equation  ! Differential equation that describes the superconductor
-    procedure                :: get_exchange    => ferromagnet_get_exchange     ! Returns the magnetic exchange field at a given position
+    procedure                :: usadel_equation       => ferromagnet_usadel_equation  ! Differential equation that describes the superconductor
+    procedure                :: get_exchange          => ferromagnet_get_exchange     ! Returns the magnetic exchange field at a given position
+    final                    ::                          ferromagnet_destruct         ! Type destructor
   end type
 
   ! Type constructor
@@ -25,19 +26,21 @@ module mod_ferromagnet
     module procedure ferromagnet_construct_homogeneous
   end interface
 contains
-  pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
+  pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points, spinorbit) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor
-    type(ferromagnet)                 :: this        ! Ferromagnet object that will be constructed
-    real(dp),    intent(in)           :: energy(:)   ! Discretized energy domain that will be used
-    real(dp),    intent(in)           :: exchange(3) ! Magnetic exchange field
-    complex(dp), intent(in), optional :: gap         ! Superconducting gap   (default: conductor default)
-    real(dp),    intent(in), optional :: thouless    ! Thouless energy       (default: conductor default)
-    real(dp),    intent(in), optional :: scattering  ! Imaginary energy term (default: conductor default)
-    integer,     intent(in), optional :: points      ! Number of positions   (default: conductor default)
-    integer                           :: n           ! Loop variable
+    type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
+    real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(dp),    intent(in)           :: exchange(3)  ! Magnetic exchange field
+    complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: conductor default)
+    real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
+    real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
+    integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
+    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: zero coupling)
+    integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
+    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, &
+                                         points=points, spinorbit=spinorbit)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%exchange)) then
@@ -68,12 +71,12 @@ contains
 
   subroutine ferromagnet_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
-    class(ferromagnet), intent(in)  :: this
-    real(dp),           intent(in)  :: z
-    type(spin),         intent(in)  :: g, gt, dg, dgt
-    type(spin),         intent(out) :: d2g, d2gt
-    type(spin)                      :: P, Pt
-    real(dp)                        :: h(3)
+    class(ferromagnet), intent(in   ) :: this
+    real(dp),           intent(in   ) :: z
+    type(spin),         intent(in   ) :: g, gt, dg, dgt
+    type(spin),         intent(inout) :: d2g, d2gt
+    type(spin)                        :: P, Pt
+    real(dp)                          :: h(3)
 
     ! Lookup the magnetic exchange field
     h  = this%get_exchange(z)/this%thouless
