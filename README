@@ -1,5 +1,13 @@
 Superconducting Spintronics Simulation Suite in Fortran (s4tran)
 
+INTRODUCTION
+
+USAGE
+
+Use the syntax --option=value to specify command line arguments.
+
+COMPILING
+
 The project requires features from Fortran 2008, which have been successfully tested with GFortran version 5.1+.
 
 To compile the project in release mode, which enables full optimization and thus provides the best performance, run:
@@ -13,7 +21,6 @@ Note that compiling the project in debug mode will make it significantly slower;
 twice the computation time of similar applications compiled in release mode. However, as the name implies, this also
 makes it significantly easier to debug the program, as it enables the use of the GDB debugger and GProf profiler, as
 well as several runtime checks (such as checking that array indices are within allowed bounds).
-
 
 NOTE: Best speed seems to occur when compiling the ATLAS libraries, which can reduce the run time of the programs by
 a factor of nearly two compared to the reference BLAS/LAPACK implementations. To switch to the ATLAS libraries on 

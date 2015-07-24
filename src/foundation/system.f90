@@ -11,6 +11,11 @@
 module mod_system
   use, intrinsic :: iso_fortran_env
 
+  ! Declare standard input/output units
+  integer, parameter  :: stdin  = input_unit
+  integer, parameter  :: stdout = output_unit
+  integer, parameter  :: stderr = error_unit
+
   ! Declare floating-point precisions
   integer,  parameter :: sp  = REAL32
   integer,  parameter :: dp  = REAL64
@@ -105,19 +110,5 @@ contains
     ! Write the results to standard out for verification purposes
     output = option
     write(*,'(a,a,a)') ' :: ', output, variable
-  end subroutine
-
-  subroutine print_error(str)
-    ! This subroutine can be used to write error messages to standard out.
-    character(len=*), intent(in) :: str
-    
-    write(*,'(a1,a,a1,a,a)') achar(27), '[1;31mERROR:', achar(27), '[0m ', str
-  end subroutine
-
-  subroutine print_info(str)
-    ! This subroutine can be used to write info messages to standard out.
-    character(len=*), intent(in) :: str
-    
-    write(*,'(a1,a,a1,a,a)') achar(27), '[1;33mINFO: ', achar(27), '[0m ', str
   end subroutine
 end module 

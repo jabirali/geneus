@@ -148,14 +148,15 @@ contains
 
     ! Status information
     if (this%information >= 0) then
-      write (*,'(a,a,a)') ' :: ', trim(this%type_string), ': Updating state...'
+      write(stdout,'(a,a,a)') ' :: ', trim(this%type_string), ': Updating state...'
     end if
 
     do n=1,size(this%energy)
       ! Status information
       if (this%information >= 0) then
-        write (*,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no')  &
+        write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
           '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n), achar(13)
+        flush(stdout)
       end if
 
       ! Convert all states at this energy level to real-valued state vectors
