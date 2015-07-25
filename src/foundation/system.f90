@@ -11,19 +11,29 @@ module mod_system
   use, intrinsic :: iso_fortran_env
 
   ! Declare standard input/output units
-  integer,     parameter :: stdin  = input_unit
-  integer,     parameter :: stdout = output_unit
-  integer,     parameter :: stderr = error_unit
+  integer,      parameter :: stdin   = input_unit
+  integer,      parameter :: stdout  = output_unit
+  integer,      parameter :: stderr  = error_unit
 
   ! Declare floating-point precisions
-  integer,     parameter :: sp     = REAL32
-  integer,     parameter :: dp     = REAL64
-  integer,     parameter :: qp     = REAL128
+  integer,      parameter :: sp      = REAL32
+  integer,      parameter :: dp      = REAL64
+  integer,      parameter :: qp      = REAL128
 
-  ! Define common mathematical constants
-  real(dp),    parameter :: inf    = huge(1.0_dp)
-  real(dp),    parameter :: pi     = atan(1.0_dp)*4.0_dp
-  complex(dp), parameter :: i      = (0.0_dp,1.0_dp)
+  ! Define comm on mathematical constants
+  real(dp),     parameter :: inf     = huge(1.0_dp)
+  real(dp),     parameter :: pi      = atan(1.0_dp)*4.0_dp
+  complex(dp),  parameter :: i       = (0.0_dp,1.0_dp)
+
+  ! Define escape codes for terminal colors
+  character(*), parameter :: color_none   = '[0m'
+  character(*), parameter :: color_red    = '[31;1m'
+  character(*), parameter :: color_green  = '[32;1m'
+  character(*), parameter :: color_yellow = '[33;1m'
+  character(*), parameter :: color_blue   = '[34;1m'
+  character(*), parameter :: color_purple = '[35;1m'
+  character(*), parameter :: color_cyan   = '[36;1m'
+  character(*), parameter :: color_white  = '[37;1m'
 
   ! Define an interface for obtaining command line arguments
   interface option

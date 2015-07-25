@@ -44,7 +44,7 @@ module mod_conductor
     type(green), pointer      :: state_b       => null()                            ! Pointer to the right interface state for the current energy
 
     ! Miscellaneous variables
-    character(len=32)         :: type_string   =  'CONDUCTOR'                       ! This variable should be modified for class(conductor) subtypes
+    character(len=32)         :: type_string   =  ''                                ! This variable should be modified when class(conductor) subtypes are initialized
   contains
     ! These methods control the simulation process (should be invoked by the user)
     procedure                 :: initialize         => conductor_initialize         ! Initializes the internal state of the material
@@ -125,6 +125,13 @@ contains
     else
       call this%initialize( cmplx(1.0_dp,0.0_dp,kind=dp) )
     end if
+
+    ! Modify the type string
+    if (allocated(this%spinorbit)) then
+      this%type_string = color_yellow // 'CONDUCTOR (SOC)' // color_none
+    else
+      this%type_string = color_yellow // 'CONDUCTOR' // color_none
+    end if
   end function
 
   pure subroutine conductor_destruct(this)
@@ -176,7 +183,7 @@ contains
 
     ! Status information
     if (this%information >= 0) then
-      write(stdout,'(a,a,a)') ' :: ', trim(this%type_string), ': Updating state...                                '
+      write(stdout,'(a)') color_white // ' :: ' // color_none // trim(this%type_string)
     end if
 
     do n=1,size(this%energy)

@@ -53,7 +53,11 @@ contains
     end do
 
     ! Modify the type string
-    this%type_string = 'FERROMAGNET'
+    if (allocated(this%spinorbit)) then
+      this%type_string = color_red // 'FERROMAGNET (SOC)' // color_none
+    else
+      this%type_string = color_red // 'FERROMAGNET' // color_none
+    end if
   end function
 
   pure subroutine ferromagnet_destruct(this)

@@ -66,7 +66,11 @@ contains
     this%coupling = coupling
 
     ! Modify the type string
-    this%type_string = 'SUPERCONDUCTOR'
+    if (allocated(this%spinorbit)) then
+      this%type_string = color_green // 'SUPERCONDUCTOR (SOC)' // color_none
+    else
+      this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+    end if
   end function
 
   pure subroutine superconductor_destruct(this)
