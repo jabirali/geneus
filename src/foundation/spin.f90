@@ -88,10 +88,11 @@ module mod_spin
   end interface
 
   ! Exported constants
-  type(spin), parameter :: pauli0 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli1 = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli2 = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli3 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli0   = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli1   = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli2   = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli3   = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli(3) = [pauli1, pauli2, pauli3]
 contains
   pure function spin_construct_rscalar(scalar) result(this)
     ! This function constructs a spin object from a real scalar
@@ -223,7 +224,7 @@ contains
     end do
   end function
 
-  pure function spin_multl_rscalar(a,b) result(r)
+  elemental pure function spin_multl_rscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a real scalar
     type(spin)             :: r
     real(dp),   intent(in) :: a
@@ -232,7 +233,7 @@ contains
     r = spin(a * b%matrix)
   end function
 
-  pure function spin_multr_rscalar(a,b) result(r)
+  elemental pure function spin_multr_rscalar(a,b) result(r)
     ! Defines right multiplication of a spin matrix by a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
@@ -241,7 +242,7 @@ contains
     r = spin(a%matrix * b)
   end function
 
-  pure function spin_multl_cscalar(a,b) result(r)
+  elemental pure function spin_multl_cscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a complex scalar
     type(spin)             :: r
     complex(dp), intent(in) :: a
@@ -250,7 +251,7 @@ contains
     r = spin(a * b%matrix)
   end function
 
-  pure function spin_multr_cscalar(a,b) result(r)
+  elemental pure function spin_multr_cscalar(a,b) result(r)
     ! Defines right multiplication of a spin matrix by a complex scalar
     type(spin)              :: r
     type(spin),  intent(in) :: a
@@ -277,7 +278,7 @@ contains
     r = spin(matmul(a%matrix, b))
   end function
 
-  pure function spin_mult_spin(a,b) result(r)
+  elemental pure function spin_mult_spin(a,b) result(r)
     ! Defines multiplication of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
@@ -285,7 +286,7 @@ contains
     r = spin(matmul(a%matrix, b%matrix))
   end function
 
-  pure function spin_div_rscalar(a,b) result(r)
+  elemental pure function spin_div_rscalar(a,b) result(r)
     ! Defines division of a spin matrix by a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
@@ -294,7 +295,7 @@ contains
     r = spin(a%matrix / b)
   end function
 
-  pure function spin_div_cscalar(a,b) result(r)
+  elemental pure function spin_div_cscalar(a,b) result(r)
     ! Defines division of a spin matrix by a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a

@@ -69,7 +69,7 @@ contains
   end function
 
   pure subroutine green_export_rvector(a, b)
-    ! Defines assignment from a green object to a real vector
+    ! Defines assignment from a green object to a real vector.
     real(dp),    intent(out) :: a(32)
     type(green), intent(in)  :: b
 
@@ -80,7 +80,7 @@ contains
   end subroutine
 
   pure subroutine green_import_rvector(a, b)
-    ! Defines assignment from a real vector to a green object
+    ! Defines assignment from a real vector to a green object.
     type(green), intent(out) :: a
     real(dp),    intent(in)  :: b(32)
 
@@ -217,7 +217,7 @@ contains
   end function
 
   function green_get_dos(this) result(ldos)
-    ! Calculates the local density of states
+    ! Calculates the local density of states.
     real(dp)                 :: ldos
     class(green), intent(in) :: this
 
@@ -228,7 +228,7 @@ contains
   end function
 
   subroutine green_print(this)
-    ! Prints the green object to stdout
+    ! Prints the green object to stdout.
     class(green), intent(in) :: this 
 
     ! Print the matrix elements

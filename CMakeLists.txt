@@ -29,8 +29,8 @@ file(GLOB src_bin "src/tests/*.f90" "src/programs/*.f90")
 # Executables
 
 # Module tests
-add_executable(test_core "src/tests/test_core.f90" ${src_mod} ${src_ext})
-target_link_libraries(test_core ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+add_executable(test_foundation "src/tests/test_foundation.f90" ${src_mod} ${src_ext})
+target_link_libraries(test_foundation ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 add_executable(test_materials "src/tests/test_materials.f90" ${src_mod} ${src_ext})
 target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
