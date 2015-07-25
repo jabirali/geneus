@@ -44,7 +44,7 @@ module mod_conductor
     type(green), pointer      :: state_b       => null()                            ! Pointer to the right interface state for the current energy
 
     ! Miscellaneous variables
-    character(len=32)         :: type_string   =  ''                                ! This variable should be modified when class(conductor) subtypes are initialized
+    character(len=64)         :: type_string   =  ''                                ! This variable should be modified when class(conductor) subtypes are initialized
   contains
     ! These methods control the simulation process (should be invoked by the user)
     procedure                 :: initialize         => conductor_initialize         ! Initializes the internal state of the material
@@ -127,10 +127,9 @@ contains
     end if
 
     ! Modify the type string
+    this%type_string = color_yellow // 'CONDUCTOR' // color_none
     if (allocated(this%spinorbit)) then
-      this%type_string = color_yellow // 'CONDUCTOR (SOC)' // color_none
-    else
-      this%type_string = color_yellow // 'CONDUCTOR' // color_none
+      this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
     end if
   end function
 

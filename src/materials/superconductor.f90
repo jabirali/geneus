@@ -66,10 +66,9 @@ contains
     this%coupling = coupling
 
     ! Modify the type string
+    this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
     if (allocated(this%spinorbit)) then
-      this%type_string = color_green // 'SUPERCONDUCTOR (SOC)' // color_none
-    else
-      this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+      this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
     end if
   end function
 

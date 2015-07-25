@@ -53,10 +53,9 @@ contains
     end do
 
     ! Modify the type string
+    this%type_string = color_red // 'FERROMAGNET' // color_none
     if (allocated(this%spinorbit)) then
-      this%type_string = color_red // 'FERROMAGNET (SOC)' // color_none
-    else
-      this%type_string = color_red // 'FERROMAGNET' // color_none
+      this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
     end if
   end function
 

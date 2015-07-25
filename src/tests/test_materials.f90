@@ -6,7 +6,7 @@ program test_materials
   use mod_multilayer
   use mod_dos
   integer              :: n
-  real(dp)             :: erg(50)
+  real(dp)             :: erg(20)
   type(conductor)      :: m
   type(superconductor) :: s
   type(ferromagnet)    :: f
@@ -14,10 +14,10 @@ program test_materials
   call energy_range(erg) !, coupling = 0.2_dp)
 
   !f = ferromagnet(erg, [2.0_dp, 1.0_dp, 0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
-  f = ferromagnet(erg, exchange_xy(3.0_dp,-pi/4), thouless = 1/0.5_dp**2)
+  f = ferromagnet(erg, exchange_xy(3.0_dp,-pi/4), thouless = 1/0.5_dp**2, spinorbit = spinorbit_xy(2.0_dp,pi/4))
   !f = ferromagnet(erg, [0.0_dp,0.0_dp,0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
   s = superconductor(erg, coupling = 0.2_dp, thouless = 1/1.0_dp**2)! spinorbit = [pauli1, pauli2, pauli3])
-  m = conductor(erg, spinorbit = spinorbit_xy(2.0_dp,pi/4))!, spinorbit = [pauli1, pauli2, pauli3])
+  m = conductor(erg)!, spinorbit = [pauli1, pauli2, pauli3])
 
   !call f%spinorbit(1)%print
   !call f%spinorbit(2)%print
@@ -58,9 +58,9 @@ program test_materials
   !end do
 
   do n=1,5
+    call m%update
     call f%update
     call s%update
-    call m%update
     !call s%update
     !call f%update
   end do
