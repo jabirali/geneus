@@ -14,9 +14,10 @@ program test_materials
   call energy_range(erg, coupling = 0.2_dp)
 
   !f = ferromagnet(erg, [2.0_dp, 1.0_dp, 0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
-  f = ferromagnet(erg, exchange_xy(3.0_dp,0.15*pi), spinorbit = spinorbit_xy(2.0_dp,pi/4))
-  s = superconductor(erg, coupling = 0.2_dp)! spinorbit = [pauli1, pauli2, pauli3])
-  m = conductor(erg)!, spinorbit = [pauli1, pauli2, pauli3])
+  f = ferromagnet(erg, exchange_xy(3.0_dp,-pi/4), spinorbit = spinorbit_xy(2.0_dp,pi/4), thouless = 1/0.5_dp**2)
+  !f = ferromagnet(erg, [0.0_dp,0.0_dp,0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
+  s = superconductor(erg, coupling = 0.2_dp, thouless = 1/1.0_dp**2)! spinorbit = [pauli1, pauli2, pauli3])
+  !m = conductor(erg)!, spinorbit = [pauli1, pauli2, pauli3])
 
   !call f%spinorbit(1)%print
   !call f%spinorbit(2)%print
@@ -28,8 +29,8 @@ program test_materials
   !call m%spinorbit(2)%print
   !call m%spinorbit(3)%print
 
-  call connect(f, s, 0.20_dp, 0.20_dp)
-  !call connect(s, m, 0.20_dp, 0.20_dp)
+  call connect(f, s, 0.33_dp, 0.33_dp)
+  !call connect(s, f, 0.20_dp, 0.20_dp)
   !call connect(m, f, 0.3_dp, 0.3_dp)
 
   !open(unit=1, file='test_materials.dat')
@@ -45,33 +46,33 @@ program test_materials
 
   ! Scalar and array exchange
 
-  open(unit=1, file='test_materials.dat')
-  call f%write_dos(1, 0.0_dp, 1.0_dp)
-  call s%write_dos(1, 1.0_dp, 2.0_dp)
-  call m%write_dos(1, 2.0_dp, 3.0_dp)
-  close(unit=1)
+  !open(unit=1, file='test_materials.dat')
+  !call f%write_dos(1, 0.0_dp, 1.0_dp)
+  !call s%write_dos(1, 1.0_dp, 2.0_dp)
+  !call m%write_dos(1, 2.0_dp, 3.0_dp)
+  !close(unit=1)
 
   !call s%internals_update
-  do n=1,128
-    print *,s%get_gap(s%location(n))
-  end do
+  !do n=1,128
+  !  print *,s%get_gap(s%location(n))
+  !end do
 
-  !do n=1,3
+  do n=1,5
     call f%update
-    !call s%update
+    call s%update
     !call m%update
     !call s%update
     !call f%update
-  !end do
-
-  do n=1,128
-    print *,s%get_gap(s%location(n))
   end do
+
+  !do n=1,128
+  !  print *,s%get_gap(s%location(n))
+  !end do
 
   open(unit=1, file='test_materials.dat')
   call f%write_dos(1, 0.0_dp, 1.0_dp)
   call s%write_dos(1, 1.0_dp, 2.0_dp)
-  call m%write_dos(1, 2.0_dp, 3.0_dp)
+  !call m%write_dos(1, 2.0_dp, 3.0_dp)
   close(unit=1)
 
 
