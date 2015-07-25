@@ -1,9 +1,9 @@
 ! This module defines the data type 'superconductor', which models the physical state of a superconductor. The type is
-! a member of class(conductor), and thus inherits internal structure and generic methods defined in module_conductor.
+! a member of class(conductor), and thus inherits the internal structure and generic methods defined in mod_conductor.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-07-23
+! Updated: 2015-07-25
 
 module mod_superconductor
   use mod_system
@@ -19,7 +19,7 @@ module mod_superconductor
     complex(dp), allocatable :: gap(:)                                              ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
   contains
     procedure                :: usadel_equation  => superconductor_usadel_equation  ! Differential equation that describes the superconductor
-    procedure                :: update_fields    => superconductor_update_fields    ! Updates the superconducting order parameter from the Green's function
+    procedure                :: update_fields    => superconductor_update_fields    ! Updates the superconducting order parameter from the Green's functions
     procedure                :: set_gap          => superconductor_set_gap          ! Updates the superconducting order parameter from a given scalar
     procedure                :: get_gap          => superconductor_get_gap          ! Returns the superconducting order parameter at a given position
     procedure                :: get_gap_mean     => superconductor_get_gap_mean     ! Returns the superconducting order parameter average in the material
@@ -34,6 +34,11 @@ module mod_superconductor
     module procedure superconductor_construct
   end interface
 contains
+
+  !--------------------------------------------------------------------------------!
+  !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
+  !--------------------------------------------------------------------------------!
+
   pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points, spinorbit) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
@@ -43,7 +48,7 @@ contains
     real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
-    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: zero coupling)
+    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: conductor default)
     integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
@@ -85,6 +90,23 @@ contains
     call conductor_destruct(this%conductor)
   end subroutine
 
+  pure subroutine superconductor_initialize(this, gap)
+    ! Redefine the default initializer.
+    class(superconductor), intent(inout) :: this
+    complex(dp),           intent(in   ) :: gap
+    integer                              :: n, m
+
+    ! Call the superclass initializer
+    call this%conductor%initialize(gap)
+
+    ! Update the superconducting gap
+    call this%set_gap(gap)
+  end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                   IMPLEMENTATION OF SUPERCONDUCTOR METHODS                     !
+  !--------------------------------------------------------------------------------!
+
   subroutine superconductor_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
@@ -121,9 +143,10 @@ contains
     allocate(dgap_real(size(this%energy)))
     allocate(dgap_imag(size(this%energy)))
 
+    ! Iterate over the stored Green's functions
     do n = 1,size(this%location)
       do m = 1,size(this%energy)
-        ! Calculate the singlet component of the anomalous Green's function at this point
+        ! Calculate the singlet component of the anomalous Green's function
         singlet     = ( this%state(m,n)%get_f_s() - conjg(this%state(m,n)%get_ft_s()) )/2.0_dp
 
         ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
@@ -147,6 +170,10 @@ contains
     deallocate(dgap_real)
     deallocate(dgap_imag)
   end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
+  !--------------------------------------------------------------------------------!
 
   pure subroutine superconductor_set_gap(this, gap)
     ! Updates the superconducting order parameter from a scalar.
@@ -195,18 +222,5 @@ contains
     real(dp),              intent(in   ) :: temperature
 
     this%temperature = temperature
-  end subroutine
-
-  pure subroutine superconductor_initialize(this, gap)
-    ! Redefine the default initializer.
-    class(superconductor), intent(inout) :: this
-    complex(dp),           intent(in   ) :: gap
-    integer                              :: n, m
-
-    ! Call the superclass initializer
-    call this%conductor%initialize(gap)
-
-    ! Update the superconducting gap
-    call this%set_gap(gap)
   end subroutine
 end module

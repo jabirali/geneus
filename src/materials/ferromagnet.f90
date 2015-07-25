@@ -1,9 +1,9 @@
 ! This module defines the data type 'ferromagnet', which models the physical state of a ferromagnet. The type is a
-! member of class(conductor), and thus inherits internal structure and generic methods defined in module_conductor.
+! member of class(conductor), and thus inherits the internal structure and generic methods defined in mod_conductor.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-07-23
+! Updated: 2015-07-25
 
 module mod_ferromagnet
   use mod_system
@@ -26,8 +26,13 @@ module mod_ferromagnet
     module procedure ferromagnet_construct_homogeneous
   end interface
 contains
+
+  !--------------------------------------------------------------------------------!
+  !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
+  !--------------------------------------------------------------------------------!
+
   pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points, spinorbit) result(this)
-    ! Constructs a ferromagnet object initialized to a weak superconductor
+    ! Constructs a ferromagnet object initialized to a weak superconductor.
     type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
     real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
     real(dp),    intent(in)           :: exchange(3)  ! Magnetic exchange field
@@ -60,7 +65,7 @@ contains
   end function
 
   pure subroutine ferromagnet_destruct(this)
-    ! Define the type destructor
+    ! Define the type destructor.
     type(ferromagnet), intent(inout) :: this
 
     ! Deallocate memory (if necessary)
@@ -71,6 +76,10 @@ contains
     ! Call the superclass destructor
     call conductor_destruct(this%conductor)
   end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !
+  !--------------------------------------------------------------------------------!
 
   subroutine ferromagnet_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
@@ -95,6 +104,10 @@ contains
     d2g  = d2g  + P  * g  + g  * Pt
     d2gt = d2gt + Pt * gt + gt * P
   end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
+  !--------------------------------------------------------------------------------!
 
   pure function ferromagnet_get_exchange(this, location) result(h)
     ! Returns the magnetic exchange field at the given location.

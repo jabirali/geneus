@@ -1,5 +1,12 @@
-! CR: 2015-07-23
-! UP   -- " --
+! This module defines a set of subroutines and functions that are useful for working with multilayer hybrid structures,
+! such as those defined in mod_conductor, mod_superconductor, and mod_ferromagnet. The procedures include a subroutine
+! 'connect' for creating interfaces between class(conductor) materials;  subroutines 'initialize_all' and 'update_all'
+! for manipulating the internal states of all materials in a hybrid structure; and a set of functions that are useful
+! for providing the arguments to class(conductor) constructors.
+!
+! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
+! Created: 2015-07-11
+! Updated: 2015-07-25
 
 module mod_multilayer
   use mod_system
@@ -8,6 +15,11 @@ module mod_multilayer
   use mod_ferromagnet
   implicit none
 contains
+
+  !--------------------------------------------------------------------------------!
+  !                PROCEDURES FOR ASSEMBLING MULTILAYER STRUCTURES                 !
+  !--------------------------------------------------------------------------------!
+
   subroutine connect(material_a, material_b, conductance_a, conductance_b)
     ! This subroutine connects two class(conductor) materials by a tunneling interface, and may
     ! therefore be used to assemble individual material layers to a multilayer hybrid structure.
@@ -24,6 +36,10 @@ contains
     material_a % conductance_b = conductance_a
     material_b % conductance_a = conductance_b
   end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !               PROCEDURES FOR MANIPULATING MULTILAYER STRUCTURES                !
+  !--------------------------------------------------------------------------------!
 
   subroutine initialize_all(m, gap)
     ! This subroutine is used to initialize the physical state of a multilayer hybrid system to a BCS superconductor,
@@ -99,6 +115,10 @@ contains
     ! Finally, update the state of the specified material itself
     call m % update
   end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !              PROCEDURES FOR CLASS(CONDUCTOR) CONSTRUCTOR ARGUMENTS             !
+  !--------------------------------------------------------------------------------!
 
   pure subroutine energy_range(array, coupling, maximum, padding)
     ! Initializes an array of energies, which can be passed on to class(conductor) constructor methods.  The initialized

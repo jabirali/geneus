@@ -57,7 +57,7 @@ program test_materials
   !  print *,s%get_gap(s%location(n))
   !end do
 
-  do n=1,5
+  do n=1,2
     call m%update
     call f%update
     call s%update

@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-23
+! Updated: 2015-07-25
 
 module mod_conductor
   use mod_system
@@ -46,8 +46,8 @@ module mod_conductor
     ! Miscellaneous variables
     character(len=64)         :: type_string   =  ''                                ! This variable should be modified when class(conductor) subtypes are initialized
   contains
-    ! These methods control the simulation process (should be invoked by the user)
-    procedure                 :: initialize         => conductor_initialize         ! Initializes the internal state of the material
+    ! These methods control the simulation process (can be invoked by the user)
+    procedure                 :: initialize         => conductor_initialize         ! Resets  the internal state of the material
     procedure                 :: update             => conductor_update             ! Updates the internal state of the material
 
     ! These methods contain the equations that describe the material (should not be invoked by the user)
@@ -134,7 +134,7 @@ contains
   end function
 
   pure subroutine conductor_destruct(this)
-    ! Define the type destructor
+    ! Define the type destructor.
     type(conductor), intent(inout) :: this
 
     ! Deallocate memory (if necessary)
@@ -227,7 +227,7 @@ contains
     call this%update_fields   
   contains
     subroutine ode(z, u, f)
-      ! Definition of the differential equation u'=f(z,u)
+      ! Definition of the differential equation u'=f(z,u).
       real(dp), intent(in)  :: z
       real(dp), intent(in)  :: u(32)
       real(dp), intent(out) :: f(32)
@@ -256,7 +256,7 @@ contains
     end subroutine
 
     subroutine bc(ua, ub, bca, bcb)
-      ! Definition of the boundary conditions bca=g(ua) and bcb=g(ub)
+      ! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
       real(dp), intent(in)  :: ua(32)
       real(dp), intent(in)  :: ub(32)
       real(dp), intent(out) :: bca(16)
@@ -396,6 +396,7 @@ contains
   end subroutine
 
   subroutine conductor_update_fields(this)
+    ! Define an interface used by class(conductor) objects to self-consistently update physical fields.
     class(conductor), intent(inout) :: this
 
     continue
