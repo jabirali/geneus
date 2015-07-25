@@ -183,7 +183,7 @@ contains
 
     ! Status information
     if (this%information >= 0) then
-      write(stdout,'(a)') color_white // ' :: ' // color_none // trim(this%type_string)
+      write(stdout,'(a)') color_white // ' :: ' // color_none // trim(this%type_string) // '                                     '
     end if
 
     do n=1,size(this%energy)
