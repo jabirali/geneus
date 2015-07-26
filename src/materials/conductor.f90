@@ -354,14 +354,13 @@ contains
     class(conductor), intent(in   ) :: this
     type(spin),       intent(inout) :: r1, rt1
     type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
-    type(spin),       pointer       :: g0, gt0, dg0, dgt0
     type(spin)                      :: N0, Nt0
 
     ! Rename the state in the material to the left
-    g0   => this%state_a%g
-    gt0  => this%state_a%gt
-    dg0  => this%state_a%dg
-    dgt0 => this%state_a%dgt
+    associate(g0   => this%state_a%g, &
+              gt0  => this%state_a%gt,&
+              dg0  => this%state_a%dg,&
+              dgt0 => this%state_a%dgt)
 
     ! Calculate the normalization matrices
     N0  = spin_inv( pauli0 - g0*gt0 )
@@ -370,6 +369,8 @@ contains
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r1  = dg1  - this%conductance_a*( pauli0 - g1*gt0 )*N0*(  g1  - g0  )
     rt1 = dgt1 - this%conductance_a*( pauli0 - gt1*g0 )*Nt0*( gt1 - gt0 )
+
+    end associate
   end subroutine
 
   subroutine conductor_interface_tunnel_b(this, g2, gt2, dg2, dgt2, r2, rt2)
@@ -377,14 +378,13 @@ contains
     class(conductor), intent(in   ) :: this
     type(spin),       intent(inout) :: r2, rt2
     type(spin),       intent(in   ) :: g2, gt2, dg2, dgt2
-    type(spin),       pointer       :: g3, gt3, dg3, dgt3
     type(spin)                      :: N3, Nt3
 
     ! Rename the state in the material to the right
-    g3   => this%state_b%g
-    gt3  => this%state_b%gt
-    dg3  => this%state_b%dg
-    dgt3 => this%state_b%dgt
+    associate(g3   => this%state_b%g, &
+              gt3  => this%state_b%gt,&
+              dg3  => this%state_b%dg,&
+              dgt3 => this%state_b%dgt)
   
     ! Calculate the normalization matrices
     N3  = spin_inv( pauli0 - g3*gt3 )
@@ -393,6 +393,8 @@ contains
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r2  = dg2  - this%conductance_b*( pauli0 - g2*gt3 )*N3*(  g3  - g2  )
     rt2 = dgt2 - this%conductance_b*( pauli0 - gt2*g3 )*Nt3*( gt3 - gt2 )
+
+    end associate
   end subroutine
 
   subroutine conductor_update_fields(this)
@@ -461,22 +463,17 @@ contains
     type(conductor),  target, intent(in   ) :: this
     type(spin),               intent(in   ) :: g, gt, dg, dgt
     type(spin),               intent(inout) :: d2g, d2gt
-
     type(spin)                              :: N,  Nt
-    type(spin),       pointer               :: Ax, Axt
-    type(spin),       pointer               :: Ay, Ayt
-    type(spin),       pointer               :: Az, Azt
-    type(spin),       pointer               :: A2, A2t
+
+    ! Rename the spin-orbit coupling matrices
+    associate(Ax => this % Ax, Axt => this % Axt,&
+              Ay => this % Ay, Ayt => this % Ayt,&
+              Az => this % Az, Azt => this % Azt,&
+              A2 => this % A2, A2t => this % A2t)
 
     ! Calculate the normalization matrices
     N   = spin_inv( pauli0 - g*gt )
     Nt  = spin_inv( pauli0 - gt*g )
-
-    ! Rename the spin-orbit coupling matrices
-    Ax => this % Ax;  Axt => this % Axt;
-    Ay => this % Ay;  Ayt => this % Ayt;
-    Az => this % Az;  Azt => this % Azt;
-    A2 => this % A2;  A2t => this % A2t;
 
     ! Update the second derivatives of the Riccati parameters
     d2g  = d2g             + (A2 * g - g * A2t)                             &
@@ -492,6 +489,8 @@ contains
          + (2.0_dp,0.0_dp) * (Azt * gt + gt * Az) * N * (Az + g * Azt * gt) &
          - (0.0_dp,2.0_dp) * (Azt + gt * Az * g) * Nt * dgt                 &
          - (0.0_dp,2.0_dp) * dgt * N * (g * Azt * gt + Az)
+
+    end associate
   end subroutine
 
   subroutine spinorbit_interface_a(this, g1, gt1, dg1, dgt1, r1, rt1)
@@ -499,15 +498,16 @@ contains
     type(conductor), target, intent(in   ) :: this
     type(spin),              intent(in   ) :: g1, gt1, dg1, dgt1
     type(spin),              intent(inout) :: r1, rt1
-    type(spin),      pointer               :: Az, Azt
 
     ! Rename the spin-orbit coupling matrices
-    Az   => this % Az
-    Azt  => this % Azt
+    associate(Az  => this % Az,&
+              Azt => this % Azt)
 
     ! Update the residuals
     r1  = r1  - (0.0_dp,1.0_dp) * (Az  * g1  + g1  * Azt)
     rt1 = rt1 + (0.0_dp,1.0_dp) * (Azt * gt1 + gt1 * Az )
+
+    end associate
   end subroutine
 
   subroutine spinorbit_interface_b(this, g2, gt2, dg2, dgt2, r2, rt2)
@@ -515,14 +515,15 @@ contains
     type(conductor), target, intent(in   ) :: this
     type(spin),              intent(in   ) :: g2, gt2, dg2, dgt2
     type(spin),              intent(inout) :: r2, rt2
-    type(spin),      pointer               :: Az, Azt
 
     ! Rename the spin-orbit coupling matrices
-    Az   => this % Az
-    Azt  => this % Azt
+    associate(Az   => this % Az,&
+              Azt  => this % Azt)
 
     ! Update the residuals
     r2  = r2  - (0.0_dp,1.0_dp) * (Az  * g2  + g2  * Azt)
     rt2 = rt2 + (0.0_dp,1.0_dp) * (Azt * gt2 + gt2 * Az )  
+
+    end associate
   end subroutine
 end module

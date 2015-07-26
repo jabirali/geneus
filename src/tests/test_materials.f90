@@ -6,7 +6,7 @@ program test_materials
   use mod_multilayer
   use mod_dos
   integer              :: n
-  real(dp)             :: erg(20)
+  real(dp)             :: erg(100)
   type(conductor)      :: m
   type(superconductor) :: s
   type(ferromagnet)    :: f
@@ -57,7 +57,7 @@ program test_materials
   !  print *,s%get_gap(s%location(n))
   !end do
 
-  do n=1,2
+  do n=1,1
     call m%update
     call f%update
     call s%update
