@@ -69,7 +69,7 @@ program test_materials
   !  print *,s%get_gap(s%location(n))
   !end do
 
-  open(unit=1, file='test_materials.dat')
+  open(newunit=n, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
   call f%write_dos(1, 0.0_dp, 1.0_dp)
   call s%write_dos(1, 1.0_dp, 2.0_dp)
   !call m%write_dos(1, 2.0_dp, 3.0_dp)

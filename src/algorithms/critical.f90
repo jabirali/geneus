@@ -26,14 +26,20 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
   complex(dp),           optional, intent(in   ) :: gap
 
   ! Declare data types for internal variables
-  integer                                        :: bisections_ = 12
-  integer                                        :: iterations_ =  5
-  real(dp)                                       :: lower_      =  0.0000_dp
-  real(dp)                                       :: upper_      =  1.0000_dp
-  complex(dp)                                    :: gap_        =  0.0001_dp
+  integer                                        :: bisections_
+  integer                                        :: iterations_
+  real(dp)                                       :: lower_     
+  real(dp)                                       :: upper_     
+  complex(dp)                                    :: gap_       
   integer                                        :: n, m
 
-  ! Handle optional arguments
+  ! Set default values, and handle optional arguments
+  bisections_ = 12
+  iterations_ =  5
+  lower_      =  0.0000_dp
+  upper_      =  1.0000_dp
+  gap_        =  0.0001_dp
+
   call process_arguments
 
   ! Set the system temperature to the midpoint of the search space

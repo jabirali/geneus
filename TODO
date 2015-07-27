@@ -1,3 +1,5 @@
 - Extend mod_spin with spin(3) vector methods, such as spin3_exp_integer and spin3_add_spin3, to simplify the ferromagnet_usadel_equation and spinorbit_usadel_equation implementations
 - Extend energy_range to include the possibility of negative energies
 - Extend the ferromagnet constructor to allow exchange field initialization from a function
+- Use namelists to construct and read config files
+- Use interfaces for spinorbit_* with IMPORT CONDUCTOR to move these procedures to a separate module without requiring submodules
