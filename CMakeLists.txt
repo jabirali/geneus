@@ -2,7 +2,7 @@
 #
 # Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 # Created: 2015-07-12
-# Updated: 2015-07-16
+# Updated: 2015-07-28
 
 
 
@@ -26,20 +26,21 @@ find_package(BLAS   REQUIRED)
 find_package(LAPACK REQUIRED)
 
 # Source files
-file(GLOB src_ext "src/external/*.f" "src/external/*.f90")
-file(GLOB src_mod "src/foundation/*.f90" "src/materials/*.f90" "src/algorithms/*.f90")
-file(GLOB src_bin "src/tests/*.f90" "src/programs/*.f90")
+file(GLOB src_ext77 "src/external/bvp_la.f")
+file(GLOB src_ext90 "src/external/bvp_m.f" "src/external/pchip.f")
+file(GLOB src_mod   "src/foundation/*.f" "src/materials/*.f" "src/algorithms/*.f")
+file(GLOB src_bin   "src/tests/*.f" "src/programs/*.f")
 
 # Executables
 
 # Module tests
-add_executable(test_foundation "src/tests/test_foundation.f90" ${src_mod} ${src_ext})
+add_executable(test_foundation "src/tests/test_foundation.f" ${src_mod} ${src_ext77} ${src_ext90})
 target_link_libraries(test_foundation ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_executable(test_materials "src/tests/test_materials.f90" ${src_mod} ${src_ext})
+add_executable(test_materials "src/tests/test_materials.f" ${src_mod} ${src_ext77} ${src_ext90})
 target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_executable(test_critical "src/tests/test_critical.f90" ${src_mod} ${src_ext})
+add_executable(test_critical "src/tests/test_critical.f" ${src_mod} ${src_ext77} ${src_ext90})
 target_link_libraries(test_critical ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 
@@ -48,7 +49,7 @@ target_link_libraries(test_critical ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 ###############################################################################
 
 # Set the target directory
-#set(EXECUTABLE_OUTPUT_PATH "bin")
+set(EXECUTABLE_OUTPUT_PATH "../bin")
 
 # Set the build type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -67,13 +68,14 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
 
   # Flags that apply to external files (imported from other projects)
-  set_source_files_properties(${src_ext} PROPERTIES COMPILE_FLAGS "-std=legacy")
+  set_source_files_properties(${src_ext77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
+  set_source_files_properties(${src_ext90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
 
   # Flags that apply to internal files (produced as part of this project)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008 -Wconversion -pedantic -fimplicit-none -fcheck=all")
+    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
   elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008")
+    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
   endif()
 endif()
 
