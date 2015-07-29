@@ -7,13 +7,12 @@
 
 program test_critical
   use mod_system
-  use mod_superconductor
-  use mod_multilayer
+  use mod_hybrid
   use mod_critical
   implicit none
 
   ! Declare variables and initialize their default values
-  type(superconductor)  :: material              ! Superconductor object
+  type(superconductor)  :: s                     ! Superconductor object
   real(dp), allocatable :: domain(:)             ! Discretized energy domain
 
   integer               :: energies   = 600      ! Number of energies to use in the discretization
@@ -41,10 +40,10 @@ program test_critical
   call energy_range(domain, coupling = coupling)
 
   ! Initialize the superconductor
-  material = superconductor(domain, coupling = coupling, thouless = 1/length**2, scattering = scattering)
+  s = superconductor(domain, coupling = coupling, thouless = 1/length**2, scattering = scattering)
 
   ! Perform the binary search for the critical temperature
-  call critical_temperature(material, bisections = bisections, iterations = iterations, lower = lower, upper = upper)
+  call critical_temperature(s, bisections = bisections, iterations = iterations, lower = lower, upper = upper)
 
   ! Deallocate memory
   deallocate(domain)

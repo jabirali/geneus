@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-07-25
+! Updated: 2015-07-29
 
 module mod_superconductor
   use mod_system
@@ -14,19 +14,25 @@ module mod_superconductor
 
   ! Type declaration
   type, extends(conductor) :: superconductor
-    real(dp)                 :: temperature = 1e-6_dp                               ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(dp)                 :: coupling                                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
-    complex(dp), allocatable :: gap(:)                                              ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
+    ! These parameters control the physical characteristics of the material 
+    complex(dp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
+    real(dp)                 :: temperature         =  1e-6_dp                            ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(dp)                 :: coupling                                                  ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
-    procedure                :: usadel_equation  => superconductor_usadel_equation  ! Differential equation that describes the superconductor
-    procedure                :: update_fields    => superconductor_update_fields    ! Updates the superconducting order parameter from the Green's functions
-    procedure                :: set_gap          => superconductor_set_gap          ! Updates the superconducting order parameter from a given scalar
-    procedure                :: get_gap          => superconductor_get_gap          ! Returns the superconducting order parameter at a given position
-    procedure                :: get_gap_mean     => superconductor_get_gap_mean     ! Returns the superconducting order parameter average in the material
-    procedure                :: get_temperature  => superconductor_get_temperature  ! Returns the current temperature of the material
-    procedure                :: set_temperature  => superconductor_set_temperature  ! Updates the current temperature of the material
-    procedure                :: initialize       => superconductor_initialize       ! Initializes the internal state of the material
-    final                    ::                     superconductor_destruct         ! Type destructor
+    ! These methods contain the equations that describe superconductors
+    procedure                :: init                => superconductor_init                ! Initializes the Green's functions
+    procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
+    procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from the Green's functions
+
+    ! These methods are used to access and mutate the parameters
+    procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
+    procedure                :: get_gap             => superconductor_get_gap             ! Returns the superconducting order parameter at a given position
+    procedure                :: get_gap_mean        => superconductor_get_gap_mean        ! Returns the superconducting order parameter averaged over the material
+    procedure                :: get_temperature     => superconductor_get_temperature     ! Returns the current temperature of the material
+    procedure                :: set_temperature     => superconductor_set_temperature     ! Updates the current temperature of the material
+
+    ! These methods are used by internal subroutines
+    final                    ::                        superconductor_destruct            ! Type destructor
   end type
 
   ! Type constructor
@@ -90,14 +96,14 @@ contains
     call conductor_destruct(this%conductor)
   end subroutine
 
-  pure subroutine superconductor_initialize(this, gap)
+  pure subroutine superconductor_init(this, gap)
     ! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
     complex(dp),           intent(in   ) :: gap
     integer                              :: n, m
 
     ! Call the superclass initializer
-    call this%conductor%initialize(gap)
+    call this%conductor%init(gap)
 
     ! Update the superconducting gap
     call this%set_gap(gap)
@@ -107,9 +113,10 @@ contains
   !                   IMPLEMENTATION OF SUPERCONDUCTOR METHODS                     !
   !--------------------------------------------------------------------------------!
 
-  subroutine superconductor_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
-    ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
+  subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+    ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
+    complex(dp),           intent(in   ) :: e
     real(dp),              intent(in)    :: z
     type(spin),            intent(in)    :: g, gt, dg, dgt
     type(spin),            intent(inout) :: d2g, d2gt
@@ -120,14 +127,14 @@ contains
     gapt = conjg(gap)
 
     ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-    call this%conductor%usadel_equation(z, g, gt, dg, dgt, d2g, d2gt)
+    call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
 
     ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
     d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
     d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
   end subroutine
 
-  subroutine superconductor_update_fields(this)
+  subroutine superconductor_update_posthook(this)
     ! Updates the superconducting order parameter based on the Green's functions of the system.
     class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
     real(dp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
@@ -136,6 +143,9 @@ contains
     real(dp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
     integer                              :: err                       ! PCHIP error status
     integer                              :: n, m                      ! Loop variables
+
+    ! Call the superclass posthook
+    call this%conductor%update_posthook
 
     ! Allocate workspace memory
     allocate(gap_real(size(this%energy)))
@@ -147,7 +157,7 @@ contains
     do n = 1,size(this%location)
       do m = 1,size(this%energy)
         ! Calculate the singlet component of the anomalous Green's function
-        singlet     = ( this%state(m,n)%get_f_s() - conjg(this%state(m,n)%get_ft_s()) )/2.0_dp
+        singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_dp
 
         ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
         gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)

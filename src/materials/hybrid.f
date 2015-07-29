@@ -1,15 +1,15 @@
-! This module defines a set of subroutines and functions that are useful for working with multilayer hybrid structures,
-! such as those defined in mod_conductor, mod_superconductor, and mod_ferromagnet. The procedures include a subroutine
-! 'connect' for creating interfaces between class(conductor) materials;  subroutines 'initialize_all' and 'update_all'
-! for manipulating the internal states of all materials in a hybrid structure; and a set of functions that are useful
-! for providing the arguments to class(conductor) constructors.
+! This module defines a set of subroutines and functions that are useful for working with multilayer hybrid structures.
+! The procedures include the subroutine 'connect' for creating interfaces between class(material) objects; subroutines 
+! 'init_all' and 'update_all' for manipulating the internal states of all materials in a hybrid structure; and a set of
+! functions that are useful for initializing arguments that will be passed to the class(material) constructor methods.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-25
+! Updated: 2015-07-29
 
-module mod_multilayer
+module mod_hybrid
   use mod_system
+  use mod_material
   use mod_conductor
   use mod_superconductor
   use mod_ferromagnet
@@ -21,12 +21,12 @@ contains
   !--------------------------------------------------------------------------------!
 
   subroutine connect(material_a, material_b, conductance_a, conductance_b)
-    ! This subroutine connects two class(conductor) materials by a tunneling interface, and may
+    ! This subroutine connects two class(material) materials by a tunneling interface, and may
     ! therefore be used to assemble individual material layers to a multilayer hybrid structure.
-    class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
-    class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
-    real(dp),                 intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
-    real(dp),                 intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
+    class(material), target, intent(inout) :: material_a      ! This object represents the left  material
+    class(material), target, intent(inout) :: material_b      ! This object represents the right material
+    real(dp),                intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
+    real(dp),                intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
     
     ! Update the internal material pointers
     material_a % material_b => material_b
@@ -41,42 +41,42 @@ contains
   !               PROCEDURES FOR MANIPULATING MULTILAYER STRUCTURES                !
   !--------------------------------------------------------------------------------!
 
-  subroutine initialize_all(m, gap)
+  subroutine init_all(m, gap)
     ! This subroutine is used to initialize the physical state of a multilayer hybrid system to a BCS superconductor,
     ! where the system should have been assembled by previous calls to the routine 'connect'.  The subroutine takes a
-    ! single class(conductor) object 'm' as its argument,  and initializes the entire associated multilayer structure
+    ! single class(material) object 'm' as its argument,  and initializes the entire associated multilayer structure
     ! to a BCS state with a given gap by jumping from layer to layer, and calling their respective initialize-methods.
-    class(conductor), target     :: m
-    class(conductor), pointer    :: p
-    complex(dp),      intent(in) :: gap
+    class(material), target     :: m
+    class(material), pointer    :: p
+    complex(dp),     intent(in) :: gap
 
     ! Initialize the specified material
-    call m % initialize(gap)
+    call m % init(gap)
 
     ! Start at the specified material, move left  until a vacuum interface is located, and initialize all layers on the way
     p => m
     do while (associated(p % material_a))
       p => p % material_a
-      call p % initialize(gap)
+      call p % init(gap)
     end do
 
     ! Start at the specified material, move right until a vacuum interface is located, and initialize all layers on the way
     p => m
     do while (associated(p % material_b))
       p => p % material_b
-      call p % initialize(gap)
+      call p % init(gap)
     end do
   end subroutine
 
   subroutine update_all(m)
     ! This subroutine is used to update the physical state of a multilayer hybrid system, where the system should have
-    ! been assembled by previous calls to the routine 'connect'. The subroutine takes a single class(conductor) object
+    ! been assembled by previous calls to the routine 'connect'. The subroutine takes a single class(material) object
     ! 'm' as its argument,  and first updates the states of all layers to the left of 'm',  then updates the states of 
     ! all materials to the right of 'm', and then finally updates the state of 'm' itself. Since 'm' will be the final
     ! material updated, and therefore the material with the most accurately described state, this should be a layer of
     ! particular physical significance, such as the superconductor investigated in a critical temperature calculation.
-    class(conductor), target  :: m
-    class(conductor), pointer :: p
+    class(material), target  :: m
+    class(material), pointer :: p
 
     ! Start at the specified material
     p => m
@@ -121,7 +121,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine energy_range(array, coupling, maximum, padding)
-    ! Initializes an array of energies, which can be passed on to class(conductor) constructor methods.  The initialized
+    ! Initializes an array of energies, which can be passed on to class(material) constructor methods.  The initialized
     ! values depend on the optional arguments.  If none of these arguments are provided, then the array is initilized to
     ! linearly spaced values in the range [0.0,1.5]. If the argument 'positive' is set to false, then the array includes
     ! negative values as well, resulting in linearly spaced values in the range [-1.5,1.5]. The default limit of 1.5 can

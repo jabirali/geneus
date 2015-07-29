@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-07-25
+! Updated: 2015-07-29
 
 module mod_ferromagnet
   use mod_system
@@ -14,11 +14,17 @@ module mod_ferromagnet
 
   ! Type declaration
   type, extends(conductor) :: ferromagnet
-    real(dp), allocatable    :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
+    ! These parameters control the physical characteristics of the material 
+    real(dp), allocatable    :: exchange(:,:)                                            ! Magnetic exchange field as a function of position
   contains
-    procedure                :: usadel_equation       => ferromagnet_usadel_equation  ! Differential equation that describes the superconductor
-    procedure                :: get_exchange          => ferromagnet_get_exchange     ! Returns the magnetic exchange field at a given position
-    final                    ::                          ferromagnet_destruct         ! Type destructor
+    ! These methods contain the equations that describe ferromagnets
+    procedure                :: diffusion_equation    => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
+
+    ! These methods are used to access and mutate the parameters
+    procedure                :: get_exchange          => ferromagnet_get_exchange        ! Returns the magnetic exchange field at a given position
+
+    ! These methods are used by internal subroutines
+    final                    ::                          ferromagnet_destruct            ! Type destructor
   end type
 
   ! Type constructor
@@ -81,9 +87,10 @@ contains
   !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !
   !--------------------------------------------------------------------------------!
 
-  subroutine ferromagnet_usadel_equation(this, z, g, gt, dg, dgt, d2g, d2gt)
-    ! Use the Usadel equation to calculate the second derivatives of the Riccati parameters at point z.
+  subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+    ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(ferromagnet), intent(in   ) :: this
+    complex(dp),        intent(in   ) :: e
     real(dp),           intent(in   ) :: z
     type(spin),         intent(in   ) :: g, gt, dg, dgt
     type(spin),         intent(inout) :: d2g, d2gt
@@ -93,12 +100,12 @@ contains
     ! Lookup the magnetic exchange field
     h  = this%get_exchange(z)/this%thouless
 
-    ! Calculate the exchange field factors in the Usadel equation
+    ! Calculate the exchange field factors in the diffusion equation
     P  = (0.0_dp,-1.0_dp) * (h(1)*pauli1 + h(2)*pauli2 + h(3)*pauli3)
     Pt = (0.0_dp,+1.0_dp) * (h(1)*pauli1 - h(2)*pauli2 + h(3)*pauli3)
 
     ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-    call this%conductor%usadel_equation(z, g, gt, dg, dgt, d2g, d2gt)
+    call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
 
     ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
     d2g  = d2g  + P  * g  + g  * Pt

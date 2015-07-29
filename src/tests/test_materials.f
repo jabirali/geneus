@@ -1,42 +1,23 @@
 
 program test_materials
-  use mod_conductor
-  use mod_superconductor
-  use mod_ferromagnet
-  use mod_multilayer
-  use mod_dos
+  use mod_hybrid
+  !use mod_dos
   integer              :: n
-  real(dp)             :: erg(100)
+  integer              :: u
+  real(dp)             :: erg(600)
   type(conductor)      :: m
   type(superconductor) :: s
   type(ferromagnet)    :: f
 
-  call energy_range(erg) !, coupling = 0.2_dp)
+  call energy_range(erg, coupling = 0.2_dp)
 
-  !f = ferromagnet(erg, [2.0_dp, 1.0_dp, 0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
   f = ferromagnet(erg, exchange_xy(3.0_dp,-pi/4), thouless = 1/0.5_dp**2, spinorbit = spinorbit_xy(2.0_dp,pi/4))
-  !f = ferromagnet(erg, [0.0_dp,0.0_dp,0.0_dp], spinorbit = [pauli1, pauli2, pauli3])
   s = superconductor(erg, coupling = 0.2_dp, thouless = 1/1.0_dp**2)! spinorbit = [pauli1, pauli2, pauli3])
   m = conductor(erg)!, spinorbit = [pauli1, pauli2, pauli3])
 
-  !call f%spinorbit(1)%print
-  !call f%spinorbit(2)%print
-  !call f%spinorbit(3)%print
-  !call s%spinorbit(1)%print
-  !call s%spinorbit(2)%print
-  !call s%spinorbit(3)%print
-  !call m%spinorbit(1)%print
-  !call m%spinorbit(2)%print
-  !call m%spinorbit(3)%print
-
   call connect(f, s, 0.33_dp, 0.33_dp)
   !call connect(s, f, 0.20_dp, 0.20_dp)
-  call connect(m, f, 0.3_dp, 0.3_dp)
-
-  !open(unit=1, file='test_materials.dat')
-  !call calculate_dos(s, iterations=2, unit=1)
-  !close(unit=1)
- 
+  call connect(s, m, 0.33_dp, 0.33_dp)
 
   !do n=1,size(f%location)
   !  f%exchange(1,n) = 0.1_dp*sin(1.57*f%location(n))
@@ -44,53 +25,44 @@ program test_materials
   !  f%exchange(3,n) = 0.1_dp
   !end do
 
-  ! Scalar and array exchange
+  !call calculate_dos(s, iterations=2, unit=1)
 
-  !open(unit=1, file='test_materials.dat')
-  !call f%write_dos(1, 0.0_dp, 1.0_dp)
-  !call s%write_dos(1, 1.0_dp, 2.0_dp)
-  !call m%write_dos(1, 2.0_dp, 3.0_dp)
-  !close(unit=1)
-
-  !call s%internals_update
-  !do n=1,128
-  !  print *,s%get_gap(s%location(n))
-  !end do
-
+  open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
+  call f%write_dos(u, 0.0_dp, 1.0_dp)
+  call s%write_dos(u, 1.0_dp, 2.0_dp)
+  call m%write_dos(u, 2.0_dp, 3.0_dp)
+  close(unit=u)
+ 
   do n=1,1
-    call m%update
     call f%update
+         open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
+         call f%write_dos(u, 0.0_dp, 1.0_dp)
+         call s%write_dos(u, 1.0_dp, 2.0_dp)
+         call m%write_dos(u, 2.0_dp, 3.0_dp)
+         close(unit=u)
     call s%update
-    !call s%update
-    !call f%update
+         open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
+         call f%write_dos(u, 0.0_dp, 1.0_dp)
+         call s%write_dos(u, 1.0_dp, 2.0_dp)
+         call m%write_dos(u, 2.0_dp, 3.0_dp)
+         close(unit=u)
+    call m%update
+         open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
+         call f%write_dos(u, 0.0_dp, 1.0_dp)
+         call s%write_dos(u, 1.0_dp, 2.0_dp)
+         call m%write_dos(u, 2.0_dp, 3.0_dp)
+         close(unit=u)
+    call s%update
+         open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
+         call f%write_dos(u, 0.0_dp, 1.0_dp)
+         call s%write_dos(u, 1.0_dp, 2.0_dp)
+         call m%write_dos(u, 2.0_dp, 3.0_dp)
+         close(unit=u)
   end do
 
-  !do n=1,128
-  !  print *,s%get_gap(s%location(n))
-  !end do
-
-  open(newunit=n, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
-  call f%write_dos(1, 0.0_dp, 1.0_dp)
-  call s%write_dos(1, 1.0_dp, 2.0_dp)
-  !call m%write_dos(1, 2.0_dp, 3.0_dp)
-  close(unit=1)
-
-
-  !call b%update
-  !print *,b%state(50,64)%get_dos()
-  !call c%update
-  !print *,c%state(50,64)%get_dos()
-  !call b%update
-  !print *,b%state(50,64)%get_dos()
-  !call a%update
-  !print *,a%state(50,64)%get_dos()
-  !call b%update
-  !print *,b%state(50,64)%get_dos()
-
-  !print *, metal%state(50,64)%get_dos()
-
-  !system = [ metal, metal, metal ]
-
-  !subroutine write_test(fd)
-  !end subroutine
+  open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
+  call f%write_dos(u, 0.0_dp, 1.0_dp)
+  call s%write_dos(u, 1.0_dp, 2.0_dp)
+  call m%write_dos(u, 2.0_dp, 3.0_dp)
+  close(unit=u)
 end program

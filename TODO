@@ -2,4 +2,10 @@
 - Extend energy_range to include the possibility of negative energies
 - Extend the ferromagnet constructor to allow exchange field initialization from a function
 - Use namelists to construct and read config files
-- Use interfaces for spinorbit_* with IMPORT CONDUCTOR to move these procedures to a separate module without requiring submodules
+- Move spinorbit_* and spinactive_* to submodules when GFortran supports it
+- Rename test_foundation to tests
+- Modify test_critical to a more general method that can handle at least bilayers and trilayers. Most scriptable might be using an array of class(conductor) objects constructed from an argument --FSFN, followed by arguments like --exchange1=[1,0,0], --phase2=0.5, and --spinorbit4=(1,2). However, easiest might be parsing a namelist.
+- Alternative approach: define critical_bilayer and critical_trilayer separately.
+- Find a sensible way to append results to a file from critical temp calculations.
+- Change test_materials into a dos calculator for general multilayer structures. 
+- Improve output routines (inspired by CMake — red headers, yellow warnings, green status info, calculate percentage complete)

@@ -1,10 +1,9 @@
 ! CR: 2015-07-23
-! UP   -- " --
+! UP   -- " 29
 
 module mod_critical
   use mod_system
-  use mod_superconductor
-  use mod_multilayer
+  use mod_hybrid
   implicit none
 contains
 
@@ -51,7 +50,7 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
     call print_information
 
     ! Initialize a weakly superconducting state
-    call initialize_all(material, gap_)
+    call init_all(material, gap_)
 
     ! Update the state of the multilayer structure
     do m = 1,iterations_
