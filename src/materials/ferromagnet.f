@@ -41,7 +41,7 @@ contains
     ! Constructs a ferromagnet object initialized to a weak superconductor.
     type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
     real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
-    real(dp),    intent(in)           :: exchange(3)  ! Magnetic exchange field
+    real(dp),    intent(in), optional :: exchange(3)  ! Magnetic exchange field
     complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: conductor default)
     real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
@@ -59,9 +59,13 @@ contains
     end if
 
     ! Initialize the exchange field
-    do n = 1,size(this%conductor%location)
-      this%exchange(:,n) = exchange
-    end do
+    if (present(exchange)) then
+      do n = 1,size(this%conductor%location)
+        this%exchange(:,n) = exchange
+      end do
+    else
+      this%exchange(:,:) = 0.0_dp
+    end if
 
     ! Modify the type string
     this%type_string = color_red // 'FERROMAGNET' // color_none
