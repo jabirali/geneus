@@ -9,6 +9,10 @@ program test_materials
   type(superconductor) :: s
   type(ferromagnet)    :: f
 
+  ! select(option(...)
+  !   --structure=sfnsf
+  !   --length1=2 --exchange2=[1,2,3] --spinorbit3=[2,3] --phase4=0.5 --exchange5=[3,2,1]
+
   call energy_range(erg, coupling = 0.2_dp)
 
   s = superconductor(erg, thouless = 1/1.0_dp**2, coupling  = 0.2_dp)
@@ -32,7 +36,7 @@ program test_materials
   call f%write_dos(u, 2.0_dp, 3.0_dp)
   close(unit=u)
  
-  do n=1,3
+  do n=1,1
     call f%update
          open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
          call s%write_dos(u, 0.0_dp, 1.0_dp)

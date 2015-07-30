@@ -21,10 +21,6 @@ enable_language(Fortran)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
 
-# System libraries
-find_package(BLAS   REQUIRED)
-find_package(LAPACK REQUIRED)
-
 # Source files
 file(GLOB src_ext77 "src/external/bvp_la.f")
 file(GLOB src_ext90 "src/external/bvp_m.f" "src/external/pchip.f")
@@ -35,13 +31,8 @@ file(GLOB src_bin   "src/tests/*.f" "src/programs/*.f")
 
 # Module tests
 add_executable(test_foundation "src/tests/test_foundation.f" ${src_mod} ${src_ext77} ${src_ext90})
-target_link_libraries(test_foundation ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-
 add_executable(test_materials "src/tests/test_materials.f" ${src_mod} ${src_ext77} ${src_ext90})
-target_link_libraries(test_materials ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-
 add_executable(test_critical "src/tests/test_critical.f" ${src_mod} ${src_ext77} ${src_ext90})
-target_link_libraries(test_critical ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 
 ###############################################################################

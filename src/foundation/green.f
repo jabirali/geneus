@@ -6,10 +6,9 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-20
+! Updated: 2015-07-30
 
 module mod_green
-  use mod_system
   use mod_spin
   implicit none
 
@@ -45,6 +44,9 @@ module mod_green
   interface assignment(=)
     module procedure green_import_rvector, green_export_rvector
   end interface
+
+  ! Exported constants
+  type(green), target :: green0 = green(spin(0),spin(0),spin(0),spin(0))
 contains
   pure function green_construct_bcs(energy, gap) result(this)
     ! Constructs a state corresponding to a BCS superconductor at some given energy, which may have an imaginary
@@ -90,7 +92,7 @@ contains
     a%dgt = b(25:32) 
   end subroutine
 
-  function green_get_g(this) result(g)
+  pure function green_get_g(this) result(g)
     ! Calculates the normal Green's function g.
     type(spin)               :: g
     class(green), intent(in) :: this
@@ -98,7 +100,7 @@ contains
     g = ( pauli0 - this%g * this%gt ) .divl. ( pauli0 + this%g * this%gt )
   end function
 
-  function green_get_gt(this) result(gt)
+  pure function green_get_gt(this) result(gt)
     ! Calculates the tilde-conjugated normal Green's function g~.
     type(spin)               :: gt
     class(green), intent(in) :: this
@@ -106,7 +108,7 @@ contains
     gt = ( pauli0 - this%gt * this%g ) .divl. ( pauli0 + this%gt * this%g )
   end function
 
-  function green_get_f(this) result(f)
+  pure function green_get_f(this) result(f)
     ! Calculates the anomalous Green's function f.
     type(spin)               :: f
     class(green), intent(in) :: this
@@ -114,7 +116,7 @@ contains
     f = ( pauli0 - this%g * this%gt ) .divl. ( 2.0_dp * this%g )
   end function
 
-  function green_get_ft(this) result(ft)
+  pure function green_get_ft(this) result(ft)
     ! Calculates the tilde-conjugated anomalous Green's function f~.
     type(spin)               :: ft
     class(green), intent(in) :: this
@@ -122,7 +124,7 @@ contains
     ft = ( pauli0 - this%gt * this%g ) .divl. ( 2.0_dp * this%gt )
   end function
 
-  function green_get_f_s(this) result(r)
+  pure function green_get_f_s(this) result(r)
     ! Calculates the singlet component of the anomalous Green's function f.
     complex(dp)              :: r
     class(green), intent(in) :: this
@@ -133,7 +135,7 @@ contains
     r = (f%matrix(1,2) - f%matrix(2,1))/2.0_dp
   end function
 
-  function green_get_ft_s(this) result(r)
+  pure function green_get_ft_s(this) result(r)
     ! Calculates the singlet component of the tilde-conjugated anomalous Green's function f~.
     complex(dp)              :: r
     class(green), intent(in) :: this
@@ -144,7 +146,7 @@ contains
     r = (ft%matrix(1,2) - ft%matrix(2,1))/2.0_dp
   end function
 
-  function green_get_f_t(this) result(r)
+  pure function green_get_f_t(this) result(r)
     ! Calculates the triplet component of the anomalous Green's function f.
     complex(dp)              :: r(3)
     class(green), intent(in) :: this
@@ -157,7 +159,7 @@ contains
           (f%matrix(1,2) + f%matrix(2,1))/(2.0_dp,0.0_dp)  ];
   end function
 
-  function green_get_ft_t(this) result(r)
+  pure function green_get_ft_t(this) result(r)
     ! Calculates the triplet component of the tilde-conjugated anomalous Green's function f~.
     complex(dp)              :: r(3)
     class(green), intent(in) :: this
@@ -170,7 +172,7 @@ contains
           (ft%matrix(1,2) + ft%matrix(2,1))/(2.0_dp,0.0_dp)  ];
   end function
 
-  function green_get_f_ts(this, h) result(r)
+  pure function green_get_f_ts(this, h) result(r)
     ! Calculates the short-range triplet component of the anomalous Green's function f,
     ! i.e. the triplet component of f along the magnetic exchange field vector h.
     complex(dp)              :: r(3)
@@ -183,7 +185,7 @@ contains
     r = dot_product(u,this%get_f_t()) * u
   end function
 
-  function green_get_ft_ts(this, h) result(r)
+  pure function green_get_ft_ts(this, h) result(r)
     ! Calculates the short-range triplet component of the tilde-conjugated anomalous Green's function f~,
     ! i.e. the triplet component of f~ along the magnetic exchange field h.
     complex(dp)              :: r(3)
@@ -196,7 +198,7 @@ contains
     r = dot_product(u,this%get_ft_t()) * u
   end function
 
-  function green_get_f_tl(this, h) result(r)
+  pure function green_get_f_tl(this, h) result(r)
     ! Calculates the long-range triplet component of the anomalous Green's function f,
     ! i.e. the triplet component of f perpendicular to the magnetic exchange field h.
     complex(dp)              :: r(3)
@@ -206,7 +208,7 @@ contains
     r = this%get_f_t() - this%get_f_ts(h)
   end function
 
-  function green_get_ft_tl(this, h) result(r)
+  pure function green_get_ft_tl(this, h) result(r)
     ! Calculates the long-range triplet component of the tilde-conjugated anomalous Green's function f~,
     ! i.e. the triplet component of f~ perpendicular to the magnetic exchange field h.
     complex(dp)              :: r(3)
@@ -216,7 +218,7 @@ contains
     r = this%get_ft_t() - this%get_ft_ts(h)
   end function
 
-  function green_get_dos(this) result(ldos)
+  pure function green_get_dos(this) result(ldos)
     ! Calculates the local density of states.
     real(dp)                 :: ldos
     class(green), intent(in) :: this
@@ -227,7 +229,7 @@ contains
     ldos = real(g%trace(), kind=dp)/2.0_dp
   end function
 
-  subroutine green_print(this)
+  impure subroutine green_print(this)
     ! Prints the green object to stdout.
     class(green), intent(in) :: this 
 

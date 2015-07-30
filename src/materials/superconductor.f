@@ -6,9 +6,6 @@
 ! Updated: 2015-07-29
 
 module mod_superconductor
-  use mod_system
-  use mod_spin
-  use mod_green
   use mod_conductor
   implicit none
 
@@ -113,7 +110,7 @@ contains
   !                   IMPLEMENTATION OF SUPERCONDUCTOR METHODS                     !
   !--------------------------------------------------------------------------------!
 
-  subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
     complex(dp),           intent(in   ) :: e
@@ -134,7 +131,7 @@ contains
     d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
   end subroutine
 
-  subroutine superconductor_update_posthook(this)
+  impure subroutine superconductor_update_posthook(this)
     ! Updates the superconducting order parameter based on the Green's functions of the system.
     class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
     real(dp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative

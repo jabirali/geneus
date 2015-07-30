@@ -6,25 +6,16 @@
 ! Updated: 2015-07-29
 
 module mod_ferromagnet
-  use mod_system
-  use mod_spin
-  use mod_green
   use mod_conductor
   implicit none
 
   ! Type declaration
   type, extends(conductor) :: ferromagnet
-    ! These parameters control the physical characteristics of the material 
-    real(dp), allocatable    :: exchange(:,:)                                            ! Magnetic exchange field as a function of position
+    real(dp), allocatable    :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
   contains
-    ! These methods contain the equations that describe ferromagnets
-    procedure                :: diffusion_equation    => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
-
-    ! These methods are used to access and mutate the parameters
-    procedure                :: get_exchange          => ferromagnet_get_exchange        ! Returns the magnetic exchange field at a given position
-
-    ! These methods are used by internal subroutines
-    final                    ::                          ferromagnet_destruct            ! Type destructor
+    procedure                :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
+    procedure                :: get_exchange       => ferromagnet_get_exchange        ! Returns the magnetic exchange field at a given position
+    final                    ::                       ferromagnet_destruct            ! Type destructor
   end type
 
   ! Type constructor
@@ -91,7 +82,7 @@ contains
   !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !
   !--------------------------------------------------------------------------------!
 
-  subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(ferromagnet), intent(in   ) :: this
     complex(dp),        intent(in   ) :: e

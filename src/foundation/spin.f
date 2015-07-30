@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-07-20
+! Updated: 2015-07-30
 
 module mod_spin
   use mod_system
@@ -428,59 +428,73 @@ contains
     r = spin(a%matrix - b%matrix)
   end function
 
-  function spin_divl_spin(a,b) result(r)
+  pure function spin_divl_spin(a,b) result(r)
     ! Defines left matrix division of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
+    complex(dp)            :: invdet
+
+    associate(aa => a%matrix(1,1), ba => b%matrix(1,1), ra => r%matrix(1,1),&
+              ab => a%matrix(1,2), bb => b%matrix(1,2), rb => r%matrix(1,2),&
+              ac => a%matrix(2,1), bc => b%matrix(2,1), rc => r%matrix(2,1),&
+              ad => a%matrix(2,2), bd => b%matrix(2,2), rd => r%matrix(2,2))
+
+    ! Calculate the inverse determinant of the left matrix
+    invdet = 1/(aa*ad - ab*ac)
     
-    integer, parameter     :: n = 2      ! Size of matrices A and B
-    complex(dp)            :: la(n,n)    ! Copy of A sent to LAPACK
-    complex(dp)            :: lb(n,n)    ! Copy of B sent to LAPACK
-    integer                :: ipiv(n)    ! Pivot indices 
-    integer                :: info       ! Nonzero if any errors occured
+    ! Calculate the elements of the results
+    ra = invdet * (ad*ba - ab*bc)
+    rb = invdet * (ad*bb - ab*bd)
+    rc = invdet * (aa*bc - ac*ba)
+    rd = invdet * (aa*bd - ac*bb)
 
-    ! Copy the contents of A and B to mutable matrices
-    la = a
-    lb = b
-
-    ! Call LAPACK to solve the equation AX=B
-    call zgesv( n, n, la, n, ipiv, lb, n, info )
-
-    ! Return the result as a spin object
-    r = lb
+    end associate
   end function
 
-  function spin_divr_spin(a,b) result(r)
+  pure function spin_divr_spin(a,b) result(r)
     ! Defines right matrix division of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
+    complex(dp)            :: invdet
 
-    r = a * b%inv()
+    associate(aa => a%matrix(1,1), ba => b%matrix(1,1), ra => r%matrix(1,1),&
+              ab => a%matrix(1,2), bb => b%matrix(1,2), rb => r%matrix(1,2),&
+              ac => a%matrix(2,1), bc => b%matrix(2,1), rc => r%matrix(2,1),&
+              ad => a%matrix(2,2), bd => b%matrix(2,2), rd => r%matrix(2,2))
+
+    ! Calculate the inverse determinant of the right matrix
+    invdet = 1/(ba*bd - bb*bc)
+    
+    ! Calculate the elements of the results
+    ra = invdet * (aa*bd - ab*bc)
+    rb = invdet * (ab*ba - aa*bb)
+    rc = invdet * (ac*bd - ad*bc)
+    rd = invdet * (ad*ba - ac*bb)
+
+    end associate
   end function
 
-  function spin_inv(this) result(r)
+  pure function spin_inv(this) result(r)
     ! Calculates the inverse of the spin matrix
     type(spin)              :: r
     class(spin), intent(in) :: this
+    complex(dp)             :: invdet
 
-    integer, parameter      :: n = 2    ! Size of the matrix
-    integer, parameter      :: m = 64*n ! Size of the work array
-    complex(dp)             :: a(n,n)   ! Local copy of the matrix
-    complex(dp)             :: work(m)  ! Local work array
-    integer                 :: ipiv(n)  ! Pivot indices
-    integer                 :: info     ! Nonzero if any errors occured
+    associate(a => this%matrix(1,1), ra => r%matrix(1,1),&
+              b => this%matrix(1,2), rb => r%matrix(1,2),&
+              c => this%matrix(2,1), rc => r%matrix(2,1),&
+              d => this%matrix(2,2), rd => r%matrix(2,2))
 
-    ! Copy the contents of this to a mutable matrix
-    a = this
+    ! Calculate the inverse determinant of this matrix
+    invdet = 1/(a*d - b*c)
+    
+    ! Calculate the inverse matrix as a result
+    ra = +invdet * d
+    rb = -invdet * b
+    rc = -invdet * c
+    rd = +invdet * a
 
-    ! Call LAPACK to perform an LU factorization of the matrix
-    call zgetrf( n, n, a, n, ipiv, info )
-
-    ! Call LAPACK to invert the matrix
-    call zgetri( n, a, n, ipiv, work, m, info )
-
-    ! Return the result as a spin object
-    r = a
+    end associate
   end function
 
   pure function spin_trace(this) result(r)
@@ -516,7 +530,7 @@ contains
     r = maxval(abs(this%matrix))
   end function
 
-  subroutine spin_print(this, title)
+  impure subroutine spin_print(this, title)
     ! Prints the spin matrix to stdout
     class(spin),  intent(in)           :: this 
     character(*), intent(in), optional :: title

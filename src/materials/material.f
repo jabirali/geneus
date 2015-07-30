@@ -8,8 +8,6 @@
 ! Updated: 2015-07-29
 
 module mod_material
-  use mod_system
-  use mod_spin
   use mod_green
   implicit none
 
@@ -55,7 +53,7 @@ module mod_material
 
   ! Interface declarations
   abstract interface
-    subroutine init(this, gap)
+    impure subroutine init(this, gap)
       ! This interface is used for the deferred procedure init.
       import material, dp
 
@@ -65,7 +63,7 @@ module mod_material
   end interface
 
   abstract interface
-    subroutine update(this)
+    impure subroutine update(this)
       ! This interface is used for the deferred procedures update_prehook and update_posthook.
       import material
 
@@ -74,7 +72,7 @@ module mod_material
   end interface
 
   abstract interface
-    subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+    pure subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
       ! This interface is used for the deferred procedure diffusion_equation.
       import material, spin, dp
 
@@ -87,39 +85,39 @@ module mod_material
   end interface
 
   abstract interface
-    subroutine interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
+    pure subroutine interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
       ! This interface is used for the deferred procedure interface_equation_a.
       import material, green, spin, dp
 
       class(material),          intent(in   ) :: this
-      type(green),     pointer, intent(in   ) :: a
+      type(green),              intent(in   ) :: a
       type(spin),               intent(in   ) :: g, gt, dg, dgt
       type(spin),               intent(inout) :: r, rt
     end subroutine
   end interface
 
   abstract interface
-    subroutine interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
+    pure subroutine interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
       ! This interface is used for the deferred procedure interface_equation_b.
       import material, green, spin, dp
 
       class(material),          intent(in   ) :: this
-      type(green),     pointer, intent(in   ) :: b
+      type(green),              intent(in   ) :: b
       type(spin),               intent(in   ) :: g, gt, dg, dgt
       type(spin),               intent(inout) :: r, rt
     end subroutine
   end interface
 contains
-  subroutine material_update(this)
+  impure subroutine material_update(this)
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
     use bvp_m
 
     class(material), intent(inout) :: this                       ! Material that will be updated
     real(dp)                       :: u(32,size(this%location))  ! Representation of the retarded Green's functions
 
+    class(green),          pointer :: a => green0                ! State at this energy at the left  interface
+    class(green),          pointer :: b => green0                ! State at this energy at the right interface
     complex(dp)                    :: e                          ! Complex energy relative to the Thouless energy
-    class(green),          pointer :: a => null()                ! State at this energy at the left  interface
-    class(green),          pointer :: b => null()                ! State at this energy at the right interface
     integer                        :: n                          ! Loop variable
 
     ! Call the prehook method
@@ -180,7 +178,7 @@ contains
     ! Call the posthook method
     call this%update_posthook
   contains
-    subroutine ode(z, u, f)
+    pure subroutine ode(z, u, f)
       ! Definition of the differential equation u'=f(z,u).
       real(dp), intent(in)  :: z
       real(dp), intent(in)  :: u(32)
@@ -203,7 +201,7 @@ contains
       f(25:32) = d2gt
     end subroutine
 
-    subroutine bc(ua, ub, bca, bcb)
+    pure subroutine bc(ua, ub, bca, bcb)
       ! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
       real(dp), intent(in)  :: ua(32)
       real(dp), intent(in)  :: ub(32)

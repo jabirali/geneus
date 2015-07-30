@@ -7,9 +7,6 @@
 ! Updated: 2015-07-29
 
 module mod_conductor
-  use mod_system
-  use mod_spin
-  use mod_green
   use mod_material
   implicit none
 
@@ -153,7 +150,7 @@ contains
   !                     IMPLEMENTATION OF CONDUCTOR EQUATIONS                      !
   !--------------------------------------------------------------------------------!
 
-  subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(conductor), intent(in   ) :: this
     complex(dp),      intent(in   ) :: e
@@ -176,10 +173,10 @@ contains
     end if
   end subroutine
 
-  subroutine conductor_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
+  pure subroutine conductor_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
       ! Calculate residuals from the boundary conditions at the left interface.
       class(conductor),          intent(in   ) :: this
-      type(green),      pointer, intent(in   ) :: a
+      type(green),               intent(in   ) :: a
       type(spin),                intent(in   ) :: g, gt, dg, dgt
       type(spin),                intent(inout) :: r, rt
 
@@ -197,10 +194,10 @@ contains
       end if
   end subroutine
 
-  subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
+  pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
       ! Calculate residuals from the boundary conditions at the left interface.
       class(conductor),          intent(in   ) :: this
-      type(green),      pointer, intent(in   ) :: b
+      type(green),               intent(in   ) :: b
       type(spin),                intent(in   ) :: g, gt, dg, dgt
       type(spin),                intent(inout) :: r, rt
 
@@ -218,7 +215,7 @@ contains
       end if
   end subroutine
 
-  subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a vacuum boundary condition for the left interface.
     class(conductor), intent(in   ) :: this
     type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
@@ -228,7 +225,7 @@ contains
     rt1 = dgt1
   end subroutine
 
-  subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a vacuum boundary condition for the right interface.
     class(conductor), intent(in   ) :: this
     type(spin),       intent(in   ) :: g2, gt2, dg2, dgt2
@@ -238,10 +235,10 @@ contains
     rt2 = dgt2
   end subroutine
 
-  subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a tunneling boundary condition for the left interface.
     class(conductor),          intent(in   ) :: this
-    type(green),      pointer, intent(in   ) :: a
+    type(green),               intent(in   ) :: a
     type(spin),                intent(inout) :: r1, rt1
     type(spin),                intent(in   ) :: g1, gt1, dg1, dgt1
     type(spin)                               :: N0, Nt0
@@ -263,10 +260,10 @@ contains
     end associate
   end subroutine
 
-  subroutine conductor_interface_tunnel_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine conductor_interface_tunnel_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a tunneling boundary condition for the right interface.
     class(conductor),          intent(in   ) :: this
-    type(green),      pointer, intent(in   ) :: b
+    type(green),               intent(in   ) :: b
     type(spin),                intent(inout) :: r2, rt2
     type(spin),                intent(in   ) :: g2, gt2, dg2, dgt2
     type(spin)                               :: N3, Nt3
@@ -288,7 +285,7 @@ contains
     end associate
   end subroutine
 
-  subroutine conductor_update_prehook(this)
+  impure subroutine conductor_update_prehook(this)
     ! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
 
@@ -298,7 +295,7 @@ contains
     end if
   end subroutine
 
-  subroutine conductor_update_posthook(this)
+  impure subroutine conductor_update_posthook(this)
     ! Code to execute after running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
 
@@ -309,7 +306,7 @@ contains
   !                    IMPLEMENTATION OF INPUT/OUTPUT METHODS                      !
   !--------------------------------------------------------------------------------!
 
-  subroutine conductor_write_dos(this, unit, a, b)
+  impure subroutine conductor_write_dos(this, unit, a, b)
     ! Writes the density of states as a function of position and energy to a given output unit.
     class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
     integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
@@ -344,7 +341,7 @@ contains
 
   ! TODO: These methods should be moved to a submodule when GFortran supports that.
 
-  subroutine spinorbit_update_prehook(this)
+  pure subroutine spinorbit_update_prehook(this)
     ! Updates the internal variables associated with spin-orbit coupling.
     class(conductor), intent(inout) :: this 
 
@@ -361,7 +358,7 @@ contains
     this%A2t = spin(conjg(this%A2%matrix))
   end subroutine
 
-  subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
     ! Calculate the spin-orbit coupling terms in the diffusion equation, and update the second derivatives of the Riccati parameters.
     class(conductor), target, intent(in   ) :: this
     type(spin),               intent(in   ) :: g, gt, dg, dgt
@@ -396,7 +393,7 @@ contains
     end associate
   end subroutine
 
-  subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     ! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
     class(conductor), target, intent(in   ) :: this
     type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
@@ -413,7 +410,7 @@ contains
     end associate
   end subroutine
 
-  subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     ! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
     class(conductor), target, intent(in   ) :: this
     type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
@@ -436,7 +433,7 @@ contains
 
   ! TODO: These methods should be moved to a submodule when GFortran supports that.
 
-  subroutine spinactive_update_prehook(this)
+  pure subroutine spinactive_update_prehook(this)
     ! Updates the internal variables associated with spin-active interfaces.
     class(conductor), intent(inout) :: this 
 
@@ -444,7 +441,7 @@ contains
     continue
   end subroutine
 
-  subroutine spinactive_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine spinactive_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     ! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
     class(conductor), target, intent(in   ) :: this
     type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
@@ -454,7 +451,7 @@ contains
     continue
   end subroutine
 
-  subroutine spinactive_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine spinactive_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     ! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
     class(conductor), target, intent(in   ) :: this
     type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
