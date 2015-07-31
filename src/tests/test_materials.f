@@ -36,7 +36,7 @@ program test_materials
   call f%write_dos(u, 2.0_dp, 3.0_dp)
   close(unit=u)
  
-  do n=1,1
+  do n=1,6
     call f%update
          open(newunit=u, file='test_materials.dat') ! Status (Old? New? Replace?) and position (append?) and action (write?)
          call s%write_dos(u, 0.0_dp, 1.0_dp)

@@ -113,7 +113,7 @@ contains
   pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
-    complex(dp),           intent(in   ) :: e
+    complex(dp),           intent(in)    :: e
     real(dp),              intent(in)    :: z
     type(spin),            intent(in)    :: g, gt, dg, dgt
     type(spin),            intent(inout) :: d2g, d2gt
