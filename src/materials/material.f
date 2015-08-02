@@ -35,6 +35,7 @@ module mod_material
     integer                                   :: control         =  2               ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                                   :: information     =  0               ! How much information that should be written to standard out (range: [-1,2])
     real(dp)                                  :: tolerance       =  1e-4_dp         ! Error tolerance (determines the maximum allowed defect or global error)
+    real(dp)                                  :: difference      =  1e+4_dp         ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
     character(len=64)                         :: type_string     =  'MATERIAL'      ! The type string should describe the specific class(material) subtype
@@ -114,6 +115,7 @@ contains
 
     class(material), intent(inout) :: this                       ! Material that will be updated
     real(dp)                       :: u(32,size(this%location))  ! Representation of the retarded Green's functions
+    real(dp)                       :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
 
     class(green),          pointer :: a => green0                ! State at this energy at the left  interface
     class(green),          pointer :: b => green0                ! State at this energy at the right interface
@@ -127,6 +129,9 @@ contains
     if (this%information >= 0) then
       write(stdout,'(a)') color_white // ' :: ' // color_none // trim(this%type_string) // '                                     '
     end if
+
+    ! Reset the difference since last update to zero
+    this%difference = 0.0_dp
 
     ! Loop over the discretized energy levels
     do n=1,size(this%energy)
@@ -146,6 +151,9 @@ contains
         do m=1,size(this%location)
           u(:,m) = this%greenr(n,m)
         end do
+
+        ! Copy the contents of the state vector to the difference vector
+        d(:,:) = u(:,:)
 
         ! Calculate the complex energy (relative to the Thouless energy)
         e = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=dp)
@@ -170,10 +178,22 @@ contains
           this%greenr(n,m) = u(:,m)
         end do
 
+        ! Update the difference vector
+        d(:,:) = abs(u(:,:) - d(:,:))
+
+        ! Update the maximal difference since last update
+        this%difference = max(this%difference,maxval(d))
+
         ! Clean up after bvp_solver
         call bvp_terminate(sol)
       end block
     end do
+
+    ! Status information
+    if (this%information >= 0) then
+      write(stdout,'(4x,a,f8.6,a)') 'Max change: ',this%difference,'                                        '
+      flush(stdout)
+    end if
 
     ! Call the posthook method
     call this%update_posthook
