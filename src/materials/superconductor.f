@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-07-29
+! Updated: 2015-08-01
 
 module mod_superconductor
   use mod_conductor
