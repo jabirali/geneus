@@ -48,7 +48,7 @@ contains
   end subroutine
 
   subroutine option_integer(variable, option)
-    ! Reads a command line option on the form --option=value, where value is an integer.
+    ! Reads a command line option on the form option=value, where value is an integer.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
     ! should be initialized to a sensible default value before this subroutine is called.
     integer,            intent(inout) :: variable
@@ -62,8 +62,8 @@ contains
       call get_command_argument(n,string)
 
       ! If this is the argument we were looking for, update the output variable
-      if ( string(1:len(option)+3)  == '--' // option // '=' ) then
-        read( string(len(option)+4:len(string)), '(i10)' ) variable
+      if ( string(1:len(option)+1)  == option // '=' ) then
+        read( string(len(option)+2:len(string)), '(i10)' ) variable
       end if
     end do
 
@@ -73,7 +73,7 @@ contains
   end subroutine
 
   subroutine option_real(variable, option)
-    ! Reads a command line option on the form --option=value, where value is a real number.
+    ! Reads a command line option on the form option=value, where value is a real number.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
     ! should be initialized to a sensible default value before this subroutine is called.
     real(dp),           intent(inout) :: variable
@@ -87,8 +87,8 @@ contains
       call get_command_argument(n,string)
 
       ! If this is the argument we were looking for, update the output variable
-      if ( string(1:len(option)+3)  == '--' // option // '=' ) then
-        read( string(len(option)+4:len(string)), '(g24.0)' ) variable
+      if ( string(1:len(option)+1)  == option // '=' ) then
+        read( string(len(option)+2:len(string)), '(g24.0)' ) variable
       end if
     end do
 
@@ -98,7 +98,7 @@ contains
   end subroutine
 
   subroutine option_string(variable, option)
-    ! Reads a command line option on the form --option=value, where value is a string.
+    ! Reads a command line option on the form option=value, where value is a string.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
     ! should be initialized to a sensible default value before this subroutine is called.
     character(len= * ), intent(inout) :: variable
@@ -112,8 +112,8 @@ contains
       call get_command_argument(n,string)
 
       ! If this is the argument we were looking for, update the output variable
-      if ( string(1:len(option)+3)  == '--' // option // '=' ) then
-        read( string(len(option)+4:len(string)), '(a)' ) variable
+      if ( string(1:len(option)+1)  == option // '=' ) then
+        read( string(len(option)+2:len(string)), '(a)' ) variable
       end if
     end do
 

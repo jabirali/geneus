@@ -4,7 +4,7 @@ INTRODUCTION
 
 USAGE
 
-Use the syntax --option=value to specify command line arguments.
+Use the syntax ./bin/command [option1=value1 [option2=value2 [...]]] to specify command line arguments, where square brackets denote optional arguments.
 
 SYSTEM REQUIREMENTS
 Note that the project requires features from Fortran 2008, and thus requires a relatively recent compiler. It has been
