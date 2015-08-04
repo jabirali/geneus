@@ -136,7 +136,7 @@ contains
     class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
     real(dp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
     real(dp), allocatable                :: gap_imag(:), dgap_imag(:) ! Imag part of the superconducting order parameter and its derivative
-    real(dp)                             :: gap_diff                  ! Used to calculate the change in the mean superconducting order parameter
+    complex(dp)                          :: gap_diff                  ! Used to calculate the change in the mean superconducting order parameter
     complex(dp)                          :: singlet                   ! Singlet component of the anomalous Green's function at a given point
     real(dp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
     integer                              :: err                       ! PCHIP error status
@@ -176,11 +176,11 @@ contains
     end do
 
     ! Calculate the difference in mean superconducting order parameter
-    gap_diff = abs(this%get_gap_mean() - gap_diff)
+    gap_diff = this%get_gap_mean() - gap_diff
 
     ! Status information
     if (this%information >= 0) then
-      write(stdout,'(4x,a,f8.6,a)') 'Gap change: ',gap_diff,'                                        '
+      write(stdout,'(4x,a,f8.6,a)') 'Gap change: ',abs(gap_diff),'                                        '
       flush(stdout)
     end if
 
