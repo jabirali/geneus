@@ -27,17 +27,17 @@ module mod_system
 
   ! Define escape codes for terminal colors
   character(*), parameter :: color_none   = '[0m'
-  character(*), parameter :: color_red    = '[31;1m'
-  character(*), parameter :: color_green  = '[32;1m'
-  character(*), parameter :: color_yellow = '[33;1m'
-  character(*), parameter :: color_blue   = '[34;1m'
-  character(*), parameter :: color_purple = '[35;1m'
-  character(*), parameter :: color_cyan   = '[36;1m'
-  character(*), parameter :: color_white  = '[37;1m'
+  character(*), parameter :: color_red    = '[31m'
+  character(*), parameter :: color_green  = '[32m'
+  character(*), parameter :: color_yellow = '[33m'
+  character(*), parameter :: color_blue   = '[34m'
+  character(*), parameter :: color_purple = '[35m'
+  character(*), parameter :: color_cyan   = '[36m'
+  character(*), parameter :: color_white  = '[37m'
 
   ! Define an interface for obtaining command line arguments
   interface option
-    module procedure option_header, option_integer, option_real, option_string
+    module procedure option_header, option_logical, option_integer, option_real, option_string
   end interface
 contains
   subroutine option_header
@@ -95,6 +95,31 @@ contains
     ! Write the results to standard out for verification purposes
     output = option
     write(*,'(a,a,f10.5)') ' :: ', output, variable
+  end subroutine
+
+  subroutine option_logical(variable, option)
+    ! Reads a command line option on the form option=value, where value is a boolean.
+    ! Note that 'variable' is only updated if the option is found, meaning that it should
+    ! should be initialized to a sensible default value before this subroutine is called.
+    logical,            intent(inout) :: variable
+    character(len= * ), intent(in   ) :: option
+    character(len=128)                :: string
+    character(len= 20)                :: output
+    integer                           :: n
+    
+    do n = 1,command_argument_count()
+      ! Iterate over all command line arguments
+      call get_command_argument(n,string)
+
+      ! If this is the argument we were looking for, update the output variable
+      if ( string(1:len(option)+1)  == option // '=' ) then
+        read( string(len(option)+2:len(string)), '(l1)' ) variable
+      end if
+    end do
+
+    ! Write the results to standard out for verification purposes
+    output = option
+    write(*,'(a,a,l1)') ' :: ', output, variable
   end subroutine
 
   subroutine option_string(variable, option)
