@@ -22,16 +22,11 @@ set ytics  -10,1,10
 set format x '%3.1f'
 
 # Plot a file provided from stdin to interactive terminal
-set terminal wxt enhanced font 'Gull Sans,12'
+set terminal wxt enhanced font 'Sans,12'
 plot '/dev/stdin' using 2:1:3 notitle with image
 
 # Wait for a mouse click
 pause mouse
-
-# Replot the same file to the file ~/gnuplot.pdf
-set terminal pdfcairo enhanced font "Gill Sans,8" linewidth 4 rounded fontscale 1.0
-set output 'gnuplot.pdf'
-plot '/dev/stdin' using 2:1:3 notitle with image
 
 # Rerun the file
 reread
