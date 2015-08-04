@@ -183,16 +183,35 @@ contains
     field(3) = 0.0_dp
   end function
 
-  pure function spinorbit_xy(strength, angle) result(field)
+  pure function spinorbit_xy(strength, angle, alpha, beta) result(field)
     ! This function returns an SU(2) vector that describes a Rashba--Dresselhaus coupling
     ! in the xy-plane. The coupling constants are given in polar coordinates, so that the
     ! Rashba constant is strength*sin(angle), and the Dresselhaus one strength*cos(angle).
-    real(dp), intent(in) :: strength
-    real(dp), intent(in) :: angle
-    type(spin)           :: field(3)
+    ! Alternatively, the Rashba constant alpha and Dresselhaus constant beta can also be
+    ! explicitly specified.
+    real(dp), intent(in), optional :: strength
+    real(dp), intent(in), optional :: angle
+    real(dp), intent(in), optional :: alpha
+    real(dp), intent(in), optional :: beta
+    type(spin)                     :: field(3)
 
-    field(1) = (+strength) * (cos(angle)*pauli1 + sin(angle)*pauli2)
-    field(2) = (-strength) * (cos(angle)*pauli2 + sin(angle)*pauli1)
-    field(3) =  0.0_dp
+    ! Initialize to zero
+    field(:) = spin(0)
+
+    ! Polar parametrization
+    if (present(strength) .and. present(angle)) then
+      field(1) = (+strength) * (cos(angle)*pauli1 + sin(angle)*pauli2)
+      field(2) = (-strength) * (cos(angle)*pauli2 + sin(angle)*pauli1)
+    end if
+
+    ! Explicit Rashba coefficient
+    if (present(alpha)) then
+      field(1) = (+beta)*pauli1 + (+alpha)*pauli2
+    end if
+
+    ! Explicit Dresselhaus coefficient
+    if (present(beta)) then
+      field(2) = (-beta)*pauli2 + (-alpha)*pauli1
+    end if
   end function
 end module
