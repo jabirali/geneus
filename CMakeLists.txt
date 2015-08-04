@@ -33,6 +33,7 @@ file(GLOB src_bin   "src/tests/*.f" "src/programs/*.f")
 add_executable(test_foundation "src/tests/test_foundation.f" ${src_mod} ${src_ext77} ${src_ext90})
 add_executable(test_materials "src/tests/test_materials.f" ${src_mod} ${src_ext77} ${src_ext90})
 add_executable(test_critical "src/tests/test_critical.f" ${src_mod} ${src_ext77} ${src_ext90})
+add_executable(dos_snfs "src/programs/dos_snfs.f" ${src_mod} ${src_ext77} ${src_ext90})
 
 
 ###############################################################################
