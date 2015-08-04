@@ -20,12 +20,14 @@ so that I may update the project files accordingly.
 
 COMPILING
 To compile the project in release mode, which enables full optimization and thus provides the best performance, run:
-    cmake .
-    make
+ ./configure
+ cd tmp
+ make
 
 To compile the project in debug mode, run the commands:
-    cmake -DCMAKE_BUILD_TYPE=Debug .
-    make
+ ./configure --debug
+ cd tmp
+ make
 Note that compiling the project in debug mode will make it significantly slower; typical applications require around
 twice the computation time of similar applications compiled in release mode. However, as the name implies, this also
 makes it significantly easier to debug the program, as it enables the use of the GDB debugger and GProf profiler, as

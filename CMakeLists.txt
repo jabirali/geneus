@@ -11,7 +11,7 @@
 ###############################################################################
 
 # General metadata
-project(s4tran)
+project(s4tran Fortran)
 cmake_minimum_required(VERSION 2.6)
 
 # Programming languages

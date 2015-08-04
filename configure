@@ -1,5 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
-rm -r debug release
-cmake -DCMAKE_Fortran_COMPILER=gfortran-5 -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_BUILD_TYPE=Release -H. -Brelease
-cmake -DCMAKE_Fortran_COMPILER=gfortran-5 -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_BUILD_TYPE=Debug   -H. -Bdebug
+if [ -e tmp ]; then
+	echo "Removing the existing build directory."
+	rm -r tmp
+fi
+
+if [ "$1" == "--debug" ]; then
+	echo "Preparing for a compilation in DEBUG mode." 
+	echo
+	cmake -DCMAKE_BUILD_TYPE=Debug   -H. -Btmp
+else
+	echo "Preparing for a compilation in RELEASE mode."
+	echo
+	cmake -DCMAKE_BUILD_TYPE=Release -H. -Btmp
+fi
+
+echo
+echo "Make has been initialized for compilation in the subdirectory 'tmp'."
+echo "You can now type 'cd tmp' followed by 'make' to compile the project."
