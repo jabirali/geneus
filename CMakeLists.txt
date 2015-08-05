@@ -12,7 +12,8 @@
 
 # General metadata
 project(s4tran Fortran)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0037 OLD)
 
 # Programming languages
 enable_language(Fortran)
@@ -22,18 +23,17 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
 
 # Source files
-file(GLOB src_ext77 "src/external/bvp_la.f")
-file(GLOB src_ext90 "src/external/bvp_m.f" "src/external/pchip.f")
-file(GLOB src_mod   "src/foundation/*.f" "src/materials/*.f" "src/algorithms/*.f")
-file(GLOB src_bin   "src/tests/*.f" "src/programs/*.f")
+file(GLOB src_ext77 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_la.f")
+file(GLOB src_ext90 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_m.f" "src/external/pchip.f")
+file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "src/foundation/*.f" "src/materials/*.f" "src/algorithms/*.f")
+file(GLOB src_exe   RELATIVE ${CMAKE_SOURCE_DIR} "src/programs/*.f")
 
 # Executables
+foreach(src_name ${src_exe})
+  get_filename_component( exe_name ${src_name} NAME_WE )
+  add_executable( ${exe_name} ${src_name} ${src_mod} ${src_ext90} ${src_ext77} )
+endforeach()
 
-# Module tests
-add_executable(test_foundation "src/tests/test_foundation.f" ${src_mod} ${src_ext77} ${src_ext90})
-add_executable(test_materials "src/tests/test_materials.f" ${src_mod} ${src_ext77} ${src_ext90})
-add_executable(test_critical "src/tests/test_critical.f" ${src_mod} ${src_ext77} ${src_ext90})
-add_executable(dos_snfs "src/programs/dos_snfs.f" ${src_mod} ${src_ext77} ${src_ext90})
 
 
 ###############################################################################
@@ -65,9 +65,9 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
   # Flags that apply to internal files (produced as part of this project)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
   elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_source_files_properties(${src_mod} ${src_bin} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
   endif()
 endif()
 

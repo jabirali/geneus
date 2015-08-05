@@ -34,8 +34,8 @@ module mod_material
     integer                                   :: order           =  4               ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                                   :: control         =  2               ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                                   :: information     =  0               ! How much information that should be written to standard out (range: [-1,2])
-    real(dp)                                  :: tolerance       =  1e-4_dp         ! Error tolerance (determines the maximum allowed defect or global error)
-    real(dp)                                  :: difference      =  1e+4_dp         ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
+    real(dp)                                  :: tolerance       =  1e-6_dp         ! Error tolerance (determines the maximum allowed defect or global error)
+    real(dp)                                  :: difference      =  1e+6_dp         ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
     character(len=64)                         :: type_string     =  'MATERIAL'      ! The type string should describe the specific class(material) subtype
