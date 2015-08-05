@@ -313,7 +313,7 @@ contains
     real(dp),           intent(in) :: a, b      ! Left and right end points of the material
     integer                        :: n, m      ! Temporary loop variables
 
-    if (minval(this%energy) < 0.0_dp) then
+    if (minval(this%energy) < -1e-16_dp) then
       ! If we have data for both positive and negative energies, simply write out the data
       do m=1,size(this%location)
         do n=1,size(this%energy)
