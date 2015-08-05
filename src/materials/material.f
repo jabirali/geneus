@@ -54,12 +54,13 @@ module mod_material
 
   ! Interface declarations
   abstract interface
-    impure subroutine init(this, gap)
+    impure subroutine init(this, gap, phase)
       ! This interface is used for the deferred procedure init.
       import material, dp
 
-      class(material), intent(inout) :: this
-      complex(dp),     intent(in   ) :: gap
+      class(material), intent(inout)           :: this
+      complex(dp),     intent(in   ), optional :: gap
+      real(dp),        intent(in   ), optional :: phase
     end subroutine
   end interface
 

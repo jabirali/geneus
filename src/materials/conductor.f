@@ -133,15 +133,38 @@ contains
     end if
   end subroutine
 
-  pure subroutine conductor_init(this, gap)
+  pure subroutine conductor_init(this, gap, phase)
     ! Define the default initializer.
-    class(conductor), intent(inout) :: this
-    complex(dp),      intent(in   ) :: gap
-    integer                         :: n, m
+    class(conductor), intent(inout)           :: this
+    complex(dp),      intent(in   ), optional :: gap
+    real(dp),         intent(in   ), optional :: phase
 
+    real(dp)                                  :: phase_
+    complex(dp)                               :: gap_
+    complex(dp)                               :: gapm
+    integer                                   :: n, m
+
+    ! Process optional arguments
+    if (present(gap)) then
+      gap_ = gap
+    else
+      gap_ = (1.0_dp,0.0_dp)
+    end if
+
+    if (present(phase)) then
+      phase_ = phase
+    else
+      phase_ = 0.0_dp
+    end if
+
+    ! Initialize all states in the material
     do m = 1,size(this%location)
+      ! Calculate the gap at this location
+      gapm = gap_ * exp(i*phase_*(this%location(m)-0.5))
+
+      ! Initialize all states at this location
       do n = 1,size(this%energy)
-        this%greenr(n,m) = green( cmplx(this%energy(n),this%scattering,kind=dp), gap )
+        this%greenr(n,m) = green( cmplx(this%energy(n),this%scattering,kind=dp), gapm )
       end do
     end do
   end subroutine

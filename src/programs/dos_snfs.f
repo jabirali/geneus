@@ -104,34 +104,41 @@ program dos_snfs
   call connect(n,  f, conductance, conductance)
   call connect(f, s2, conductance, conductance)
 
+  ! Initialize the materials to phi/2 phase difference across N and F
+  call s1 % init( gap = exp((-i*pi/2)*phase) )
+  call n  % init( gap = exp((-i*pi/4)*phase), phase = (+pi/2)*phase )
+  call f  % init( gap = exp((+i*pi/4)*phase), phase = (+pi/2)*phase )
+  call s2 % init( gap = exp((+i*pi/2)*phase) )
+
+
   ! BOOTSTRAPPING: Spend some iterations getting there (TODO: Make parameter)
   ! Status information
-  write(*,'(/,a,f7.5,a)') 'Setting phase difference to ', 0.0_dp, ' π'
-  ! Update the state of the system
-  do nn=0,2
-    call f%update
-    call n%update
-  end do
-  do nn=1,15
-    ! Status information
-    write(*,'(/,a,f7.5,a)') 'Setting phase difference to ', abs((phase*nn)/15), ' π'
+  !write(*,'(/,a,f7.5,a)') 'Setting phase difference to ', 0.0_dp, ' π'
+  !! Update the state of the system
+  !do nn=0,2
+  !  call f%update
+  !  call n%update
+  !end do
+  !do nn=1,15
+  !  ! Status information
+  !  write(*,'(/,a,f7.5,a)') 'Setting phase difference to ', abs((phase*nn)/15), ' π'
 
-    ! Reinitialize the superconductors
-    call s1%init( exp((+i*pi*phase*nn)/(2*15)) )
-    call s2%init( exp((-i*pi*phase*nn)/(2*15)) )
+  !  ! Reinitialize the superconductors
+  !  call s1%init( exp((+i*pi*phase*nn)/(2*15)) )
+  !  call s2%init( exp((-i*pi*phase*nn)/(2*15)) )
 
-    ! Update the state of the system
-    call f%update
-    call n%update
+  !  ! Update the state of the system
+  !  call f%update
+  !  call n%update
 
-    ! Write the density of states to file
-    rewind(unit=output)
-    call s1 % write_dos(output, interfaces(1), interfaces(2))
-    call n  % write_dos(output, interfaces(2), interfaces(3))
-    call f  % write_dos(output, interfaces(3), interfaces(4))
-    call s2 % write_dos(output, interfaces(4), interfaces(5))
-    flush(unit=output)
-  end do
+  !  ! Write the density of states to file
+  !  rewind(unit=output)
+  !  call s1 % write_dos(output, interfaces(1), interfaces(2))
+  !  call n  % write_dos(output, interfaces(2), interfaces(3))
+  !  call f  % write_dos(output, interfaces(3), interfaces(4))
+  !  call s2 % write_dos(output, interfaces(4), interfaces(5))
+  !  flush(unit=output)
+  !end do
 
 
   ! Calculate the i
