@@ -93,18 +93,17 @@ contains
     call conductor_destruct(this%conductor)
   end subroutine
 
-  pure subroutine superconductor_init(this, gap, phase)
+  pure subroutine superconductor_init(this, gap)
     ! Redefine the default initializer.
-    class(superconductor), intent(inout)           :: this
-    complex(dp),           intent(in   ), optional :: gap
-    real(dp),              intent(in   ), optional :: phase
-    integer                                        :: n, m
+    class(superconductor), intent(inout) :: this
+    complex(dp),           intent(in   ) :: gap
+    integer                              :: n, m
 
     ! Call the superclass initializer
-    call this%conductor%init(gap, phase)
+    call this%conductor%init(gap)
 
     ! Update the superconducting gap
-    call this%set_gap(gap, phase)
+    call this%set_gap(gap)
   end subroutine
 
   !--------------------------------------------------------------------------------!
@@ -196,37 +195,14 @@ contains
   !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine superconductor_set_gap(this, gap, phase)
+  pure subroutine superconductor_set_gap(this, gap)
     ! Updates the superconducting order parameter from a scalar.
-    class(superconductor), intent(inout)           :: this
-    complex(dp),           intent(in   ), optional :: gap
-    real(dp),              intent(in   ), optional :: phase
+    class(superconductor), intent(inout) :: this
+    complex(dp),           intent(in   ) :: gap
+    integer                              :: n
 
-    real(dp)                                       :: phase_
-    complex(dp)                                    :: gap_
-    complex(dp)                                    :: gapn
-    integer                                        :: n
-
-    ! Process optional arguments
-    if (present(gap)) then
-      gap_ = gap
-    else
-      gap_ = (1.0_dp,0.0_dp)
-    end if
-
-    if (present(phase)) then
-      phase_ = phase
-    else
-      phase_ = 0.0_dp
-    end if
-
-    ! Loop over all locations
     do n = 1,size(this%gap)
-      ! Calculate the gap at this location
-      gapn = gap_ * exp(i*phase_*(this%location(n)-0.5))
-
-      ! Update the gap at this location
-      this%gap(n) = gapn
+      this%gap(n) = gap
     end do
   end subroutine
 
