@@ -1,8 +1,7 @@
-! This program calculates the density of states in an S/N/F trilayer,  assuming that the superconductor
-! can be described as a BCS superconductor.  The density of states as a function of position and energy
-! is then written to an output file. Note that the output file may be visualized using the accompanying
-! Gnuplot script 'plot/dos.plt'. Note also that the related program 'programs/dos_sc_snf.f' can be used
-! for a fully selfconsistent calculation, meaning that the effect on the superconductor is included.
+! This program calculates the density of states in an S/N/F trilayer, where the superconducting layer may
+! be treated either self-consistently or not.  The density of states as a function of position and energy
+! is then written to an output file.   Note that the output file may be visualized using the accompanying
+! Gnuplot script 'plot/dos.plt'. 
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-08-05
@@ -29,7 +28,8 @@ program dos_snf
 
   ! Declare the parameters that can be modified at runtime
   character(len=64)       :: filename             = 'dos_snf.dat'
-  integer                 :: energies             = 600      
+  logical                 :: selfconsistent       = .false.
+  integer                 :: energies             
   real(dp)                :: scattering           = 0.01_dp
   real(dp)                :: conductance          = 0.30_dp
   real(dp)                :: s_length             = 1.00_dp
@@ -51,6 +51,14 @@ program dos_snf
   ! Process command line options
   call option
   call option(filename,             'filename')
+  call option(selfconsistent,       'selfconsistent')
+
+  if (selfconsistent) then
+    energies = 600
+  else
+    energies = 150
+  end if
+
   call option(energies,             'energies')
   call option(scattering,           'scattering')
   call option(conductance,          'conductance')
@@ -75,7 +83,11 @@ program dos_snf
 
   ! Allocate and initialize the energy array
   allocate(energy_array(energies))
-  call energy_range(energy_array)
+  if (selfconsistent) then
+    call energy_range(energy_array, coupling = s_coupling)
+  else
+    call energy_range(energy_array)
+  end if
 
   ! Calculate the locations of the interfaces
   interfaces(1) = -(s_length + n_length + f_length)/2
@@ -124,7 +136,7 @@ program dos_snf
 
   ! Iterate until convergence
   iteration = 0
-  do while (n%difference > 10*n%tolerance .or. f%difference > 10*f%tolerance)
+  do while (n%difference>10*n%tolerance .or. f%difference>10*f%tolerance .or. (selfconsistent .and. s%difference>10*s%tolerance))
     iteration = iteration + 1
 
     ! Status information
@@ -133,6 +145,10 @@ program dos_snf
     ! Update the state of the system
     call f%update
     call n%update
+    if (selfconsistent) then
+      call s%update
+      call n%update
+    end if
 
     ! Write the density of states to file
     call write_dos(output)
@@ -176,26 +192,6 @@ contains
     write(*,'(a)') '╘═══════════════════════════════════╛'
   end subroutine
 
-  subroutine print_boot
-    ! Determine how much CPU time has elapsed
-    real(sp) :: time
-    call cpu_time(time)
-
-    ! Print the progress information to standard out
-    write(*,'(a)') '                                     '
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│          BOOTSTRAPPING            │'
-    write(*,'(a)') '├───────────────────────────────────┤'
-    write(*,'(a,5x,a,i8,4x,a)')                         &
-      '│','Iteration:        ',iteration,'│'
-    write(*,'(a,5x,a,i2.2,a,i2.2,a,i2.2,4x,a)')         &
-      '│','Elapsed time:     ',                         &
-      int(time/3600.0_sp),':',                          &
-      int(mod(time,3600.0_sp)/60.0_sp),':',             &
-      int(mod(time,60.0_sp)),                          '│'
-    write(*,'(a)') '╘═══════════════════════════════════╛'
-  end subroutine
-
   subroutine print_main
     ! Determine how much CPU time has elapsed
     real(sp) :: time
@@ -225,5 +221,6 @@ contains
     call s % write_dos(output, interfaces(1), interfaces(2))
     call n % write_dos(output, interfaces(2), interfaces(3))
     call f % write_dos(output, interfaces(3), interfaces(4))
+    flush(unit=output)
   end subroutine
 end program

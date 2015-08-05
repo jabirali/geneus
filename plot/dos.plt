@@ -11,12 +11,12 @@ set tics nomirror out scale 0.75
 set xlabel  'Energy ϵ/Δ'   offset 0,0
 set ylabel  'Position z/ξ' offset 0,0
 
-set xrange  [-1.5:1.5]
+set xrange  [-1.501:1.501]
 set cbrange [ 0.0:2.0]
 
-set xtics  -1.5,0.5,1.5
+set xtics  -1.501,0.5,1.501
 set cbtics -10,1,10
-set ytics  -10,0.5,10
+set ytics  -10,0.49999,10
 
 set format x '%3.1f'
 set format y '%3.1f'
