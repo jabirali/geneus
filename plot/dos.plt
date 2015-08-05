@@ -5,7 +5,6 @@ set palette defined (0 '#352a87', 1 '#0363e1', 2 '#1485d4', 3 '#06a7c6', 4 '#38b
 
 # Configure the borders
 set style line 11 lc rgb '#808080' lt 1
-set border 3 front ls 11
 set tics nomirror out scale 0.75
 
 # Configure the axes
@@ -22,9 +21,13 @@ set ytics  -10,0.5,10
 set format x '%3.1f'
 set format y '%3.1f'
 
+# Configure the heatmap
+set pm3d map
+set pm3d interpolate 0,0
+
 # Plot a file provided from stdin to interactive terminal
-set terminal wxt enhanced font 'Sans,12'
-plot '/dev/stdin' using 2:1:3 notitle with image
+set terminal wxt enhanced font 'Gillius ADF,12'
+splot '/dev/stdin' using 2:1:3 notitle
 
 # Wait for a mouse click
 pause mouse

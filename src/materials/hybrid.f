@@ -166,7 +166,7 @@ contains
     else
       ! Positive energies from zero to 'maximum'
       do n = 1,size(array)
-        array(n) = (n-1) * (maximum_/size(array))
+        array(n) = (n-1) * (maximum_/(size(array)-1))
       end do
     end if
   end subroutine
