@@ -25,7 +25,8 @@ program test_critical
 
   ! Declare the parameters that can be modified at runtime
   integer                 :: bisections           = 12
-  integer                 :: iterations           = 6
+  integer                 :: bootstrap            = 3
+  integer                 :: iterations           = 3
   integer                 :: energies             = 600
   real(dp)                :: scattering           = 0.01_dp
   real(dp)                :: conductance          = 0.30_dp
@@ -50,6 +51,7 @@ program test_critical
   ! Process command line options
   call option
   call option(bisections,           'bisections')
+  call option(bootstrap,            'bootstrap')
   call option(iterations,           'iterations')
   call option(energies,             'energies')
   call option(scattering,           'scattering')
@@ -95,7 +97,8 @@ program test_critical
   !--------------------------------------------------------------------------------!
 
   ! Perform the binary search for the critical temperature
-  call critical_temperature(s, bisections = bisections, iterations = iterations, lower = temperature_min, upper = temperature_max)
+  call critical_temperature(s, bisections = bisections, bootstrap = bootstrap, iterations = iterations, &
+                            lower = temperature_min, upper = temperature_max)
 
   !--------------------------------------------------------------------------------!
   !                              CLEANUP PROCEDURE                                 !

@@ -7,7 +7,7 @@ module mod_critical
   implicit none
 contains
 
-subroutine critical_temperature(material, bisections, iterations, lower, upper, gap)
+subroutine critical_temperature(material, bisections, iterations, bootstrap, lower, upper, gap)
   ! This subroutine calculates the critical temperature of a superconducting material using a binary search algorithm.
   ! The two compulsory arguments are 'material', which is the superconducting material that we will find the critical
   ! temperature of, and 'update', which is a subroutine that updates the current system state by solving the equations
@@ -18,6 +18,7 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
 
   ! Declare data types for input variables
   class(superconductor), target,   intent(inout) :: material
+  integer,               optional, intent(in   ) :: bootstrap
   integer,               optional, intent(in   ) :: bisections
   integer,               optional, intent(in   ) :: iterations
   real(dp),              optional, intent(in   ) :: lower 
@@ -25,6 +26,7 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
   complex(dp),           optional, intent(in   ) :: gap
 
   ! Declare data types for internal variables
+  integer                                        :: bootstrap_
   integer                                        :: bisections_
   integer                                        :: iterations_
   real(dp)                                       :: lower_     
@@ -33,6 +35,7 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
   integer                                        :: n, m
 
   ! Set default values, and handle optional arguments
+  bootstrap_  =  0
   bisections_ = 12
   iterations_ =  5
   lower_      =  0.0000_dp
@@ -52,8 +55,20 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
     ! Initialize a weakly superconducting state
     call init_all(material, gap_)
 
-    ! Update the state of the multilayer structure
+    ! Bootstrap the system by updating the other layers
+    do m = 1,bootstrap_
+      write (*,'(/," :: BOOTSTRAPPING [ ",i2.2," / ",i2.2," ]")') m, bootstrap_
+      call update_other(material)
+    end do
+
+    ! Update the superconductor after the last bootstrap iteration
+    if (bootstrap_ > 0) then
+      call material%update
+    end if
+
+    ! Update the state of the entire multilayer structure
     do m = 1,iterations_
+      write (*,'(/," :: ITERATING [ ",i2.2," / ",i2.2," ]")') m, bootstrap_
       call update_all(material)
     end do
 
@@ -73,6 +88,10 @@ subroutine critical_temperature(material, bisections, iterations, lower, upper, 
 contains
   subroutine process_arguments
     ! This nested subroutine processes the optional arguments to the parent subroutine.
+    if (present(bootstrap)) then
+      bootstrap_  = bootstrap
+    end if
+
     if (present(bisections)) then
       bisections_ = bisections
     end if

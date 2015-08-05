@@ -116,6 +116,73 @@ contains
     call m % update
   end subroutine
 
+  subroutine update_other(m, reverse)
+    ! This subroutine is used to update the physical state of a multilayer hybrid system, where the system should have
+    ! been assembled by previous calls to the routine 'connect'. The subroutine takes a single class(material) object
+    ! 'm' as its argument,  and first updates the states of all layers to the left of 'm',  then updates the states of 
+    ! all materials to the right of 'm'. However, the state of the material 'm' itself will not be changed. By default,
+    ! the materials are updated from the vacuum interface to m, but this behaviour can be changed by setting 'reverse'.
+    class(material), target   :: m
+    class(material), pointer  :: p
+    logical,         optional :: reverse
+    logical                   :: reverse_
+
+    ! Process optional arguments
+    if (present(reverse)) then
+      reverse_ = reverse
+    else
+      reverse_ = .false.
+    end if
+
+    ! Start at the specified material
+    p => m
+
+    ! Move to the left until a vacuum interface is located
+    do while (associated(p % material_a))
+      p => p % material_a
+      if (reverse_) then
+        call p % update
+      end if
+    end do
+
+    ! Move to the right until we get back to the start point, and update the states of all materials on the way
+    if (.not. associated(p, m)) then
+      if (.not. reverse_) then
+        call p % update
+      end if
+      do while (associated(p % material_b) .and. .not. associated(p % material_b, m))
+        p => p % material_b
+        if (.not. reverse_) then
+          call p % update
+        end if
+      end do
+    end if
+
+    ! Restart at the specified material
+    p => m
+
+    ! Move to the right until a vacuum interface is located
+    do while (associated(p % material_b))
+      p => p % material_b
+      if (reverse_) then
+        call p % update
+      end if
+    end do
+
+    ! Move to the left until we get back to the start point, and update the states of all materials on the way
+    if (.not. associated(p, m)) then
+      if (.not. reverse_) then
+        call p % update
+      end if
+      do while (associated(p % material_a) .and. .not. associated(p % material_a, m))
+        p => p % material_a
+        if (.not. reverse_) then
+          call p % update
+        end if
+      end do
+    end if
+  end subroutine
+
   !--------------------------------------------------------------------------------!
   !              PROCEDURES FOR CLASS(CONDUCTOR) CONSTRUCTOR ARGUMENTS             !
   !--------------------------------------------------------------------------------!
