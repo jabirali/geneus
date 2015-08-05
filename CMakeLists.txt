@@ -28,10 +28,14 @@ file(GLOB src_ext90 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_m.f" "src/ext
 file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "src/foundation/*.f" "src/materials/*.f" "src/algorithms/*.f")
 file(GLOB src_exe   RELATIVE ${CMAKE_SOURCE_DIR} "src/programs/*.f")
 
+# Libraries
+add_library(s4tran STATIC ${src_mod} ${src_ext90} ${src_ext77})
+
 # Executables
 foreach(src_name ${src_exe})
   get_filename_component( exe_name ${src_name} NAME_WE )
-  add_executable( ${exe_name} ${src_name} ${src_mod} ${src_ext90} ${src_ext77} )
+  add_executable( ${exe_name} ${src_name} )
+  target_link_libraries( ${exe_name} s4tran )
 endforeach()
 
 
@@ -55,9 +59,9 @@ endif()
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # Flags that apply to all files
-  set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -s")
   set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace")
-  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fuse-linker-plugin -fno-stack-arrays -s")
+  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fuse-linker-plugin -fwhole-program -static")
 
   # Flags that apply to external files (imported from other projects)
   set_source_files_properties(${src_ext77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
