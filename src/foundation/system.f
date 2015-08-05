@@ -119,7 +119,7 @@ contains
 
     ! Write the results to standard out for verification purposes
     output = option
-    write(*,'(a,a,l1)') ' :: ', output, variable
+    write(*,'(a,a,l10)') ' :: ', output, variable
   end subroutine
 
   subroutine option_string(variable, option)
