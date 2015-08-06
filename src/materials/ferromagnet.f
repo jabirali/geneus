@@ -44,24 +44,28 @@ contains
     this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, &
                                          points=points, spinorbit=spinorbit)
 
-    ! Allocate memory (if necessary)
-    if (.not. allocated(this%exchange)) then
-      allocate(this%exchange(3,size(this%conductor%location)))
+    ! Deallocate existing memory (if necessary)
+    if (allocated(this%exchange)) then
+      deallocate(this%exchange)
     end if
 
-    ! Initialize the exchange field
-    if (present(exchange)) then
+    ! Handle the exchange field argument
+    if (present(exchange) .and. norm2(exchange) > 1e-10) then
+      ! Reallocate memory
+      allocate(this%exchange(3,size(this%conductor%location)))
+
+      ! Initialize the exchange field
       do n = 1,size(this%conductor%location)
         this%exchange(:,n) = exchange
       end do
-    else
-      this%exchange(:,:) = 0.0_dp
     end if
 
     ! Modify the type string
-    this%type_string = color_red // 'FERROMAGNET' // color_none
-    if (allocated(this%spinorbit)) then
-      this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+    if (allocated(this%exchange)) then
+      this%type_string = color_red // 'FERROMAGNET' // color_none
+      if (allocated(this%spinorbit)) then
+        this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+      end if
     end if
   end function
 
@@ -92,19 +96,21 @@ contains
     type(spin)                        :: P, Pt
     real(dp)                          :: h(3)
 
-    ! Lookup the magnetic exchange field
-    h  = this%get_exchange(z)/this%thouless
+    if (allocated(this%exchange)) then
+      ! Lookup the magnetic exchange field
+      h  = this%get_exchange(z)/this%thouless
 
-    ! Calculate the exchange field factors in the diffusion equation
-    P  = (0.0_dp,-1.0_dp) * (h(1)*pauli1 + h(2)*pauli2 + h(3)*pauli3)
-    Pt = (0.0_dp,+1.0_dp) * (h(1)*pauli1 - h(2)*pauli2 + h(3)*pauli3)
+      ! Calculate the exchange field factors in the diffusion equation
+      P  = (0.0_dp,-1.0_dp) * (h(1)*pauli1 + h(2)*pauli2 + h(3)*pauli3)
+      Pt = (0.0_dp,+1.0_dp) * (h(1)*pauli1 - h(2)*pauli2 + h(3)*pauli3)
 
-    ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-    call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+      ! Calculate the second derivatives of the Riccati parameters (conductor terms)
+      call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
 
-    ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
-    d2g  = d2g  + P  * g  + g  * Pt
-    d2gt = d2gt + Pt * gt + gt * P
+      ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
+      d2g  = d2g  + P  * g  + g  * Pt
+      d2gt = d2gt + Pt * gt + gt * P
+    end if
   end subroutine
 
   !--------------------------------------------------------------------------------!

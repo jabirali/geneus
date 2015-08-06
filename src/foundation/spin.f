@@ -505,7 +505,7 @@ contains
     r = this%matrix(1,1) + this%matrix(2,2)
   end function
 
-  pure function spin_norm(this) result(r)
+  pure elemental function spin_norm(this) result(r)
     ! Calculates the Frobenius norm of the spin matrix
     real(dp)                :: r, w(8)
     class(spin), intent(in) :: this

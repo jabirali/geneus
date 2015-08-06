@@ -83,9 +83,14 @@ contains
     end if
 
     ! Optional argument: spin-orbit coupling
+    if (allocated(this%spinorbit)) then
+      deallocate(this%spinorbit)
+    end if
     if (present(spinorbit)) then
-      allocate(this%spinorbit(size(spinorbit)))
-      this%spinorbit = spinorbit
+      if (sum(spinorbit%norm()) > 1e-10) then
+        allocate(this%spinorbit(size(spinorbit)))
+        this%spinorbit = spinorbit
+      end if
     end if
     
     ! Allocate memory (if necessary)
