@@ -32,17 +32,20 @@ program dos_snfs
   integer                 :: iteration
 
   ! Declare the parameters that can be modified at runtime
-  character(len=64)       :: filename             = 'dos_snfs.dat'
-  integer                 :: bootstrap            =  15
+  character(len=32)       :: filename             = 'dos_snfs.dat'
+  character(len=32)       :: structure            = 'SNFS'
+  integer                 :: bootstraps           =  15
   integer                 :: energies             = 150      
   real(dp)                :: scattering           = 0.01_dp
   real(dp)                :: conductance          = 0.30_dp
   real(dp)                :: phase                = 0.00_dp
   real(dp)                :: s_length             = 1.00_dp
   real(dp)                :: s_coupling           = 0.20_dp
+  logical                 :: n_enable             = .false.
   real(dp)                :: n_length             = 0.50_dp
   real(dp)                :: n_spinorbit_a        = 0.00_dp
   real(dp)                :: n_spinorbit_b        = 0.00_dp
+  logical                 :: f_enable             = .false.
   real(dp)                :: f_length             = 0.50_dp
   real(dp)                :: f_exchange_x         = 0.00_dp
   real(dp)                :: f_exchange_y         = 0.00_dp
@@ -57,23 +60,64 @@ program dos_snfs
   ! Process command line options
   call option
   call option(filename,             'filename')
-  call option(bootstrap,            'bootstrap')
+  call option(structure,            'structure')
+
+  ! Check the selected hybrid structure
+  select case (trim(structure))
+    case ('SNFS', 'SFNS')
+      write(*,'(/,a,/)') ' :: '//color_green//trim(structure)//color_none//' structures are supported.'
+      f_enable = .true.
+      n_enable = .true.
+    case ('SFS')
+      write(*,'(/,a,/)') ' :: '//color_green//trim(structure)//color_none//' structures are supported.'
+      f_enable = .true.
+    case ('SNS')
+      write(*,'(/,a,/)') ' :: '//color_green//trim(structure)//color_none//' structures are supported.'
+      n_enable = .true.
+    case default
+      write(*,'(/,a,/)') ' :: '//color_red  //trim(structure)//color_none//' structures are not supported!'
+      stop
+  end select
+
+  ! Process command line options
+  call option(bootstraps,           'bootstraps')
   call option(energies,             'energies')
   call option(scattering,           'scattering')
   call option(conductance,          'conductance')
   call option(phase,                'phase')
   call option(s_length,             's.length')
   call option(s_coupling,           's.coupling')
-  call option(n_length,             'n.length')
-  call option(n_spinorbit_a,        'n.spinorbit.a')
-  call option(n_spinorbit_b,        'n.spinorbit.b')
-  call option(f_length,             'f.length')
-  call option(f_exchange_x,         'f.exchange.x')
-  call option(f_exchange_y,         'f.exchange.y')
-  call option(f_exchange_z,         'f.exchange.z')
+  select case (trim(structure))
+    case ('SNFS')
+      call option(n_length,             'n.length')
+      call option(n_spinorbit_a,        'n.spinorbit.a')
+      call option(n_spinorbit_b,        'n.spinorbit.b')
+      call option(f_length,             'f.length')
+      call option(f_exchange_x,         'f.exchange.x')
+      call option(f_exchange_y,         'f.exchange.y')
+      call option(f_exchange_z,         'f.exchange.z')
+    case ('SFNS')
+      call option(f_length,             'f.length')
+      call option(f_exchange_x,         'f.exchange.x')
+      call option(f_exchange_y,         'f.exchange.y')
+      call option(f_exchange_z,         'f.exchange.z')
+      call option(n_length,             'n.length')
+      call option(n_spinorbit_a,        'n.spinorbit.a')
+      call option(n_spinorbit_b,        'n.spinorbit.b')
+    case ('SNS')
+      call option(n_length,             'n.length')
+      call option(n_spinorbit_a,        'n.spinorbit.a')
+      call option(n_spinorbit_b,        'n.spinorbit.b')
+    case ('SFS')
+      call option(f_length,             'f.length')
+      call option(f_exchange_x,         'f.exchange.x')
+      call option(f_exchange_y,         'f.exchange.y')
+      call option(f_exchange_z,         'f.exchange.z')
+  end select
 
   ! Open the output file
   open(newunit=output, file=filename)
+
 
 
 
@@ -86,11 +130,17 @@ program dos_snfs
   call energy_range(energy_array)
 
   ! Calculate the locations of the interfaces
-  interfaces(1) = -(2*s_length + n_length + f_length)/2
-  interfaces(2) = interfaces(1) + s_length
-  interfaces(3) = interfaces(2) + n_length
-  interfaces(4) = interfaces(3) + f_length
-  interfaces(5) = interfaces(4) + s_length
+  interfaces(1) = 0.0_dp
+  !do iteration=2,len(structure)
+  !  select case (structure(iteration))
+  !    case ('S')
+  !      interfaces(iteration) = interfaces(iteration-1) + s_length
+  !    case ('N')
+  !      interfaces(iteration) = interfaces(iteration-1) + n_length
+  !    case ('F')
+  !      interfaces(iteration) = interfaces(iteration-1) + f_length
+  !  end select
+  !end do
 
   ! Initialize the material layers
   s1 = superconductor (energy_array, scattering = scattering, thouless = 1/s_length**2, coupling  = s_coupling)
@@ -101,9 +151,22 @@ program dos_snfs
                        exchange  = [f_exchange_x, f_exchange_y, f_exchange_z])
 
   ! Connect the material layers
-  call connect(s1, n, conductance, conductance)
-  call connect(n,  f, conductance, conductance)
-  call connect(f, s2, conductance, conductance)
+  select case (trim(structure))
+    case('SNFS')
+      call connect(s1, n, conductance, conductance)
+      call connect(n,  f, conductance, conductance)
+      call connect(f, s2, conductance, conductance)
+    case('SFNS')
+      call connect(s1, f, conductance, conductance)
+      call connect(f,  n, conductance, conductance)
+      call connect(n, s2, conductance, conductance)
+    case('SFS')
+      call connect(s1, f, conductance, conductance)
+      call connect(f, s2, conductance, conductance)
+    case('SNS')
+      call connect(s1, n, conductance, conductance)
+      call connect(n, s2, conductance, conductance)
+  end select
 
 
 
@@ -115,22 +178,24 @@ program dos_snfs
   call write_dos(output)
 
   ! Bootstrap the system at zero phase difference
-  do iteration=1,3
-    ! Status information
-    call print_init
+  if (n_enable .and. f_enable) then
+    do iteration=1,3
+      ! Status information
+      call print_init
 
-    ! Update the state of the system
-    call f%update
-    call n%update
+      ! Update the state of the system
+      call f%update
+      call n%update
 
-    ! Write the density of states to file
-    call write_dos(output)
-  end do
+      ! Write the density of states to file
+      call write_dos(output)
+    end do
+  end if
 
   ! Bootstrap the system at gradually increasing phase difference
-  do iteration=1,bootstrap
+  do iteration=1,bootstraps
     ! Calculate the current phase difference
-    phase_ = (phase*iteration)/bootstrap
+    phase_ = (phase*iteration)/bootstraps
 
     ! Status information
     call print_boot
@@ -140,8 +205,13 @@ program dos_snfs
     call s2%init( exp((+i*pi/2)*phase_) )
 
     ! Update the state of the system
-    call f%update
-    call n%update
+    if (f_enable) then
+      call f%update
+    end if
+
+    if (n_enable) then
+      call n%update
+    end if
 
     ! Write the density of states to file
     call write_dos(output)
@@ -161,8 +231,13 @@ program dos_snfs
     call print_main
 
     ! Update the state of the system
-    call f%update
-    call n%update
+    if (f_enable) then
+      call f%update
+    end if
+
+    if (n_enable) then
+      call n%update
+    end if
 
     ! Write the density of states to file
     call write_dos(output)
@@ -256,10 +331,26 @@ contains
     integer, intent(in) :: output
 
     rewind(unit=output)
-    call s1 % write_dos(output, interfaces(1), interfaces(2))
-    call n  % write_dos(output, interfaces(2), interfaces(3))
-    call f  % write_dos(output, interfaces(3), interfaces(4))
-    call s2 % write_dos(output, interfaces(4), interfaces(5))
+    select case (trim(structure))
+      case ('SNFS')
+        call s1 % write_dos(output, interfaces(1), interfaces(2))
+        call n  % write_dos(output, interfaces(2), interfaces(3))
+        call f  % write_dos(output, interfaces(3), interfaces(4))
+        call s2 % write_dos(output, interfaces(4), interfaces(5))
+      case ('SFNS')
+        call s1 % write_dos(output, interfaces(1), interfaces(2))
+        call f  % write_dos(output, interfaces(3), interfaces(4))
+        call n  % write_dos(output, interfaces(2), interfaces(3))
+        call s2 % write_dos(output, interfaces(4), interfaces(5))
+      case ('SFS')
+        call s1 % write_dos(output, interfaces(1), interfaces(2))
+        call f  % write_dos(output, interfaces(3), interfaces(4))
+        call s2 % write_dos(output, interfaces(4), interfaces(5))
+      case ('SNS')
+        call s1 % write_dos(output, interfaces(1), interfaces(2))
+        call n  % write_dos(output, interfaces(2), interfaces(3))
+        call s2 % write_dos(output, interfaces(4), interfaces(5))
+    end select
     flush(unit=output)
   end subroutine
 end program
