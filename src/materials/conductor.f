@@ -42,7 +42,9 @@ module mod_conductor
     procedure                 :: interface_spinactive_a => spinactive_interface_equation_a  ! Defines the left  boundary condition (spin-active terms) [TODO]
     procedure                 :: interface_spinactive_b => spinactive_interface_equation_b  ! Defines the right boundary condition (spin-active terms) [TODO]
 
-    ! These methods are used to output physical results 
+    ! These methods define miscellaneous utility functions
+    procedure                 :: save                   => conductor_save                   ! Saves the state of the conductor to a different object
+    procedure                 :: load                   => conductor_load                   ! Loads the state of the conductor from a different object
     procedure                 :: write_dos              => conductor_write_dos              ! Writes the density of states to a given output unit
 
     ! These methods are used by internal subroutines 
@@ -305,6 +307,22 @@ contains
   !--------------------------------------------------------------------------------!
   !                    IMPLEMENTATION OF INPUT/OUTPUT METHODS                      !
   !--------------------------------------------------------------------------------!
+
+  impure subroutine conductor_save(this, other)
+    ! Saves the state of the conductor to a different object.
+    class(conductor), intent(inout) :: this
+    class(conductor), intent(inout) :: other
+
+    other % greenr = this % greenr
+  end subroutine
+
+  impure subroutine conductor_load(this, other)
+    ! Saves the state of the conductor to a different object.
+    class(conductor), intent(inout) :: this
+    class(conductor), intent(inout) :: other
+
+    this % greenr = other % greenr
+  end subroutine
 
   impure subroutine conductor_write_dos(this, unit, a, b)
     ! Writes the density of states as a function of position and energy to a given output unit.
