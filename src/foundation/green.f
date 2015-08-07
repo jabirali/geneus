@@ -46,7 +46,7 @@ module mod_green
   end interface
 
   ! Exported constants
-  type(green), target :: green0 = green(spin(0),spin(0),spin(0),spin(0))
+  type(green), parameter :: green0 = green(spin(0),spin(0),spin(0),spin(0))
 contains
   pure function green_construct_bcs(energy, gap) result(this)
     ! Constructs a state corresponding to a BCS superconductor at some given energy, which may have an imaginary

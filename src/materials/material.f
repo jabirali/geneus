@@ -113,11 +113,11 @@ contains
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
     use bvp_m
 
-    class(material), intent(inout) :: this          ! Material that will be updated
-    class(green),          pointer :: a => green0   ! State at this energy at the left  interface
-    class(green),          pointer :: b => green0   ! State at this energy at the right interface
-    complex(dp)                    :: e             ! Complex energy relative to the Thouless energy
-    integer                        :: n             ! Outer loop variable (current energy)
+    class(material), intent(inout) :: this  ! Material that will be updated
+    type(green)                    :: a     ! State at this energy at the left  interface
+    type(green)                    :: b     ! State at this energy at the right interface
+    complex(dp)                    :: e     ! Complex energy relative to the Thouless energy
+    integer                        :: n     ! Outer loop variable (current energy)
 
     ! Call the prehook method
     call this%update_prehook
@@ -152,17 +152,17 @@ contains
         end do
 
         ! Copy the contents of the state vector to the difference vector
-        d(:,:) = u(:,:)
+        d = u
 
         ! Calculate the complex energy (relative to the Thouless energy)
         e = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=dp)
 
         ! Update the pointers used to evaluate boundary conditions
         if (associated(this%material_a)) then
-          a => this%material_a%greenr(n,ubound(this%material_a%greenr,2))
+          a = this%material_a%greenr(n,ubound(this%material_a%greenr,2))
         end if
         if (associated(this%material_b)) then
-          b => this%material_b%greenr(n,lbound(this%material_b%greenr,2))
+          b = this%material_b%greenr(n,lbound(this%material_b%greenr,2))
         end if
 
         ! Initialize bvp_solver
@@ -178,7 +178,7 @@ contains
         end do
 
         ! Update the difference vector
-        d(:,:) = abs(u(:,:) - d(:,:))
+        d = abs(u - d)
 
         ! Update the maximal difference since last update
         this%difference = max(this%difference,maxval(d))
