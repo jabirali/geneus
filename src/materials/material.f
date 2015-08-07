@@ -128,7 +128,7 @@ contains
     end if
 
     ! Reset the difference since last update to zero
-    this%difference = 1.0_dp
+    this%difference = 0.0_dp
 
     ! Loop over the discretized energy levels
     do n=1,size(this%energy)
