@@ -16,14 +16,14 @@ set cbrange [ 0.0:2.0]
 
 set xtics  -1.501,0.5,1.501
 set cbtics -10,1,10
-set ytics  -10,0.49999,10
+set ytics  -100,0.49999,100
 
 set format x '%3.1f'
 set format y '%3.1f'
 
 # Configure the heatmap
 set pm3d map
-set pm3d interpolate 0,0
+#set pm3d interpolate 0,0
 
 # Plot a file provided from stdin to interactive terminal
 set terminal wxt enhanced font 'Gillius ADF,12'
