@@ -8,11 +8,11 @@ fi
 if [ "$1" == "--debug" ]; then
 	echo "Preparing for a compilation in DEBUG mode." 
 	echo
-	cmake -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Btmp
+	cmake -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Btmp
 else
 	echo "Preparing for a compilation in RELEASE mode."
 	echo
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Btmp
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Btmp
 fi
 
 echo
