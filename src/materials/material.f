@@ -30,7 +30,7 @@ module mod_material
     class(material),                  pointer :: material_b      => null()          ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
-    integer                                   :: scaling         =  64              ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
+    integer                                   :: scaling         =  128             ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
     integer                                   :: order           =  4               ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                                   :: control         =  2               ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                                   :: information     =  0               ! How much information that should be written to standard out (range: [-1,2])
