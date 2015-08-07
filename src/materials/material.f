@@ -113,14 +113,11 @@ contains
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
     use bvp_m
 
-    class(material), intent(inout) :: this                       ! Material that will be updated
-    real(dp)                       :: u(32,size(this%location))  ! Representation of the retarded Green's functions
-    real(dp)                       :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
-
-    class(green),          pointer :: a => green0                ! State at this energy at the left  interface
-    class(green),          pointer :: b => green0                ! State at this energy at the right interface
-    complex(dp)                    :: e                          ! Complex energy relative to the Thouless energy
-    integer                        :: n                          ! Loop variable
+    class(material), intent(inout) :: this          ! Material that will be updated
+    class(green),          pointer :: a => green0   ! State at this energy at the left  interface
+    class(green),          pointer :: b => green0   ! State at this energy at the right interface
+    complex(dp)                    :: e             ! Complex energy relative to the Thouless energy
+    integer                        :: n             ! Outer loop variable (current energy)
 
     ! Call the prehook method
     call this%update_prehook
@@ -131,14 +128,16 @@ contains
     end if
 
     ! Reset the difference since last update to zero
-    this%difference = 0.0_dp
+    this%difference = 1.0_dp
 
     ! Loop over the discretized energy levels
     do n=1,size(this%energy)
       block
         ! Declare local block variables
-        type(bvp_sol) :: sol ! Workspace for the bvp_solver procedures
-        integer       :: m   ! Inner loop variable
+        real(dp)      :: u(32,size(this%location))  ! Representation of the retarded Green's functions
+        real(dp)      :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
+        type(bvp_sol) :: sol                        ! Workspace for the bvp_solver procedures
+        integer       :: m                          ! Inner loop variable (current location)
 
         ! Status information
         if (this%information >= 0) then
