@@ -1,13 +1,13 @@
-! This program calculates the density of states in an S/N/F trilayer, where the superconducting layer may
-! be treated either self-consistently or not.  The density of states as a function of position and energy
-! is then written to an output file.   Note that the output file may be visualized using the accompanying
-! Gnuplot script 'plot/dos.plt'. 
+! This program calculates the density of states in a multilayer with a single superconducting component,
+! which may be treated either self-consistently or not. The density of states as a function of position
+! and energy will be written to a given output file.  Note that the output file may be visualized using
+! the accompanying Gnuplot script 'plot/dos.plt'. 
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-08-05
-! Updated: 2015-08-05
+! Updated: 2015-08-07
 
-program dos_snf
+program proximity_dos
   use mod_hybrid
   implicit none
 
@@ -16,23 +16,23 @@ program dos_snf
   !--------------------------------------------------------------------------------!
 
   ! Declare the materials in the hybrid structure
-  type(superconductor)    :: s
-  type(ferromagnet)       :: f(:)
+  type(superconductor)           :: s
+  type(ferromagnet), allocatable :: f(:)
 
   ! Declare the variables used by the program
-  integer                 :: output
-  real(dp),   allocatable :: energy_array(:)
-  real(dp)                :: interfaces(:)
-  integer                 :: iteration
-  integer                 :: n
+  integer                        :: output
+  real(dp),          allocatable :: energy_array(:)
+  real(dp),          allocatable :: interfaces(:)
+  integer                        :: iteration
+  integer                        :: n
 
   ! Declare global parameters that can be modified at runtime
-  character(len=64)       :: filename             = 'dos_proximity.dat'
-  logical                 :: selfconsistent       = .false.
-  integer                 :: layers               = 2
-  integer                 :: energies             
-  real(dp)                :: scattering           = 0.01_dp
-  real(dp)                :: conductance          = 0.30_dp
+  character(len=64)              :: filename       = 'dos_proximity.dat'
+  logical                        :: selfconsistent = .false.
+  integer                        :: layers         = 2
+  integer                        :: energies       
+  real(dp)                       :: scattering     = 0.01_dp
+  real(dp)                       :: conductance    = 0.30_dp
 
 
 
@@ -69,11 +69,6 @@ program dos_snf
   ! Determine the number of energies to use
   call option(energies, 'energies')
   allocate(energy_array(energies))
-  if (selfconsistent .and. energies>200) then
-    call energy_range(energy_array, coupling = s_coupling)
-  else
-    call energy_range(energy_array)
-  end if
 
   ! Determine the inelastic scattering rate
   call option(scattering,   'scattering')
@@ -91,6 +86,13 @@ program dos_snf
     if (selfconsistent) then
       call option(length,   's.length')
       call option(coupling, 's.coupling')
+    end if
+
+    ! Construct a sufficient energy array
+    if (selfconsistent .and. energies>200) then
+      call energy_range(energy_array, coupling = coupling)
+    else
+      call energy_range(energy_array)
     end if
 
     ! Construct the superconductor
@@ -116,12 +118,12 @@ program dos_snf
       write(ioname, '(a,i0)') 'f', n
 
       ! Obtain the command line values
-      call option(length,      ioname // '.length')
-      call option(spinorbit_a, ioname // '.spinorbit.a')
-      call option(spinorbit_b, ioname // '.spinorbit.b')
-      call option(exchange_x,  ioname // '.exchange.x')
-      call option(exchange_y,  ioname // '.exchange.y')
-      call option(exchange_z,  ioname // '.exchange.z')
+      call option(length,      trim(ioname) // '.length')
+      call option(spinorbit_a, trim(ioname) // '.spinorbit.a')
+      call option(spinorbit_b, trim(ioname) // '.spinorbit.b')
+      call option(exchange_x,  trim(ioname) // '.exchange.x')
+      call option(exchange_y,  trim(ioname) // '.exchange.y')
+      call option(exchange_z,  trim(ioname) // '.exchange.z')
 
       ! Construct the ferromagnet
       f(n) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2,     &
@@ -172,14 +174,14 @@ program dos_snf
 
   ! Iterate until convergence
   iteration = 0
-  do while (.not. converged)
+  do while (.not. convergence(s,f))
     iteration = iteration + 1
 
     ! Status information
     call print_main
 
     ! Update the ferromagnets right-to-left (including edges)
-    do n=layers-1,1
+    do n=layers-1,1,-1
       call f(n) % update
     end do
 
@@ -189,11 +191,11 @@ program dos_snf
       call f(1) % update
     end if
 
-    ! Update the ferromagnets right-to-left (excluding edges)
-    if (layers > 2)
-      do n=2,layers-2
+    ! Update the ferromagnets left-to-right (excluding edges)
+    if (layers > 2) then
+      do n=1,layers-2
         call f(n) % update
-      end if
+      end do
     end if
 
     ! Write the density of states to file
@@ -220,13 +222,15 @@ contains
   !                             LOGICAL PROCEDURES                                 !
   !--------------------------------------------------------------------------------!
 
-  pure function converged return(r)
+  pure function convergence(s, f) result(r)
     ! Returns whether or not the main loop has converged
-    logical :: r
-    integer :: n
+    class(superconductor), intent(in)  :: s
+    class(ferromagnet),    intent(in)  :: f(:)
+    logical                            :: r
+    integer                            :: n
 
-    r = (.not. selfconsistent) .or. (s%difference < 10 * s%tolerance)
-    do n=2,layers
+    r = ((.not. selfconsistent) .or. (s%difference < 10 * s%tolerance))
+    do n=1,size(f)
       r = r .and. (f(n)%difference < 10 * f(n)%tolerance)
     end do
   end function
@@ -267,8 +271,8 @@ contains
     write(*,'(a)') '├───────────────────────────────────┤'
     write(*,'(a,5x,a,i8,4x,a)')                         &
       '│','Iteration:        ',iteration,'│'
-    write(*,'(a,5x,a,f8.6,4x,a)')                       &
-      '│','Maximum change:   ',max(n%difference,f%difference),'│'
+    !write(*,'(a,5x,a,f8.6,4x,a)')                       &
+    !  '│','Maximum change:   ',max(n%difference,f%difference),'│'
     write(*,'(a,5x,a,i2.2,a,i2.2,a,i2.2,4x,a)')         &
       '│','Elapsed time:     ',                         &
       int(time/3600.0_sp),':',                          &
