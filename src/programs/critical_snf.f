@@ -8,7 +8,6 @@
 program critical_snf
   use mod_system
   use mod_hybrid
-  use mod_critical
   implicit none
 
   !--------------------------------------------------------------------------------!
@@ -104,6 +103,8 @@ program critical_snf
   call connect(s, n, conductance, conductance)
   call connect(n, f, conductance, conductance)
 
+  ! Deallocate the energy array
+  deallocate(energy_array)
 
 
   !--------------------------------------------------------------------------------!
@@ -111,7 +112,9 @@ program critical_snf
   !--------------------------------------------------------------------------------!
 
   ! Initialize all materials to weakly superconducting states
-  call init_all(s, cmplx(s_gap,0.0_dp,kind=dp))
+  call s % init( gap = cmplx(s_gap,0.0_dp,kind=dp) )
+  call n % init( gap = cmplx(s_gap,0.0_dp,kind=dp) )
+  call f % init( gap = cmplx(s_gap,0.0_dp,kind=dp) )
 
   do iteration = 1,bootstraps
     ! Status information
@@ -126,9 +129,6 @@ program critical_snf
   call s % save(s_boot)
   call n % save(n_boot)
   call f % save(f_boot)
-  s_boot % greenr = s % greenr
-  n_boot % greenr = n % greenr
-  f_boot % greenr = f % greenr
 
   !--------------------------------------------------------------------------------!
   !                  BINARY SEARCH FOR THE CRITICAL TEMPERATURE                    !
@@ -144,7 +144,7 @@ program critical_snf
     call print_main
 
     ! Load the bootstrapped state
-    s % gap = s_gap
+    call s % set_gap(cmplx(s_gap,0,kind=dp))
     call s % load(s_boot)
     call n % load(n_boot)
     call f % load(f_boot)
@@ -177,13 +177,6 @@ program critical_snf
 
   ! Print the final results
   call print_final
-
-  !--------------------------------------------------------------------------------!
-  !                              CLEANUP PROCEDURE                                 !
-  !--------------------------------------------------------------------------------!
-
-  ! Deallocate memory
-  deallocate(energy_array)
 
 contains
 

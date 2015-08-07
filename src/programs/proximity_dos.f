@@ -22,30 +22,36 @@ program proximity_dos
   ! Declare the variables used by the program
   integer                        :: output
   real(dp),          allocatable :: energy_array(:)
-  real(dp),          allocatable :: interfaces(:)
+  real(dp),          allocatable :: connection(:)
   integer                        :: iteration
   integer                        :: n
 
   ! Declare global parameters that can be modified at runtime
-  character(len=64)              :: filename       = 'dos_proximity.dat'
+  character(len=32)              :: filename       = 'dos.dat'
+  integer                        :: information    = 0
   logical                        :: selfconsistent = .false.
-  integer                        :: layers         = 2
+  integer                        :: layers         = 1
   integer                        :: energies       
+  integer                        :: points         = 150
   real(dp)                       :: scattering     = 0.01_dp
   real(dp)                       :: conductance    = 0.30_dp
 
 
 
   !--------------------------------------------------------------------------------!
-  !                          PROCESS COMMAND LINE OPTIONS                          !
+  !                    PROCESS GENERIC COMMAND LINE OPTIONS                        !
   !--------------------------------------------------------------------------------!
 
   ! Print out the header
-  call option
+  call print_option
 
   ! Determine the output file
   call option(filename, 'filename')
   open(newunit=output, file=filename)
+
+  ! Determine the debug level
+  call option(information, 'information')
+  print *
 
   ! Determine whether to perform a selfconsistent calculation
   call option(selfconsistent, 'selfconsistent')
@@ -57,67 +63,127 @@ program proximity_dos
 
   ! Determine how many ferromagnetic layers there are
   call option(layers, 'layers')
-  if (layers > 1) then
-    allocate(f(layers-1))
-    allocate(interfaces(layers+1))
-    interfaces(1) = 0.0_dp
-  else
-    print *,'Error: there must be at least two layers in the structure!'
+  if (layers <= 0) then
+    print *
+    print *,'Error: there should be minimum one non-superconducting layer in the structure!'
     stop
   end if
+  allocate(f(layers))
+  allocate(connection(layers+2))
 
   ! Determine the number of energies to use
   call option(energies, 'energies')
   allocate(energy_array(energies))
 
+  ! Determine the internal position mesh size
+  call option(points, 'points')
+
   ! Determine the inelastic scattering rate
-  call option(scattering,   'scattering')
+  call option(scattering, 'scattering')
 
   ! Determine the interface conductance
-  call option(conductance,  'conductance')
+  call option(conductance, 'conductance')
 
-  ! Process the superconducting layers
+  ! Flush information to stdout
+  flush(unit=stdout)
+
+
+
+  !--------------------------------------------------------------------------------!
+  !                       PROCESS SUPERCONDUCTING LAYERS                           !
+  !--------------------------------------------------------------------------------!
+
   block
     ! Declare the input variables
-    real(dp) :: length   = 1.00_dp
-    real(dp) :: coupling = 0.20_dp
+    real(dp) :: gap         = 1.00_dp
+    real(dp) :: length      = 1.00_dp
+    real(dp) :: coupling    = 0.20_dp
+    real(dp) :: temperature = 1e-8_dp
 
     ! Obtain the command line values
     if (selfconsistent) then
-      call option(length,   's.length')
-      call option(coupling, 's.coupling')
+      print *
+      call option(gap,         's.gap')
+      call option(length,      's.length')
+      call option(coupling,    's.coupling')
+      call option(temperature, 's.temperature')
     end if
 
-    ! Construct a sufficient energy array
-    if (selfconsistent .and. energies>200) then
+    ! Construct the energy array
+    if (selfconsistent) then
+      if (energies < 200) then
+        print *
+        print *,'Error: minimum 200 energies required for self-consistent calculations!'
+        stop
+      end if
       call energy_range(energy_array, coupling = coupling)
     else
+      if (energies < 1) then
+        print *
+        print *,'Error: minimum one energy required for the calculations!'
+        stop
+      end if
       call energy_range(energy_array)
     end if
 
     ! Construct the superconductor
-    s = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, coupling  = coupling)
+    s = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, points = points, &
+                       coupling = coupling, gap = cmplx(gap, 0, kind=dp))
+
+    ! Set the temperature
+    if (selfconsistent) then
+      call s % set_temperature(temperature)
+    end if
 
     ! Determine the location of the interface
-    interfaces(2) = interfaces(1) + length
+    connection(1) = -length
+    connection(2) =  0.0_dp
+
+    ! Set the superconductor change to zero in non-selfconsistent calculations
+    if (.not. selfconsistent) then
+      s % difference = 0.0_dp
+    end if
+
+    ! Set the information level
+    s % information = information
+
+    ! Flush information to stdout
+    flush(unit=stdout)
   end block
 
-  ! Process the ferromagnetic layers
-  do n=1,layers-1
+
+
+  !--------------------------------------------------------------------------------!
+  !                        PROCESS FERROMAGNETIC LAYERS                            !
+  !--------------------------------------------------------------------------------!
+
+  do n=1,size(f)
     block
       ! Declare the input variables
       character(len=8) :: ioname
-      real(dp)         :: length      = 0.50_dp
-      real(dp)         :: exchange_x  = 0.00_dp
-      real(dp)         :: exchange_y  = 0.00_dp
-      real(dp)         :: exchange_z  = 0.00_dp
-      real(dp)         :: spinorbit_a = 0.00_dp
-      real(dp)         :: spinorbit_b = 0.00_dp
+      real(dp)         :: length     
+      real(dp)         :: exchange_x 
+      real(dp)         :: exchange_y 
+      real(dp)         :: exchange_z 
+      real(dp)         :: spinorbit_a
+      real(dp)         :: spinorbit_b
+      real(dp)         :: gap
+
+      ! Set the default values
+      gap         = 1.00_dp
+      length      = 1.00_dp
+      exchange_x  = 0.00_dp
+      exchange_y  = 0.00_dp
+      exchange_z  = 0.00_dp
+      spinorbit_a = 0.00_dp
+      spinorbit_b = 0.00_dp
 
       ! Determine the ferromagnet name
       write(ioname, '(a,i0)') 'f', n
 
       ! Obtain the command line values
+      print *
+      call option(gap,         trim(ioname) // '.gap')
       call option(length,      trim(ioname) // '.length')
       call option(spinorbit_a, trim(ioname) // '.spinorbit.a')
       call option(spinorbit_b, trim(ioname) // '.spinorbit.b')
@@ -126,9 +192,12 @@ program proximity_dos
       call option(exchange_z,  trim(ioname) // '.exchange.z')
 
       ! Construct the ferromagnet
-      f(n) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2,     &
-                                 spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b), &
-                                 exchange  = [exchange_x, exchange_y, exchange_z])
+      f(n) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, points = points, &
+                         spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b),              &
+                         exchange  = [exchange_x, exchange_y, exchange_z])
+
+      ! Initialize it to a superconducting state
+      call f(n) % init(gap = cmplx(gap,0,kind=dp))
 
       ! Connect it to the previous material
       if (n > 1) then
@@ -138,33 +207,50 @@ program proximity_dos
       end if
 
       ! Determine the location of the interface
-      interfaces(n+2) = interfaces(n+1) + length
+      connection(n+2) = connection(n+1) + length
+
+      ! Set the information level
+      f(n) % information = information
+
+      ! Flush information to stdout
+      flush(unit=stdout)
     end block
   end do
 
+  ! Deallocate the energy array
+  deallocate(energy_array)
+
 
 
   !--------------------------------------------------------------------------------!
-  !                           BOOTSTRAPPING PROCEDURE                              !
+  !                          INITIALIZATION PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
   ! Write the initial density of states to file
-  call write_dos(output)
+  call write_result(output)
 
-  ! Bootstrap the ferromagnets
-  !if (layers > 2) then
-  !  do iteration=1,3
-  !    ! Status information
-  !    call print_init
+  ! Initialize the ferromagnets
+  if (size(f) > 1) then
+    do iteration=1,3
+      ! Status information
+      call print_status('         INITIALIZATION', iteration = iteration, change = maxval(f%difference))
 
-  !    ! Update the state of the system
-  !    call f%update
-  !    call n%update
+      ! Update the state of the system (including edges)
+      do n=size(f),1,-1
+        call f(n) % update
+      end do
 
-  !    ! Write the density of states to file
-  !    call write_dos(output)
-  !  end do
-  !end if
+      ! Update the state of the system (excluding edges)
+      if (size(f) > 2) then
+        do n=2,size(f)-1
+          call f(n) % update
+        end do
+      end if
+
+      ! Write the density of states to file
+      call write_result(output)
+    end do
+  end if
 
 
 
@@ -172,16 +258,13 @@ program proximity_dos
   !                            CONVERGENCE PROCEDURE                               !
   !--------------------------------------------------------------------------------!
 
-  ! Iterate until convergence
   iteration = 0
-  do while (.not. convergence(s,f))
-    iteration = iteration + 1
-
+  do while (max(maxval(f%difference/f%tolerance),s%difference/s%tolerance) > 10)
     ! Status information
-    call print_main
+    call print_status('           CONVERGENCE', iteration = iteration, change = max(maxval(f%difference),s%difference))
 
     ! Update the ferromagnets right-to-left (including edges)
-    do n=layers-1,1,-1
+    do n=size(f),1,-1
       call f(n) % update
     end do
 
@@ -192,16 +275,21 @@ program proximity_dos
     end if
 
     ! Update the ferromagnets left-to-right (excluding edges)
-    if (layers > 2) then
-      do n=1,layers-2
+    if (size(f) > 1) then
+      do n=2,size(f)-1
         call f(n) % update
       end do
     end if
 
     ! Write the density of states to file
-    call write_dos(output)
+    call write_result(output)
+
+    ! Update the counter
+    iteration = iteration + 1
   end do
 
+  ! Status information
+  call print_status('            CONVERGED', change = max(maxval(f%difference),s%difference))
 
 
   !--------------------------------------------------------------------------------!
@@ -212,83 +300,34 @@ program proximity_dos
   close(unit=output)
 
   ! Deallocate memory
-  deallocate(energy_array)
-  deallocate(interfaces)
+  deallocate(connection)
   deallocate(f)
 
 contains
 
   !--------------------------------------------------------------------------------!
-  !                             LOGICAL PROCEDURES                                 !
-  !--------------------------------------------------------------------------------!
-
-  pure function convergence(s, f) result(r)
-    ! Returns whether or not the main loop has converged
-    class(superconductor), intent(in)  :: s
-    class(ferromagnet),    intent(in)  :: f(:)
-    logical                            :: r
-    integer                            :: n
-
-    r = ((.not. selfconsistent) .or. (s%difference < 10 * s%tolerance))
-    do n=1,size(f)
-      r = r .and. (f(n)%difference < 10 * f(n)%tolerance)
-    end do
-  end function
-
-  !--------------------------------------------------------------------------------!
   !                           INPUT/OUTPUT PROCEDURES                              !
   !--------------------------------------------------------------------------------!
 
-  subroutine print_init
-    ! Determine how much CPU time has elapsed
-    real(sp) :: time
-    call cpu_time(time)
-
-    ! Print the progress information to standard out
-    write(*,'(a)') '                                     '
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│          INITIALIZATION           │'
-    write(*,'(a)') '├───────────────────────────────────┤'
-    write(*,'(a,5x,a,i8,4x,a)')                         &
-      '│','Iteration:        ',iteration,'│'
-    write(*,'(a,5x,a,i2.2,a,i2.2,a,i2.2,4x,a)')         &
-      '│','Elapsed time:     ',                         &
-      int(time/3600.0_sp),':',                          &
-      int(mod(time,3600.0_sp)/60.0_sp),':',             &
-      int(mod(time,60.0_sp)),                          '│'
-    write(*,'(a)') '╘═══════════════════════════════════╛'
-  end subroutine
-
-  subroutine print_main
-    ! Determine how much CPU time has elapsed
-    real(sp) :: time
-    call cpu_time(time)
-
-    ! Print the progress information to standard out
-    write(*,'(a)') '                                     '
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│           CONVERGENCE             │'
-    write(*,'(a)') '├───────────────────────────────────┤'
-    write(*,'(a,5x,a,i8,4x,a)')                         &
-      '│','Iteration:        ',iteration,'│'
-    !write(*,'(a,5x,a,f8.6,4x,a)')                       &
-    !  '│','Maximum change:   ',max(n%difference,f%difference),'│'
-    write(*,'(a,5x,a,i2.2,a,i2.2,a,i2.2,4x,a)')         &
-      '│','Elapsed time:     ',                         &
-      int(time/3600.0_sp),':',                          &
-      int(mod(time,3600.0_sp)/60.0_sp),':',             &
-      int(mod(time,60.0_sp)),                          '│'
-    write(*,'(a)') '╘═══════════════════════════════════╛'
-  end subroutine
-
-  subroutine write_dos(output)
+  subroutine write_result(output)
+    ! Saves the density of states as a function of position and energy to a file.
     integer, intent(in) :: output
+    integer             :: n
 
-    continue
-  !  rewind(unit=output)
-  !  call s % write_dos(output, interfaces(1), interfaces(2))
-  !  call n % write_dos(output, interfaces(2), interfaces(3))
-  !  call f % write_dos(output, interfaces(3), interfaces(4))
-  !  flush(unit=output)
+    ! Go to the start of the file
+    rewind(unit=output)
+
+    ! Write out the superconductor data in self-consistent calculations
+    if (selfconsistent) then
+      call s % write_dos(output, connection(1), connection(2))
+    end if
+
+    ! Write out the ferromagnet data in all calculations
+    do n = 1,size(f)
+      call f(n) % write_dos(output, connection(n+1), connection(n+2))
+    end do
+
+    ! Flush the changes to file immediately
+    flush(unit=output)
   end subroutine
 end program

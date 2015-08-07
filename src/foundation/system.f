@@ -37,10 +37,10 @@ module mod_system
 
   ! Define an interface for obtaining command line arguments
   interface option
-    module procedure option_header, option_logical, option_integer, option_real, option_string
+    module procedure print_option, option_logical, option_integer, option_real, option_string
   end interface
 contains
-  subroutine option_header
+  subroutine print_option
     ! If the subroutine 'option' is run without arguments, this prints out a header.
     write(*,'(a)') '╒═══════════════════════════════════╕'
     write(*,'(a)') '│        RUNTIME  PARAMETERS        │'
@@ -144,4 +144,40 @@ contains
     ! Write the results to standard out for verification purposes
     write(*,'(a,a,1x,a,a,a)') ' :: ', option, '"', trim(variable), '"'
   end subroutine
+
+  subroutine print_status(header, iteration, change)
+    ! Prints a status message including the iteration number and elapsed time to stdout.
+    character(*),           intent(in) :: header
+    integer,      optional, intent(in) :: iteration
+    real(dp),     optional, intent(in) :: change
+    real(sp)                           :: time
+    character(33)                      :: string
+
+    ! Determine how much CPU time has elapsed
+    call cpu_time(time)
+
+    ! Copy the header to a string of correct size
+    string = header
+
+    ! Print the progress information to standard out
+    write(*,'(a)') '                                     '
+    write(*,'(a)') '╒═══════════════════════════════════╕'
+    write(*,'(a)') '│ '         // string //          ' │'
+    write(*,'(a)') '├───────────────────────────────────┤'
+    if (present(iteration)) then
+      write(*,'(a,3x,a,i8,3x,a)')                       &
+        '│','Iteration:           ',     iteration,     '│'
+    end if
+    if (present(change)) then
+      write(*,'(a,3x,a,f8.6,3x,a)')                     &
+        '│','Maximum change:      ',     change,       '│'
+    end if
+    write(*,'(a,3x,a,i2.2,a,i2.2,a,i2.2,3x,a)')         &
+      '│','Elapsed time:        ',                      &
+      int(time/3600.0_sp),':',                          &
+      int(mod(time,3600.0_sp)/60.0_sp),':',             &
+      int(mod(time,60.0_sp)),                          '│'
+    write(*,'(a)') '╘═══════════════════════════════════╛'
+  end subroutine
+
 end module 
