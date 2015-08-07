@@ -129,7 +129,6 @@ contains
     character(len= * ), intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
-    character(len= 20)                :: output
     integer                           :: n
     
     do n = 1,command_argument_count()
@@ -143,7 +142,6 @@ contains
     end do
 
     ! Write the results to standard out for verification purposes
-    output = option
-    write(*,'(a,a,a)') ' :: ', output, variable
+    write(*,'(a,a,1x,a,a,a)') ' :: ', option, '"', trim(variable), '"'
   end subroutine
 end module 
