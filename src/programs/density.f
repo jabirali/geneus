@@ -171,7 +171,9 @@ program density
     ! Update the left superconductor and ferromagnet (if selfconsistent)
     if (selfconsistent) then
       call s(1) % update
-      call f(1) % update
+      if (size(f) > 1) then
+        call f(1) % update
+      end if
     end if
 
     ! Update the ferromagnets left-to-right (excluding edges)
@@ -209,6 +211,9 @@ program density
   deallocate(connection)
   deallocate(f)
   deallocate(s)
+  if (allocated(r)) then
+    deallocate(r)
+  end if
 contains
 
   !--------------------------------------------------------------------------------!
