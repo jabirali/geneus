@@ -16,8 +16,6 @@ module mod_material
     ! These parameters determine the basic physical behaviour of a diffusive material
     real(dp)                                  :: thouless        =  1.00_dp         ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(dp)                                  :: scattering      =  0.01_dp         ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    real(dp)                                  :: conductance_a   =  0.00_dp         ! Conductance of the left interface  (relative to the bulk conductance of this material)
-    real(dp)                                  :: conductance_b   =  0.00_dp         ! Conductance of the right interface (relative to the bulk conductance of this material)
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical Green's functions
     real(dp),                     allocatable :: energy(:)                          ! Discretized domain for the energies

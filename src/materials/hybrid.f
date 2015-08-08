@@ -23,10 +23,10 @@ contains
   subroutine connect(material_a, material_b, conductance_a, conductance_b)
     ! This subroutine connects two class(material) materials by a tunneling interface, and may
     ! therefore be used to assemble individual material layers to a multilayer hybrid structure.
-    class(material), target, intent(inout) :: material_a      ! This object represents the left  material
-    class(material), target, intent(inout) :: material_b      ! This object represents the right material
-    real(dp),                intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
-    real(dp),                intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
+    class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
+    class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
+    real(dp),                 intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
+    real(dp),                 intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
     
     ! Update the internal material pointers
     material_a % material_b => material_b
@@ -35,6 +35,20 @@ contains
     ! Update the interface parameters
     material_a % conductance_b = conductance_a
     material_b % conductance_a = conductance_b
+  end subroutine
+
+  subroutine transparent(material_a, material_b)
+    ! This subroutine connects two class(material) materials by a transparent interface.
+    class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
+    class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
+    
+    ! Update the internal material pointers
+    material_a % material_b => material_b
+    material_b % material_a => material_a
+
+    ! Update the interface parameters
+    material_a % transparent_b = .true.
+    material_b % transparent_a = .true.
   end subroutine
 
 

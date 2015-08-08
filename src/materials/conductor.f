@@ -13,42 +13,48 @@ module mod_conductor
   ! Type declarations
   type, extends(material) :: conductor
     ! These parameters control the physical characteristics of the material 
-    type(spin),   allocatable :: spinorbit(:)                                               ! This is an SU(2) vector field that describes spin-orbit coupling (default: no spin-orbit coupling)
+    logical                   :: transparent_a           =  .false.                           ! Whether the left  interface is transparent or not
+    logical                   :: transparent_b           =  .false.                           ! Whether the right interface is transparent or not
+    real(dp)                  :: conductance_a           =  0.00_dp                           ! Conductance of the left interface  (relative to the bulk conductance of this material)
+    real(dp)                  :: conductance_b           =  0.00_dp                           ! Conductance of the right interface (relative to the bulk conductance of this material)
+    type(spin),   allocatable :: spinorbit(:)                                                 ! This is an SU(2) vector field that describes spin-orbit coupling (default: no spin-orbit coupling)
   
     ! These variables are used by internal subroutines to handle spin-orbit coupling
-    type(spin),       private :: Ax,  Ay,  Az,  A2                                          ! Spin-orbit coupling matrices (the components and square)
-    type(spin),       private :: Axt, Ayt, Azt, A2t                                         ! Spin-orbit coupling matrices (tilde-conjugated versions)
+    type(spin),       private :: Ax,  Ay,  Az,  A2                                            ! Spin-orbit coupling matrices (the components and square)
+    type(spin),       private :: Axt, Ayt, Azt, A2t                                           ! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
     ! These methods are required by the class(material) abstract interface
-    procedure                 :: init                   => conductor_init                   ! Initializes the Green's functions
-    procedure                 :: interface_equation_a   => conductor_interface_equation_a   ! Boundary condition at the left  interface
-    procedure                 :: interface_equation_b   => conductor_interface_equation_b   ! Boundary condition at the right interface
-    procedure                 :: update_prehook         => conductor_update_prehook         ! Code to execute before calculating the Green's functions
-    procedure                 :: update_posthook        => conductor_update_posthook        ! Code to execute after  calculating the Green's functions
+    procedure                 :: init                    => conductor_init                    ! Initializes the Green's functions
+    procedure                 :: interface_equation_a    => conductor_interface_equation_a    ! Boundary condition at the left  interface
+    procedure                 :: interface_equation_b    => conductor_interface_equation_b    ! Boundary condition at the right interface
+    procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the Green's functions
+    procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the Green's functions
 
     ! These methods contain the equations that describe electrical conductors
-    procedure                 :: diffusion_equation     => conductor_diffusion_equation     ! Defines the Usadel diffusion equation
-    procedure                 :: interface_vacuum_a     => conductor_interface_vacuum_a     ! Defines the left  boundary condition (vacuum interface)
-    procedure                 :: interface_vacuum_b     => conductor_interface_vacuum_b     ! Defines the right boundary condition (vacuum interface)
-    procedure                 :: interface_tunnel_a     => conductor_interface_tunnel_a     ! Defines the left  boundary condition (tunnel interface)
-    procedure                 :: interface_tunnel_b     => conductor_interface_tunnel_b     ! Defines the right boundary condition (tunnel interface)
+    procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation
+    procedure                 :: interface_transparent_a => conductor_interface_transparent_a ! Defines the left  boundary condition (tunnel interface)
+    procedure                 :: interface_transparent_b => conductor_interface_transparent_b ! Defines the right boundary condition (tunnel interface)
+    procedure                 :: interface_vacuum_a      => conductor_interface_vacuum_a      ! Defines the left  boundary condition (vacuum interface)
+    procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      ! Defines the right boundary condition (vacuum interface)
+    procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      ! Defines the left  boundary condition (tunnel interface)
+    procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      ! Defines the right boundary condition (tunnel interface)
 
     ! These methods contain the equations that describe spin-orbit coupling
-    procedure                 :: diffusion_spinorbit    => spinorbit_diffusion_equation     ! Defines the Usadel diffusion equation (spin-orbit terms)
-    procedure                 :: interface_spinorbit_a  => spinorbit_interface_equation_a   ! Defines the left  boundary condition  (spin-orbit terms)
-    procedure                 :: interface_spinorbit_b  => spinorbit_interface_equation_b   ! Defines the right boundary condition  (spin-orbit terms)
+    procedure                 :: diffusion_spinorbit     => spinorbit_diffusion_equation      ! Defines the Usadel diffusion equation (spin-orbit terms)
+    procedure                 :: interface_spinorbit_a   => spinorbit_interface_equation_a    ! Defines the left  boundary condition  (spin-orbit terms)
+    procedure                 :: interface_spinorbit_b   => spinorbit_interface_equation_b    ! Defines the right boundary condition  (spin-orbit terms)
 
     ! These methods contain the equations that describe spin-active interfaces
-    procedure                 :: interface_spinactive_a => spinactive_interface_equation_a  ! Defines the left  boundary condition (spin-active terms) [TODO]
-    procedure                 :: interface_spinactive_b => spinactive_interface_equation_b  ! Defines the right boundary condition (spin-active terms) [TODO]
+    procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms) [TODO]
+    procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms) [TODO]
 
     ! These methods define miscellaneous utility functions
-    procedure                 :: save                   => conductor_save                   ! Saves the state of the conductor to a different object
-    procedure                 :: load                   => conductor_load                   ! Loads the state of the conductor from a different object
-    procedure                 :: write_dos              => conductor_write_dos              ! Writes the density of states to a given output unit
+    procedure                 :: save                    => conductor_save                    ! Saves the state of the conductor to a different object
+    procedure                 :: load                    => conductor_load                    ! Loads the state of the conductor from a different object
+    procedure                 :: write_dos               => conductor_write_dos               ! Writes the density of states to a given output unit
 
     ! These methods are used by internal subroutines 
-    final                     ::                           conductor_destruct               ! Type destructor
+    final                     ::                            conductor_destruct                ! Type destructor
   end type
 
   ! Type constructors
@@ -188,8 +194,13 @@ contains
       type(spin),                intent(inout) :: r, rt
 
       if (associated(this%material_a)) then
-        ! Interface is a tunnel junction
-        call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
+        if (this%transparent_a) then
+          ! Interface is transparent
+          call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
+        else
+          ! Interface is a tunnel junction
+          call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
+        end if
       else
         ! Interface is a vacuum junction
         call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
@@ -209,10 +220,15 @@ contains
       type(spin),                intent(inout) :: r, rt
 
       if (associated(this%material_b)) then
-        ! Right interface is a tunnel junction
-        call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
+        if (this%transparent_b) then
+          ! Interface is transparent
+          call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
+        else
+          ! Interface is a tunnel junction
+          call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
+        end if
       else
-        ! Right interface is a vacuum junction
+        ! Interface is a vacuum junction
         call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
       end if
 
@@ -240,6 +256,42 @@ contains
 
     r2  = dg2
     rt2 = dgt2
+  end subroutine
+
+  pure subroutine conductor_interface_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
+    ! Defines a transparent boundary condition for the left interface.
+    class(conductor), intent(in   ) :: this
+    type(green),      intent(in   ) :: a
+    type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
+    type(spin),       intent(inout) :: r1, rt1
+
+    ! Rename the Riccati parameters in the material to the left
+    associate(g0  => a%g,&
+              gt0 => a%gt)
+
+    ! Calculate the deviation between the materials
+    r1  = g1  - g0
+    rt1 = gt1 - gt0
+
+    end associate
+  end subroutine
+
+  pure subroutine conductor_interface_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
+    ! Defines a transparent boundary condition for the right interface.
+    class(conductor),          intent(in   ) :: this
+    type(green),               intent(in   ) :: b
+    type(spin),                intent(in   ) :: g2, gt2, dg2, dgt2
+    type(spin),                intent(inout) :: r2, rt2
+
+    ! Rename the Riccati parameters in the material to the right
+    associate(g3  => b%g,&
+              gt3 => b%gt)
+  
+    ! Calculate the deviation between the materials
+    r2  = g2  - g3
+    rt2 = gt2 - g3
+
+    end associate
   end subroutine
 
   pure subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
