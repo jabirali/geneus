@@ -46,7 +46,7 @@ contains
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
-    real(dp),    intent(in)           :: coupling     ! BCS coupling constant
+    real(dp),    intent(in), optional :: coupling     ! BCS coupling constant
     complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: 1.0)
     real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
@@ -71,7 +71,11 @@ contains
     end if
 
     ! Initialize the BCS coupling constant
-    this%coupling = coupling
+    if (present(coupling)) then
+      this%coupling = coupling
+    else
+      this%coupling = 0.20_dp
+    end if
 
     ! Modify the type string
     this%type_string = color_green // 'SUPERCONDUCTOR' // color_none

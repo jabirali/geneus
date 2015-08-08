@@ -145,11 +145,13 @@ contains
     write(*,'(a,a,1x,a,a,a)') ' :: ', option, '"', trim(variable), '"'
   end subroutine
 
-  subroutine print_status(header, iteration, change)
+  subroutine print_status(header, iteration, change, phasediff, temperature)
     ! Prints a status message including the iteration number and elapsed time to stdout.
     character(*),           intent(in) :: header
     integer,      optional, intent(in) :: iteration
     real(dp),     optional, intent(in) :: change
+    real(dp),     optional, intent(in) :: phasediff
+    real(dp),     optional, intent(in) :: temperature
     real(sp)                           :: time
     character(33)                      :: string
 
@@ -166,7 +168,15 @@ contains
     write(*,'(a)') '├───────────────────────────────────┤'
     if (present(iteration)) then
       write(*,'(a,3x,a,i8,3x,a)')                       &
-        '│','Iteration:           ',     iteration,     '│'
+        '│','Iteration:           ',     iteration,    '│'
+    end if
+    if (present(phasediff)) then
+      write(*,'(a,3x,a,f8.6,3x,a)')                     &
+        '│','Phase difference:    ',     phasediff,    '│'
+    end if
+    if (present(temperature)) then
+      write(*,'(a,3x,a,f8.6,3x,a)')                     &
+        '│','Temperature:         ',     temperature,  '│'
     end if
     if (present(change)) then
       write(*,'(a,3x,a,f8.6,3x,a)')                     &
