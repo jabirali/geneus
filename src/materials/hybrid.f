@@ -114,14 +114,14 @@ contains
 
     ! Explicit Rashba coefficient
     if (present(alpha)) then
-      field(1) = (+alpha)*pauli2
-      field(2) = (-alpha)*pauli1
+      field(1) = field(1) + (+alpha)*pauli2
+      field(2) = field(2) + (-alpha)*pauli1
     end if
 
     ! Explicit Dresselhaus coefficient
     if (present(beta)) then
-      field(1) = (+beta)*pauli1
-      field(2) = (-beta)*pauli2
+      field(1) = field(1) + (+beta)*pauli1
+      field(2) = field(2) + (-beta)*pauli2
     end if
 
     ! Polar parametrization
