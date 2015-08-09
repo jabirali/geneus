@@ -35,7 +35,7 @@ module mod_material
     real(dp)                                  :: difference      =  1e+6_dp         ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
-    character(len=64)                         :: type_string     =  'MATERIAL'      ! The type string should describe the specific class(material) subtype
+    character(len=128)                        :: type_string     =  'MATERIAL'      ! The type string should describe the specific class(material) subtype
   contains
     ! These methods define how to update the physical state of the material
     procedure(init),                 deferred :: init                               ! Initializes  the Green's functions

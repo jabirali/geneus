@@ -19,7 +19,8 @@ module mod_superconductor
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the Green's functions
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
-    procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from the Green's functions
+    procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the Green's functions
+    procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the Green's functions
 
     ! These methods are used to access and mutate the parameters
     procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
@@ -76,20 +77,6 @@ contains
     else
       this%coupling = 0.20_dp
     end if
-
-    ! Modify the type string
-    if (colors) then
-      this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
-    else
-      this%type_string = 'SUPERCONDUCTOR'
-    end if
-    if (allocated(this%spinorbit)) then
-      if (colors) then
-        this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
-      else
-        this%type_string = trim(this%type_string) // ' [SOC] '
-      end if
-    end if
   end function
 
   pure subroutine superconductor_destruct(this)
@@ -141,6 +128,27 @@ contains
     ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
     d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
     d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
+  end subroutine
+
+  impure subroutine superconductor_update_prehook(this)
+    ! Code to execute before running the update method of a class(superconductor) object.
+    class(superconductor), intent(inout) :: this
+
+    ! Call the superclass prehook
+    call this%conductor%update_prehook
+
+    ! Modify the type string
+    if (colors) then
+      this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+      if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
+      if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
+      if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // color_purple // ' [SAR]' // color_none
+    else
+      this%type_string = 'SUPERCONDUCTOR'
+      if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // ' [SOC]'
+      if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // ' [SAL]'
+      if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // ' [SAR]'
+    end if
   end subroutine
 
   impure subroutine superconductor_update_posthook(this)
