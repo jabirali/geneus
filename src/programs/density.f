@@ -80,14 +80,6 @@ program density
   !                          INITIALIZATION PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
-  f(1)%magnetization_a = [1,0,0]
-  f(1)%polarization_a  = 0.5_dp
-  f(1)%phaseshift_a    = 0.0_dp
-
-  f(2)%magnetization_a = [1,0,0]
-  f(2)%polarization_a  = 0.5_dp
-  f(2)%phaseshift_a    = 1.0_dp
-
   ! Write the initial density of states to file
   call write_result(output)
 
