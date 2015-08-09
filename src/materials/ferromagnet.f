@@ -3,19 +3,21 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-07-29
+! Updated: 2015-08-09
 
 module mod_ferromagnet
   use mod_conductor
   implicit none
 
   ! Type declaration
-  type, extends(conductor) :: ferromagnet
-    real(dp), allocatable    :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
+  type, extends(conductor)           :: ferromagnet
+    real(dp),   allocatable          :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
+    type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
   contains
-    procedure                :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
-    procedure                :: get_exchange       => ferromagnet_get_exchange        ! Returns the magnetic exchange field at a given position
-    final                    ::                       ferromagnet_destruct            ! Type destructor
+    procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
+    procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Updates the magnetic exchange field terms h and ht
+    procedure                        :: get_exchange       => ferromagnet_get_exchange        ! Returns the magnetic exchange field at a given position
+    final                            ::                       ferromagnet_destruct            ! Type destructor
   end type
 
   ! Type constructor
@@ -53,6 +55,8 @@ contains
     if (present(exchange) .and. norm2(exchange) > 1e-10) then
       ! Reallocate memory
       allocate(this%exchange(3,size(this%conductor%location)))
+      allocate(this%h(size(this%conductor%location)))
+      allocate(this%ht(size(this%conductor%location)))
 
       ! Initialize the exchange field
       do n = 1,size(this%conductor%location)
@@ -76,6 +80,8 @@ contains
     ! Deallocate memory (if necessary)
     if(allocated(this%exchange)) then
       deallocate(this%exchange)
+      deallocate(this%h)
+      deallocate(this%ht)
     end if
 
     ! Call the superclass destructor
@@ -93,24 +99,55 @@ contains
     real(dp),           intent(in   ) :: z
     type(spin),         intent(in   ) :: g, gt, dg, dgt
     type(spin),         intent(inout) :: d2g, d2gt
-    type(spin)                        :: P, Pt
-    real(dp)                          :: h(3)
+    type(spin)                        :: h, ht
+    real(dp)                          :: d
+    integer                           :: n
+
+    ! Calculate the second derivatives of the Riccati parameters (conductor terms)
+    call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
 
     if (allocated(this%exchange)) then
-      ! Lookup the magnetic exchange field
-      h  = this%get_exchange(z)/this%thouless
+      ! Calculate the index corresponding to the given location
+      n = floor(z*(size(this%location)-1) + 1)
 
-      ! Calculate the exchange field factors in the diffusion equation
-      P  = (0.0_dp,-1.0_dp) * (h(1)*pauli1 + h(2)*pauli2 + h(3)*pauli3)
-      Pt = (0.0_dp,+1.0_dp) * (h(1)*pauli1 - h(2)*pauli2 + h(3)*pauli3)
-
-      ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-      call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+      ! Extract the exchange field terms at that point
+      if (n <= 1) then
+        h  = this%h(1)
+        ht = this%ht(1)
+      else
+        d  = (z - this%location(n-1))/(this%location(n) - this%location(n-1))
+        h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
+        ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
+      end if
 
       ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
-      d2g  = d2g  + P  * g  + g  * Pt
-      d2gt = d2gt + Pt * gt + gt * P
+      d2g  = d2g  + h  * g  + g  * ht
+      d2gt = d2gt + ht * gt + gt * h
     end if
+  end subroutine
+
+  impure subroutine ferromagnet_update_prehook(this)
+    ! Updates the exchange field terms in the diffusion equation.
+    class(ferromagnet), intent(inout) :: this ! Ferromagnet object that will be updated
+    integer                           :: n    ! Loop variable
+
+    ! Call the superclass prehook
+    call this%conductor%update_prehook
+
+    ! Rename the internal variables
+    associate(exchange => this % exchange, &
+              h        => this % h,        &
+              ht       => this % ht)
+
+    ! Update internal variables
+    if (allocated(this%exchange)) then
+      do n = 1,ubound(exchange,2)
+        h(n)  = (0.0_dp,-1.0_dp) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)/this%thouless
+        ht(n) = (0.0_dp,+1.0_dp) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)/this%thouless
+      end do
+    end if
+
+    end associate
   end subroutine
 
   !--------------------------------------------------------------------------------!
@@ -125,9 +162,14 @@ contains
     integer                        :: n
 
     ! Calculate the index corresponding to the given location
-    n = nint(location*(size(this%location)-1) + 1)
+    n = floor(location*(size(this%location)-1) + 1)
 
     ! Extract the magnetic exchange field at that point
-    h = this%exchange(:,n)
+    if (n <= 1) then
+      h = this%exchange(:,1)
+    else
+      h = this%exchange(:,n-1) + &
+          (this%exchange(:,n)-this%exchange(:,n-1))*(location-this%location(n-1))/(this%location(n)-this%location(n-1))
+    end if
   end function
 end module

@@ -289,7 +289,7 @@ contains
   
     ! Calculate the deviation between the materials
     r2  = g2  - g3
-    rt2 = gt2 - g3
+    rt2 = gt2 - gt3
 
     end associate
   end subroutine

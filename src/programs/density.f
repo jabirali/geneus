@@ -34,7 +34,7 @@ program density
   real(dp)                          :: coupling        = 0.20_dp
   real(dp)                          :: conductance     = 0.30_dp
   real(dp)                          :: phasediff       = 0.00_dp
-  real(dp)                          :: phasestep       = 0.05_dp
+  real(dp)                          :: phasestep       = 0.15_dp
 
   ! Declare the variables used by the program
   integer                           :: output
@@ -85,7 +85,8 @@ program density
 
   ! Initialize the ferromagnets
   if (size(f) > 1) then
-    do n=0,2
+    n = 0
+    do while (maxval(f%difference) > 0.05)
       ! Status information
       call print_status('         INITIALIZATION', iteration = n, change = maxval(f%difference))
 
@@ -103,6 +104,9 @@ program density
 
       ! Write the density of states to file
       call write_result(output)
+
+      ! Update counter
+      n = n + 1
     end do
   end if
 
@@ -112,7 +116,7 @@ program density
   !                             BOOTSTRAP PROCEDURE                                !
   !--------------------------------------------------------------------------------!
 
-  if (phasediff > phasestep) then
+  if (phasediff > 0) then
     block
       ! Declare block-local variables
       integer     :: steps
@@ -123,7 +127,11 @@ program density
       steps = ceiling(phasediff/phasestep)
       do n=0,steps
         ! Calculate the phase
-        phase = (n*phasediff)/steps
+        if (n == 0) then
+          phase = 1e-6
+        else
+          phase = (n*phasediff)/steps
+        end if
 
         ! Calculate the gap
         gap   = exp((-i*pi/2)*phase)
@@ -168,14 +176,6 @@ program density
       call f(m) % update
     end do
 
-    ! Update the left superconductor and ferromagnet (if selfconsistent)
-    if (selfconsistent) then
-      call s(1) % update
-      if (size(f) > 1) then
-        call f(1) % update
-      end if
-    end if
-
     ! Update the ferromagnets left-to-right (excluding edges)
     if (size(f) > 1) then
       do m=2,size(f)-1
@@ -183,10 +183,12 @@ program density
       end do
     end if
 
-    ! Update the right superconductor and ferromagnet (if selfconsistent)
-    if (selfconsistent .and. size(s) > 1) then
-      call f(size(f)) % update
-      call s(size(s)) % update
+    ! Update the superconductors (if selfconsistent)
+    if (selfconsistent) then
+      call s(1) % update
+      if (size(s) > 1) then
+        call s(2) % update
+      end if
     end if
 
     ! Write the density of states to file
@@ -306,15 +308,13 @@ contains
     end if
 
     ! Determine the phase difference and step
-    if (allocated(r)) then
-      if (size(r) > 1) then
-        call option(phasediff, 'phasediff')
-        call option(phasestep, 'phasestep')
-        if (phasediff < 0.0_dp .or. phasestep < 0.0_dp) then
-          print *
-          print *,'Error: the phase difference and phase step should be positive numbers!'
-          stop
-        end if
+    if (size(s) > 1) then
+      call option(phasediff, 'phasediff')
+      call option(phasestep, 'phasestep')
+      if (phasediff < 0.0_dp .or. phasestep < 0.0_dp) then
+        print *
+        print *,'Error: the phase difference and phase step should be positive numbers!'
+        stop
       end if
     end if
 
@@ -370,7 +370,11 @@ contains
     ! Connect it to the previous material and determine the interface location
     if (m == 1) then
       connection(1) = 0.0_dp
-      connection(2) = length
+      if (selfconsistent) then
+        connection(2) = length
+      else
+        connection(2) = connection(1)
+      end if
     else
       connection(size(connection)) = connection(size(connection)-1) + length
       call connect(f(size(f)), s(m), conductance, conductance)
