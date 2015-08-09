@@ -602,9 +602,9 @@ contains
     type(spin),               intent(inout) :: r1, rt1
     type(spin)                              :: N0, Nt0
     type(spin)                              :: N1, Nt1
-    complex(dp)                             :: L(8,8)
-    complex(dp)                             :: R(8,8)
-    complex(dp)                             :: I(8,8)
+    complex(dp)                             :: L(4,4)
+    complex(dp)                             :: R(4,4)
+    complex(dp)                             :: I(4,4)
 
     ! Rename the parameters that describe the spin-active properties
     associate(G1 => this % G1_a,&
@@ -637,13 +637,15 @@ contains
     R(3:4,3:4) = (-1.0_dp) * Nt1 * (pauli0 + gt1*g1)
 
     ! Calculate the spin-active terms in the interface current
-    I = G1 * (R*M*L*M - M*L*M*R)         &
-      + GM * (R*(L*M+M*L) - (L*M+M*L)*R) &
-      + GP * (R*M - M*R)
+    I = G1 * (matmul(R,matmul(M,matmul(L,M)))  &
+             -matmul(M,matmul(L,matmul(M,R)))) &
+      + GM * (matmul(R,matmul(L,M)+matmul(M,L))        &
+             -matmul(matmul(L,M)+matmul(M,L),R))       &
+      + GP * (matmul(R,M) - matmul(M,R))
 
     ! Calculate the deviation from the boundary condition
-    r1  = r1  - spin_inv(N1)  * (I(1:2,3:4) - I(1:2,1:2)*g1)
-    rt1 = rt1 - spin_inv(Nt1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
+    r1  = r1  - (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
+    rt1 = rt1 - (pauli0 - gt1*g1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
 
     end associate
     end associate
