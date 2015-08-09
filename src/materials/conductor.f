@@ -546,6 +546,7 @@ contains
   pure subroutine spinactive_update_prehook(this)
     ! Updates the internal variables associated with spin-active interfaces.
     class(conductor), intent(inout) :: this 
+    real(dp)                        :: Pr
 
     if (allocated(this % magnetization_a)) then
       ! Rename the relevant variables
@@ -563,9 +564,10 @@ contains
       M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
 
       ! Calculate the conductances associated with the spin-active interface
-      GM = G0 * P/(1 + sqrt(1-P**2))
-      GP = G0 * (-2*i*Q)/(1 + sqrt(1-P**2))
-      G1 = G0 * (1 - sqrt(1-P**2))/(1 + sqrt(1-P**2))
+      Pr = sqrt(1 - P**2 + 1e-12)
+      GM = 0.25 * G0 * P/(1 + Pr)
+      GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
+      G1 = 0.25 * G0 * (1 - Pr)/(1 + Pr)
 
       end associate
     end if
@@ -586,9 +588,10 @@ contains
       M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
 
       ! Calculate the conductances associated with the spin-active interface
-      GM = G0 * P/(1 + sqrt(1-P**2))
-      GP = G0 * (-2*i*Q)/(1 + sqrt(1-P**2))
-      G1 = G0 * (1 - sqrt(1-P**2))/(1 + sqrt(1-P**2))
+      Pr = sqrt(1 - P**2 + 1e-12)
+      GM = 0.25 * G0 * P/(1 + Pr)
+      GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
+      G1 = 0.25 * G0 * (1 - Pr)/(1 + Pr)
 
       end associate
     end if
@@ -607,7 +610,7 @@ contains
     complex(dp)                             :: I(4,4)
 
     ! Rename the parameters that describe the spin-active properties
-    associate(G1 => this % G1_a,&
+    associate(GC => this % G1_a,&
               GM => this % GM_a,&
               GP => this % GP_a,&
               M  => this % M_a)
@@ -624,28 +627,28 @@ contains
     N1  = spin_inv( pauli0 - g1*gt1 )
     Nt1 = spin_inv( pauli0 - gt1*g1 )
 
-    ! Calculate the 8×8 Green's function in the left material
+    ! Calculate the 4×4 Green's function in the left material
     L(1:2,1:2) = (+1.0_dp) * N0  * (pauli0 + g0*gt0)
     L(1:2,3:4) = (+2.0_dp) * N0  * g0
     L(3:4,1:2) = (-2.0_dp) * Nt0 * gt0
     L(3:4,3:4) = (-1.0_dp) * Nt0 * (pauli0 + gt0*g0)
 
-    ! Calculate the 8×8 Green's function in the right material
+    ! Calculate the 4×4 Green's function in the right material
     R(1:2,1:2) = (+1.0_dp) * N1  * (pauli0 + g1*gt1)
     R(1:2,3:4) = (+2.0_dp) * N1  * g1
     R(3:4,1:2) = (-2.0_dp) * Nt1 * gt1
     R(3:4,3:4) = (-1.0_dp) * Nt1 * (pauli0 + gt1*g1)
 
     ! Calculate the spin-active terms in the interface current
-    I = G1 * (matmul(R,matmul(M,matmul(L,M)))  &
-             -matmul(M,matmul(L,matmul(M,R)))) &
-      + GM * (matmul(R,matmul(L,M)+matmul(M,L))        &
-             -matmul(matmul(L,M)+matmul(M,L),R))       &
+    I = GC * (matmul(R,matmul(M,matmul(L,M)))    &
+             -matmul(M,matmul(L,matmul(M,R))))   &
+      + GM * (matmul(R,matmul(L,M)+matmul(M,L))  &
+             -matmul(matmul(L,M)+matmul(M,L),R)) &
       + GP * (matmul(R,M) - matmul(M,R))
 
     ! Calculate the deviation from the boundary condition
-    r1  = r1  - (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
-    rt1 = rt1 - (pauli0 - gt1*g1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
+    r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
+    rt1 = rt1 + (pauli0 - gt1*g1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
 
     end associate
     end associate
@@ -658,7 +661,54 @@ contains
     type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
     type(spin),               intent(inout) :: r2, rt2
 
-    ! TODO
-    continue
+    type(spin)                              :: N2, Nt2
+    type(spin)                              :: N3, Nt3
+    complex(dp)                             :: L(4,4)
+    complex(dp)                             :: R(4,4)
+    complex(dp)                             :: I(4,4)
+
+    ! Rename the parameters that describe the spin-active properties
+    associate(GC => this % G1_b,&
+              GM => this % GM_b,&
+              GP => this % GP_b,&
+              M  => this % M_b)
+
+    ! Rename the Riccati parameters in the material to the right
+    associate(g3   => b % g, &
+              gt3  => b % gt,&
+              dg3  => b % dg,&
+              dgt3 => b % dgt)
+
+    ! Calculate the normalization matrices
+    N2  = spin_inv( pauli0 - g2*gt2 )
+    Nt2 = spin_inv( pauli0 - gt2*g2 )
+    N3  = spin_inv( pauli0 - g3*gt3 )
+    Nt3 = spin_inv( pauli0 - gt3*g3 )
+
+    ! Calculate the 4×4 Green's function in the left material
+    L(1:2,1:2) = (+1.0_dp) * N2  * (pauli0 + g2*gt2)
+    L(1:2,3:4) = (+2.0_dp) * N2  * g2
+    L(3:4,1:2) = (-2.0_dp) * Nt2 * gt2
+    L(3:4,3:4) = (-1.0_dp) * Nt2 * (pauli0 + gt2*g2)
+
+    ! Calculate the 4×4 Green's function in the right material
+    R(1:2,1:2) = (+1.0_dp) * N3  * (pauli0 + g3*gt3)
+    R(1:2,3:4) = (+2.0_dp) * N3  * g3
+    R(3:4,1:2) = (-2.0_dp) * Nt3 * gt3
+    R(3:4,3:4) = (-1.0_dp) * Nt3 * (pauli0 + gt3*g3)
+
+    ! Calculate the spin-active terms in the interface current
+    I = GC * (matmul(L,matmul(M,matmul(R,M)))    &
+             -matmul(M,matmul(R,matmul(M,L))))   &
+      + GM * (matmul(L,matmul(R,M)+matmul(M,R))  &
+             -matmul(matmul(R,M)+matmul(M,R),L)) &
+      + GP * (matmul(L,M) - matmul(M,L))
+
+    ! Calculate the deviation from the boundary condition
+    r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
+    rt2 = rt2 - (pauli0 - gt2*g2) * (I(3:4,1:2) - I(3:4,3:4)*gt2)
+
+    end associate
+    end associate
   end subroutine
 end module
