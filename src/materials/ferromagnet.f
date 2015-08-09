@@ -66,9 +66,17 @@ contains
 
     ! Modify the type string
     if (allocated(this%exchange)) then
-      this%type_string = color_red // 'FERROMAGNET' // color_none
+      if (colors) then
+        this%type_string = color_red // 'FERROMAGNET' // color_none
+      else
+        this%type_string = 'FERROMAGNET'
+      end if
       if (allocated(this%spinorbit)) then
-        this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+        if (colors) then
+          this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+        else
+          this%type_string = trim(this%type_string) // ' [SOC] '
+        end if
       end if
     end if
   end function
@@ -142,8 +150,8 @@ contains
     ! Update internal variables
     if (allocated(this%exchange)) then
       do n = 1,ubound(exchange,2)
-        h(n)  = (0.0_dp,-1.0_dp) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)/this%thouless
-        ht(n) = (0.0_dp,+1.0_dp) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)/this%thouless
+        h(n)  = ((0.0_dp,-1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
+        ht(n) = ((0.0_dp,+1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
       end do
     end if
 

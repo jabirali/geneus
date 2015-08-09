@@ -21,7 +21,6 @@ module mod_material
     real(dp),                     allocatable :: energy(:)                          ! Discretized domain for the energies
     real(dp),                     allocatable :: location(:)                        ! Discretized domain for the positions
     type(green),                  allocatable :: greenr(:,:)                        ! Discretized values for the Green's function (retarded component)
-    type(green),                  allocatable :: greenk(:,:)                        ! Discretized values for the Green's function (Keldysh  component)
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
     class(material),                  pointer :: material_a      => null()          ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
@@ -39,10 +38,10 @@ module mod_material
     character(len=64)                         :: type_string     =  'MATERIAL'      ! The type string should describe the specific class(material) subtype
   contains
     ! These methods define how to update the physical state of the material
-    procedure(init),                 deferred :: init                               ! Initializes the Green's functions
-    procedure                                 :: update          => material_update ! Calculates  the Green's functions
-    procedure(update),               deferred :: update_prehook                     ! Code to execute before calculating the Green's functions
-    procedure(update),               deferred :: update_posthook                    ! Code to execute after  calculating the Green's functions
+    procedure(init),                 deferred :: init                               ! Initializes  the Green's functions
+    procedure                                 :: update          => material_update ! Recalculates the Green's functions
+    procedure(update),               deferred :: update_prehook                     ! Executed before calculating the Green's functions
+    procedure(update),               deferred :: update_posthook                    ! Executed after  calculating the Green's functions
 
     ! These methods define the physical equations used by the update methods
     procedure(diffusion_equation),   deferred :: diffusion_equation                 ! Diffusion equation that describes the material
@@ -122,7 +121,7 @@ contains
 
     ! Status information
     if (this%information >= 0) then
-      write(stdout,'(a)') color_white // ' :: ' // color_none // trim(this%type_string) // '                                     '
+      write(stdout,'(a)') ' :: ' // trim(this%type_string) // '                                     '
     end if
 
     ! Reset the difference since last update to zero
@@ -140,7 +139,7 @@ contains
         ! Status information
         if (this%information >= 0) then
           write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
-            '[',n,'/',size(this%energy),']  ϵ = ',this%energy(n), achar(13)
+            '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
           flush(stdout)
         end if
 

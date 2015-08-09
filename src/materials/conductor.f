@@ -124,9 +124,17 @@ contains
     end if
 
     ! Modify the type string
-    this%type_string = color_yellow // 'CONDUCTOR' // color_none
+    if (colors) then
+      this%type_string = color_yellow // 'CONDUCTOR' // color_none
+    else
+      this%type_string = 'CONDUCTOR'
+    end if
     if (allocated(this%spinorbit)) then
-      this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+      if (colors) then
+        this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+      else
+        this%type_string = trim(this%type_string) // ' [SOC] '
+      end if
     end if
   end function
 
@@ -213,7 +221,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
-      ! Calculate residuals from the boundary conditions at the left interface.
+      ! Calculate residuals from the boundary conditions at the right interface.
       class(conductor),          intent(in   ) :: this
       type(green),               intent(in   ) :: b
       type(spin),                intent(in   ) :: g, gt, dg, dgt

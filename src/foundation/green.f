@@ -6,7 +6,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-30
+! Updated: 2015-08-09
 
 module mod_green
   use mod_spin
@@ -234,9 +234,9 @@ contains
     class(green), intent(in) :: this 
 
     ! Print the matrix elements
-    call this%g%print('Riccati parameter γ ')
-    call this%gt%print('Riccati parameter γ~')
-    call this%dg%print('Derivative dγ / dz')
-    call this%dgt%print('Derivative dγ~/ dz')
+    call this%g%print('Riccati parameter gamma ')
+    call this%gt%print('Riccati parameter gamma~')
+    call this%dg%print('Derivative dgamma / dz')
+    call this%dgt%print('Derivative dgamma~/ dz')
   end subroutine
 end module

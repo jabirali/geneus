@@ -56,7 +56,7 @@ program critical_snf
   !--------------------------------------------------------------------------------!
 
   ! Process command line options
-  call option
+  call print_option
   call option(bisections,           'bisections')
   call option(bootstraps,           'bootstraps')
   call option(iterations,           'iterations')

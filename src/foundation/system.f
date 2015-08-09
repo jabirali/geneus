@@ -1,14 +1,23 @@
 ! This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
 ! floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
-! the type of the variable. It also renames the ISO input/output units to the standard UNIX names.  Finally, the module
-! defines a set of subroutines with the common interface 'option' to read and parse command line arguments to a program.
+! the type of the variable. It also renames the ISO input/output units to the standard UNIX names, and defines the ANSI
+! escape codes for colored output. Finally, the module defines a set of subroutines with the common interface 'option',
+! which can be used to read and parse the command line arguments to a program.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-07-25
+! Updated: 2015-08-09
 
 module mod_system
   use, intrinsic :: iso_fortran_env
+
+  ! Declare whether the terminal supports colors
+  ! [disable this when using cmd.exe on Windows]
+  logical,      parameter :: colors  = .true.
+
+  ! Declare whether the terminal supports unicode
+  ! [disable this when using cmd.exe on Windows]
+  logical,      parameter :: unicode = .true.
 
   ! Declare standard input/output units
   integer,      parameter :: stdin   = input_unit
@@ -20,13 +29,14 @@ module mod_system
   integer,      parameter :: dp      = REAL64
   integer,      parameter :: qp      = REAL128
 
-  ! Define comm on mathematical constants
+  ! Define common mathematical constants
   real(dp),     parameter :: inf     = huge(1.0_dp)
   real(dp),     parameter :: pi      = atan(1.0_dp)*4.0_dp
   complex(dp),  parameter :: i       = (0.0_dp,1.0_dp)
 
   ! Define escape codes for terminal colors
   character(*), parameter :: color_none   = '[0m'
+  character(*), parameter :: color_bold   = '[1m'
   character(*), parameter :: color_red    = '[31m'
   character(*), parameter :: color_green  = '[32m'
   character(*), parameter :: color_yellow = '[33m'
@@ -37,16 +47,9 @@ module mod_system
 
   ! Define an interface for obtaining command line arguments
   interface option
-    module procedure print_option, option_logical, option_integer, option_real, option_string
+    module procedure option_logical, option_integer, option_real, option_string
   end interface
 contains
-  subroutine print_option
-    ! If the subroutine 'option' is run without arguments, this prints out a header.
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│        RUNTIME  PARAMETERS        │'
-    write(*,'(a)') '╘═══════════════════════════════════╛'
-  end subroutine
-
   subroutine option_integer(variable, option)
     ! Reads a command line option on the form option=value, where value is an integer.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
@@ -145,49 +148,16 @@ contains
     write(*,'(a,a,1x,a,a,a)') ' :: ', option, '"', trim(variable), '"'
   end subroutine
 
-  subroutine print_status(header, iteration, change, phasediff, temperature)
-    ! Prints a status message including the iteration number and elapsed time to stdout.
-    character(*),           intent(in) :: header
-    integer,      optional, intent(in) :: iteration
-    real(dp),     optional, intent(in) :: change
-    real(dp),     optional, intent(in) :: phasediff
-    real(dp),     optional, intent(in) :: temperature
-    real(sp)                           :: time
-    character(33)                      :: string
-
-    ! Determine how much CPU time has elapsed
-    call cpu_time(time)
-
-    ! Copy the header to a string of correct size
-    string = header
-
-    ! Print the progress information to standard out
-    write(*,'(a)') '                                     '
+  subroutine print_option
+    ! Prints out a header for runtime parameters.
+    if (unicode) then
     write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│ '         // string //          ' │'
-    write(*,'(a)') '├───────────────────────────────────┤'
-    if (present(iteration)) then
-      write(*,'(a,3x,a,i8,3x,a)')                       &
-        '│','Iteration:           ',     iteration,    '│'
-    end if
-    if (present(phasediff)) then
-      write(*,'(a,3x,a,f8.6,3x,a)')                     &
-        '│','Phase difference:    ',     phasediff,    '│'
-    end if
-    if (present(temperature)) then
-      write(*,'(a,3x,a,f8.6,3x,a)')                     &
-        '│','Temperature:         ',     temperature,  '│'
-    end if
-    if (present(change)) then
-      write(*,'(a,3x,a,f8.6,3x,a)')                     &
-        '│','Maximum change:      ',     change,       '│'
-    end if
-    write(*,'(a,3x,a,i2.2,a,i2.2,a,i2.2,3x,a)')         &
-      '│','Elapsed time:        ',                      &
-      int(time/3600.0_sp),':',                          &
-      int(mod(time,3600.0_sp)/60.0_sp),':',             &
-      int(mod(time,60.0_sp)),                          '│'
+    write(*,'(a)') '│        RUNTIME  PARAMETERS        │'
     write(*,'(a)') '╘═══════════════════════════════════╛'
+    else
+    write(*,'(a)') '+-----------------------------------+'
+    write(*,'(a)') '|        RUNTIME  PARAMETERS        |'
+    write(*,'(a)') '+-----------------------------------+'
+    end if
   end subroutine
-
 end module 

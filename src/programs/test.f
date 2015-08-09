@@ -1,8 +1,8 @@
-! This program is used to test the data structures and procedures declared in 'modules/*.f90'.
+! This program is used to test the fundamental data structures and procedures.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-13
-! Updated: 2015-07-13
+! Updated: 2015-08-09
 
 program test_core
   use mod_assert
@@ -178,14 +178,14 @@ program test_core
                     (21.000000000000000_dp,22.000000000000000_dp), (23.000000000000000_dp,24.000000000000000_dp)]), &
               spin([(25.000000000000000_dp,26.000000000000000_dp), (27.000000000000000_dp,28.000000000000000_dp),   &
                     (29.000000000000000_dp,30.000000000000000_dp), (31.000000000000000_dp,32.000000000000000_dp)]))
-  call assert(s0%g         - s1%g,                     'Importing from a real vector (γ )')
-  call assert(s0%gt        - s1%gt,                    'Importing from a real vector (γ~)')
-  call assert(s0%dg        - s1%dg,                    'Importing from a real vector (dγ / dz)')
-  call assert(s0%dgt       - s1%dgt,                   'Importing from a real vector (dγ~/ dz)')
+  call assert(s0%g         - s1%g,                     'Importing from a real vector (gamma )')
+  call assert(s0%gt        - s1%gt,                    'Importing from a real vector (gamma~)')
+  call assert(s0%dg        - s1%dg,                    'Importing from a real vector (dgamma / dz)')
+  call assert(s0%dgt       - s1%dgt,                   'Importing from a real vector (dgamma~/ dz)')
   rw = s0
-  call assert(rw - [ (n, n=1,32) ],                    'Exporting to a real vector　')
+  call assert(rw - [ (n, n=1,32) ],                    'Exporting to a real vector')
 
-  call subsection('Testing construction of a BCS state with ϵ=0 and Δ=1:')
+  call subsection('Testing construction of a BCS state with E=0 (gap real):')
   s0 = green( (0.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
   s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp,-0.999000499999875_dp),   &
                     ( 0.000000000000000_dp, 0.999000499999875_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -195,13 +195,13 @@ program test_core
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
-  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
-  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
-  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
-  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
-  call assert(s0%get_dos() - 9.999995000002913e-04_dp, 'Density of states　')
+  call assert(s0%g         - s1%g,                     'Riccati parameter gamma ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter gamma~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dgamma / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dgamma~/ dz')
+  call assert(s0%get_dos() - 9.999995000002913e-04_dp, 'Density of states')
 
-  call subsection('Testing construction of a BCS state with ϵ=1 and Δ=1:')
+  call subsection('Testing construction of a BCS state with E=1 (gap real):')
   s0 = green( (1.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
   s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.968385128104009_dp,-0.030630683283800_dp),   &
                     (-0.968385128104009_dp, 0.030630683283800_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -211,13 +211,13 @@ program test_core
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
-  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
-  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
-  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
-  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
-  call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states　')
+  call assert(s0%g         - s1%g,                     'Riccati parameter gamma ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter gamma~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dgamma / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dgamma~/ dz')
+  call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states')
 
-  call subsection('Testing construction of a BCS state with ϵ=1 and Δ=i:')
+  call subsection('Testing construction of a BCS state with E=1 (gap imag):')
   s0 = green( (1.0_dp,0.001_dp), (0.0_dp,1.0_dp) )
   s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.030630683283800_dp, 0.968385128104009_dp),   &
                     (-0.030630683283800_dp,-0.968385128104009_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -227,13 +227,13 @@ program test_core
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
-  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
-  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
-  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
-  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
-  call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states　')
+  call assert(s0%g         - s1%g,                     'Riccati parameter gamma ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter gamma~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dgamma / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dgamma~/ dz')
+  call assert(s0%get_dos() - 15.823249311731509_dp,    'Density of states')
 
-  call subsection('Testing construction of a BCS state with ϵ=2 and Δ=1:')
+  call subsection('Testing construction of a BCS state with E=2 (gap real):')
   s0 = green( (2.0_dp,0.001_dp), (1.0_dp,0.0_dp) )
   s1 = green( spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.267949096206123_dp,-0.000154700474229_dp),   &
                     (-0.267949096206123_dp, 0.000154700474229_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
@@ -243,11 +243,11 @@ program test_core
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]), &
               spin([( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp),   &
                     ( 0.000000000000000_dp, 0.000000000000000_dp), ( 0.000000000000000_dp, 0.000000000000000_dp)]))
-  call assert(s0%g         - s1%g,                     'Riccati parameter γ ')
-  call assert(s0%gt        - s1%gt,                    'Riccati parameter γ~')
-  call assert(s0%dg        - s1%dg,                    'Derivative dγ / dz')
-  call assert(s0%dgt       - s1%dgt,                   'Derivative dγ~/ dz')
-  call assert(s0%get_dos() - 1.154700345929331_dp,     'Density of states　')
+  call assert(s0%g         - s1%g,                     'Riccati parameter gamma ')
+  call assert(s0%gt        - s1%gt,                    'Riccati parameter gamma~')
+  call assert(s0%dg        - s1%dg,                    'Derivative dgamma / dz')
+  call assert(s0%dgt       - s1%dgt,                   'Derivative dgamma~/ dz')
+  call assert(s0%get_dos() - 1.154700345929331_dp,     'Density of states')
 
   call section("State: Calculation of Green's functions")
   s0%g  = (0.05_dp,0.10_dp)*pauli0 + (0.15_dp,0.20_dp)*pauli1 + (0.25_dp,0.30_dp)*pauli2 + (0.35_dp,0.40_dp)*pauli3
@@ -295,4 +295,34 @@ program test_core
                                                         ( 0.056032457036146_dp, 0.283756586590947_dp)],&
               'Extraction of the long-range triplet component of f~:')
   call assert(s0%get_dos() - 0.551405891753394_dp, 'Extraction of the density of states:')
+contains
+ subroutine section(msg)
+   character(*),  intent(in) :: msg
+   character(68)             :: str
+
+   str = trim(msg)
+
+   if (unicode) then
+     print *,''
+     print *,'╒═══════════════════════════════════',&
+             '═══════════════════════════════════╕'
+     print *,'│  ',          str,               '│'
+     print *,'╘═══════════════════════════════════',&
+             '═══════════════════════════════════╛'
+   else
+     print *,''
+     print *,'+-----------------------------------',&
+             '-----------------------------------+'
+     print *,'|  ',          str,               '|'
+     print *,'+-----------------------------------',&
+             '-----------------------------------+'
+   end if
+ end subroutine
+
+ subroutine subsection(msg)
+   character(*), intent(in) :: msg
+
+   print *,' '
+   print *,msg
+ end subroutine
 end program

@@ -264,7 +264,7 @@ contains
     ! Determine whether to perform a selfconsistent calculation
     call option(selfconsistent, 'selfconsistent')
     if (selfconsistent) then
-      energies = 600
+      energies = 800
       if (superconductors > 1) then
         reservoirs = .true.
       end if
@@ -279,9 +279,9 @@ contains
     ! Determine the number of energies to use
     call option(energies, 'energies')
     if (selfconsistent) then
-      if (energies < 200) then
+      if (energies < 600) then
         print *
-        print *,'Error: minimum 200 energies required for self-consistent calculations!'
+        print *,'Error: minimum 600 energies required for self-consistent calculations!'
         stop
       end if
     else

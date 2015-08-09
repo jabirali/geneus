@@ -1,11 +1,10 @@
 ! This module defines a set of subroutines and functions that are useful for working with multilayer hybrid structures.
-! The procedures include the subroutine 'connect' for creating interfaces between class(material) objects; subroutines 
-! 'init_all' and 'update_all' for manipulating the internal states of all materials in a hybrid structure; and a set of
-! functions that are useful for initializing arguments that will be passed to the class(material) constructor methods.
+! The procedures include the subroutine 'connect' and 'transparent' for creating interfaces between two class(material)
+! objects, and a set of functions for initializing arguments that will be passed to class(material) constructor methods.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-07-29
+! Updated: 2015-08-08
 
 module mod_hybrid
   use mod_system
@@ -57,53 +56,34 @@ contains
   !              PROCEDURES FOR CLASS(CONDUCTOR) CONSTRUCTOR ARGUMENTS             !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine energy_range(array, coupling, maximum, padding)
-    ! Initializes an array of energies, which can be passed on to class(material) constructor methods.  The initialized
-    ! values depend on the optional arguments.  If none of these arguments are provided, then the array is initilized to
-    ! linearly spaced values in the range [0.0,1.5]. If the argument 'positive' is set to false, then the array includes
-    ! negative values as well, resulting in linearly spaced values in the range [-1.5,1.5]. The default limit of 1.5 can
-    ! be changed using the argument 'maximum'.  Finally, if the coupling constant 'coupling' is provided, the array will
-    ! be padded with 100 linearly spaced energies up to the Debye cutoff cosh(1/coupling). If 'positive' is set to false,
-    ! this becomes 100 positive and 100 negative energies. The parameter 'padding' can be used to change the default 100.
-    !
-    ! TODO:  the argument 'positive' has not been implemented yet,  and the other arguments are not checked for validity.
+  pure subroutine energy_range(array, coupling)
+    ! Initializes an array of energies,  which can be passed on to class(material) constructor methods.
+    ! If the coupling constant 'coupling' is provided,  the array will include values all the way up to
+    ! the Debye cutoff cosh(1/coupling), which is appropriate for selfconsistent calculations.  If not,
+    ! it will only include energies up to 1.5Δ, which is sufficient for non-selfconsistent calculations.
 
     real(dp), intent(out)          :: array(:)
-    real(dp), optional, intent(in) :: maximum
     real(dp), optional, intent(in) :: coupling
-    integer,  optional, intent(in) :: padding
-
-    real(dp)                       :: maximum_
-    integer                        :: padding_
     integer                        :: n
 
-    ! Handle optional arguments
-    if (present(maximum)) then
-      maximum_ = maximum
-    else
-      maximum_ = 1.5_dp
-    end if
-
-    if (present(padding)) then
-      padding_ = padding
-    else
-      padding_ = 100
-    end if
-
     ! Initialize the energy array
-    if (present(coupling)) then
-      ! Positive energies from zero to 'maximum'
-      do n = 1,size(array)-padding_
-        array(n) = (n-1) * (maximum_/(size(array)-padding_))
+    if (present(coupling) .and. size(array) >= 600) then
+      ! Positive energies from 0.0 to 1.5
+      do n = 1,size(array)-300
+        array(n) = (n-1) * (1.5_dp/(size(array)-300))
       end do
-      ! Positive energies from 'maximum' to the Debye cutoff
-      do n = 1,padding_
-        array(size(array)-padding_+n) = maximum_ + n * (cosh(1.0_dp/coupling)-maximum_)/padding_
+      ! Positive energies from 1.5 to 4.5
+      do n = 1,200
+        array(size(array)-300+n) = 1.5_dp + (n-1) * (3.0_dp/200)
+      end do
+      ! Positive energies from 1.5 to cutoff
+      do n = 1,100
+        array(size(array)-100+n) = 4.5_dp + n * (cosh(1.0_dp/coupling)-4.5)/100
       end do
     else
-      ! Positive energies from zero to 'maximum'
+      ! Positive energies from 0.0 to 1.5
       do n = 1,size(array)
-        array(n) = (n-1) * (maximum_/(size(array)-1))
+        array(n) = (n-1) * (1.5_dp/(size(array)-1))
       end do
     end if
   end subroutine
@@ -122,10 +102,7 @@ contains
 
   pure function spinorbit_xy(strength, angle, alpha, beta) result(field)
     ! This function returns an SU(2) vector that describes a Rashba--Dresselhaus coupling
-    ! in the xy-plane. The coupling constants are given in polar coordinates, so that the
-    ! Rashba constant is strength*sin(angle), and the Dresselhaus one strength*cos(angle).
-    ! Alternatively, the Rashba constant alpha and Dresselhaus constant beta can also be
-    ! explicitly specified.
+    ! in the xy-plane.  The coupling constants can also be provided in polar coordinates.
     real(dp), intent(in), optional :: strength
     real(dp), intent(in), optional :: angle
     real(dp), intent(in), optional :: alpha
@@ -135,20 +112,85 @@ contains
     ! Initialize to zero
     field(:) = spin(0)
 
-    ! Polar parametrization
-    if (present(strength) .and. present(angle)) then
-      field(1) = (+strength) * (cos(angle)*pauli1 + sin(angle)*pauli2)
-      field(2) = (-strength) * (cos(angle)*pauli2 + sin(angle)*pauli1)
-    end if
-
     ! Explicit Rashba coefficient
     if (present(alpha)) then
-      field(1) = (+beta)*pauli1 + (+alpha)*pauli2
+      field(1) = (+alpha)*pauli2
+      field(2) = (-alpha)*pauli1
     end if
 
     ! Explicit Dresselhaus coefficient
     if (present(beta)) then
-      field(2) = (-beta)*pauli2 + (-alpha)*pauli1
+      field(1) = (+beta)*pauli1
+      field(2) = (-beta)*pauli2
+    end if
+
+    ! Polar parametrization
+    if (present(strength) .and. present(angle)) then
+      field(1) = field(1) + (+strength) * (cos(angle)*pauli1 + sin(angle)*pauli2)
+      field(2) = field(2) + (-strength) * (cos(angle)*pauli2 + sin(angle)*pauli1)
     end if
   end function
+
+  !--------------------------------------------------------------------------------!
+  !                             INPUT/OUTPUT PROCEDURES                            !
+  !--------------------------------------------------------------------------------!
+
+  subroutine print_status(header, iteration, change, phasediff, temperature)
+    ! Prints a status message to stdout including iteration number, elapsed time, and physical parameters.
+    character(*),       intent(in) :: header
+    integer,  optional, intent(in) :: iteration
+    real(dp), optional, intent(in) :: change
+    real(dp), optional, intent(in) :: phasediff
+    real(dp), optional, intent(in) :: temperature
+    real(sp)                       :: time
+    character(len=33)              :: string
+    character(len=4)               :: bar
+
+    ! Determine how much CPU time has elapsed
+    call cpu_time(time)
+
+    ! Copy the header to a string of correct size
+    string = header
+
+    ! Print the progress information to standard out
+    if (unicode) then
+    write(*,'(a)') '                                     '
+    write(*,'(a)') '╒═══════════════════════════════════╕'
+    write(*,'(a)') '│ '         // string //          ' │'
+    write(*,'(a)') '├───────────────────────────────────┤'
+    bar = '│'
+    else
+    write(*,'(a)') '                                     '
+    write(*,'(a)') '+-----------------------------------+'
+    write(*,'(a)') '| '         // string //          ' |'
+    write(*,'(a)') '+-----------------------------------+'
+    bar = '|'
+    end if
+    if (present(iteration)) then
+      write(*,'(a,3x,a,i8,3x,a)')                       &
+        trim(bar),'Iteration:           ', iteration,   trim(bar)
+    end if
+    if (present(phasediff)) then
+      write(*,'(a,3x,a,f8.6,3x,a)')                     &
+        trim(bar),'Phase difference:    ', phasediff,   trim(bar)
+    end if
+    if (present(temperature)) then
+      write(*,'(a,3x,a,f8.6,3x,a)')                     &
+        trim(bar),'Temperature:         ', temperature, trim(bar)
+    end if
+    if (present(change)) then
+      write(*,'(a,3x,a,f8.6,3x,a)')                     &
+        trim(bar),'Maximum change:      ', change,      trim(bar)
+    end if
+    write(*,'(a,3x,a,i2.2,a,i2.2,a,i2.2,3x,a)')         &
+      trim(bar),'Elapsed time:        ',                &
+      int(time/3600.0_sp),':',                          &
+      int(mod(time,3600.0_sp)/60.0_sp),':',             &
+      int(mod(time,60.0_sp)),                           trim(bar)
+    if (unicode) then
+    write(*,'(a)') '╘═══════════════════════════════════╛'
+    else
+    write(*,'(a)') '+-----------------------------------+'
+    end if
+  end subroutine
 end module

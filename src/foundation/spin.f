@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-07-30
+! Updated: 2015-08-09
 
 module mod_spin
   use mod_system
@@ -541,12 +541,21 @@ contains
     end if
 
     ! Print the matrix elements
-    write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
-            '⎡',real(this%matrix(1,1)),' +',aimag(this%matrix(1,1)),'i',                & 
-                real(this%matrix(1,2)),' +',aimag(this%matrix(1,2)),'i','⎤'
-    write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
-            '⎣',real(this%matrix(2,1)),' +',aimag(this%matrix(2,1)),'i',                & 
-                real(this%matrix(2,2)),' +',aimag(this%matrix(2,2)),'i','⎦'
+    if (unicode) then
+      write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
+              '⎡',real(this%matrix(1,1)),' +',aimag(this%matrix(1,1)),'i',                & 
+                  real(this%matrix(1,2)),' +',aimag(this%matrix(1,2)),'i','⎤'
+      write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
+              '⎣',real(this%matrix(2,1)),' +',aimag(this%matrix(2,1)),'i',                & 
+                  real(this%matrix(2,2)),' +',aimag(this%matrix(2,2)),'i','⎦'
+    else
+      write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
+              '[',real(this%matrix(1,1)),' +',aimag(this%matrix(1,1)),'i',                & 
+                  real(this%matrix(1,2)),' +',aimag(this%matrix(1,2)),'i',']'
+      write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
+              '[',real(this%matrix(2,1)),' +',aimag(this%matrix(2,1)),'i',                & 
+                  real(this%matrix(2,2)),' +',aimag(this%matrix(2,2)),'i',']'
+    end if
 
     ! Print extra whitespace
     if(present(title)) then

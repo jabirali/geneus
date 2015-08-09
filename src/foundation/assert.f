@@ -1,8 +1,8 @@
-! This module defines assert functions, which are used to test the data structures.
+! This module defines the interface 'assert', which is used for unit testing.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-13
-! Updated: 2015-07-13
+! Updated: 2015-08-09
 
 
 module mod_assert
@@ -16,37 +16,24 @@ module mod_assert
   end interface
 
   contains
-    subroutine section(msg)
-      character(*),  intent(in) :: msg
-      character(68)             :: str
-
-      str = msg
-
-      print *,''
-      print *,'┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
-              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓'
-      print *,'┃  ',achar(27),'[1m',str,achar(27),'[0m','┃'
-      print *,'┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',&
-              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛'
-    end subroutine
-
-    subroutine subsection(msg)
-      character(*), intent(in) :: msg
-
-      print *,' '
-      print *,msg
-    end subroutine
-
     subroutine assert_logical(expr, msg)
       logical,      intent(in) :: expr
       character(*), intent(in) :: msg
       character(60)            :: str
 
       str = msg
-      if (expr) then
-        print *,' :: ',str,achar(27),'[32;1mSUCCESS',achar(27),'[0m'
+      if (colors) then
+        if (expr) then
+          print *,' :: ', str, color_green, 'SUCCESS', color_none
+        else
+          print *,' :: ', str, color_red,   'FAILURE', color_none
+        end if
       else
-        print *,' :: ',str,achar(27),'[31;1mFAILURE',achar(27),'[0m'
+        if (expr) then
+          print *,' :: ', str, 'SUCCESS'
+        else
+          print *,' :: ', str, 'FAILURE'
+        end if
       end if
     end subroutine
 

@@ -78,9 +78,17 @@ contains
     end if
 
     ! Modify the type string
-    this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+    if (colors) then
+      this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+    else
+      this%type_string = 'SUPERCONDUCTOR'
+    end if
     if (allocated(this%spinorbit)) then
-      this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+      if (colors) then
+        this%type_string = trim(this%type_string) // color_cyan // ' [SOC] ' // color_none
+      else
+        this%type_string = trim(this%type_string) // ' [SOC] '
+      end if
     end if
   end function
 
