@@ -4,7 +4,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-08-09
+! Updated: 2015-08-10
 
 module mod_conductor
   use mod_material
@@ -15,8 +15,8 @@ module mod_conductor
     ! These parameters control the physical characteristics of the material 
     logical                   :: transparent_a           =  .false.                           ! Whether the left  interface is transparent or not
     logical                   :: transparent_b           =  .false.                           ! Whether the right interface is transparent or not
-    real(dp)                  :: conductance_a           =  0.00_dp                           ! Normalized conductance of the left interface  (relative to the bulk conductance of this material)
-    real(dp)                  :: conductance_b           =  0.00_dp                           ! Normalized conductance of the right interface (relative to the bulk conductance of this material)
+    real(dp)                  :: conductance_a           =  0.30_dp                           ! Normalized conductance of the left interface  (relative to the bulk conductance of this material)
+    real(dp)                  :: conductance_b           =  0.30_dp                           ! Normalized conductance of the right interface (relative to the bulk conductance of this material)
     real(dp)                  :: polarization_a          =  0.00_dp                           ! Spin-polarization of the left interface  (range: [-1,+1])
     real(dp)                  :: polarization_b          =  0.00_dp                           ! Spin-polarization of the right interface (range: [-1,+1])
     real(dp)                  :: phaseshift_a            =  0.00_dp                           ! Spin-dependent phase shifts at the left interface
@@ -30,9 +30,9 @@ module mod_conductor
     ! These variables are used by internal subroutines to handle spin-active interfaces
     complex(dp),      private :: M_a(4,4)                =  0.00_dp                           ! Left interface magnetization matrix in Spin-Nambu space
     complex(dp),      private :: M_b(4,4)                =  0.00_dp                           ! Right interface magnetization matrix in Spin-Nambu space
-    complex(dp),      private :: GP_a, GP_b                                                   ! Normalized phaseshift factors G_ϕ/G at the left and right interfaces
-    real(dp),         private :: GM_a, GM_b                                                   ! Normalized magnetoconductances G_MR/G at the left and right interfaces
-    real(dp),         private :: G1_a, G1_b                                                   ! Normalized correction factors G_T1/G at the left and right interfaces
+    complex(dp),      private :: GP_a, GP_b                                                   ! Normalized phaseshift factors G_ϕ/G at the interfaces
+    real(dp),         private :: GM_a, GM_b                                                   ! Normalized magnetoconductances G_MR/G at the interfaces
+    real(dp),         private :: GC_a, GC_b                                                   ! Normalized correction factors G_T1/G at the interfaces
   
     ! These variables are used by internal subroutines to handle spin-orbit coupling
     type(spin),       private :: Ax,  Ay,  Az,  A2                                            ! Spin-orbit coupling matrices (the components and square)
@@ -46,13 +46,13 @@ module mod_conductor
     procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the Green's functions
 
     ! These methods contain the equations that describe electrical conductors
-    procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation
-    procedure                 :: interface_transparent_a => conductor_interface_transparent_a ! Defines the left  boundary condition (tunnel interface)
-    procedure                 :: interface_transparent_b => conductor_interface_transparent_b ! Defines the right boundary condition (tunnel interface)
-    procedure                 :: interface_vacuum_a      => conductor_interface_vacuum_a      ! Defines the left  boundary condition (vacuum interface)
-    procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      ! Defines the right boundary condition (vacuum interface)
-    procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      ! Defines the left  boundary condition (tunnel interface)
-    procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      ! Defines the right boundary condition (tunnel interface)
+    procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation (conductor terms)
+    procedure                 :: interface_transparent_a => conductor_interface_transparent_a ! Defines the left  boundary condition  (transparent interface)
+    procedure                 :: interface_transparent_b => conductor_interface_transparent_b ! Defines the right boundary condition  (transparent interface)
+    procedure                 :: interface_vacuum_a      => conductor_interface_vacuum_a      ! Defines the left  boundary condition  (vacuum interface)
+    procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      ! Defines the right boundary condition  (vacuum interface)
+    procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      ! Defines the left  boundary condition  (tunnel interface)
+    procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      ! Defines the right boundary condition  (tunnel interface)
 
     ! These methods contain the equations that describe spin-orbit coupling
     procedure                 :: diffusion_spinorbit     => spinorbit_diffusion_equation      ! Defines the Usadel diffusion equation (spin-orbit terms)
@@ -60,8 +60,8 @@ module mod_conductor
     procedure                 :: interface_spinorbit_b   => spinorbit_interface_equation_b    ! Defines the right boundary condition  (spin-orbit terms)
 
     ! These methods contain the equations that describe spin-active interfaces
-    procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms) [TODO]
-    procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms) [TODO]
+    procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms)
+    procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms)
 
     ! These methods define miscellaneous utility functions
     procedure                 :: save                    => conductor_save                    ! Saves the state of the conductor to a different object
@@ -82,7 +82,7 @@ contains
   !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
   !--------------------------------------------------------------------------------!
 
-  pure function conductor_construct(energy, gap, thouless, scattering, points, spinorbit) result(this)
+  pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this         ! Conductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
@@ -90,7 +90,6 @@ contains
     real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
     complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
     integer,     intent(in), optional :: points       ! Number of positions   (default: see definition below)
-    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: zero coupling)
     integer                           :: n, m         ! Loop variables
 
     ! Optional argument: Thouless energy
@@ -103,17 +102,6 @@ contains
       this%scattering = scattering
     end if
 
-    ! Optional argument: spin-orbit coupling
-    if (allocated(this%spinorbit)) then
-      deallocate(this%spinorbit)
-    end if
-    if (present(spinorbit)) then
-      if (sum(spinorbit%norm()) > 1e-10) then
-        allocate(this%spinorbit(size(spinorbit)))
-        this%spinorbit = spinorbit
-      end if
-    end if
-    
     ! Allocate memory (if necessary)
     if (.not. allocated(this%greenr)) then
       if (present(points)) then
@@ -152,6 +140,14 @@ contains
 
     if (allocated(this%spinorbit)) then
       deallocate(this%spinorbit)
+    end if
+
+    if (allocated(this%magnetization_a)) then
+      deallocate(this%magnetization_a)
+    end if
+
+    if (allocated(this%magnetization_b)) then
+      deallocate(this%magnetization_b)
     end if
   end subroutine
 
@@ -394,86 +390,44 @@ contains
     continue
   end subroutine
 
-  !--------------------------------------------------------------------------------!
-  !                    IMPLEMENTATION OF INPUT/OUTPUT METHODS                      !
-  !--------------------------------------------------------------------------------!
 
-  impure subroutine conductor_save(this, other)
-    ! Saves the state of the conductor to a different object.
-    class(conductor), intent(inout) :: this
-    class(conductor), intent(inout) :: other
-
-    other % greenr = this % greenr
-  end subroutine
-
-  impure subroutine conductor_load(this, other)
-    ! Saves the state of the conductor to a different object.
-    class(conductor), intent(inout) :: this
-    class(conductor), intent(inout) :: other
-
-    this % greenr = other % greenr
-  end subroutine
-
-  impure subroutine conductor_write_dos(this, unit, a, b)
-    ! Writes the density of states as a function of position and energy to a given output unit.
-    class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
-    integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
-    real(dp),           intent(in) :: a, b      ! Left and right end points of the material
-    integer                        :: n, m      ! Temporary loop variables
-
-    if (minval(this%energy) < -1e-16_dp) then
-      ! If we have data for both positive and negative energies, simply write out the data
-      do m=1,size(this%location)
-        do n=1,size(this%energy)
-          write(unit,*) a+(b-a)*this%location(m), this%energy(n), this%greenr(n,m)%get_dos()
-        end do
-        write(unit,*)
-      end do
-    else
-      ! If we only have data for positive energies, assume that the negative region is symmetric
-      do m=1,size(this%location)
-        do n=size(this%energy),1,-1
-          write(unit,*) a+(b-a)*this%location(m), -this%energy(n), this%greenr(n,m)%get_dos()
-        end do
-        do n=1,size(this%energy),+1
-          write(unit,*) a+(b-a)*this%location(m), +this%energy(n), this%greenr(n,m)%get_dos()
-        end do
-        write(unit,*)
-      end do
-    end if
-  end subroutine
 
   !--------------------------------------------------------------------------------!
   !                     IMPLEMENTATION OF SPIN-ORBIT COUPLING                      !
   !--------------------------------------------------------------------------------!
 
-  ! TODO: These methods should be moved to a submodule when GFortran supports that.
+  ! TODO: These methods should be moved to a submodule when compilers support that.
 
   pure subroutine spinorbit_update_prehook(this)
     ! Updates the internal variables associated with spin-orbit coupling.
     class(conductor), intent(inout) :: this 
 
     if (allocated(this%spinorbit)) then
-      ! Spin-orbit coupling terms in the equations for the Riccati parameter γ
-      this%Ax  = this%spinorbit(1)/sqrt(this%thouless)
-      this%Ay  = this%spinorbit(2)/sqrt(this%thouless)
-      this%Az  = this%spinorbit(3)/sqrt(this%thouless)
-      this%A2  = this%Ax**2 + this%Ay**2 + this%Az**2
+      if (sum(this%spinorbit%norm()) < 1e-10) then
+        ! Negligible spin-orbit coupling
+        deallocate(this%spinorbit)
+      else
+        ! Spin-orbit coupling terms in the equations for the Riccati parameter γ
+        this%Ax  = this%spinorbit(1)/sqrt(this%thouless)
+        this%Ay  = this%spinorbit(2)/sqrt(this%thouless)
+        this%Az  = this%spinorbit(3)/sqrt(this%thouless)
+        this%A2  = this%Ax**2 + this%Ay**2 + this%Az**2
 
-      ! Spin-orbit coupling terms in the equations for the Riccati parameter γ~
-      this%Axt = spin(conjg(this%Ax%matrix))
-      this%Ayt = spin(conjg(this%Ay%matrix))
-      this%Azt = spin(conjg(this%Az%matrix))
-      this%A2t = spin(conjg(this%A2%matrix))
+        ! Spin-orbit coupling terms in the equations for the Riccati parameter γ~
+        this%Axt = spin(conjg(this%Ax%matrix))
+        this%Ayt = spin(conjg(this%Ay%matrix))
+        this%Azt = spin(conjg(this%Az%matrix))
+        this%A2t = spin(conjg(this%A2%matrix))
+      end if
     end if
   end subroutine
 
   pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
     ! Calculate the spin-orbit coupling terms in the diffusion equation, and update the second derivatives of the Riccati parameters.
-    class(conductor), target, intent(in   ) :: this
-    type(spin),               intent(in   ) :: g, gt, dg, dgt
-    type(spin),               intent(inout) :: d2g, d2gt
-    type(spin)                              :: N,  Nt
+    class(conductor), intent(in   ) :: this
+    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    type(spin),       intent(inout) :: d2g, d2gt
+    type(spin)                      :: N,  Nt
 
     ! Rename the spin-orbit coupling matrices
     associate(Ax => this % Ax, Axt => this % Axt,&
@@ -537,11 +491,13 @@ contains
     end associate
   end subroutine
 
+
+
   !--------------------------------------------------------------------------------!
   !                   IMPLEMENTATION OF SPIN-ACTIVE INTERFACES                     !
   !--------------------------------------------------------------------------------!
 
-  ! TODO: These methods should be moved to a submodule when GFortran supports that.
+  ! TODO: These methods should be moved to a submodule when compilers support that.
 
   pure subroutine spinactive_update_prehook(this)
     ! Updates the internal variables associated with spin-active interfaces.
@@ -549,51 +505,67 @@ contains
     real(dp)                        :: Pr
 
     if (allocated(this % magnetization_a)) then
-      ! Rename the relevant variables
-      associate(G0 => this % conductance_a,   &
-                G1 => this % G1_a,            &
-                GM => this % GM_a,            &
-                GP => this % GP_a,            &
-                h  => this % magnetization_a, & 
-                P  => this % polarization_a,  &
-                Q  => this % phaseshift_a,    &
-                M  => this % M_a)
+      if (norm2(this % magnetization_a) < 1e-10) then
+        ! Deallocate negligible magnetizations
+        deallocate(this % magnetization_a)
+      else if (abs(norm2(this % magnetization_a) - 1) > 1e-10) then
+        ! Rescale the magnetization to a unit vector
+        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + 1e-16)
+      else
+        ! Rename the relevant variables
+        associate(G0 => this % conductance_a,   &
+                  GC => this % GC_a,            &
+                  GM => this % GM_a,            &
+                  GP => this % GP_a,            &
+                  h  => this % magnetization_a, & 
+                  P  => this % polarization_a,  &
+                  Q  => this % phaseshift_a,    &
+                  M  => this % M_a)
 
-      ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
-      M(1:2,1:2) = h(1) * pauli1 + h(2) * pauli2 + h(3) * pauli3
-      M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
+        ! Calculate the elements of the magnetization matrix diag(h·σ,h·σ*)
+        M(1:2,1:2) = h(1) * pauli1 + h(2) * pauli2 + h(3) * pauli3
+        M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
 
-      ! Calculate the conductances associated with the spin-active interface
-      Pr = sqrt(1 - P**2 + 1e-12)
-      GM = 0.25 * G0 * P/(1 + Pr)
-      GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
-      G1 = 0.25 * G0 * (1 - Pr)/(1 + Pr)
+        ! Calculate the conductances associated with the spin-active interface
+        Pr = sqrt(1 - P**2 + 1e-16)
+        GM = 0.25 * G0 * P/(1 + Pr)
+        GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
+        GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
 
-      end associate
+        end associate
+      end if
     end if
 
     if (allocated(this % magnetization_b)) then
-      ! Rename the relevant variables
-      associate(G0 => this % conductance_b,   &
-                G1 => this % G1_b,            &
-                GM => this % GM_b,            &
-                GP => this % GP_b,            &
-                h  => this % magnetization_b, & 
-                P  => this % polarization_b,  &
-                Q  => this % phaseshift_b,    &
-                M  => this % M_b)
+      if (norm2(this % magnetization_b) < 1e-10) then
+        ! Deallocate negligible magnetizations
+        deallocate(this % magnetization_b)
+      else if (abs(norm2(this % magnetization_b) - 1) > 1e-10) then
+        ! Rescale the magnetization to a unit vector
+        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + 1e-16)
+      else
+        ! Rename the relevant variables
+        associate(G0 => this % conductance_b,   &
+                  GC => this % GC_b,            &
+                  GM => this % GM_b,            &
+                  GP => this % GP_b,            &
+                  h  => this % magnetization_b, & 
+                  P  => this % polarization_b,  &
+                  Q  => this % phaseshift_b,    &
+                  M  => this % M_b)
 
-      ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
-      M(1:2,1:2) = h(1) * pauli1 + h(2) * pauli2 + h(3) * pauli3
-      M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
+        ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
+        M(1:2,1:2) = h(1) * pauli1 + h(2) * pauli2 + h(3) * pauli3
+        M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
 
-      ! Calculate the conductances associated with the spin-active interface
-      Pr = sqrt(1 - P**2 + 1e-12)
-      GM = 0.25 * G0 * P/(1 + Pr)
-      GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
-      G1 = 0.25 * G0 * (1 - Pr)/(1 + Pr)
+        ! Calculate the conductances associated with the spin-active interface
+        Pr = sqrt(1 - P**2 + 1e-16)
+        GM = 0.25 * G0 * P/(1 + Pr)
+        GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
+        GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
 
-      end associate
+        end associate
+      end if
     end if
   end subroutine
 
@@ -610,7 +582,7 @@ contains
     complex(dp)                             :: I(4,4)
 
     ! Rename the parameters that describe the spin-active properties
-    associate(GC => this % G1_a,&
+    associate(GC => this % GC_a,&
               GM => this % GM_a,&
               GP => this % GP_a,&
               M  => this % M_a)
@@ -668,7 +640,7 @@ contains
     complex(dp)                             :: I(4,4)
 
     ! Rename the parameters that describe the spin-active properties
-    associate(GC => this % G1_b,&
+    associate(GC => this % GC_b,&
               GM => this % GM_b,&
               GP => this % GP_b,&
               M  => this % M_b)
@@ -710,5 +682,66 @@ contains
 
     end associate
     end associate
+  end subroutine
+
+
+
+  !--------------------------------------------------------------------------------!
+  !                    IMPLEMENTATION OF INPUT/OUTPUT METHODS                      !
+  !--------------------------------------------------------------------------------!
+
+  pure subroutine conductor_save(this, backup)
+    ! Exports the state of the conductor to a matrix of Green's functions.
+    class(conductor),         intent(inout) :: this
+    type(green), allocatable, intent(inout) :: backup(:,:)
+
+    ! Make sure enough memory is allocated
+    if (allocated(backup)) then
+      if (size(this%greenr,1) /= size(backup,1) .or. size(this%greenr,2) /= size(backup,2)) then
+        deallocate(backup)
+        allocate(backup(ubound(this%greenr,1),ubound(this%greenr,2)))
+      end if
+    end if
+
+    ! Save the Green's functions to the object
+    backup = this % greenr
+  end subroutine
+
+  pure subroutine conductor_load(this, backup)
+    ! Imports the state of the conductor from a matrix of Green's functions.
+    class(conductor),         intent(inout) :: this
+    type(green), allocatable, intent(inout) :: backup(:,:)
+
+    ! Load the Green's functions from the object
+    this % greenr = backup
+  end subroutine
+
+  impure subroutine conductor_write_dos(this, unit, a, b)
+    ! Writes the density of states as a function of position and energy to a given output unit.
+    class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
+    integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
+    real(dp),           intent(in) :: a, b      ! Left and right end points of the material
+    integer                        :: n, m      ! Temporary loop variables
+
+    if (minval(this%energy) < -1e-16_dp) then
+      ! If we have data for both positive and negative energies, simply write out the data
+      do m=1,size(this%location)
+        do n=1,size(this%energy)
+          write(unit,*) a+(b-a)*this%location(m), this%energy(n), this%greenr(n,m)%get_dos()
+        end do
+        write(unit,*)
+      end do
+    else
+      ! If we only have data for positive energies, assume that the negative region is symmetric
+      do m=1,size(this%location)
+        do n=size(this%energy),1,-1
+          write(unit,*) a+(b-a)*this%location(m), -this%energy(n), this%greenr(n,m)%get_dos()
+        end do
+        do n=1,size(this%energy),+1
+          write(unit,*) a+(b-a)*this%location(m), +this%energy(n), this%greenr(n,m)%get_dos()
+        end do
+        write(unit,*)
+      end do
+    end if
   end subroutine
 end module

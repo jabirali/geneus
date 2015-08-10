@@ -4,7 +4,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-08-08
+! Updated: 2015-08-10
 
 module mod_hybrid
   use mod_system
@@ -24,16 +24,25 @@ contains
     ! therefore be used to assemble individual material layers to a multilayer hybrid structure.
     class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
     class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
-    real(dp),                 intent(in)    :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
-    real(dp),                 intent(in)    :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
+    real(dp),       optional, intent(in   ) :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
+    real(dp),       optional, intent(in   ) :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
     
     ! Update the internal material pointers
     material_a % material_b => material_b
     material_b % material_a => material_a
 
     ! Update the interface parameters
-    material_a % conductance_b = conductance_a
-    material_b % conductance_a = conductance_b
+    material_a % transparent_b = .false.
+    material_b % transparent_a = .false.
+
+    if (present(conductance_a)) then
+      material_a % conductance_b = conductance_a
+      if (present(conductance_b)) then
+        material_b % conductance_a = conductance_b
+      else
+        material_b % conductance_a = conductance_a
+      end if
+    end if
   end subroutine
 
   subroutine transparent(material_a, material_b)

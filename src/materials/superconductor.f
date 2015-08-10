@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-08-09
+! Updated: 2015-08-10
 
 module mod_superconductor
   use mod_conductor
@@ -26,8 +26,6 @@ module mod_superconductor
     procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
     procedure                :: get_gap             => superconductor_get_gap             ! Returns the superconducting order parameter at a given position
     procedure                :: get_gap_mean        => superconductor_get_gap_mean        ! Returns the superconducting order parameter averaged over the material
-    procedure                :: get_temperature     => superconductor_get_temperature     ! Returns the current temperature of the material
-    procedure                :: set_temperature     => superconductor_set_temperature     ! Updates the current temperature of the material
 
     ! These methods are used by internal subroutines
     final                    ::                        superconductor_destruct            ! Type destructor
@@ -43,7 +41,7 @@ contains
   !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
   !--------------------------------------------------------------------------------!
 
-  pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points, spinorbit) result(this)
+  pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
     real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
@@ -52,12 +50,10 @@ contains
     real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
-    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: conductor default)
     integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, &
-                                         points=points, spinorbit=spinorbit)
+    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then
@@ -165,50 +161,53 @@ contains
     ! Call the superclass posthook
     call this%conductor%update_posthook
 
-    ! Allocate workspace memory
-    allocate(gap_real(size(this%energy)))
-    allocate(gap_imag(size(this%energy)))
-    allocate(dgap_real(size(this%energy)))
-    allocate(dgap_imag(size(this%energy)))
+    ! Update the superconducting gap if the BCS coupling constant is set
+    if (this % coupling > 0) then
+      ! Allocate workspace memory
+      allocate(gap_real(size(this%energy)))
+      allocate(gap_imag(size(this%energy)))
+      allocate(dgap_real(size(this%energy)))
+      allocate(dgap_imag(size(this%energy)))
 
-    ! Calculate the mean superconducting order parameter
-    gap_diff = this%get_gap_mean()
+      ! Calculate the mean superconducting order parameter
+      gap_diff = this%get_gap_mean()
 
-    ! Iterate over the stored Green's functions
-    do n = 1,size(this%location)
-      do m = 1,size(this%energy)
-        ! Calculate the singlet component of the anomalous Green's function
-        singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_dp
+      ! Iterate over the stored Green's functions
+      do n = 1,size(this%location)
+        do m = 1,size(this%energy)
+          ! Calculate the singlet component of the anomalous Green's function
+          singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_dp
 
-        ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
-        gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
-        gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+          ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
+          gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+          gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+        end do
+
+        ! Create a PCHIP interpolation of the numerical results above
+        call dpchez(size(this%energy), this%energy, gap_real, dgap_real, .false., 0, 0, err)
+        call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
+
+        ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
+        this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
+                             dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
+                             kind=dp )
       end do
 
-      ! Create a PCHIP interpolation of the numerical results above
-      call dpchez(size(this%energy), this%energy, gap_real, dgap_real, .false., 0, 0, err)
-      call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
+      ! Calculate the difference in mean superconducting order parameter
+      gap_diff = this%get_gap_mean() - gap_diff
 
-      ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
-      this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
-                           dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
-                           kind=dp )
-    end do
+      ! Status information
+      if (this%information >= 0) then
+        write(stdout,'(4x,a,f8.6,a)') 'Gap change: ',abs(gap_diff),'                                        '
+        flush(stdout)
+      end if
 
-    ! Calculate the difference in mean superconducting order parameter
-    gap_diff = this%get_gap_mean() - gap_diff
-
-    ! Status information
-    if (this%information >= 0) then
-      write(stdout,'(4x,a,f8.6,a)') 'Gap change: ',abs(gap_diff),'                                        '
-      flush(stdout)
+      ! Deallocate workspace memory
+      deallocate(gap_real)
+      deallocate(gap_imag)
+      deallocate(dgap_real)
+      deallocate(dgap_imag)
     end if
-
-    ! Deallocate workspace memory
-    deallocate(gap_real)
-    deallocate(gap_imag)
-    deallocate(dgap_real)
-    deallocate(dgap_imag)
   end subroutine
 
   !--------------------------------------------------------------------------------!
@@ -251,20 +250,4 @@ contains
 
     gap = sum(this%gap)/max(1,size(this%gap)) 
   end function
-
-  pure function superconductor_get_temperature(this) result(temperature)
-    ! Returns the superconductor temperature.
-    class(superconductor), intent(in) :: this
-    real(dp)                          :: temperature
-
-    temperature = this%temperature
-  end function
-
-  pure subroutine superconductor_set_temperature(this, temperature)
-    ! Updates the superconductor temperature.
-    class(superconductor), intent(inout) :: this
-    real(dp),              intent(in   ) :: temperature
-
-    this%temperature = temperature
-  end subroutine
 end module

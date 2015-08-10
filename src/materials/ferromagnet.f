@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-08-09
+! Updated: 2015-08-10
 
 module mod_ferromagnet
   use mod_conductor
@@ -15,8 +15,8 @@ module mod_ferromagnet
     type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
   contains
     procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
-    procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Updates the magnetic exchange field terms h and ht
-    procedure                        :: get_exchange       => ferromagnet_get_exchange        ! Returns the magnetic exchange field at a given position
+    procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the Green's functions
+    procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the Green's functions
     final                            ::                       ferromagnet_destruct            ! Type destructor
   end type
 
@@ -30,7 +30,7 @@ contains
   !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
   !--------------------------------------------------------------------------------!
 
-  pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points, spinorbit) result(this)
+  pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor.
     type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
     real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
@@ -39,27 +39,21 @@ contains
     real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
-    type(spin),  intent(in), optional :: spinorbit(:) ! Spin-orbit coupling   (default: zero coupling)
     integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, &
-                                         points=points, spinorbit=spinorbit)
+    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
 
-    ! Deallocate existing memory (if necessary)
-    if (allocated(this%exchange)) then
-      deallocate(this%exchange)
-    end if
 
     ! Handle the exchange field argument
     if (present(exchange) .and. norm2(exchange) > 1e-10) then
-      ! Reallocate memory
-      allocate(this%exchange(3,size(this%conductor%location)))
-      allocate(this%h(size(this%conductor%location)))
-      allocate(this%ht(size(this%conductor%location)))
+      ! Allocate the exchange field array if necessary
+      if (.not. allocated(this%exchange)) then
+        allocate(this%exchange(3,size(this%location)))
+      end if
 
-      ! Initialize the exchange field
-      do n = 1,size(this%conductor%location)
+      ! Copy data from input array
+      do n = 1,size(this%location)
         this%exchange(:,n) = exchange
       end do
     end if
@@ -70,8 +64,11 @@ contains
     type(ferromagnet), intent(inout) :: this
 
     ! Deallocate memory (if necessary)
-    if(allocated(this%exchange)) then
+    if (allocated(this%exchange)) then
       deallocate(this%exchange)
+    end if
+
+    if (allocated(this%h)) then
       deallocate(this%h)
       deallocate(this%ht)
     end if
@@ -127,19 +124,31 @@ contains
     call this%conductor%update_prehook
 
     ! Rename the internal variables
-    associate(exchange => this % exchange, &
-              h        => this % h,        &
-              ht       => this % ht)
-
-    ! Update internal variables
     if (allocated(this%exchange)) then
-      do n = 1,ubound(exchange,2)
-        h(n)  = ((0.0_dp,-1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
-        ht(n) = ((0.0_dp,+1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
-      end do
-    end if
+      if (norm2(this%exchange) < 1e-10) then
+        ! Deallocate negligible fields
+        deallocate(this%exchange)
+      else
+        ! Allocate space for internal variables
+        if (.not. allocated(this%h)) then
+          allocate(this%h(size(this%location)))
+          allocate(this%ht(size(this%location)))
+        end if
 
-    end associate
+        ! Rename the internal variables
+        associate(exchange => this % exchange, &
+                  h        => this % h,        &
+                  ht       => this % ht)
+
+        ! Update the internal variables
+        do n = 1,size(exchange,2)
+          h(n)  = ((0.0_dp,-1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
+          ht(n) = ((0.0_dp,+1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
+        end do
+
+        end associate
+      end if
+    end if
 
     ! Modify the type string
     if (allocated(this%exchange)) then
@@ -158,26 +167,10 @@ contains
     end if
   end subroutine
 
-  !--------------------------------------------------------------------------------!
-  !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
-  !--------------------------------------------------------------------------------!
+  impure subroutine ferromagnet_update_posthook(this)
+    ! Code to execute after running the update method of a class(ferromagnet) object.
+    class(ferromagnet), intent(inout) :: this
 
-  pure function ferromagnet_get_exchange(this, location) result(h)
-    ! Returns the magnetic exchange field at the given location.
-    class(ferromagnet), intent(in) :: this
-    real(dp),           intent(in) :: location
-    real(dp)                       :: h(3)
-    integer                        :: n
-
-    ! Calculate the index corresponding to the given location
-    n = floor(location*(size(this%location)-1) + 1)
-
-    ! Extract the magnetic exchange field at that point
-    if (n <= 1) then
-      h = this%exchange(:,1)
-    else
-      h = this%exchange(:,n-1) + &
-          (this%exchange(:,n)-this%exchange(:,n-1))*(location-this%location(n-1))/(this%location(n)-this%location(n-1))
-    end if
-  end function
+    continue
+  end subroutine
 end module

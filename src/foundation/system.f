@@ -6,7 +6,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-08-09
+! Updated: 2015-08-10
 
 module mod_system
   use, intrinsic :: iso_fortran_env
@@ -47,7 +47,7 @@ module mod_system
 
   ! Define an interface for obtaining command line arguments
   interface option
-    module procedure option_logical, option_integer, option_real, option_string
+    module procedure option_logical, option_integer, option_real, option_reals, option_string
   end interface
 contains
   subroutine option_integer(variable, option)
@@ -57,7 +57,7 @@ contains
     integer,            intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
-    character(len= 20)                :: output
+    character(len= 22)                :: output
     integer                           :: n
     
     do n = 1,command_argument_count()
@@ -82,7 +82,7 @@ contains
     real(dp),           intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
-    character(len= 20)                :: output
+    character(len= 22)                :: output
     integer                           :: n
     
     do n = 1,command_argument_count()
@@ -100,6 +100,31 @@ contains
     write(*,'(a,a,f10.5)') ' :: ', output, variable
   end subroutine
 
+  subroutine option_reals(array, option)
+    ! Reads a command line option on the form option=value, where value is a real vector.
+    ! Note that 'variable' is only updated if the option is found, meaning that it should
+    ! should be initialized to a sensible default value before this subroutine is called.
+    real(dp),           intent(inout) :: array(3)
+    character(len= * ), intent(in   ) :: option
+    character(len=128)                :: string
+    character(len= 22)                :: output
+    integer                           :: n
+    
+    do n = 1,command_argument_count()
+      ! Iterate over all command line arguments
+      call get_command_argument(n,string)
+
+      ! If this is the argument we were looking for, update the output variable
+      if ( string(1:len(option)+1)  == option // '=' ) then
+        read( string(len(option)+2:len(string)), * ) array(:)
+      end if
+    end do
+
+    ! Write the results to standard out for verification purposes
+    output = option
+    write(*,'(a,a,f10.5,/,26x,f10.5,/,26x,f10.5)') ' :: ', output, array(:)
+  end subroutine
+
   subroutine option_logical(variable, option)
     ! Reads a command line option on the form option=value, where value is a boolean.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
@@ -107,7 +132,7 @@ contains
     logical,            intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
-    character(len= 20)                :: output
+    character(len= 22)                :: output
     integer                           :: n
     
     do n = 1,command_argument_count()

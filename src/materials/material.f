@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-29
-! Updated: 2015-08-08
+! Updated: 2015-08-10
 
 module mod_material
   use mod_green
@@ -51,7 +51,7 @@ module mod_material
 
   ! Interface declarations
   abstract interface
-    impure subroutine init(this, gap)
+    pure subroutine init(this, gap)
       ! This interface is used for the deferred procedure init.
       import material, dp
 
@@ -154,7 +154,7 @@ contains
         ! Calculate the complex energy (relative to the Thouless energy)
         e = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=dp)
 
-        ! Update the pointers used to evaluate boundary conditions
+        ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
           a = this%material_a%greenr(n,ubound(this%material_a%greenr,2))
         end if

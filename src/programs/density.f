@@ -6,7 +6,7 @@
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-08-05
-! Updated: 2015-08-08
+! Updated: 2015-08-10
 
 program density
   use mod_hybrid
@@ -32,7 +32,6 @@ program density
   integer                           :: points          = 150
   real(dp)                          :: scattering      = 0.01_dp
   real(dp)                          :: coupling        = 0.20_dp
-  real(dp)                          :: conductance     = 0.30_dp
   real(dp)                          :: phasediff       = 0.00_dp
   real(dp)                          :: phasestep       = 0.15_dp
 
@@ -109,8 +108,6 @@ program density
       n = n + 1
     end do
   end if
-
-
 
   !--------------------------------------------------------------------------------!
   !                             BOOTSTRAP PROCEDURE                                !
@@ -196,6 +193,11 @@ program density
 
     ! Update the counter
     n = n + 1
+
+    ! If this is the only material, stop after one iteration
+    if ( .not. selfconsistent .and. size(f) <= 1 ) then
+      exit
+    end if
   end do
 
   ! Status information
@@ -234,7 +236,6 @@ contains
 
     ! Determine the debug level
     call option(information, 'information')
-    print *
 
     ! Determine how many superconducting layers there are
     call option(superconductors, 'superconductors')
@@ -299,9 +300,6 @@ contains
     ! Determine the inelastic scattering rate
     call option(scattering, 'scattering')
 
-    ! Determine the interface conductance
-    call option(conductance, 'conductance')
-
     ! Determine the BCS coupling constant
     if (selfconsistent) then
       call option(coupling, 'coupling')
@@ -343,10 +341,25 @@ contains
 
     ! Obtain the command line values
     if (selfconsistent) then
-      print *
+      if (m == 1) then
+        print *
+        if (unicode) then
+          print *,'═══════════════════════════════════'
+        else
+          print *,'==================================='
+        end if
+      end if
       call option(gap,         trim(ioname) // '.gap')
       call option(length,      trim(ioname) // '.length')
       call option(temperature, trim(ioname) // '.temperature')
+      if (m == 2) then
+        if (unicode) then
+          print *,'═══════════════════════════════════'
+        else
+          print *,'==================================='
+        end if
+        print *
+      end if
     end if
 
     ! Construct the superconductor
@@ -365,7 +378,7 @@ contains
     end if
 
     ! Set the temperature
-    call s(m) % set_temperature(temperature)
+    s(m) % temperature = temperature
 
     ! Connect it to the previous material and determine the interface location
     if (m == 1) then
@@ -377,7 +390,7 @@ contains
       end if
     else
       connection(size(connection)) = connection(size(connection)-1) + length
-      call connect(f(size(f)), s(m), conductance, conductance)
+      call connect(f(size(f)), s(m))
     end if
 
     ! For non-selfconsistent calculations, assert that the material has converged
@@ -400,49 +413,99 @@ contains
     ! Declare the input variables
     character(len=8) :: ioname
     real(dp)         :: length     
-    real(dp)         :: exchange_x 
-    real(dp)         :: exchange_y 
-    real(dp)         :: exchange_z 
+    real(dp)         :: conductance_a
+    real(dp)         :: conductance_b
+    real(dp)         :: polarization_a
+    real(dp)         :: polarization_b
+    real(dp)         :: phaseshift_a
+    real(dp)         :: phaseshift_b
     real(dp)         :: spinorbit_a
     real(dp)         :: spinorbit_b
+    real(dp)         :: exchange(3)
+    real(dp)         :: magnetization_a(3)
+    real(dp)         :: magnetization_b(3)
     real(dp)         :: gap
 
     ! Set the default values
-    gap         = 1.00_dp
-    length      = 1.00_dp
-    exchange_x  = 0.00_dp
-    exchange_y  = 0.00_dp
-    exchange_z  = 0.00_dp
-    spinorbit_a = 0.00_dp
-    spinorbit_b = 0.00_dp
+    gap              = 1.00_dp
+    length           = 1.00_dp
+    exchange         = 0.00_dp
+    magnetization_a  = 0.00_dp
+    magnetization_b  = 0.00_dp
+    spinorbit_a      = 0.00_dp
+    spinorbit_b      = 0.00_dp
+    polarization_a   = 0.00_dp
+    polarization_b   = 0.00_dp
+    spinorbit_a      = 0.00_dp
+    spinorbit_b      = 0.00_dp
+    conductance_a    = 0.30_dp
+    conductance_b    = 0.30_dp
 
     ! Determine the ferromagnet name
     write(ioname, '(a,i0)') 'f', m
 
     ! Obtain the command line values
-    print *
-    call option(gap,         trim(ioname) // '.gap')
-    call option(length,      trim(ioname) // '.length')
-    call option(spinorbit_a, trim(ioname) // '.spinorbit.a')
-    call option(spinorbit_b, trim(ioname) // '.spinorbit.b')
-    call option(exchange_x,  trim(ioname) // '.exchange.x')
-    call option(exchange_y,  trim(ioname) // '.exchange.y')
-    call option(exchange_z,  trim(ioname) // '.exchange.z')
+    if (unicode) then
+      print *,'═══════════════════════════════════'
+    else
+      print *,'==================================='
+    end if
+    call option(conductance_a,         trim(ioname) // 'l.conductance')
+    call option(phaseshift_a,          trim(ioname) // 'l.phaseshift')
+    call option(polarization_a,        trim(ioname) // 'l.polarization')
+    call option(magnetization_a,       trim(ioname) // 'l.magnetization')
+    if (unicode) then
+      print *,'───────────────────────────────────'
+    else
+      print *,'-----------------------------------'
+    end if
+    call option(gap,                   trim(ioname) // '.gap')
+    call option(length,                trim(ioname) // '.length')
+    call option(spinorbit_a,           trim(ioname) // '.rashba')
+    call option(spinorbit_b,           trim(ioname) // '.dresselhaus')
+    call option(exchange,              trim(ioname) // '.exchange')
+    if (unicode) then
+      print *,'───────────────────────────────────'
+    else
+      print *,'-----------------------------------'
+    end if
+    call option(conductance_b,         trim(ioname) // 'r.conductance')
+    call option(phaseshift_b,          trim(ioname) // 'r.phaseshift')
+    call option(polarization_b,        trim(ioname) // 'r.polarization')
+    call option(magnetization_b,       trim(ioname) // 'r.magnetization')
+    if (m == ubound(f,1)) then
+      if (unicode) then
+        print *,'═══════════════════════════════════'
+      else
+        print *,'==================================='
+      end if
+    end if
 
     ! Construct the ferromagnet
-    f(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, points = points, &
-                       spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b),              &
-                       exchange  = [exchange_x, exchange_y, exchange_z])
+    f(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, points = points, exchange = exchange)
 
     ! Initialize it to a superconducting state
     call f(m) % init(gap = cmplx(gap,0,kind=dp))
 
     ! Connect it to the previous material
     if (m == 1) then
-      call connect(s(1),   f(m), conductance, conductance)
+      call connect(s(1),   f(m))
     else
-      call connect(f(m-1), f(m), conductance, conductance)
+      call connect(f(m-1), f(m))
     end if
+
+    ! Set the internal fields
+    f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
+
+    ! Set the interface parameters
+    f(m) % conductance_a   = conductance_a
+    f(m) % conductance_b   = conductance_b
+    f(m) % polarization_a  = polarization_a
+    f(m) % polarization_b  = polarization_b
+    f(m) % phaseshift_a    = phaseshift_a
+    f(m) % phaseshift_b    = phaseshift_b
+    f(m) % magnetization_a = magnetization_a
+    f(m) % magnetization_b = magnetization_b
 
     ! Determine the location of the interface
     connection(m+2) = connection(m+1) + length
