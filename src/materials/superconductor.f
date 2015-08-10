@@ -14,7 +14,7 @@ module mod_superconductor
     ! These parameters control the physical characteristics of the material 
     complex(dp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
     real(dp)                 :: temperature         =  1e-6_dp                            ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(dp)                 :: coupling                                                  ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    real(dp)                 :: coupling            =  0.20_dp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the Green's functions
@@ -70,8 +70,6 @@ contains
     ! Initialize the BCS coupling constant
     if (present(coupling)) then
       this%coupling = coupling
-    else
-      this%coupling = 0.20_dp
     end if
   end function
 

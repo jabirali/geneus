@@ -17,6 +17,7 @@ set cbrange [ 0.0:2.0]
 set xtics  -1.501,0.5,1.501
 set cbtics -10,1,10
 set ytics  -100,0.49999,100
+unset ytics
 
 set format x '%3.1f'
 set format y '%3.1f'
