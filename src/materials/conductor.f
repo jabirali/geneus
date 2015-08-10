@@ -508,10 +508,12 @@ contains
       if (norm2(this % magnetization_a) < 1e-10) then
         ! Deallocate negligible magnetizations
         deallocate(this % magnetization_a)
-      else if (abs(norm2(this % magnetization_a) - 1) > 1e-10) then
-        ! Rescale the magnetization to a unit vector
-        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + 1e-16)
       else
+        ! Rescale the magnetization to a unit vector
+        if (abs(norm2(this % magnetization_a) - 1) > 1e-10) then
+          this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + 1e-16)
+        end if
+
         ! Rename the relevant variables
         associate(G0 => this % conductance_a,   &
                   GC => this % GC_a,            &
@@ -540,10 +542,12 @@ contains
       if (norm2(this % magnetization_b) < 1e-10) then
         ! Deallocate negligible magnetizations
         deallocate(this % magnetization_b)
-      else if (abs(norm2(this % magnetization_b) - 1) > 1e-10) then
-        ! Rescale the magnetization to a unit vector
-        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + 1e-16)
       else
+        ! Rescale the magnetization to a unit vector
+        if (abs(norm2(this % magnetization_b) - 1) > 1e-10) then
+          this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + 1e-16)
+        end if
+
         ! Rename the relevant variables
         associate(G0 => this % conductance_b,   &
                   GC => this % GC_b,            &
