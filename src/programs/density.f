@@ -459,17 +459,17 @@ contains
     s(m) % temperature = temperature
 
     ! Set the internal fields
-    f(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
+    s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
 
     ! Set the interface parameters
-    f(m) % conductance_a   = conductance_a
-    f(m) % conductance_b   = conductance_b
-    f(m) % polarization_a  = polarization_a
-    f(m) % polarization_b  = polarization_b
-    f(m) % phaseshift_a    = phaseshift_a
-    f(m) % phaseshift_b    = phaseshift_b
-    f(m) % magnetization_a = magnetization_a
-    f(m) % magnetization_b = magnetization_b
+    s(m) % conductance_a   = conductance_a
+    s(m) % conductance_b   = conductance_b
+    s(m) % polarization_a  = polarization_a
+    s(m) % polarization_b  = polarization_b
+    s(m) % phaseshift_a    = phaseshift_a
+    s(m) % phaseshift_b    = phaseshift_b
+    s(m) % magnetization_a = magnetization_a
+    s(m) % magnetization_b = magnetization_b
 
     ! Connect it to the previous material and determine the interface location
     if (m == 1) then
