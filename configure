@@ -16,6 +16,7 @@ elif [ "$1" == "--windows" ]; then
 elif [ "$1" == "--fallback" ]; then
 	echo "Preparing for a compilation in FALLBACK mode."
 	echo
+  module load gcc/4.9.1
 	cmake -DCMAKE_BUILD_TYPE=Release -H. -Bbuild
 else
 	echo "Preparing for a compilation in RELEASE mode."
