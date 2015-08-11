@@ -23,4 +23,8 @@ function plot_density(filename)
     % Set the axis labels
     xlabel('Energy \epsilon/\Delta')
     ylabel('Position z/\xi')
+        
+    % Fix axis ticks
+    set(gca, 'XTickLabel', num2str(get(gca,'XTick')','%3.1f'))
+    set(gca, 'YTickLabel', num2str(get(gca,'YTick')','%3.1f'))
 end
