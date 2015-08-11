@@ -6,4 +6,4 @@ else
   filename="density.dat"
 fi
 
-cat ${filename} | awk -f $(dirname $0)/addblanks.awk | gnuplot5 $(dirname $0)/plot_density.plt
+cat ${filename} | awk -f $(dirname $0)/addblanks.awk | gnuplot $(dirname $0)/plot_density.plt
