@@ -59,9 +59,9 @@ endif()
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # Flags that apply to all files
-  set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -s")
-  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-march=x86-64 -Og -g -pg -fbacktrace")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-march=x86-64 -Ofast -flto -fno-stack-arrays -s")
+  set(CMAKE_EXE_LINKER_FLAGS      "-march=x86-64 -flto -fwhole-program -static")
 
   # Flags that apply to external files (imported from other projects)
   set_source_files_properties(${src_ext77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
