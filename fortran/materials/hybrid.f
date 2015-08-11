@@ -201,5 +201,8 @@ contains
     else
     write(*,'(a)') '+-----------------------------------+'
     end if
+
+    ! Flush the progress information to standard out
+    flush(unit=stdout)
   end subroutine
 end module

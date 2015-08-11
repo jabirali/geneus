@@ -8,20 +8,20 @@ fi
 if [ "$1" == "--debug" ]; then
 	echo "Preparing for a compilation in DEBUG mode." 
 	echo
-	cmake -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
+	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
 elif [ "$1" == "--windows" ]; then
 	echo "Preparing for a compilation in WINDOWS mode."
 	echo
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild
+	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild
 elif [ "$1" == "--fallback" ]; then
 	echo "Preparing for a compilation in FALLBACK mode."
 	echo
   module load gcc/4.9.1
-	cmake -DCMAKE_BUILD_TYPE=Release -H. -Bbuild
+	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -H. -Bbuild
 else
 	echo "Preparing for a compilation in RELEASE mode."
 	echo
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
+	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
 fi
 
 echo
