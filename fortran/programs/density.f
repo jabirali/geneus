@@ -576,10 +576,10 @@ contains
       else
         print *,'==================================='
       end if
-    end if
-    if (size(s) < 2) then
-      print *
-      print *
+      if (size(s) < 2) then
+        print *
+        print *
+      end if
     end if
 
     ! Construct the ferromagnet

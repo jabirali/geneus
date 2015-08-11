@@ -725,26 +725,27 @@ contains
     class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
     integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
     real(dp),           intent(in) :: a, b      ! Left and right end points of the material
+    real(dp)                       :: x         ! Current location
     integer                        :: n, m      ! Temporary loop variables
 
     if (minval(this%energy) < -1e-16_dp) then
       ! If we have data for both positive and negative energies, simply write out the data
       do m=1,size(this%location)
+        x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
         do n=1,size(this%energy)
-          write(unit,*) a+(b-a)*this%location(m), this%energy(n), this%greenr(n,m)%get_dos()
+          write(unit,*) x, this%energy(n), this%greenr(n,m)%get_dos()
         end do
-        write(unit,*)
       end do
     else
       ! If we only have data for positive energies, assume that the negative region is symmetric
       do m=1,size(this%location)
-        do n=size(this%energy),1,-1
-          write(unit,*) a+(b-a)*this%location(m), -this%energy(n), this%greenr(n,m)%get_dos()
+        x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
+        do n=size(this%energy),2,-1
+          write(unit,*) x, -this%energy(n), this%greenr(n,m)%get_dos()
         end do
         do n=1,size(this%energy),+1
-          write(unit,*) a+(b-a)*this%location(m), +this%energy(n), this%greenr(n,m)%get_dos()
+          write(unit,*) x, +this%energy(n), this%greenr(n,m)%get_dos()
         end do
-        write(unit,*)
       end do
     end if
   end subroutine

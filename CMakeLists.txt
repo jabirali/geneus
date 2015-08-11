@@ -23,10 +23,10 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
 
 # Source files
-file(GLOB src_ext77 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_la.f")
-file(GLOB src_ext90 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_m.f" "src/external/pchip.f")
-file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "src/foundation/*.f" "src/materials/*.f" "src/algorithms/*.f")
-file(GLOB src_exe   RELATIVE ${CMAKE_SOURCE_DIR} "src/programs/*.f")
+file(GLOB src_ext77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
+file(GLOB src_ext90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f")
+file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/foundation/*.f" "fortran/materials/*.f" "fortran/algorithms/*.f")
+file(GLOB src_exe   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/programs/*.f")
 
 # Libraries
 add_library(s4tran STATIC ${src_mod} ${src_ext90} ${src_ext77})
@@ -45,7 +45,7 @@ endforeach()
 ###############################################################################
 
 # Set the target directory
-set(EXECUTABLE_OUTPUT_PATH "../bin")
+set(EXECUTABLE_OUTPUT_PATH "../programs")
 
 # Set the build type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
