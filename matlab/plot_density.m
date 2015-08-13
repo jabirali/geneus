@@ -7,24 +7,30 @@ function plot_density(filename)
     A = load(filename);
     
     % Convert the data to a Matlab-compatible format
-    X = unique(A(:,1),'stable');
-    Y = unique(A(:,2),'stable');
-    Z = reshape(A(:,3), [length(Y),length(X)]);
+    X = unique(A(:,2),'stable');
+    Y = unique(A(:,1),'stable')-3.3;
+    Z = reshape(A(:,3), [length(X),length(Y)]);
     
     % Plot the data
-    surf(Y,X,Z','EdgeColor','None')
+    surf(X,Y,Z','EdgeColor','None')
     
     % Set the default viewer angle
     view(2)
     
     % Set the plot range
     xlim([-1.5,1.5])
+    ylim([min(Y)-1e-6,max(Y)+1e-6])
+    caxis([0 2])
 
     % Set the axis labels
     xlabel('Energy \epsilon/\Delta')
     ylabel('Position z/\xi')
+
+    % Create a colorbar
+    cca = colorbar;
         
     % Fix axis ticks
     set(gca, 'XTickLabel', num2str(get(gca,'XTick')','%3.1f'))
     set(gca, 'YTickLabel', num2str(get(gca,'YTick')','%3.1f'))
+    set(cca, 'YTickLabel', num2str(get(cca,'YTick')','%3.1f'))
 end
