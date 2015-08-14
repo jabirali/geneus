@@ -144,9 +144,10 @@ contains
   !                             INPUT/OUTPUT PROCEDURES                            !
   !--------------------------------------------------------------------------------!
 
-  subroutine print_status(header, iteration, change, phasediff, temperature)
+  subroutine print_status(header, bisection, iteration, change, phasediff, temperature)
     ! Prints a status message to stdout including iteration number, elapsed time, and physical parameters.
     character(*),       intent(in) :: header
+    integer,  optional, intent(in) :: bisection
     integer,  optional, intent(in) :: iteration
     real(dp), optional, intent(in) :: change
     real(dp), optional, intent(in) :: phasediff
@@ -174,6 +175,10 @@ contains
     write(*,'(a)') '| '         // string //          ' |'
     write(*,'(a)') '+-----------------------------------+'
     bar = '|'
+    end if
+    if (present(bisection)) then
+      write(*,'(a,3x,a,i8,3x,a)')                       &
+        trim(bar),'Bisection:           ', bisection,   trim(bar)
     end if
     if (present(iteration)) then
       write(*,'(a,3x,a,i8,3x,a)')                       &

@@ -5,7 +5,11 @@ if [ -e build ]; then
 	rm -r build
 fi
 
-if [ "$1" == "--debug" ]; then
+if [ "$1" == "" -o "$1" == "--release" ]; then
+	echo "Preparing for a compilation in RELEASE mode."
+	echo
+	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
+elif [ "$1" == "--debug" ]; then
 	echo "Preparing for a compilation in DEBUG mode." 
 	echo
 	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
@@ -18,9 +22,13 @@ elif [ "$1" == "--fallback" ]; then
 	echo
 	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -H. -Bbuild
 else
-	echo "Preparing for a compilation in RELEASE mode."
-	echo
-	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
+  echo
+  echo "Usage:"
+  echo " $0             # Build in RELEASE mode"
+  echo " $0 --release   # Build in RELEASE mode"
+  echo " $0 --windows   # Build in WINDOWS mode"
+  echo " $0 --debug     # Build in  DEBUG  mode"
+  exit 1
 fi
 
 echo

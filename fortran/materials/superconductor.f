@@ -196,7 +196,7 @@ contains
 
       ! Status information
       if (this%information >= 0) then
-        write(stdout,'(4x,a,f8.6,a)') 'Gap change: ',abs(gap_diff),'                                        '
+        write(stdout,'(4x,a,f10.8,a)') 'Gap change: ',abs(gap_diff),'                                        '
         flush(stdout)
       end if
 

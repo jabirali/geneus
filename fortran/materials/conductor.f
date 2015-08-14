@@ -4,7 +4,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-08-10
+! Updated: 2015-08-14
 
 module mod_conductor
   use mod_material
@@ -62,11 +62,6 @@ module mod_conductor
     ! These methods contain the equations that describe spin-active interfaces
     procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms)
     procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms)
-
-    ! These methods define miscellaneous utility functions
-    procedure                 :: save                    => conductor_save                    ! Saves the state of the conductor to a different object
-    procedure                 :: load                    => conductor_load                    ! Loads the state of the conductor from a different object
-    procedure                 :: write_dos               => conductor_write_dos               ! Writes the density of states to a given output unit
 
     ! These methods are used by internal subroutines 
     final                     ::                            conductor_destruct                ! Type destructor
@@ -686,67 +681,5 @@ contains
 
     end associate
     end associate
-  end subroutine
-
-
-
-  !--------------------------------------------------------------------------------!
-  !                    IMPLEMENTATION OF INPUT/OUTPUT METHODS                      !
-  !--------------------------------------------------------------------------------!
-
-  pure subroutine conductor_save(this, backup)
-    ! Exports the state of the conductor to a matrix of Green's functions.
-    class(conductor),         intent(inout) :: this
-    type(green), allocatable, intent(inout) :: backup(:,:)
-
-    ! Make sure enough memory is allocated
-    if (allocated(backup)) then
-      if (size(this%greenr,1) /= size(backup,1) .or. size(this%greenr,2) /= size(backup,2)) then
-        deallocate(backup)
-        allocate(backup(ubound(this%greenr,1),ubound(this%greenr,2)))
-      end if
-    end if
-
-    ! Save the Green's functions to the object
-    backup = this % greenr
-  end subroutine
-
-  pure subroutine conductor_load(this, backup)
-    ! Imports the state of the conductor from a matrix of Green's functions.
-    class(conductor),         intent(inout) :: this
-    type(green), allocatable, intent(inout) :: backup(:,:)
-
-    ! Load the Green's functions from the object
-    this % greenr = backup
-  end subroutine
-
-  impure subroutine conductor_write_dos(this, unit, a, b)
-    ! Writes the density of states as a function of position and energy to a given output unit.
-    class(conductor),   intent(in) :: this      ! Material that the density of states will be calculated from
-    integer,            intent(in) :: unit      ! Output unit that determines where the information will be written
-    real(dp),           intent(in) :: a, b      ! Left and right end points of the material
-    real(dp)                       :: x         ! Current location
-    integer                        :: n, m      ! Temporary loop variables
-
-    if (minval(this%energy) < -1e-16_dp) then
-      ! If we have data for both positive and negative energies, simply write out the data
-      do m=1,size(this%location)
-        x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
-        do n=1,size(this%energy)
-          write(unit,*) x, this%energy(n), this%greenr(n,m)%get_dos()
-        end do
-      end do
-    else
-      ! If we only have data for positive energies, assume that the negative region is symmetric
-      do m=1,size(this%location)
-        x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
-        do n=size(this%energy),2,-1
-          write(unit,*) x, -this%energy(n), this%greenr(n,m)%get_dos()
-        end do
-        do n=1,size(this%energy),+1
-          write(unit,*) x, +this%energy(n), this%greenr(n,m)%get_dos()
-        end do
-      end do
-    end if
   end subroutine
 end module
