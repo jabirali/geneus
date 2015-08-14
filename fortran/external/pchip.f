@@ -4130,7 +4130,7 @@ SUBROUTINE DPCHFE ( N, X, F, D, INCFD, SKIP, NE, XE, FE, IERR )
 
   end if
 
-  skip = .true.
+!  skip = .true.
 !
 !  FUNCTION DEFINITION IS OK, GO ON.
 !

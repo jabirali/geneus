@@ -62,6 +62,95 @@ contains
 
 
   !--------------------------------------------------------------------------------!
+  !               PROCEDURES FOR CALCULATING MULTILAYER INTERACTIONS               !
+  !--------------------------------------------------------------------------------!
+
+  function differential_conductance(material_a, material_b, voltage, temperature) result(conductance)
+    ! Numerically calculates the differential conductance at a tunneling interface.
+    class(material), intent(in) :: material_a
+    class(material), intent(in) :: material_b
+    real(dp),        intent(in) :: temperature
+    real(dp),        intent(in) :: voltage(:)
+    real(dp),       allocatable :: conductance(:)
+    real(dp),       allocatable :: current(:)
+    real(dp),       allocatable :: energy(:)
+    real(dp),       allocatable :: dos_a(:), ddos_a(:), idos_a(:)
+    real(dp),       allocatable :: dos_b(:), ddos_b(:), idos_b(:)
+    integer                     :: n, m, err
+
+    ! Allocate memory
+    allocate(conductance(size(voltage)))
+    allocate(current(size(voltage)))
+    allocate(energy(1024))
+
+    allocate(dos_a(size(material_a%energy)))
+    allocate(dos_b(size(material_b%energy)))
+    allocate(ddos_a(size(material_a%energy)))
+    allocate(ddos_b(size(material_b%energy)))
+    allocate(idos_a(size(energy)))
+    allocate(idos_b(size(energy)))
+
+    ! Initialize the energy array
+    call energy_range(energy)
+
+    ! Calculate the density of states at the interface
+    do n = 1,size(material_a%energy)
+      dos_a(n) = material_a % greenr(n,ubound(material_a%location,1)) % get_dos()
+      dos_b(n) = material_b % greenr(n,lbound(material_b%location,1)) % get_dos()
+    end do
+
+    ! Create a PCHIP interpolation of the numerical results above
+    call dpchez(size(material_a%energy), material_a%energy, dos_a, ddos_a, .false., 0, 0, err)
+    call dpchez(size(material_b%energy), material_b%energy, dos_b, ddos_b, .false., 0, 0, err)
+
+    ! Extract the interpolated density of states in the left material
+    call dpchfe(size(material_a%energy), material_a%energy, dos_a, ddos_a, 1, .false., size(energy), energy, idos_a, err)
+
+    ! Calculate the current as a function of voltage by numerical integration
+    do n = 1,size(voltage)
+      ! Extract the voltage-shifted density of states in the right material
+      call dpchfe(size(material_b%energy), material_b%energy, dos_b, ddos_b, 1, .false., &
+                  size(energy), abs(energy-voltage(n)), idos_b, err)
+
+      ! Calculate the current for this voltage
+      current(n) = 0.0_dp
+      do m = 1,size(energy)
+        current(n) = current(n) + idos_a(m)*idos_b(m)*(fermi(energy(m)-voltage(n))-fermi(energy(m))) &
+                                * (maxval(energy)-minval(energy))/(size(energy)-1)
+      end do
+    end do
+
+    ! Calculate the differential conductance by numerical differentiation (interior points)
+    do n = 2,size(voltage)-1
+      conductance(n) = (current(n+1)-current(n-1))/(voltage(n+1)-voltage(n-1))
+    end do
+
+    ! Calculate the differential conductance by numerical extrapolation (exterior points)
+    conductance(lbound(voltage,1)) = 2*conductance(lbound(voltage,1)+1) - conductance(lbound(voltage,1)+2)
+    conductance(ubound(voltage,1)) = 2*conductance(ubound(voltage,1)-1) - conductance(ubound(voltage,1)-2)
+
+   ! Deallocate workspace memory
+   deallocate(current)
+   deallocate(energy)
+   deallocate(dos_a)
+   deallocate(dos_b)
+   deallocate(ddos_a)
+   deallocate(ddos_b)
+   deallocate(idos_a)
+   deallocate(idos_b)
+  contains
+    pure function fermi(energy)
+      ! Evaluates the Fermi function at the given energy and current temperature.
+      real(dp), intent(in) :: energy
+      real(dp)             :: fermi
+
+      fermi = 1/(exp(energy/(temperature+1e-16))+1)
+    end function
+  end function
+
+
+
+  !--------------------------------------------------------------------------------!
   !              PROCEDURES FOR CLASS(CONDUCTOR) CONSTRUCTOR ARGUMENTS             !
   !--------------------------------------------------------------------------------!
 

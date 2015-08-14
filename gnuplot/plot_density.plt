@@ -32,6 +32,3 @@ splot '/dev/stdin' using 2:1:3 notitle
 
 # Wait for a mouse click
 pause mouse
-
-# Rerun the file
-reread

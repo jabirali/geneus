@@ -22,12 +22,13 @@ program density
   type(ferromagnet),    allocatable :: f(:)            ! Ferromagnetic layers
 
   ! Declare global parameters that can be modified at runtime
-  character(len=32)                 :: filename        = 'density.dat'
+  character(len=32)                 :: filename        = 'result'
   integer                           :: information     = 0
   logical                           :: selfconsistent  = .false.
   logical                           :: reservoirs      = .false.
   integer                           :: superconductors = 1
   integer                           :: ferromagnets    = 1
+  integer                           :: voltages        = 150
   integer                           :: energies        = 150
   integer                           :: points          = 150
   real(dp)                          :: scattering      = 0.01_dp
@@ -37,8 +38,10 @@ program density
   real(dp)                          :: temperature     = 0.00_dp
 
   ! Declare the variables used by the program
-  integer                           :: output
+  integer                           :: output_density
+  integer                           :: output_conduct
   real(dp),             allocatable :: energy_array(:)
+  real(dp),             allocatable :: voltage_array(:)
   real(dp),             allocatable :: connection(:)
   integer                           :: n, m
 
@@ -57,6 +60,9 @@ program density
   else
     call energy_range(energy_array)
   end if
+
+  ! Initialize the voltage array
+  voltage_array = [ ((1.5_dp*(n-1)/size(voltage_array)), n=1,size(voltage_array)) ]
 
   ! Construct the left superconducting layer
   call superconductor_io(s, 1)
@@ -81,7 +87,7 @@ program density
   !--------------------------------------------------------------------------------!
 
   ! Write the initial density of states to file
-  call write_result(output)
+  call write_density(output_density)
 
   ! Initialize the ferromagnets
   if (size(f) > 1) then
@@ -103,7 +109,7 @@ program density
       end if
 
       ! Write the density of states to file
-      call write_result(output)
+      call write_density(output_density)
 
       ! Update counter
       n = n + 1
@@ -155,7 +161,7 @@ program density
         end if
 
         ! Write the density of states to file
-        call write_result(output)
+        call write_density(output_density)
       end do
     end block
   end if
@@ -190,7 +196,10 @@ program density
     end if
 
     ! Write the density of states to file
-    call write_result(output)
+    call write_density(output_density)
+
+    ! Write the differential conductance to file
+    call write_conductance(output_conduct)
 
     ! Update the counter
     n = n + 1
@@ -210,9 +219,11 @@ program density
   !--------------------------------------------------------------------------------!
 
   ! Close the output file
-  close(unit=output)
+  close(unit=output_density)
+  close(unit=output_conduct)
 
   ! Deallocate memory
+  deallocate(voltage_array)
   deallocate(connection)
   deallocate(f)
   deallocate(s)
@@ -233,7 +244,8 @@ contains
 
     ! Determine the output file
     call option(filename, 'filename')
-    open(newunit=output, file=filename)
+    open(newunit=output_density, file=(trim(filename) // '.density.dat'))
+    open(newunit=output_conduct, file=(trim(filename) // '.conduct.dat'))
 
     ! Determine the debug level
     call option(information, 'information')
@@ -302,6 +314,14 @@ contains
       end if
     end if
     allocate(energy_array(energies))
+
+    call option(voltages, 'voltages')
+    if (voltages < 2) then
+      print *
+      print *,'Error: minimum two voltages required for the calculations!'
+      stop
+    end if
+    allocate(voltage_array(voltages))
 
     ! Determine the internal position mesh size
     call option(points, 'points')
@@ -382,14 +402,12 @@ contains
     length           = 1.00_dp
     magnetization_a  = 0.00_dp
     magnetization_b  = 0.00_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
     polarization_a   = 0.00_dp
     polarization_b   = 0.00_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
     conductance_a    = 0.30_dp
     conductance_b    = 0.30_dp
+    spinorbit_a      = 0.00_dp
+    spinorbit_b      = 0.00_dp
 
     ! Determine the superconductor name
     write(ioname, '(a,i0)') 's', m
@@ -474,11 +492,7 @@ contains
     ! Connect it to the previous material and determine the interface location
     if (m == 1) then
       connection(1) = 0.0_dp
-      if (selfconsistent) then
-        connection(2) = length
-      else
-        connection(2) = connection(1)
-      end if
+      connection(2) = length
     else
       connection(size(connection)) = connection(size(connection)-1) + length
       call connect(f(size(f)), s(m))
@@ -527,8 +541,6 @@ contains
     gap              = 1.00_dp
     length           = 1.00_dp
     exchange         = 0.00_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
     conductance_a    = 0.30_dp
     conductance_b    = 0.30_dp
     magnetization_a  = 0.00_dp
@@ -622,7 +634,7 @@ contains
   !                              OUTPUT PROCEDURES                                 !
   !--------------------------------------------------------------------------------!
 
-  subroutine write_result(output)
+  subroutine write_density(output)
     ! Saves the density of states as a function of position and energy to a file.
     integer, intent(in) :: output
     integer             :: n
@@ -630,22 +642,47 @@ contains
     ! Go to the start of the file
     rewind(unit=output)
 
-    ! Write out the superconductor data in self-consistent calculations
-    if (selfconsistent) then
-      call s(1) % write_dos(output, connection(1), connection(2))
-    end if
+    ! Write out the superconductor data (left)
+    call s(1) % write_dos(output, connection(1), connection(2))
 
-    ! Write out the ferromagnet data in all calculations
+    ! Write out the ferromagnet data (all)
     do m = 1,size(f)
       call f(m) % write_dos(output, connection(m+1), connection(m+2))
     end do
-
-    ! Write out the superconductor data in self-consistent calculations
-    if (selfconsistent .and. size(s) > 1) then
+ 
+    ! Write out the superconductor data (right)
+    if (size(s) > 1) then
       call s(2) % write_dos(output, connection(size(connection)-1), connection(size(connection)))
     end if
 
     ! Flush the changes to file immediately
     flush(unit=output)
+  end subroutine
+
+  subroutine write_conductance(output)
+    ! Saves the tunneling current at the first interface as a function of voltage to a file.
+    integer,   intent(in) :: output
+    real(dp), allocatable :: conductance(:)
+    integer               :: n
+
+    ! Go to the start of the file
+    rewind(unit=output)
+
+    ! Calculate the differential conductance
+    conductance = differential_conductance(s(1), f(1), voltage_array, s(1)%temperature)
+
+    ! Write the results to file
+    do n=size(voltage_array),2,-1
+      write(output,*) -voltage_array(n), conductance(n)
+    end do
+    do n=1,size(voltage_array),+1
+      write(output,*) +voltage_array(n), conductance(n)
+    end do
+
+    ! Flush the changes to file immediately
+    flush(unit=output)
+
+    ! Deallocate the result array
+    deallocate(conductance)
   end subroutine
 end program
