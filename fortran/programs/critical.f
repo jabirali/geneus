@@ -29,7 +29,7 @@ program critical
   integer                           :: points       = 150
   real(dp)                          :: scattering   = 0.01_dp
   real(dp)                          :: coupling     = 0.20_dp
-  real(dp)                          :: initgap      = 1e-4_dp
+  real(dp)                          :: initgap      = 1e-5_dp
   real(dp)                          :: minimum      = 0.00_dp
   real(dp)                          :: maximum      = 1.00_dp
 
