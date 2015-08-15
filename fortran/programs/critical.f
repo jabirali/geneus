@@ -17,7 +17,8 @@ program critical
   ! Declare the materials in the hybrid structure
   type(superconductor), allocatable :: s(:)                ! Superconducting layer
   type(ferromagnet),    allocatable :: f(:)                ! Ferromagnetic layers
-  type(ferromagnet),    allocatable :: b(:)                ! Ferromagnetic backups
+  type(superconductor), allocatable :: sb(:)               ! Superconducting backups
+  type(ferromagnet),    allocatable :: fb(:)               ! Ferromagnetic backups
 
   ! Declare global parameters that can be modified at runtime
   integer                           :: information  = 0
@@ -65,10 +66,14 @@ program critical
   !                          INITIALIZATION PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
-  ! Initialize the ferromagnets at zero temperature
+  ! Initialize the materials at zero temperature
   if (size(f) > 0) then
+    ! Disable gap updates for the superconductor
+    s(1) % coupling = 0.0_dp
+
+    ! Loop until convergence for a fixed gap and zero temperature
     n = 0
-    do while (maxval(f%difference) > 1e-4)
+    do while (max(maxval(s%difference/s%tolerance),maxval(f%difference/f%tolerance)) > 10)
       ! Status information
       call print_status('         INITIALIZATION', bisection=0, iteration=n, change = maxval(f%difference), temperature = 0.0_dp)
 
@@ -84,18 +89,21 @@ program critical
         end do
       end if
 
-      ! Break the loop if this is the only ferromagnet
-      if (size(f) == 1) then
-        exit
-      end if
+      ! Update the state of the superconductor
+      call s(1) % update
 
       ! Update counter
       n = n + 1
     end do
 
-    ! Save the current state of the ferromagnets
+    ! Reenable gap updates
+    s(1) % coupling = coupling
+
+    ! Save the current state of the materials
+    sb(1) % gap = s(1) % gap
+    call s(1) % save(sb(1))
     do n=1,size(f)
-      call f(n) % save(b(n))
+      call f(n) % save(fb(n))
     end do
   end if
 
@@ -111,14 +119,15 @@ program critical
     ! Status information
     call print_status('           CONVERGENCE', bisection=n, iteration=0, temperature = s(1)%temperature)
 
-    ! Reset the superconductor state
-    call s(1) % init( gap = cmplx(initgap,0,kind=dp) )
-
-    ! Load the ferromagnet states from backup
+    ! Load the states from backup
     if (size(f) > 0) then
+      s(1) % gap = sb(1) % gap
+      call s(1) % load(sb(1))
       do m = 1,size(f)
-        call f(m) % load(b(m))
+        call f(m) % load(fb(m))
       end do
+    else
+      call s(1) % init( gap = cmplx(initgap,0,kind=dp) )
     end if
 
     ! Update the superconductor once
@@ -169,7 +178,8 @@ program critical
   ! Deallocate memory
   deallocate(s)
   deallocate(f)
-  deallocate(b)
+  deallocate(sb)
+  deallocate(fb)
 contains
 
   !--------------------------------------------------------------------------------!
@@ -192,6 +202,7 @@ contains
 
     ! Allocate memory for the superconducting layer
     allocate(s(1))
+    allocate(sb(1))
 
     ! Determine the number of iterations of the binary search
     call option(bisections, 'bisections')
@@ -217,7 +228,7 @@ contains
       stop
     else 
       allocate(f(ferromagnets))
-      allocate(b(ferromagnets))
+      allocate(fb(ferromagnets))
     end if
 
     ! Determine the number of energies to use
@@ -357,8 +368,12 @@ contains
     end if
 
     ! Construct the superconductor
-    s(m) = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
+    s(m)  = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
                           points = points, coupling = coupling, gap = cmplx(initgap,0,kind=dp))
+
+    ! Construct the backup
+    sb(m) = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
+                           points = points, coupling = coupling, gap = cmplx(initgap,0,kind=dp))
     
     ! Set the internal fields
     s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
@@ -462,8 +477,12 @@ contains
     end if
 
     ! Construct the ferromagnet
-    f(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                       points = points, gap = cmplx(initgap,0,kind=dp), exchange = exchange)
+    f(m)  = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
+                        points = points, gap = cmplx(initgap,0,kind=dp), exchange = exchange)
+
+    ! Construct the backup
+    fb(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
+                        points = points, gap = cmplx(initgap,0,kind=dp), exchange = exchange)
 
     ! Set the internal fields
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)

@@ -12,7 +12,7 @@ set xtics -1.501,0.5,1.501
 set ytics -10,1,10
 
 set xrange [-1.501:1.501]
-set yrange [ 0.0:4.0]
+#set yrange [ 0.0:4.0]
 
 set format x '%3.1f'
 set format y '%3.1f'

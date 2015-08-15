@@ -81,7 +81,7 @@ contains
     ! Allocate memory
     allocate(conductance(size(voltage)))
     allocate(current(size(voltage)))
-    allocate(energy(1024))
+    allocate(energy(2*size(voltage)))
 
     allocate(dos_a(size(material_a%energy)))
     allocate(dos_b(size(material_b%energy)))
