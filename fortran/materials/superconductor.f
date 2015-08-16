@@ -186,8 +186,8 @@ contains
         call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
 
         ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
-        this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
-                             dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 0.0_dp, cosh(1.0_dp/this%coupling), err), &
+        this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 1e-6_dp, cosh(1.0_dp/this%coupling), err),&
+                             dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 1e-6_dp, cosh(1.0_dp/this%coupling), err),&
                              kind=dp )
       end do
 

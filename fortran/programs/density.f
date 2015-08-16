@@ -672,7 +672,7 @@ contains
     conductance = differential_conductance(s(1), f(1), voltage_array, s(1)%temperature)
 
     ! Write the results to file
-    do n=size(voltage_array),2,-1
+    do n=size(voltage_array),1,-1
       write(output,*) -voltage_array(n), conductance(n)
     end do
     do n=1,size(voltage_array),+1

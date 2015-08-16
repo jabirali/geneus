@@ -168,20 +168,20 @@ contains
     if (present(coupling) .and. size(array) >= 600) then
       ! Positive energies from 0.0 to 1.5
       do n = 1,size(array)-300
-        array(n) = (n-1) * (1.5_dp/(size(array)-300))
+        array(n) = 1e-6_dp + (n-1) * (1.5_dp/(size(array)-300))
       end do
       ! Positive energies from 1.5 to 4.5
       do n = 1,200
-        array(size(array)-300+n) = 1.5_dp + (n-1) * (3.0_dp/200)
+        array(size(array)-300+n) = 1e-6_dp + 1.5_dp + (n-1) * (3.0_dp/200)
       end do
       ! Positive energies from 1.5 to cutoff
       do n = 1,100
-        array(size(array)-100+n) = 4.5_dp + n * (cosh(1.0_dp/coupling)-4.5)/100
+        array(size(array)-100+n) = 1e-6_dp + 4.5_dp + n * (cosh(1.0_dp/coupling)-4.5)/100
       end do
     else
       ! Positive energies from 0.0 to 1.5
       do n = 1,size(array)
-        array(n) = (n-1) * (1.5_dp/(size(array)-1))
+        array(n) = 1e-6 + (n-1) * (1.5_dp/(size(array)-1))
       end do
     end if
   end subroutine

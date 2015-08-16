@@ -324,7 +324,7 @@ contains
       ! If we only have data for positive energies, assume that the negative region is symmetric
       do m=1,size(this%location)
         x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
-        do n=size(this%energy),2,-1
+        do n=size(this%energy),1,-1
           write(unit,*) x, -this%energy(n), this%greenr(n,m)%get_dos()
         end do
         do n=1,size(this%energy),+1
