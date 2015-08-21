@@ -168,9 +168,14 @@ contains
         ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
           a = this%material_a%greenr(n,ubound(this%material_a%greenr,2))
+        else
+          a = green0
         end if
+
         if (associated(this%material_b)) then
           b = this%material_b%greenr(n,lbound(this%material_b%greenr,2))
+        else
+          b = green0
         end if
 
         ! Initialize bvp_solver

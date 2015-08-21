@@ -272,13 +272,16 @@ contains
 
     ! Determine how many ferromagnetic layers there are
     call option(ferromagnets, 'ferromagnets')
-    if (ferromagnets <= 0) then
+    if (ferromagnets < 0) then
       print *
-      print *,'Error: there should be minimum one ferromagnetic layer in the structure!'
+      print *,'Error: the number of ferromagnetic layers should be zero or a positive number!'
       stop
     else
       allocate(f(ferromagnets))
       allocate(connection(superconductors+ferromagnets+1))
+      if (ferromagnets == 0) then
+        selfconsistent = .true.
+      end if
     end if
 
     ! Determine whether to perform a selfconsistent calculation
@@ -665,24 +668,26 @@ contains
     real(dp), allocatable :: conductance(:)
     integer               :: n
 
-    ! Go to the start of the file
-    rewind(unit=output)
+    if (size(f) > 0) then
+      ! Go to the start of the file
+      rewind(unit=output)
 
-    ! Calculate the differential conductance
-    conductance = differential_conductance(s(1), f(1), voltage_array, s(1)%temperature)
+      ! Calculate the differential conductance
+      conductance = differential_conductance(s(1), f(1), voltage_array, s(1)%temperature)
 
-    ! Write the results to file
-    do n=size(voltage_array),1,-1
-      write(output,*) -voltage_array(n), conductance(n)
-    end do
-    do n=1,size(voltage_array),+1
-      write(output,*) +voltage_array(n), conductance(n)
-    end do
+      ! Write the results to file
+      do n=size(voltage_array),1,-1
+        write(output,*) -voltage_array(n), conductance(n)
+      end do
+      do n=1,size(voltage_array),+1
+        write(output,*) +voltage_array(n), conductance(n)
+      end do
 
-    ! Flush the changes to file immediately
-    flush(unit=output)
+      ! Flush the changes to file immediately
+      flush(unit=output)
 
-    ! Deallocate the result array
-    deallocate(conductance)
+      ! Deallocate the result array
+      deallocate(conductance)
+    end if
   end subroutine
 end program
