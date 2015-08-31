@@ -17,8 +17,8 @@ function diffcond_plot(transmission, polarization, phaseshift, scattering, tempe
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
   % Parameters to use in calculations
-  voltage = linspace(-3,+3,200);
-  energy  = linspace(-6,+6,400);
+  voltage = linspace(-05,+05,300);
+  energy  = linspace(-10,+10,600);
 
   % Spin-dependent transmission probabilities
   D_up = transmission * (1+polarization);
@@ -105,8 +105,12 @@ function diffcond_plot(transmission, polarization, phaseshift, scattering, tempe
   plot((voltage(1:end-1)+voltage(2:end))/2, diffcond);
   xlabel('Voltage eV/\Delta_0');
   ylabel('Differential conductance R·dI/dV');
-  legend(strtrim(cellstr(strcat('T=',num2str(temperature')))))
-  axis([min(voltage) max(voltage) min(0,min(diffcond)) 4]);
+  if (length(temperature) <= 20)
+    legend(strtrim(cellstr(strcat('T=',num2str(temperature')))));
+  end
+  axis([min(voltage) max(voltage) min([0 min(diffcond)]) max([2 ceil(max(diffcond))])]);
+  set(gca,'XTick',linspace(-10,10,21));
+  set(gca,'YTick',linspace(-10,10,21));
 
   % Plot the differential conductance (gradient)
   figure;
@@ -117,5 +121,6 @@ function diffcond_plot(transmission, polarization, phaseshift, scattering, tempe
   ylabel('Temperature T/T_c');
   caxis([0 2]);
   set(hcb,'YTick',[0,1,2]);
+  set(gca,'XTick',linspace(-5,5,11));
   colormap(parula(256));
 end
