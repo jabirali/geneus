@@ -1,10 +1,9 @@
-function diffcond_plot(transmission, polarization, phaseshift, temperature)
+function diffcond_plot(transmission, polarization, phaseshift, scattering, temperature)
   % Calculates and plots the differential conductance as function of voltage for
   % a ballistic superconductor/normal-metal bilayer with a spin-active tunneling
   % interface. The temperature, transmission probability, spin-polarization, and
-  % spin-dependent phase shifts at the interface must be specified as arguments.
-  % The temperature is normalized to the superconductor critical temperature Tc,
-  % and the spin-dependent interfacial phaseshift is normalized to pi.
+  % temperature must be specified as arguments. The temperature is normalized to
+  % the superconducting critical temperature Tc.
 
 
 
@@ -12,9 +11,10 @@ function diffcond_plot(transmission, polarization, phaseshift, temperature)
   %                      PREPARATIONS FOR THE CALCULATIONS                     %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
-  % Voltages and energies to use in calculations
+  % Parameters to use in calculations
   voltage = linspace(-3,+3,200);
   energy  = linspace(-6,+6,400);
+  %angle   = linspace(0,pi/2,100);
 
   % Spin-dependent transmission probabilities
   D_up = transmission * (1+polarization);
@@ -44,16 +44,16 @@ function diffcond_plot(transmission, polarization, phaseshift, temperature)
 
     % Calculate the spectral current density as a function of energy
     for m=1:length(energy)
-      if (abs(energy(m)) < 1)
+      if (abs(energy(m)) < gap)
         % Calculation below the superconducting gap
         % [eqs. (45) and (50) in PRB 70 134510]
-        delta         = acos(energy(m)/gap);
+        delta         = acos((energy(m)+i*scattering)/gap);
         spectral(m,k) = 1/(B+C*cos(2*delta+pi*phaseshift))...
                       + 1/(B+C*cos(2*delta-pi*phaseshift));
       else
         % Calculation above the superconducting gap
         % [eqs. (46) and (49) in PRB 70 134510]
-        delta         = acosh(abs(energy(m))/gap);
+        delta         = acosh((abs(energy(m))+i*scattering)/gap);
         spectral(m,k) = 2*cosh(delta)*(A*exp(-delta) + 2*sinh(delta))        ...
                       / (exp(2*delta) + U*exp(-2*delta) + V*cos(pi*phaseshift));
       end
@@ -74,7 +74,7 @@ function diffcond_plot(transmission, polarization, phaseshift, temperature)
         % Calculate the total current density as a function of voltage bias
         % [eq.(51) in PRB 70 134510, where 0.8819... is half the BCS ratio]
         current(n,k) = current(n,k)                                                            ...
-                     + spectral(m) * step                                                      ...
+                     + real(spectral(m,k)) * step                                                    ...
                      * (tanh(0.8819384944310228*(energy(m)+voltage(n))/(temperature(k)+1e-16)) ...
                        -tanh(0.8819384944310228*(energy(m)-voltage(n))/(temperature(k)+1e-16)))/4;
       end 
@@ -93,11 +93,23 @@ function diffcond_plot(transmission, polarization, phaseshift, temperature)
     diffcond(:,k) = diff(current(:,k)) ./ diff(voltage(:));
   end
 
-  % Plot the differential conductance
+  % Plot the differential conductance (overlay)
   figure;
   hold on;
   plot((voltage(1:end-1)+voltage(2:end))/2, diffcond);
-  xlabel('Voltage eV/\Delta');
+  xlabel('Voltage eV/\Delta_0');
   ylabel('Differential conductance R·dI/dV');
   legend(strtrim(cellstr(strcat('T=',num2str(temperature')))))
+  axis([min(voltage) max(voltage) -2 4]);
+
+  % Plot the differential conductance (gradient)
+  figure;
+  hold on;
+  surf((voltage(1:end-1)+voltage(2:end))/2, temperature, diffcond', 'EdgeColor', 'None');
+  hcb = colorbar;
+  xlabel('Voltage eV/\Delta_0');
+  ylabel('Temperature T/T_c');
+  caxis([0 2]);
+  set(hcb,'YTick',[0,1,2]);
+  colormap(parula(256));
 end
