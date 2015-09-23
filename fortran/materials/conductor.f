@@ -21,7 +21,7 @@ module mod_conductor
     real(dp)                  :: polarization_b          =  0.00_dp                           ! Spin-polarization of the right interface (range: [-1,+1])
     real(dp)                  :: phaseshift_a            =  0.00_dp                           ! Spin-dependent phase shifts at the left interface
     real(dp)                  :: phaseshift_b            =  0.00_dp                           ! Spin-dependent phase shifts at the right interface
-    real(dp)                  :: depairing               =  0.00_dp                           ! Pair breaking due to orbital depairing in superconductors
+    real(dp)                  :: depairing               =  0.00_dp                           ! Pair breaking due to orbital magnetic depairing
 
     ! These parameters represent the physical fields in the material
     real(dp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left interface  (unit vector)
@@ -186,7 +186,7 @@ contains
       call this%diffusion_spinorbit(g, gt, dg, dgt, d2g, d2gt)
     end if
 
-    ! Calculate the contribution from orbital depairing
+    ! Calculate the contribution from orbital magnetic depairing
     if (this%depairing /= 0.0_dp) then
       d2g  = d2g  + (4*this%depairing/this%thouless)*(2.0_dp*N  - pauli0)*g
       d2gt = d2gt + (4*this%depairing/this%thouless)*(2.0_dp*Nt - pauli0)*gt
