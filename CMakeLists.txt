@@ -24,7 +24,7 @@ set(BUILD_SHARED_LIBRARIES OFF)
 # Source files
 file(GLOB src_ext77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
 file(GLOB src_ext90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f")
-file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/foundation/*.f" "fortran/materials/*.f" "fortran/algorithms/*.f")
+file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/foundation/*.f" "fortran/materials/*.f")
 file(GLOB src_exe   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/programs/*.f")
 
 # Libraries

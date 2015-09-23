@@ -9,6 +9,7 @@
 
 module mod_spin
   use mod_system
+  use mod_math
   implicit none
 
   ! Type declaration
@@ -478,23 +479,8 @@ contains
     ! Calculates the inverse of the spin matrix
     type(spin)              :: r
     class(spin), intent(in) :: this
-    complex(dp)             :: invdet
 
-    associate(a => this%matrix(1,1), ra => r%matrix(1,1),&
-              b => this%matrix(1,2), rb => r%matrix(1,2),&
-              c => this%matrix(2,1), rc => r%matrix(2,1),&
-              d => this%matrix(2,2), rd => r%matrix(2,2))
-
-    ! Calculate the inverse determinant of this matrix
-    invdet = 1/(a*d - b*c)
-    
-    ! Calculate the inverse matrix as a result
-    ra = +invdet * d
-    rb = -invdet * b
-    rc = -invdet * c
-    rd = +invdet * a
-
-    end associate
+    r%matrix = matinv2(this%matrix)
   end function
 
   pure function spin_trace(this) result(r)
