@@ -389,6 +389,7 @@ contains
     character(8) :: ioname
     real(dp)     :: gap        
     real(dp)     :: length     
+    real(dp)     :: depairing
     real(dp)     :: conductance_a
     real(dp)     :: conductance_b
     real(dp)     :: polarization_a
@@ -440,6 +441,7 @@ contains
       call option(length,          trim(ioname) // '.length')
       call option(spinorbit_a,     trim(ioname) // '.rashba')
       call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
+      call option(depairing,       trim(ioname) // '.depairing')
       if (unicode) then
         print *,'───────────────────────────────────'
       else
@@ -480,6 +482,7 @@ contains
     s(m) % temperature = temperature
 
     ! Set the internal fields
+    s(m) % depairing   = depairing
     s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
 
     ! Set the interface parameters
@@ -528,6 +531,7 @@ contains
     character(len=8) :: ioname
     real(dp)         :: gap
     real(dp)         :: length     
+    real(dp)         :: depairing
     real(dp)         :: conductance_a
     real(dp)         :: conductance_b
     real(dp)         :: polarization_a
@@ -543,6 +547,7 @@ contains
     ! Set the default values
     gap              = 1.00_dp
     length           = 1.00_dp
+    depairing        = 0.00_dp
     exchange         = 0.00_dp
     conductance_a    = 0.30_dp
     conductance_b    = 0.30_dp
@@ -575,6 +580,7 @@ contains
     call option(length,          trim(ioname) // '.length')
     call option(spinorbit_a,     trim(ioname) // '.rashba')
     call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
+    call option(depairing,       trim(ioname) // '.depairing')
     call option(exchange,        trim(ioname) // '.exchange')
     if (unicode) then
       print *,'───────────────────────────────────'
@@ -603,6 +609,7 @@ contains
 
     ! Set the internal fields
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
+    f(m) % depairing = depairing
 
     ! Set the interface parameters
     f(m) % conductance_a   = conductance_a
