@@ -19,8 +19,8 @@ module mod_conductor
     real(dp)                  :: conductance_b           =  0.30_dp                           ! Normalized conductance of the right interface (relative to the bulk conductance of this material)
     real(dp)                  :: polarization_a          =  0.00_dp                           ! Spin-polarization of the left interface  (range: [-1,+1])
     real(dp)                  :: polarization_b          =  0.00_dp                           ! Spin-polarization of the right interface (range: [-1,+1])
-    real(dp)                  :: phaseshift_a            =  0.00_dp                           ! Spin-dependent phase shifts at the left interface
-    real(dp)                  :: phaseshift_b            =  0.00_dp                           ! Spin-dependent phase shifts at the right interface
+    real(dp)                  :: spinmixing_a            =  0.00_dp                           ! Spin-dependent phase shifts at the left interface
+    real(dp)                  :: spinmixing_b            =  0.00_dp                           ! Spin-dependent phase shifts at the right interface
     real(dp)                  :: depairing               =  0.00_dp                           ! Pair breaking due to orbital magnetic depairing
 
     ! These parameters represent the physical fields in the material
@@ -31,7 +31,7 @@ module mod_conductor
     ! These variables are used by internal subroutines to handle spin-active interfaces
     complex(dp),      private :: M_a(4,4)                =  0.00_dp                           ! Left interface magnetization matrix in Spin-Nambu space
     complex(dp),      private :: M_b(4,4)                =  0.00_dp                           ! Right interface magnetization matrix in Spin-Nambu space
-    complex(dp),      private :: GP_a, GP_b                                                   ! Normalized phaseshift factors G_ϕ/G at the interfaces
+    complex(dp),      private :: GP_a, GP_b                                                   ! Normalized spinmixing factors G_ϕ/G at the interfaces
     real(dp),         private :: GM_a, GM_b                                                   ! Normalized magnetoconductances G_MR/G at the interfaces
     real(dp),         private :: GC_a, GC_b                                                   ! Normalized correction factors G_T1/G at the interfaces
   
@@ -523,7 +523,7 @@ contains
                   GP => this % GP_a,            &
                   h  => this % magnetization_a, & 
                   P  => this % polarization_a,  &
-                  Q  => this % phaseshift_a,    &
+                  Q  => this % spinmixing_a,    &
                   M  => this % M_a)
 
         ! Calculate the elements of the magnetization matrix diag(h·σ,h·σ*)
@@ -557,7 +557,7 @@ contains
                   GP => this % GP_b,            &
                   h  => this % magnetization_b, & 
                   P  => this % polarization_b,  &
-                  Q  => this % phaseshift_b,    &
+                  Q  => this % spinmixing_b,    &
                   M  => this % M_b)
 
         ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)

@@ -433,23 +433,8 @@ contains
     ! Defines left matrix division of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
-    complex(dp)            :: invdet
 
-    associate(aa => a%matrix(1,1), ba => b%matrix(1,1), ra => r%matrix(1,1),&
-              ab => a%matrix(1,2), bb => b%matrix(1,2), rb => r%matrix(1,2),&
-              ac => a%matrix(2,1), bc => b%matrix(2,1), rc => r%matrix(2,1),&
-              ad => a%matrix(2,2), bd => b%matrix(2,2), rd => r%matrix(2,2))
-
-    ! Calculate the inverse determinant of the left matrix
-    invdet = 1/(aa*ad - ab*ac)
-    
-    ! Calculate the elements of the results
-    ra = invdet * (ad*ba - ab*bc)
-    rb = invdet * (ad*bb - ab*bd)
-    rc = invdet * (aa*bc - ac*ba)
-    rd = invdet * (aa*bd - ac*bb)
-
-    end associate
+    r%matrix = matdivl2(a%matrix, b%matrix)
   end function
 
   pure function spin_divr_spin(a,b) result(r)
@@ -458,21 +443,7 @@ contains
     type(spin), intent(in) :: a, b
     complex(dp)            :: invdet
 
-    associate(aa => a%matrix(1,1), ba => b%matrix(1,1), ra => r%matrix(1,1),&
-              ab => a%matrix(1,2), bb => b%matrix(1,2), rb => r%matrix(1,2),&
-              ac => a%matrix(2,1), bc => b%matrix(2,1), rc => r%matrix(2,1),&
-              ad => a%matrix(2,2), bd => b%matrix(2,2), rd => r%matrix(2,2))
-
-    ! Calculate the inverse determinant of the right matrix
-    invdet = 1/(ba*bd - bb*bc)
-    
-    ! Calculate the elements of the results
-    ra = invdet * (aa*bd - ab*bc)
-    rb = invdet * (ab*ba - aa*bb)
-    rc = invdet * (ac*bd - ad*bc)
-    rd = invdet * (ad*ba - ac*bb)
-
-    end associate
+    r%matrix = matdivr2(a%matrix, b%matrix)
   end function
 
   pure function spin_inv(this) result(r)

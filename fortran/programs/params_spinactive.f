@@ -50,7 +50,7 @@ program params_spinactive
 
     do m = -mmax,mmax
       ! Update the phaseshift
-      f % phaseshift_a = (2*m)/real(mmax,kind=dp)
+      f % spinmixing_a = (2*m)/real(mmax,kind=dp)
 
       do n = 1-nmax,nmax-1
         ! Update the polarization

@@ -306,8 +306,8 @@ contains
     real(dp)     :: conductance_b
     real(dp)     :: polarization_a
     real(dp)     :: polarization_b
-    real(dp)     :: phaseshift_a
-    real(dp)     :: phaseshift_b
+    real(dp)     :: spinmixing_a
+    real(dp)     :: spinmixing_b
     real(dp)     :: spinorbit_a
     real(dp)     :: spinorbit_b
     real(dp)     :: magnetization_a(3)
@@ -337,7 +337,7 @@ contains
       end if
     end if
     call option(conductance_a,   trim(ioname) // 'l.conductance')
-    call option(phaseshift_a,    trim(ioname) // 'l.phaseshift')
+    call option(spinmixing_a,    trim(ioname) // 'l.spinmixing')
     call option(polarization_a,  trim(ioname) // 'l.polarization')
     call option(magnetization_a, trim(ioname) // 'l.magnetization')
     if (unicode) then
@@ -354,7 +354,7 @@ contains
       print *,'-----------------------------------'
     end if
     call option(conductance_b,   trim(ioname) // 'r.conductance')
-    call option(phaseshift_b,    trim(ioname) // 'r.phaseshift')
+    call option(spinmixing_b,    trim(ioname) // 'r.spinmixing')
     call option(polarization_b,  trim(ioname) // 'r.polarization')
     call option(magnetization_b, trim(ioname) // 'r.magnetization')
     if (size(f) == 0) then
@@ -383,8 +383,8 @@ contains
     s(m) % conductance_b   = conductance_b
     s(m) % polarization_a  = polarization_a
     s(m) % polarization_b  = polarization_b
-    s(m) % phaseshift_a    = phaseshift_a
-    s(m) % phaseshift_b    = phaseshift_b
+    s(m) % spinmixing_a    = spinmixing_a
+    s(m) % spinmixing_b    = spinmixing_b
     s(m) % magnetization_a = magnetization_a
     s(m) % magnetization_b = magnetization_b
 
@@ -413,8 +413,8 @@ contains
     real(dp)         :: conductance_b
     real(dp)         :: polarization_a
     real(dp)         :: polarization_b
-    real(dp)         :: phaseshift_a
-    real(dp)         :: phaseshift_b
+    real(dp)         :: spinmixing_a
+    real(dp)         :: spinmixing_b
     real(dp)         :: spinorbit_a
     real(dp)         :: spinorbit_b
     real(dp)         :: exchange(3)
@@ -443,7 +443,7 @@ contains
       print *,'==================================='
     end if
     call option(conductance_a,   trim(ioname) // 'l.conductance')
-    call option(phaseshift_a,    trim(ioname) // 'l.phaseshift')
+    call option(spinmixing_a,    trim(ioname) // 'l.spinmixing')
     call option(polarization_a,  trim(ioname) // 'l.polarization')
     call option(magnetization_a, trim(ioname) // 'l.magnetization')
     if (unicode) then
@@ -461,7 +461,7 @@ contains
       print *,'-----------------------------------'
     end if
     call option(conductance_b,   trim(ioname) // 'r.conductance')
-    call option(phaseshift_b,    trim(ioname) // 'r.phaseshift')
+    call option(spinmixing_b,    trim(ioname) // 'r.spinmixing')
     call option(polarization_b,  trim(ioname) // 'r.polarization')
     call option(magnetization_b, trim(ioname) // 'r.magnetization')
     if (m == size(f)) then
@@ -492,8 +492,8 @@ contains
     f(m) % conductance_b   = conductance_b
     f(m) % polarization_a  = polarization_a
     f(m) % polarization_b  = polarization_b
-    f(m) % phaseshift_a    = phaseshift_a
-    f(m) % phaseshift_b    = phaseshift_b
+    f(m) % spinmixing_a    = spinmixing_a
+    f(m) % spinmixing_b    = spinmixing_b
     f(m) % magnetization_a = magnetization_a
     f(m) % magnetization_b = magnetization_b
 
