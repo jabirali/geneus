@@ -39,7 +39,7 @@ contains
     end do
   end function
 
-  function matrnd(n) result(A)
+  impure function matrnd(n) result(A)
     ! Constructs an n×n random matrix.
     integer, allocatable :: seed(:)
     integer              :: n, m, u
@@ -47,7 +47,7 @@ contains
     real(dp)             :: R(n,n)
     real(dp)             :: I(n,n)
 
-    ! Find the minimum size of an RNG seed
+    ! Check the size of an RNG seed
     call random_seed(size = m)
 
     ! Allocate memory for the RNG seed
@@ -84,6 +84,40 @@ contains
     B(2,1) = -detinv * A(2,1)
     B(1,2) = -detinv * A(1,2)
     B(2,2) = +detinv * A(1,1)
+  end function
+
+  pure function matdivl2(A,B) result(C)
+    ! Performs a direct calculation of a 2×2 matrix left division.
+    complex(dp), intent(in) :: A(2,2)
+    complex(dp), intent(in) :: B(2,2)
+    complex(dp)             :: C(2,2)
+    complex(dp)             :: detinv
+
+    ! Calculate the inverse determinant of the left matrix
+    detinv = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
+
+    ! Calculate the elements of the resulting matrix
+    C(1,1) = detinv * (A(2,2)*B(1,1) - A(1,2)*B(2,1))
+    C(2,1) = detinv * (A(1,1)*B(2,1) - A(2,1)*B(1,1))
+    C(1,2) = detinv * (A(2,2)*B(1,2) - A(1,2)*B(2,2))
+    C(2,2) = detinv * (A(1,1)*B(2,2) - A(2,1)*B(1,2))
+  end function
+
+  pure function matdivr2(A,B) result(C)
+    ! Performs a direct calculation of a 2×2 matrix right division.
+    complex(dp), intent(in) :: A(2,2)
+    complex(dp), intent(in) :: B(2,2)
+    complex(dp)             :: C(2,2)
+    complex(dp)             :: detinv
+
+    ! Calculate the inverse determinant of the right matrix
+    detinv = 1/(B(1,1)*B(2,2) - B(1,2)*B(2,1))
+
+    ! Calculate the elements of the resulting matrix
+    C(1,1) = detinv * (A(1,1)*B(2,2) - A(1,2)*B(2,1))
+    C(2,1) = detinv * (A(2,1)*B(2,2) - A(2,2)*B(2,1))
+    C(1,2) = detinv * (A(1,2)*B(1,1) - A(1,1)*B(1,2))
+    C(2,2) = detinv * (A(2,2)*B(1,1) - A(2,1)*B(1,2))
   end function
 
   pure function matinv3(A) result(B)
@@ -141,39 +175,5 @@ contains
     B(2,4) = detinv*(A(1,1)*(A(2,3)*A(3,4)-A(2,4)*A(3,3))+A(1,3)*(A(2,4)*A(3,1)-A(2,1)*A(3,4))+A(1,4)*(A(2,1)*A(3,3)-A(2,3)*A(3,1)))
     B(3,4) = detinv*(A(1,1)*(A(2,4)*A(3,2)-A(2,2)*A(3,4))+A(1,2)*(A(2,1)*A(3,4)-A(2,4)*A(3,1))+A(1,4)*(A(2,2)*A(3,1)-A(2,1)*A(3,2)))
     B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
-  end function
-
-  pure function matdivl2(A,B) result(C)
-    ! Performs a direct calculation of a 2×2 matrix left division.
-    complex(dp), intent(in) :: A(2,2)
-    complex(dp), intent(in) :: B(2,2)
-    complex(dp)             :: C(2,2)
-    complex(dp)             :: detinv
-
-    ! Calculate the inverse determinant of the left matrix
-    detinv = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
-
-    ! Calculate the elements of the resulting matrix
-    C(1,1) = detinv * (A(2,2)*B(1,1) - A(1,2)*B(2,1))
-    C(2,1) = detinv * (A(1,1)*B(2,1) - A(2,1)*B(1,1))
-    C(1,2) = detinv * (A(2,2)*B(1,2) - A(1,2)*B(2,2))
-    C(2,2) = detinv * (A(1,1)*B(2,2) - A(2,1)*B(1,2))
-  end function
-
-  pure function matdivr2(A,B) result(C)
-    ! Performs a direct calculation of a 2×2 matrix right division.
-    complex(dp), intent(in) :: A(2,2)
-    complex(dp), intent(in) :: B(2,2)
-    complex(dp)             :: C(2,2)
-    complex(dp)             :: detinv
-
-    ! Calculate the inverse determinant of the right matrix
-    detinv = 1/(B(1,1)*B(2,2) - B(1,2)*B(2,1))
-
-    ! Calculate the elements of the resulting matrix
-    C(1,1) = detinv * (A(1,1)*B(2,2) - A(1,2)*B(2,1))
-    C(2,1) = detinv * (A(2,1)*B(2,2) - A(2,2)*B(2,1))
-    C(1,2) = detinv * (A(1,2)*B(1,1) - A(1,1)*B(1,2))
-    C(2,2) = detinv * (A(2,2)*B(1,1) - A(2,1)*B(1,2))
   end function
 end module
