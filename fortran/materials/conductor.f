@@ -4,7 +4,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-08-14
+! Updated: 2015-09-18
 
 module mod_conductor
   use mod_material
@@ -13,27 +13,31 @@ module mod_conductor
   ! Type declarations
   type, extends(material) :: conductor
     ! These parameters control the physical characteristics of the material 
-    logical                   :: transparent_a           =  .false.                           ! Whether the left  interface is transparent or not
-    logical                   :: transparent_b           =  .false.                           ! Whether the right interface is transparent or not
-    real(dp)                  :: conductance_a           =  0.30_dp                           ! Normalized conductance of the left interface  (relative to the bulk conductance of this material)
-    real(dp)                  :: conductance_b           =  0.30_dp                           ! Normalized conductance of the right interface (relative to the bulk conductance of this material)
-    real(dp)                  :: polarization_a          =  0.00_dp                           ! Spin-polarization of the left interface  (range: [-1,+1])
-    real(dp)                  :: polarization_b          =  0.00_dp                           ! Spin-polarization of the right interface (range: [-1,+1])
-    real(dp)                  :: spinmixing_a            =  0.00_dp                           ! Spin-dependent phase shifts at the left interface
-    real(dp)                  :: spinmixing_b            =  0.00_dp                           ! Spin-dependent phase shifts at the right interface
-    real(dp)                  :: depairing               =  0.00_dp                           ! Pair breaking due to orbital magnetic depairing
+    logical                   :: transparent_a           =  .false.                           ! Whether the left  interface is completely transparent
+    logical                   :: transparent_b           =  .false.                           ! Whether the right interface is completely transparent
+    logical                   :: reflecting_a            =  .false.                           ! Whether the left  interface is completely reflecting
+    logical                   :: reflecting_b            =  .false.                           ! Whether the right interface is completely reflecting
+    real(dp)                  :: conductance_a           =  0.30_dp                           ! Normalized conductance at the left  interface
+    real(dp)                  :: conductance_b           =  0.30_dp                           ! Normalized conductance at the right interface
+    real(dp)                  :: spinmixing_a            =  0.00_dp                           ! Normalized spin-mixing at the left  interface
+    real(dp)                  :: spinmixing_b            =  0.00_dp                           ! Normalized spin-mixing at the right interface
+    real(dp)                  :: polarization_a          =  0.00_dp                           ! Spin-polarization at the left  interface
+    real(dp)                  :: polarization_b          =  0.00_dp                           ! Spin-polarization at the right interface
 
     ! These parameters represent the physical fields in the material
-    real(dp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left interface  (unit vector)
-    real(dp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector)
+    real(dp)                  :: depairing               =  0.00_dp                           ! Magnetic orbital depairing
     type(spin),   allocatable :: spinorbit(:)                                                 ! Spin-orbit coupling field (spin vector)
+    real(dp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left  interface (unit vector)
+    real(dp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(dp),      private :: M_a(4,4)                =  0.00_dp                           ! Left interface magnetization matrix in Spin-Nambu space
-    complex(dp),      private :: M_b(4,4)                =  0.00_dp                           ! Right interface magnetization matrix in Spin-Nambu space
-    complex(dp),      private :: GP_a, GP_b                                                   ! Normalized spinmixing factors G_ϕ/G at the interfaces
-    real(dp),         private :: GM_a, GM_b                                                   ! Normalized magnetoconductances G_MR/G at the interfaces
-    real(dp),         private :: GC_a, GC_b                                                   ! Normalized correction factors G_T1/G at the interfaces
+    complex(dp),      private :: M_a(4,4)                =  0.00_dp                           ! Interface magnetization matrix in Spin-Nambu space
+    complex(dp),      private :: M_b(4,4)                =  0.00_dp                           ! Interface magnetization matrix in Spin-Nambu space
+    complex(dp),      private :: GM_a, GM_b                                                   ! Normalized spin-mixing G_ϕ /G_T0 at the interfaces
+    real(dp),         private :: GF_a, GF_b                                                   ! Normalized spin-filter G_MR/G_T0 at the interfaces
+    real(dp),         private :: GC_a, GC_b                                                   ! Normalized correction  G_T1/G_T0 at the interfaces
+    complex(dp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
+    complex(dp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
   
     ! These variables are used by internal subroutines to handle spin-orbit coupling
     type(spin),       private :: Ax,  Ay,  Az,  A2                                            ! Spin-orbit coupling matrices (the components and square)
@@ -60,9 +64,13 @@ module mod_conductor
     procedure                 :: interface_spinorbit_a   => spinorbit_interface_equation_a    ! Defines the left  boundary condition  (spin-orbit terms)
     procedure                 :: interface_spinorbit_b   => spinorbit_interface_equation_b    ! Defines the right boundary condition  (spin-orbit terms)
 
-    ! These methods contain the equations that describe spin-active interfaces
+    ! These methods contain the equations that describe spin-active tunneling  interfaces
     procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms)
     procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms)
+
+    ! These methods contain the equations that describe spin-active reflecting interfaces
+    procedure                 :: interface_spinreflect_a => spinreflect_interface_equation_a  ! Defines the left  boundary condition (spin-active terms)
+    procedure                 :: interface_spinreflect_b => spinreflect_interface_equation_b  ! Defines the right boundary condition (spin-active terms)
 
     ! These methods are used by internal subroutines 
     final                     ::                            conductor_destruct                ! Type destructor
@@ -73,6 +81,13 @@ module mod_conductor
     module procedure conductor_construct
   end interface
 contains
+  !--------------------------------------------------------------------------------!
+  !                      INCLUDE EXTERNAL MODULE PROCEDURES                        !
+  !--------------------------------------------------------------------------------!
+
+  include 'spinorbit.i'
+  include 'spinactive.i'
+  include 'spinreflect.i'
 
   !--------------------------------------------------------------------------------!
   !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
@@ -204,12 +219,15 @@ contains
         if (this%transparent_a) then
           ! Interface is transparent
           call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
+        else if (this%reflecting_a) then
+          ! Interface is reflecting
+          call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
         else
-          ! Interface is a tunnel junction
+          ! Interface is tunneling
           call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
         end if
       else
-        ! Interface is a vacuum junction
+        ! Interface is vacuum
         call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
       end if
 
@@ -220,7 +238,13 @@ contains
 
       if (allocated(this%magnetization_a)) then
         ! Interface is spin-active
-        call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
+        if (this%reflecting_a) then
+          ! Must be a reflecting interface
+          call this%interface_spinreflect_a(g, gt, dg, dgt, r, rt)
+        else
+          ! May be a tunneling interface
+          call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
+        end if
       end if
   end subroutine
 
@@ -235,23 +259,32 @@ contains
         if (this%transparent_b) then
           ! Interface is transparent
           call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
+        else if (this%reflecting_b) then
+          ! Interface is reflecting
+          call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
         else
-          ! Interface is a tunnel junction
+          ! Interface is tunneling
           call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
         end if
       else
-        ! Interface is a vacuum junction
+        ! Interface is vacuum
         call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
       end if
 
       if (allocated(this%spinorbit)) then
-        ! Interface has a spin-orbit coupling
+        ! Interface has spin-orbit coupling
         call this%interface_spinorbit_b(g, gt, dg, dgt, r, rt)
       end if
 
       if (allocated(this%magnetization_b)) then
         ! Interface is spin-active
-        call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
+        if (this%reflecting_b) then
+          ! Must be a reflecting interface
+          call this%interface_spinreflect_b(g, gt, dg, dgt, r, rt)
+        else
+          ! May be a tunneling interface
+          call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
+        end if
       end if
   end subroutine
 
@@ -368,8 +401,11 @@ contains
     ! Prepare variables associated with spin-orbit coupling
     call spinorbit_update_prehook(this)
 
-    ! Prepare variables associated with spin-active interfaces
+    ! Prepare variables associated with spin-active tunneling  interfaces
     call spinactive_update_prehook(this)
+
+    ! Prepare variables associated with spin-active reflecting interfaces
+    call spinreflect_update_prehook(this)
 
     ! Modify the type string
     if (colors) then
@@ -390,303 +426,5 @@ contains
     class(conductor), intent(inout) :: this
 
     continue
-  end subroutine
-
-
-
-  !--------------------------------------------------------------------------------!
-  !                     IMPLEMENTATION OF SPIN-ORBIT COUPLING                      !
-  !--------------------------------------------------------------------------------!
-
-  ! TODO: These methods should be moved to a submodule when compilers support that.
-
-  pure subroutine spinorbit_update_prehook(this)
-    ! Updates the internal variables associated with spin-orbit coupling.
-    class(conductor), intent(inout) :: this 
-
-    if (allocated(this%spinorbit)) then
-      if (sum(this%spinorbit%norm()) < 1e-10) then
-        ! Negligible spin-orbit coupling
-        deallocate(this%spinorbit)
-      else
-        ! Spin-orbit coupling terms in the equations for the Riccati parameter γ
-        this%Ax  = this%spinorbit(1)/sqrt(this%thouless)
-        this%Ay  = this%spinorbit(2)/sqrt(this%thouless)
-        this%Az  = this%spinorbit(3)/sqrt(this%thouless)
-        this%A2  = this%Ax**2 + this%Ay**2 + this%Az**2
-
-        ! Spin-orbit coupling terms in the equations for the Riccati parameter γ~
-        this%Axt = spin(conjg(this%Ax%matrix))
-        this%Ayt = spin(conjg(this%Ay%matrix))
-        this%Azt = spin(conjg(this%Az%matrix))
-        this%A2t = spin(conjg(this%A2%matrix))
-      end if
-    end if
-  end subroutine
-
-  pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
-    ! Calculate the spin-orbit coupling terms in the diffusion equation, and update the second derivatives of the Riccati parameters.
-    class(conductor), intent(in   ) :: this
-    type(spin),       intent(in   ) :: g, gt, dg, dgt
-    type(spin),       intent(inout) :: d2g, d2gt
-    type(spin)                      :: N,  Nt
-
-    ! Rename the spin-orbit coupling matrices
-    associate(Ax => this % Ax, Axt => this % Axt,&
-              Ay => this % Ay, Ayt => this % Ayt,&
-              Az => this % Az, Azt => this % Azt,&
-              A2 => this % A2, A2t => this % A2t)
-
-    ! Calculate the normalization matrices
-    N   = spin_inv( pauli0 - g*gt )
-    Nt  = spin_inv( pauli0 - gt*g )
-
-    ! Update the second derivatives of the Riccati parameters
-    d2g  = d2g             + (A2 * g - g * A2t)                             &
-         + (2.0_dp,0.0_dp) * (Ax * g + g * Axt) * Nt * (Axt + gt * Ax * g)  &
-         + (2.0_dp,0.0_dp) * (Ay * g + g * Ayt) * Nt * (Ayt + gt * Ay * g)  &
-         + (2.0_dp,0.0_dp) * (Az * g + g * Azt) * Nt * (Azt + gt * Az * g)  &
-         + (0.0_dp,2.0_dp) * (Az + g * Azt * gt) * N * dg                   &
-         + (0.0_dp,2.0_dp) * dg * Nt * (gt * Az * g + Azt)
-
-    d2gt = d2gt            + (A2t * gt - gt * A2)                           &
-         + (2.0_dp,0.0_dp) * (Axt * gt + gt * Ax) * N * (Ax + g * Axt * gt) &
-         + (2.0_dp,0.0_dp) * (Ayt * gt + gt * Ay) * N * (Ay + g * Ayt * gt) &
-         + (2.0_dp,0.0_dp) * (Azt * gt + gt * Az) * N * (Az + g * Azt * gt) &
-         - (0.0_dp,2.0_dp) * (Azt + gt * Az * g) * Nt * dgt                 &
-         - (0.0_dp,2.0_dp) * dgt * N * (g * Azt * gt + Az)
-
-    end associate
-  end subroutine
-
-  pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
-    class(conductor), target, intent(in   ) :: this
-    type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
-    type(spin),               intent(inout) :: r1, rt1
-
-    ! Rename the spin-orbit coupling matrices
-    associate(Az  => this % Az,&
-              Azt => this % Azt)
-
-    ! Update the residuals
-    r1  = r1  - (0.0_dp,1.0_dp) * (Az  * g1  + g1  * Azt)
-    rt1 = rt1 + (0.0_dp,1.0_dp) * (Azt * gt1 + gt1 * Az )
-
-    end associate
-  end subroutine
-
-  pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
-    class(conductor), target, intent(in   ) :: this
-    type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
-    type(spin),               intent(inout) :: r2, rt2
-
-    ! Rename the spin-orbit coupling matrices
-    associate(Az   => this % Az,&
-              Azt  => this % Azt)
-
-    ! Update the residuals
-    r2  = r2  - (0.0_dp,1.0_dp) * (Az  * g2  + g2  * Azt)
-    rt2 = rt2 + (0.0_dp,1.0_dp) * (Azt * gt2 + gt2 * Az )  
-
-    end associate
-  end subroutine
-
-
-
-  !--------------------------------------------------------------------------------!
-  !                   IMPLEMENTATION OF SPIN-ACTIVE INTERFACES                     !
-  !--------------------------------------------------------------------------------!
-
-  ! TODO: These methods should be moved to a submodule when compilers support that.
-
-  pure subroutine spinactive_update_prehook(this)
-    ! Updates the internal variables associated with spin-active interfaces.
-    class(conductor), intent(inout) :: this 
-    real(dp)                        :: Pr
-
-    if (allocated(this % magnetization_a)) then
-      if (norm2(this % magnetization_a) < 1e-10) then
-        ! Deallocate negligible magnetizations
-        deallocate(this % magnetization_a)
-      else
-        ! Rescale the magnetization to a unit vector
-        if (abs(norm2(this % magnetization_a) - 1) > 1e-10) then
-          this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + 1e-16)
-        end if
-
-        ! Rename the relevant variables
-        associate(G0 => this % conductance_a,   &
-                  GC => this % GC_a,            &
-                  GM => this % GM_a,            &
-                  GP => this % GP_a,            &
-                  h  => this % magnetization_a, & 
-                  P  => this % polarization_a,  &
-                  Q  => this % spinmixing_a,    &
-                  M  => this % M_a)
-
-        ! Calculate the elements of the magnetization matrix diag(h·σ,h·σ*)
-        M(1:2,1:2) = h(1) * pauli1 + h(2) * pauli2 + h(3) * pauli3
-        M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
-
-        ! Calculate the conductances associated with the spin-active interface
-        Pr = sqrt(1 - P**2 + 1e-16)
-        GM = 0.25 * G0 * P/(1 + Pr)
-        GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
-        GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
-
-        end associate
-      end if
-    end if
-
-    if (allocated(this % magnetization_b)) then
-      if (norm2(this % magnetization_b) < 1e-10) then
-        ! Deallocate negligible magnetizations
-        deallocate(this % magnetization_b)
-      else
-        ! Rescale the magnetization to a unit vector
-        if (abs(norm2(this % magnetization_b) - 1) > 1e-10) then
-          this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + 1e-16)
-        end if
-
-        ! Rename the relevant variables
-        associate(G0 => this % conductance_b,   &
-                  GC => this % GC_b,            &
-                  GM => this % GM_b,            &
-                  GP => this % GP_b,            &
-                  h  => this % magnetization_b, & 
-                  P  => this % polarization_b,  &
-                  Q  => this % spinmixing_b,    &
-                  M  => this % M_b)
-
-        ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
-        M(1:2,1:2) = h(1) * pauli1 + h(2) * pauli2 + h(3) * pauli3
-        M(3:4,3:4) = h(1) * pauli1 - h(2) * pauli2 + h(3) * pauli3
-
-        ! Calculate the conductances associated with the spin-active interface
-        Pr = sqrt(1 - P**2 + 1e-16)
-        GM = 0.25 * G0 * P/(1 + Pr)
-        GP = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
-        GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
-
-        end associate
-      end if
-    end if
-  end subroutine
-
-  pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Calculate the spin-active terms in the left boundary condition, and update the residuals.
-    class(conductor), target, intent(in   ) :: this
-    type(green),              intent(in   ) :: a
-    type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
-    type(spin),               intent(inout) :: r1, rt1
-    type(spin)                              :: N0, Nt0
-    type(spin)                              :: N1, Nt1
-    complex(dp)                             :: L(4,4)
-    complex(dp)                             :: R(4,4)
-    complex(dp)                             :: I(4,4)
-
-    ! Rename the parameters that describe the spin-active properties
-    associate(GC => this % GC_a,&
-              GM => this % GM_a,&
-              GP => this % GP_a,&
-              M  => this % M_a)
-
-    ! Rename the Riccati parameters in the material to the left
-    associate(g0   => a % g, &
-              gt0  => a % gt,&
-              dg0  => a % dg,&
-              dgt0 => a % dgt)
-
-    ! Calculate the normalization matrices
-    N0  = spin_inv( pauli0 - g0*gt0 )
-    Nt0 = spin_inv( pauli0 - gt0*g0 )
-    N1  = spin_inv( pauli0 - g1*gt1 )
-    Nt1 = spin_inv( pauli0 - gt1*g1 )
-
-    ! Calculate the 4×4 Green's function in the left material
-    L(1:2,1:2) = (+1.0_dp) * N0  * (pauli0 + g0*gt0)
-    L(1:2,3:4) = (+2.0_dp) * N0  * g0
-    L(3:4,1:2) = (-2.0_dp) * Nt0 * gt0
-    L(3:4,3:4) = (-1.0_dp) * Nt0 * (pauli0 + gt0*g0)
-
-    ! Calculate the 4×4 Green's function in the right material
-    R(1:2,1:2) = (+1.0_dp) * N1  * (pauli0 + g1*gt1)
-    R(1:2,3:4) = (+2.0_dp) * N1  * g1
-    R(3:4,1:2) = (-2.0_dp) * Nt1 * gt1
-    R(3:4,3:4) = (-1.0_dp) * Nt1 * (pauli0 + gt1*g1)
-
-    ! Calculate the spin-active terms in the interface current
-    I = GC * (matmul(R,matmul(M,matmul(L,M)))    &
-             -matmul(M,matmul(L,matmul(M,R))))   &
-      + GM * (matmul(R,matmul(L,M)+matmul(M,L))  &
-             -matmul(matmul(L,M)+matmul(M,L),R)) &
-      + GP * (matmul(R,M) - matmul(M,R))
-
-    ! Calculate the deviation from the boundary condition
-    r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
-    rt1 = rt1 + (pauli0 - gt1*g1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
-
-    end associate
-    end associate
-  end subroutine
-
-  pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Calculate the spin-active terms in the right boundary condition, and update the residuals.
-    class(conductor), target, intent(in   ) :: this
-    type(green),              intent(in   ) :: b
-    type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
-    type(spin),               intent(inout) :: r2, rt2
-
-    type(spin)                              :: N2, Nt2
-    type(spin)                              :: N3, Nt3
-    complex(dp)                             :: L(4,4)
-    complex(dp)                             :: R(4,4)
-    complex(dp)                             :: I(4,4)
-
-    ! Rename the parameters that describe the spin-active properties
-    associate(GC => this % GC_b,&
-              GM => this % GM_b,&
-              GP => this % GP_b,&
-              M  => this % M_b)
-
-    ! Rename the Riccati parameters in the material to the right
-    associate(g3   => b % g, &
-              gt3  => b % gt,&
-              dg3  => b % dg,&
-              dgt3 => b % dgt)
-
-    ! Calculate the normalization matrices
-    N2  = spin_inv( pauli0 - g2*gt2 )
-    Nt2 = spin_inv( pauli0 - gt2*g2 )
-    N3  = spin_inv( pauli0 - g3*gt3 )
-    Nt3 = spin_inv( pauli0 - gt3*g3 )
-
-    ! Calculate the 4×4 Green's function in the left material
-    L(1:2,1:2) = (+1.0_dp) * N2  * (pauli0 + g2*gt2)
-    L(1:2,3:4) = (+2.0_dp) * N2  * g2
-    L(3:4,1:2) = (-2.0_dp) * Nt2 * gt2
-    L(3:4,3:4) = (-1.0_dp) * Nt2 * (pauli0 + gt2*g2)
-
-    ! Calculate the 4×4 Green's function in the right material
-    R(1:2,1:2) = (+1.0_dp) * N3  * (pauli0 + g3*gt3)
-    R(1:2,3:4) = (+2.0_dp) * N3  * g3
-    R(3:4,1:2) = (-2.0_dp) * Nt3 * gt3
-    R(3:4,3:4) = (-1.0_dp) * Nt3 * (pauli0 + gt3*g3)
-
-    ! Calculate the spin-active terms in the interface current
-    I = GC * (matmul(L,matmul(M,matmul(R,M)))    &
-             -matmul(M,matmul(R,matmul(M,L))))   &
-      + GM * (matmul(L,matmul(R,M)+matmul(M,R))  &
-             -matmul(matmul(R,M)+matmul(M,R),L)) &
-      + GP * (matmul(L,M) - matmul(M,L))
-
-    ! Calculate the deviation from the boundary condition
-    r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
-    rt2 = rt2 - (pauli0 - gt2*g2) * (I(3:4,1:2) - I(3:4,3:4)*gt2)
-
-    end associate
-    end associate
   end subroutine
 end module

@@ -400,6 +400,8 @@ contains
     real(dp)     :: spinorbit_b
     real(dp)     :: magnetization_a(3)
     real(dp)     :: magnetization_b(3)
+    logical      :: reflecting_a
+    logical      :: reflecting_b
 
     ! Set the default values
     gap              = 1.00_dp
@@ -412,6 +414,8 @@ contains
     conductance_b    = 0.30_dp
     spinorbit_a      = 0.00_dp
     spinorbit_b      = 0.00_dp
+    reflecting_a    = .false.
+    reflecting_b    = .false.
 
     ! Determine the superconductor name
     write(ioname, '(a,i0)') 's', m
@@ -426,6 +430,7 @@ contains
       end if
     end if
     if (selfconsistent) then
+      call option(reflecting_a,   trim(ioname) // 'l.reflecting')
       call option(conductance_a,   trim(ioname) // 'l.conductance')
       call option(spinmixing_a,    trim(ioname) // 'l.spinmixing')
       call option(polarization_a,  trim(ioname) // 'l.polarization')
@@ -447,6 +452,7 @@ contains
       else
         print *,'-----------------------------------'
       end if
+      call option(reflecting_b,   trim(ioname) // 'r.reflecting')
       call option(conductance_b,   trim(ioname) // 'r.conductance')
       call option(spinmixing_b,    trim(ioname) // 'r.spinmixing')
       call option(polarization_b,  trim(ioname) // 'r.polarization')
@@ -494,6 +500,8 @@ contains
     s(m) % spinmixing_b    = spinmixing_b
     s(m) % magnetization_a = magnetization_a
     s(m) % magnetization_b = magnetization_b
+    s(m) % reflecting_a    = reflecting_a
+    s(m) % reflecting_b    = reflecting_b
 
     ! Connect it to the previous material and determine the interface location
     if (m == 1) then
