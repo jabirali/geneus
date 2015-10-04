@@ -2,7 +2,7 @@
 ! is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dx and dγ~/dx. These are
 ! sufficient to reconstruct the normal Green's function g and anomalous Green's function f, and derived quantities like
 ! the density of states.  To make it easier to interact with differential equation solvers, which often operate on real
-! state vectors, the assignment operator is overloaded so objects can be easily imported/exported to real vectors(32).
+! state vectors, the assignment operator is overloaded so objects can be easily imported/exported to a real vector(32).
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11

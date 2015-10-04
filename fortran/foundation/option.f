@@ -1,38 +1,18 @@
-! This file renames the ISO input/output units to the standard UNIX names,  and defines the ANSI escape codes for colored output,
-! as well as a set of subroutines with the common interface 'option', which can be used to read and parse command line arguments.
+! This modules define the interface 'option', which can be used to read and parse command line arguments.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
 ! Updated: 2015-10-04
 
-module mod_system
-  use iso_fortran_env
+module mod_option
   use mod_math, only: wp
   implicit none
   private
 
   ! Public interface
   public option, print_option
-  public stdin, stdout, stderr
-  public color_none, color_bold, color_red, color_green, color_yellow, color_blue, color_purple, color_cyan, color_white
 
-  ! Declare standard input/output units
-  integer,      parameter :: stdin   = input_unit
-  integer,      parameter :: stdout  = output_unit
-  integer,      parameter :: stderr  = error_unit
-
-  ! Define escape codes for terminal colors
-  character(*), parameter :: color_none   = '[0m'
-  character(*), parameter :: color_bold   = '[1m'
-  character(*), parameter :: color_red    = '[31m'
-  character(*), parameter :: color_green  = '[32m'
-  character(*), parameter :: color_yellow = '[33m'
-  character(*), parameter :: color_blue   = '[34m'
-  character(*), parameter :: color_purple = '[35m'
-  character(*), parameter :: color_cyan   = '[36m'
-  character(*), parameter :: color_white  = '[37m'
-
-  ! Define an interface for obtaining command line arguments
+  ! Generic procedures
   interface option
     module procedure option_logical, option_integer, option_real, option_reals, option_string
   end interface

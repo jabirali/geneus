@@ -7,7 +7,7 @@
 ! Updated: 2015-08-10
 
 module mod_hybrid
-  use mod_system
+  use mod_stdio
   use mod_material
   use mod_conductor
   use mod_superconductor

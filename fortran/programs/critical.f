@@ -7,6 +7,7 @@
 ! Updated: 2015-08-14
 
 program critical
+  use mod_option
   use mod_hybrid
   implicit none
 

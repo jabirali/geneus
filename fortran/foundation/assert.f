@@ -6,7 +6,7 @@
 
 
 module mod_assert
-  use mod_system
+  use mod_stdio
   use mod_math, only: eps, wp
   use mod_spin, only: spin
   implicit none

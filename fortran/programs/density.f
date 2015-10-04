@@ -9,6 +9,7 @@
 ! Updated: 2015-08-10
 
 program density
+  use mod_option
   use mod_hybrid
   implicit none
 
