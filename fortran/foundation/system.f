@@ -3,11 +3,18 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-08-10
+! Updated: 2015-10-04
 
 module mod_system
   use iso_fortran_env
   use mod_math, only: wp
+  implicit none
+  private
+
+  ! Public interface
+  public option, print_option
+  public stdin, stdout, stderr
+  public color_none, color_bold, color_red, color_green, color_yellow, color_blue, color_purple, color_cyan, color_white
 
   ! Declare standard input/output units
   integer,      parameter :: stdin   = input_unit

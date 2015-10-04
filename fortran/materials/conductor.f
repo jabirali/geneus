@@ -7,6 +7,7 @@
 ! Updated: 2015-09-18
 
 module mod_conductor
+  use mod_math
   use mod_material
   implicit none
 

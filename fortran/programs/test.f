@@ -6,6 +6,7 @@
 
 program test_core
   use mod_assert
+  use mod_math
   use mod_spin
   use mod_green
 
@@ -19,17 +20,17 @@ program test_core
   ! Calibrate the test procedures in 'module_assert'
   call section('Calibration of assert subroutines')
   call subsection('Subroutines operating on a single value:')
-  call assert(.true.,                'Logical true                                     SUCCESS == ')
-  call assert(.false.,               'Logical false                                    FAILURE == ')
-  call assert(0,                     'Integer 0                                        SUCCESS == ')
-  call assert(1,                     'Integer 1                                        FAILURE == ')
-  call assert(0.0_wp,                'Real    0                                        SUCCESS == ')
-  call assert(1.0_wp,                'Real    1                                        FAILURE == ')
-  call assert((0.0_wp,0.0_wp),       'Complex 0                                        SUCCESS == ')
-  call assert((0.0_wp,1.0_wp),       'Complex i                                        FAILURE == ')
-  call assert(spin(0.0_wp),          'Spin matrix 0                                    SUCCESS == ')
-  call assert(spin(1.0_wp),          'Spin matrix 1                                    FAILURE == ')
-  call assert(spin((0.0_wp,1.0_wp)), 'Spin matrix i                                    FAILURE == ')
+  call assert(.true.,                            'Logical true                                     SUCCESS == ')
+  call assert(.false.,                           'Logical false                                    FAILURE == ')
+  call assert(0,                                 'Integer 0                                        SUCCESS == ')
+  call assert(1,                                 'Integer 1                                        FAILURE == ')
+  call assert(0.0_wp,                            'Real    0                                        SUCCESS == ')
+  call assert(1.0_wp,                            'Real    1                                        FAILURE == ')
+  call assert((0.0_wp,0.0_wp),                   'Complex 0                                        SUCCESS == ')
+  call assert((0.0_wp,1.0_wp),                   'Complex i                                        FAILURE == ')
+  call assert(spin(0.0_wp),                      'Spin matrix 0                                    SUCCESS == ')
+  call assert(spin(1.0_wp),                      'Spin matrix 1                                    FAILURE == ')
+  call assert(spin((0.0_wp,1.0_wp)),             'Spin matrix i                                    FAILURE == ')
 
   call subsection('Subroutines operating on arrays:')
   call assert([.true., .true.],                  'Logical [true, true ]                            SUCCESS == ')

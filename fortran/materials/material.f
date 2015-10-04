@@ -8,6 +8,9 @@
 ! Updated: 2015-08-14
 
 module mod_material
+  use mod_system
+  use mod_math
+  use mod_spin
   use mod_green
   implicit none
 

@@ -10,7 +10,12 @@ module mod_assert
   use mod_math, only: eps, wp
   use mod_spin, only: spin
   implicit none
+  private
 
+  ! Public interface
+  public check, assert
+
+  ! Generic procedures
   interface check
     module procedure check_scalar, check_array
   end interface

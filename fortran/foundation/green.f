@@ -2,15 +2,20 @@
 ! is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dx and dγ~/dx. These are
 ! sufficient to reconstruct the normal Green's function g and anomalous Green's function f, and derived quantities like
 ! the density of states.  To make it easier to interact with differential equation solvers, which often operate on real
-! state vectors, the assignment operator is overloaded so 'green' objects can be imported from and exported to real(32).
+! state vectors, the assignment operator is overloaded so objects can be easily imported/exported to real vectors(32).
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-08-09
+! Updated: 2015-10-04
 
 module mod_green
+  use mod_math
   use mod_spin
   implicit none
+  private
+
+  ! Public interface
+  public green, green0, assignment(=)
 
   ! Type declaration
   type green
@@ -18,7 +23,7 @@ module mod_green
     type(spin) :: gt                           ! Riccati parameter γ~
     type(spin) :: dg                           ! Derivative dγ /dz
     type(spin) :: dgt                          ! Derivative dγ~/dz
-    contains
+  contains
     procedure  :: get_g     => green_get_g     ! Normal Green's function g
     procedure  :: get_gt    => green_get_gt    ! Normal Green's function g~
     procedure  :: get_f     => green_get_f     ! Anomal Green's function f
@@ -61,7 +66,7 @@ contains
     complex(wp)             :: a, b
 
     t = atanh(abs(gap)/energy)
-    p = atan(aimag(gap)/dble(gap))
+    p = atan(im(gap)/re(gap))
     a =  sinh(t)/(1+cosh(t)) * exp( (0, 1) * p )
     b = -sinh(t)/(1+cosh(t)) * exp( (0,-1) * p )
 
@@ -226,7 +231,7 @@ contains
     type(spin)               :: g
     g = this%get_g()
 
-    ldos = real(g%trace(), kind=wp)/2.0_wp
+    ldos = 0.5_wp*re(g%trace())
   end function
 
   impure subroutine green_print(this)

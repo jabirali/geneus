@@ -1,6 +1,6 @@
 ! This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
 ! floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
-! the type of the variable.  It also defines the working-precision wp,  which is the default kind for module procedures.
+! the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
 ! As for module procedures, this library defines common utility functions for working with complex numbers and matrices.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
@@ -9,6 +9,8 @@
 
 module mod_math
   use :: iso_fortran_env
+  implicit none
+  public
 
   ! Declare floating-point precisions
   integer,     parameter :: sp  = REAL32              ! Single precision
@@ -19,15 +21,15 @@ module mod_math
   ! Define common mathematical constants
   real(wp),    parameter :: inf = huge(1.0_wp)        ! Numerical infinity
   real(wp),    parameter :: eps = epsilon(1.0_wp)     ! Numerical infinitesimal
-  real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp ! Mathematical circle constant
-  complex(wp), parameter :: i   = (0.0_wp,1.0_wp)     ! Mathematical imaginary unit
+  real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp ! Circle constant
+  complex(wp), parameter :: i   = (0.0_wp,1.0_wp)     ! Imaginary unit
 
   ! Define common identity matrices
   real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])
   real(wp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])
   real(wp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4])
-
 contains
+
   !----------------------------------------------------------------------------!
   !                        COMPLEX NUMBER PROCEDURES                           !
   !----------------------------------------------------------------------------!
@@ -75,13 +77,13 @@ contains
     end do
   end function
 
-  impure function matrnd(n) result(A)
+  impure function matrnd(n) result(C)
     ! Constructs an n×n random matrix.
     integer, allocatable :: seed(:)
     integer              :: n, m, u
-    complex(wp)          :: A(n,n)
-    real(wp)             :: R(n,n)
-    real(wp)             :: I(n,n)
+    complex(wp)          :: C(n,n)
+    real(wp)             :: B(n,n)
+    real(wp)             :: A(n,n)
 
     ! Check the size of a random seed
     call random_seed(size = m)
@@ -98,9 +100,9 @@ contains
     call random_seed(put = seed)
 
     ! Construct a random complex matrix
-    call random_number(R)
-    call random_number(I)
-    A = cx(R,I)
+    call random_number(A)
+    call random_number(B)
+    C = cx(A,B)
 
     ! Deallocate dynamic memory
     deallocate(seed)

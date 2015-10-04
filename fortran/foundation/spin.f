@@ -1,29 +1,33 @@
 ! This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads
 ! common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
 ! To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
-! the assignment operator is overloaded in such a way that 'spin' can be imported/exported from a real(8) vector.
+! the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-08-09
+! Updated: 2015-10-04
 
 module mod_spin
-  use mod_system
   use mod_math
   implicit none
+  private
+
+  ! Public interface
+  public spin
+  public assignment(=), operator(+), operator(-), operator(*), operator(/), operator(**), operator(.divl.), operator(.divr.)
+  public spin_inv, spin_trace, spin_norm, spin_min, spin_max, spin_print
+  public pauli, pauli0, pauli1, pauli2, pauli3
 
   ! Type declaration
   type spin
-    complex(wp) :: matrix(2,2)      =  0.0_wp        ! Stores the spin matrix
-    contains
+    complex(wp) :: matrix(2,2)      =  0.0_wp        ! Spin matrix
+  contains
     procedure   :: inv              => spin_inv      ! Inverse of the matrix
     procedure   :: trace            => spin_trace    ! Trace of the matrix
     procedure   :: norm             => spin_norm     ! Frobenius norm of the matrix
     procedure   :: min              => spin_min      ! Size of the smallest element
     procedure   :: max              => spin_max      ! Size of the largest element
-    procedure   :: print            => spin_print    ! Prints the spin matrix to standard out
-   !generic     :: write(formatted) => spin_write    ! Modifies the output format (used by 'write' and 'print')
-   !generic     :: read(formatted)  => spin_read     ! Modifies the  input format (used by 'read')
+    procedure   :: print            => spin_print    ! Prints the matrix to standard out
   end type
 
   ! Type constructor
@@ -132,9 +136,8 @@ contains
     type(spin)           :: this
     real(wp), intent(in) :: vector(8)
 
-    this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
-                         reshape(vector(2:8:2),[2,2],order=[2,1]),&
-                         kind=wp )
+    this%matrix = cx(reshape(vector(1:7:2),[2,2],order=[2,1]),&
+                     reshape(vector(2:8:2),[2,2],order=[2,1]))
   end function
 
   pure function spin_construct_spin(other) result(this)
@@ -182,9 +185,8 @@ contains
     type(spin), intent(out) :: this
     real(wp),   intent(in)  :: vector(8)
 
-    this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
-                         reshape(vector(2:8:2),[2,2],order=[2,1]),&
-                         kind=wp )
+    this%matrix = cx(reshape(vector(1:7:2),[2,2],order=[2,1]),&
+                     reshape(vector(2:8:2),[2,2],order=[2,1]))
   end subroutine
 
   pure subroutine spin_export_cmatrix(matrix, this)
@@ -208,8 +210,8 @@ contains
     real(wp),  intent(out) :: vector(8)
     type(spin), intent(in) :: this
 
-    vector(1:7:2) =  real([ this%matrix(1,:), this%matrix(2,:) ])
-    vector(2:8:2) = aimag([ this%matrix(1,:), this%matrix(2,:) ])
+    vector(1:7:2) = re([ this%matrix(1,:), this%matrix(2,:) ])
+    vector(2:8:2) = im([ this%matrix(1,:), this%matrix(2,:) ])
   end subroutine
 
   pure function spin_exp_integer(a,b) result(r)
@@ -245,7 +247,7 @@ contains
 
   elemental pure function spin_multl_cscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a complex scalar
-    type(spin)             :: r
+    type(spin)              :: r
     complex(wp), intent(in) :: a
     type(spin),  intent(in) :: b
 
@@ -488,7 +490,7 @@ contains
   end function
 
   impure subroutine spin_print(this, title)
-    ! Prints the spin matrix to stdout
+    ! Prints the spin matrix to standard out
     class(spin),  intent(in)           :: this 
     character(*), intent(in), optional :: title
 
@@ -498,40 +500,16 @@ contains
     end if
 
     ! Print the matrix elements
-    write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
-            '⎡',real(this%matrix(1,1)),' +',aimag(this%matrix(1,1)),'i',                & 
-                real(this%matrix(1,2)),' +',aimag(this%matrix(1,2)),'i','⎤'
-    write(*,'(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)') &
-            '⎣',real(this%matrix(2,1)),' +',aimag(this%matrix(2,1)),'i',                & 
-                real(this%matrix(2,2)),' +',aimag(this%matrix(2,2)),'i','⎦'
+    print '(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)', &
+            '⎡',re(this%matrix(1,1)),' +',im(this%matrix(1,1)),'i',                     & 
+                re(this%matrix(1,2)),' +',im(this%matrix(1,2)),'i','⎤'
+    print '(ss,4x,a,1x,es11.4,1x,a,1x,es11.4,1x,a,5x,es11.4,1x,a,1x,es11.4,1x,a,2x,a)', &
+            '⎣',re(this%matrix(2,1)),' +',im(this%matrix(2,1)),'i',                     & 
+                re(this%matrix(2,2)),' +',im(this%matrix(2,2)),'i','⎦'
 
     ! Print extra whitespace
     if(present(title)) then
       print *,''
     end if
   end subroutine
-
- !subroutine spin_read(this, unit, iotype, v_list, iostat, iomsg)
- !  ! This method is used to overload the builtin 'read'
- !  class(spin),  intent(inout) :: this
- !  integer,      intent(in   ) :: unit
- !  character(*), intent(in   ) :: iotype
- !  integer,      intent(in   ) :: v_list(:)
- !  integer,      intent(  out) :: iostat
- !  character(*), intent(inout) :: iomsg
- !
- !  read(unit, fmt=*, iostat=iostat, iomsg=iomsg) this%matrix
- !end subroutine
-
- !subroutine spin_write(this, unit, iotype, v_list, iostat, iomsg)
- !  ! This method is used to overload the builtin 'write'
- !  class(spin),  intent(in   ) :: this
- !  integer,      intent(in   ) :: unit
- !  character(*), intent(in   ) :: iotype
- !  integer,      intent(  out) :: v_list(:)
- !  integer,      intent(  out) :: iostat
- !  character(*), intent(inout) :: iomsg
- !
- !  write(unit, fmt=*, iostat=iostat, iomsg=iomsg) this%matrix
- !end subroutine
 end module
