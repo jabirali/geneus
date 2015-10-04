@@ -4,10 +4,12 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-08-10
+! Updated: 2015-10-04
 
 module mod_hybrid
   use mod_stdio
+  use mod_math
+  use mod_spin
   use mod_material
   use mod_conductor
   use mod_superconductor

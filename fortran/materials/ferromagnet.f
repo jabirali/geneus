@@ -3,11 +3,18 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-08-10
+! Updated: 2015-10-04
 
 module mod_ferromagnet
+  use mod_stdio
+  use mod_math
+  use mod_spin
   use mod_conductor
   implicit none
+  private
+
+  ! Public interface
+  public ferromagnet, ferromagnet_construct_homogeneous
 
   ! Type declaration
   type, extends(conductor)           :: ferromagnet
@@ -17,7 +24,6 @@ module mod_ferromagnet
     procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
     procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the Green's functions
     procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the Green's functions
-    final                            ::                       ferromagnet_destruct            ! Type destructor
   end type
 
   ! Type constructor
@@ -27,7 +33,7 @@ module mod_ferromagnet
 contains
 
   !--------------------------------------------------------------------------------!
-  !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
+  !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
   pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
@@ -58,24 +64,6 @@ contains
       end do
     end if
   end function
-
-  pure subroutine ferromagnet_destruct(this)
-    ! Define the type destructor.
-    type(ferromagnet), intent(inout) :: this
-
-    ! Deallocate memory (if necessary)
-    if (allocated(this%exchange)) then
-      deallocate(this%exchange)
-    end if
-
-    if (allocated(this%h)) then
-      deallocate(this%h)
-      deallocate(this%ht)
-    end if
-
-    ! Call the superclass destructor
-    call conductor_destruct(this%conductor)
-  end subroutine
 
   !--------------------------------------------------------------------------------!
   !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !

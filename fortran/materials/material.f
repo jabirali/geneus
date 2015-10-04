@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-29
-! Updated: 2015-08-14
+! Updated: 2015-10-04
 
 module mod_material
   use mod_stdio
@@ -13,6 +13,10 @@ module mod_material
   use mod_spin
   use mod_green
   implicit none
+  private
+
+  ! Public interface
+  public material
 
   ! Type declarations
   type, abstract :: material
@@ -55,7 +59,6 @@ module mod_material
     procedure                                 :: save            => material_save         ! Saves the state of the conductor to a different object
     procedure                                 :: load            => material_load         ! Loads the state of the conductor from a different object
     procedure                                 :: write_dos       => material_write_dos    ! Writes the density of states to a given output unit
-
   end type
 
   ! Interface declarations
@@ -166,7 +169,7 @@ contains
         d = u
 
         ! Calculate the complex energy (relative to the Thouless energy)
-        e = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=wp)
+        e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
 
         ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
@@ -320,10 +323,10 @@ contains
     real(wp)                    :: x         ! Current location
     integer                     :: n, m      ! Temporary loop variables
 
-    if (minval(this%energy) < -1e-16_wp) then
+    if (minval(this%energy) < -eps) then
       ! If we have data for both positive and negative energies, simply write out the data
       do m=1,size(this%location)
-        x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
+        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
         do n=1,size(this%energy)
           write(unit,*) x, this%energy(n), this%greenr(n,m)%get_dos()
         end do
@@ -331,7 +334,7 @@ contains
     else
       ! If we only have data for positive energies, assume that the negative region is symmetric
       do m=1,size(this%location)
-        x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)
+        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
         do n=size(this%energy),1,-1
           write(unit,*) x, -this%energy(n), this%greenr(n,m)%get_dos()
         end do

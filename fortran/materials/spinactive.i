@@ -1,8 +1,8 @@
 ! This submodule is included by conductor.f, and contains the equations which model spin-active tunneling and vacuum interfaces.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-09-01
-! Updated: 2015-09-01
+! Created: 2015-10-01
+! Updated: 2015-10-04
 
 pure subroutine spinactive_update_prehook(this)
   ! Updates the internal variables associated with spin-active interfaces.
@@ -10,13 +10,13 @@ pure subroutine spinactive_update_prehook(this)
   real(wp)                        :: Pr
 
   if (allocated(this % magnetization_a) .and. .not. this % reflecting_a) then
-    if (norm2(this % magnetization_a) < 1e-10) then
+    if (norm2(this % magnetization_a) < sqrt(eps)) then
       ! Deallocate negligible magnetizations
       deallocate(this % magnetization_a)
     else
       ! Rescale the magnetization to a unit vector
-      if (abs(norm2(this % magnetization_a) - 1) > 1e-10) then
-        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + 1e-16)
+      if (abs(norm2(this % magnetization_a) - 1) > sqrt(eps)) then
+        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + eps)
       end if
 
       ! Rename the relevant variables
@@ -36,7 +36,7 @@ pure subroutine spinactive_update_prehook(this)
       ! Calculate the conductances associated with the spin-active interface
       if (associated(this % material_a)) then
         ! Tunneling interfaces: everything is normalized to the tunneling conductance
-        Pr = sqrt(1 - P**2 + 1e-16)
+        Pr = sqrt(1 - P**2 + eps)
         GF = 0.25 * G0 * P/(1 + Pr)
         GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
         GM = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
@@ -52,13 +52,13 @@ pure subroutine spinactive_update_prehook(this)
   end if
 
   if (allocated(this % magnetization_b) .and. .not. this % reflecting_b) then
-    if (norm2(this % magnetization_b) < 1e-10) then
+    if (norm2(this % magnetization_b) < sqrt(eps)) then
       ! Deallocate negligible magnetizations
       deallocate(this % magnetization_b)
     else
       ! Rescale the magnetization to a unit vector
-      if (abs(norm2(this % magnetization_b) - 1) > 1e-10) then
-        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + 1e-16)
+      if (abs(norm2(this % magnetization_b) - 1) > sqrt(eps)) then
+        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + eps)
       end if
 
       ! Rename the relevant variables
@@ -78,7 +78,7 @@ pure subroutine spinactive_update_prehook(this)
       ! Calculate the conductances associated with the spin-active interface
       if (associated(this % material_b)) then
         ! Tunneling interfaces: everything is normalized to the tunneling conductance
-        Pr = sqrt(1 - P**2 + 1e-16)
+        Pr = sqrt(1 - P**2 + eps)
         GF = 0.25 * G0 * P/(1 + Pr)
         GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
         GM = 0.25 * G0 * (-2*i*Q)/(1 + Pr)

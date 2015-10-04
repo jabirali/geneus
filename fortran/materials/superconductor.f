@@ -3,17 +3,24 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2015-08-10
+! Updated: 2015-10-04
 
 module mod_superconductor
+  use mod_stdio
+  use mod_math
+  use mod_spin
   use mod_conductor
   implicit none
+  private
+
+  ! Public interface
+  public superconductor, superconductor_construct
 
   ! Type declaration
   type, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
     complex(wp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp)                 :: temperature         =  1e-6_wp                            ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(wp)                 :: temperature         =  sqrt(eps)                          ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
     real(wp)                 :: coupling            =  0.20_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
@@ -26,9 +33,6 @@ module mod_superconductor
     procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
     procedure                :: get_gap             => superconductor_get_gap             ! Returns the superconducting order parameter at a given position
     procedure                :: get_gap_mean        => superconductor_get_gap_mean        ! Returns the superconducting order parameter averaged over the material
-
-    ! These methods are used by internal subroutines
-    final                    ::                        superconductor_destruct            ! Type destructor
   end type
 
   ! Type constructor
@@ -38,7 +42,7 @@ module mod_superconductor
 contains
 
   !--------------------------------------------------------------------------------!
-  !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
+  !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
   pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
@@ -72,19 +76,6 @@ contains
       this%coupling = coupling
     end if
   end function
-
-  pure subroutine superconductor_destruct(this)
-    ! Define the type destructor.
-    type(superconductor), intent(inout) :: this
-
-    ! Deallocate memory (if necessary)
-    if(allocated(this%gap)) then
-      deallocate(this%gap)
-    end if
-
-    ! Call the superclass destructor
-    call conductor_destruct(this%conductor)
-  end subroutine
 
   pure subroutine superconductor_init(this, gap)
     ! Redefine the default initializer.
@@ -170,8 +161,8 @@ contains
           singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_wp
 
           ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
-          gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
-          gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+          gap_real(m) = re(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+          gap_imag(m) = im(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
         end do
 
         ! Create a PCHIP interpolation of the numerical results above
@@ -179,9 +170,8 @@ contains
         call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
 
         ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
-        this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 1e-6_wp, cosh(1.0_wp/this%coupling), err),&
-                             dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 1e-6_wp, cosh(1.0_wp/this%coupling), err),&
-                             kind=wp )
+        this%gap(n) = cx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 1e-6_wp, cosh(1.0_wp/this%coupling), err),&
+                          dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 1e-6_wp, cosh(1.0_wp/this%coupling), err) )
       end do
 
       ! Calculate the difference in mean superconducting order parameter

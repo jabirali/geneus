@@ -4,12 +4,19 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-09-18
+! Updated: 2015-10-04
 
 module mod_conductor
+  use mod_stdio
   use mod_math
+  use mod_spin
+  use mod_green
   use mod_material
   implicit none
+  private
+
+  ! Public interface
+  public conductor, conductor_construct
 
   ! Type declarations
   type, extends(material) :: conductor
@@ -72,9 +79,6 @@ module mod_conductor
     ! These methods contain the equations that describe spin-active reflecting interfaces
     procedure                 :: interface_spinreflect_a => spinreflect_interface_equation_a  ! Defines the left  boundary condition (spin-active terms)
     procedure                 :: interface_spinreflect_b => spinreflect_interface_equation_b  ! Defines the right boundary condition (spin-active terms)
-
-    ! These methods are used by internal subroutines 
-    final                     ::                            conductor_destruct                ! Type destructor
   end type
 
   ! Type constructors
@@ -91,7 +95,7 @@ contains
   include 'spinreflect.i'
 
   !--------------------------------------------------------------------------------!
-  !                IMPLEMENTATION OF CONSTRUCTORS AND DESTRUCTORS                  !
+  !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
   pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
@@ -129,39 +133,15 @@ contains
 
     ! Initialize energy and position arrays
     this%energy   = energy
-    this%location = [ ((real(n,kind=wp)/real(size(this%location)-1,kind=wp)), n=0,size(this%location)-1) ]
+    this%location = [ ((real(n,kind=wp)/(size(this%location)-1)), n=0,size(this%location)-1) ]
 
     ! Initialize the state
     if (present(gap)) then
       call this%init( gap )
     else
-      call this%init( cmplx(1.0_wp,0.0_wp,kind=wp) )
+      call this%init( cx(1.0_wp,0.0_wp) )
     end if
   end function
-
-  pure subroutine conductor_destruct(this)
-    ! Define the type destructor.
-    type(conductor), intent(inout) :: this
-
-    ! Deallocate memory (if necessary)
-    if(allocated(this%greenr)) then
-      deallocate(this%greenr)
-      deallocate(this%location)
-      deallocate(this%energy)
-    end if
-
-    if (allocated(this%spinorbit)) then
-      deallocate(this%spinorbit)
-    end if
-
-    if (allocated(this%magnetization_a)) then
-      deallocate(this%magnetization_a)
-    end if
-
-    if (allocated(this%magnetization_b)) then
-      deallocate(this%magnetization_b)
-    end if
-  end subroutine
 
   pure subroutine conductor_init(this, gap)
     ! Define the default initializer.
@@ -171,7 +151,7 @@ contains
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%greenr(n,m) = green( cmplx(this%energy(n),this%scattering,kind=wp), gap )
+        this%greenr(n,m) = green( cx(this%energy(n),this%scattering), gap )
       end do
     end do
   end subroutine

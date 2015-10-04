@@ -1,21 +1,21 @@
 ! This submodule is included by conductor.f, and contains the equations which model spin-mixing at fully reflecting interfaces.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-09-01
-! Updated: 2015-09-01
+! Created: 2015-10-01
+! Updated: 2015-10-04
 
 pure subroutine spinreflect_update_prehook(this)
   ! Updates the internal variables associated with fully reflecting spin-active interfaces.
   class(conductor), intent(inout) :: this 
 
   if (allocated(this % magnetization_a) .and. this % reflecting_a) then
-    if (norm2(this % magnetization_a) < 1e-10) then
+    if (norm2(this % magnetization_a) < sqrt(eps)) then
       ! Deallocate negligible magnetizations
       deallocate(this % magnetization_a)
     else
       ! Rescale the magnetization to a unit vector
-      if (abs(norm2(this % magnetization_a) - 1) > 1e-10) then
-        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + 1e-16)
+      if (abs(norm2(this % magnetization_a) - 1) > sqrt(eps)) then
+        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + eps)
       end if
 
       ! Rename the relevant variables
@@ -39,13 +39,13 @@ pure subroutine spinreflect_update_prehook(this)
   end if
 
   if (allocated(this % magnetization_b) .and. this % reflecting_b) then
-    if (norm2(this % magnetization_b) < 1e-10) then
+    if (norm2(this % magnetization_b) < sqrt(eps)) then
       ! Deallocate negligible magnetizations
       deallocate(this % magnetization_b)
     else
       ! Rescale the magnetization to a unit vector
-      if (abs(norm2(this % magnetization_b) - 1) > 1e-10) then
-        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + 1e-16)
+      if (abs(norm2(this % magnetization_b) - 1) > sqrt(eps)) then
+        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + eps)
       end if
 
       ! Rename the relevant variables

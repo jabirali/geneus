@@ -1,15 +1,15 @@
 ! This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-09-01
-! Updated: 2015-09-01
+! Created: 2015-10-01
+! Updated: 2015-10-04
 
 pure subroutine spinorbit_update_prehook(this)
   ! Updates the internal variables associated with spin-orbit coupling.
   class(conductor), intent(inout) :: this 
 
   if (allocated(this%spinorbit)) then
-    if (sum(this%spinorbit%norm()) < 1e-10) then
+    if (sum(this%spinorbit%norm()) < sqrt(eps)) then
       ! Negligible spin-orbit coupling
       deallocate(this%spinorbit)
     else
