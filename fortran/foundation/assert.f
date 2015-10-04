@@ -1,4 +1,4 @@
-! This module defines the interface 'assert', which is used for unit testing.
+! This module defines the interfaces 'check' and 'assert', which are used for unit testing of other modules.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-13
@@ -76,7 +76,7 @@ contains
       type is (complex(wp))
         r = check(abs(expr) < sqrt(eps))
       type is(spin)
-        r = check(norm2(abs(expr%matrix)))
+        r = check(reshape(expr%matrix,[4]))
     end select
   end function
 end module

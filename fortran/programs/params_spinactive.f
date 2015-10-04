@@ -9,22 +9,22 @@ program params_spinactive
   ! Declare variables
   type(superconductor) :: s               ! Superconductor
   type(conductor)      :: f               ! Normal metal
-  real(dp)             :: d               ! Density of states at zero excitation energy
+  real(wp)             :: d               ! Density of states at zero excitation energy
   integer              :: u               ! Output unit
   integer              :: n, nmax = 100   ! Polarization counter
   integer              :: m, mmax = 100   ! Phaseshift counter
   integer              :: k, kmax = 3     ! Magnetization axis
 
   ! Construct the individual materials
-  s = superconductor ([ 0.0_dp ], points = 150)
-  f = conductor      ([ 0.0_dp ], points = 150)
+  s = superconductor ([ 0.0_wp ], points = 150)
+  f = conductor      ([ 0.0_wp ], points = 150)
 
   ! Disable internal output
   s % information = -1
   f % information = -1
 
   ! Connect the two materials
-  call connect(s, f, 0.3_dp)
+  call connect(s, f, 0.3_wp)
 
   do k = 1,kmax
     select case (k)
@@ -50,14 +50,14 @@ program params_spinactive
 
     do m = -mmax,mmax
       ! Update the phaseshift
-      f % spinmixing_a = (2*m)/real(mmax,kind=dp)
+      f % spinmixing_a = (2*m)/real(mmax,kind=wp)
 
       do n = 1-nmax,nmax-1
         ! Update the polarization
-        f % polarization_a = n/real(nmax,kind=dp)
+        f % polarization_a = n/real(nmax,kind=wp)
 
         ! Reinitialize the material
-        call f % init( gap = (1.00_dp,0.01_dp) )
+        call f % init( gap = (1.00_wp,0.01_wp) )
 
         ! Update the state
         call f % update

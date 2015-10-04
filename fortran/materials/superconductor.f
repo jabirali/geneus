@@ -12,9 +12,9 @@ module mod_superconductor
   ! Type declaration
   type, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(dp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    real(dp)                 :: temperature         =  1e-6_dp                            ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(dp)                 :: coupling            =  0.20_dp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    complex(wp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
+    real(wp)                 :: temperature         =  1e-6_wp                            ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(wp)                 :: coupling            =  0.20_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the Green's functions
@@ -44,11 +44,11 @@ contains
   pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
-    real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: coupling     ! BCS coupling constant
-    complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: 1.0)
-    real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
-    real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
+    real(wp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(wp),    intent(in), optional :: coupling     ! BCS coupling constant
+    complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: 1.0)
+    real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
+    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
     integer                           :: n            ! Loop variable
 
@@ -64,7 +64,7 @@ contains
     if (present(gap)) then
       call this%set_gap(gap)
     else
-      call this%set_gap( (1.0_dp,0.0_dp) )
+      call this%set_gap( (1.0_wp,0.0_wp) )
     end if
 
     ! Initialize the BCS coupling constant
@@ -89,7 +89,7 @@ contains
   pure subroutine superconductor_init(this, gap)
     ! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
-    complex(dp),           intent(in   ) :: gap
+    complex(wp),           intent(in   ) :: gap
     integer                              :: n, m
 
     ! Call the superclass initializer
@@ -106,11 +106,11 @@ contains
   pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
-    complex(dp),           intent(in)    :: e
-    real(dp),              intent(in)    :: z
+    complex(wp),           intent(in)    :: e
+    real(wp),              intent(in)    :: z
     type(spin),            intent(in)    :: g, gt, dg, dgt
     type(spin),            intent(inout) :: d2g, d2gt
-    complex(dp)                          :: gap, gapt
+    complex(wp)                          :: gap, gapt
 
     ! Lookup the superconducting order parameter
     gap  = this%get_gap(z)/this%thouless
@@ -141,11 +141,11 @@ contains
   impure subroutine superconductor_update_posthook(this)
     ! Updates the superconducting order parameter based on the Green's functions of the system.
     class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
-    real(dp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
-    real(dp), allocatable                :: gap_imag(:), dgap_imag(:) ! Imag part of the superconducting order parameter and its derivative
-    complex(dp)                          :: gap_diff                  ! Used to calculate the change in the mean superconducting order parameter
-    complex(dp)                          :: singlet                   ! Singlet component of the anomalous Green's function at a given point
-    real(dp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
+    real(wp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
+    real(wp), allocatable                :: gap_imag(:), dgap_imag(:) ! Imag part of the superconducting order parameter and its derivative
+    complex(wp)                          :: gap_diff                  ! Used to calculate the change in the mean superconducting order parameter
+    complex(wp)                          :: singlet                   ! Singlet component of the anomalous Green's function at a given point
+    real(wp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
     integer                              :: err                       ! PCHIP error status
     integer                              :: n, m                      ! Loop variables
 
@@ -167,11 +167,11 @@ contains
       do n = 1,size(this%location)
         do m = 1,size(this%energy)
           ! Calculate the singlet component of the anomalous Green's function
-          singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_dp
+          singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_wp
 
           ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
-          gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
-          gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_dp * this%energy(m)/this%temperature)
+          gap_real(m) =  dble(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+          gap_imag(m) = aimag(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
         end do
 
         ! Create a PCHIP interpolation of the numerical results above
@@ -179,9 +179,9 @@ contains
         call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
 
         ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
-        this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 1e-6_dp, cosh(1.0_dp/this%coupling), err),&
-                             dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 1e-6_dp, cosh(1.0_dp/this%coupling), err),&
-                             kind=dp )
+        this%gap(n) = cmplx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 1e-6_wp, cosh(1.0_wp/this%coupling), err),&
+                             dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 1e-6_wp, cosh(1.0_wp/this%coupling), err),&
+                             kind=wp )
       end do
 
       ! Calculate the difference in mean superconducting order parameter
@@ -208,7 +208,7 @@ contains
   pure subroutine superconductor_set_gap(this, gap)
     ! Updates the superconducting order parameter from a scalar.
     class(superconductor), intent(inout) :: this
-    complex(dp),           intent(in   ) :: gap
+    complex(wp),           intent(in   ) :: gap
     integer                              :: n
 
     do n = 1,size(this%gap)
@@ -219,8 +219,8 @@ contains
   pure function superconductor_get_gap(this, location) result(gap)
     ! Returns the superconducting order parameter at the given location.
     class(superconductor), intent(in) :: this
-    real(dp),              intent(in) :: location
-    complex(dp)                       :: gap
+    real(wp),              intent(in) :: location
+    complex(wp)                       :: gap
     integer                           :: n
 
     ! Calculate the index corresponding to the given location
@@ -237,7 +237,7 @@ contains
   pure function superconductor_get_gap_mean(this) result(gap)
     ! Returns the superconducting order parameter average in the material.
     class(superconductor), intent(in)  :: this
-    complex(dp)                        :: gap
+    complex(wp)                        :: gap
 
     gap = sum(this%gap)/max(1,size(this%gap)) 
   end function

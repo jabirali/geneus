@@ -31,18 +31,18 @@ program density
   integer                           :: voltages        = 150
   integer                           :: energies        = 150
   integer                           :: points          = 150
-  real(dp)                          :: scattering      = 0.01_dp
-  real(dp)                          :: coupling        = 0.20_dp
-  real(dp)                          :: phasediff       = 0.00_dp
-  real(dp)                          :: phasestep       = 0.15_dp
-  real(dp)                          :: temperature     = 0.00_dp
+  real(wp)                          :: scattering      = 0.01_wp
+  real(wp)                          :: coupling        = 0.20_wp
+  real(wp)                          :: phasediff       = 0.00_wp
+  real(wp)                          :: phasestep       = 0.15_wp
+  real(wp)                          :: temperature     = 0.00_wp
 
   ! Declare the variables used by the program
   integer                           :: output_density
   integer                           :: output_conduct
-  real(dp),             allocatable :: energy_array(:)
-  real(dp),             allocatable :: voltage_array(:)
-  real(dp),             allocatable :: connection(:)
+  real(wp),             allocatable :: energy_array(:)
+  real(wp),             allocatable :: voltage_array(:)
+  real(wp),             allocatable :: connection(:)
   integer                           :: n, m
 
 
@@ -62,7 +62,7 @@ program density
   end if
 
   ! Initialize the voltage array
-  voltage_array = [ ((1.5_dp*(n-1)/size(voltage_array)), n=1,size(voltage_array)) ]
+  voltage_array = [ ((1.5_wp*(n-1)/size(voltage_array)), n=1,size(voltage_array)) ]
 
   ! Construct the left superconducting layer
   call superconductor_io(s, 1)
@@ -124,8 +124,8 @@ program density
     block
       ! Declare block-local variables
       integer     :: steps
-      real(dp)    :: phase
-      complex(dp) :: gap, gapt
+      real(wp)    :: phase
+      complex(wp) :: gap, gapt
 
       ! Loop over the number of intermediate phases
       steps = ceiling(phasediff/phasestep)
@@ -357,13 +357,13 @@ contains
     ! Determine the phase difference and step
     if (size(s) > 1 .and. ((reservoirs .and. selfconsistent) .or. (.not. selfconsistent))) then
       call option(phasediff, 'phasediff')
-      if (phasediff < 0.0_dp) then
+      if (phasediff < 0.0_wp) then
         print *
         print *,'Error: the phase difference should be a positive number!'
         stop
       end if
       call option(phasestep, 'phasestep')
-      if (phasestep < 0.0_dp) then
+      if (phasestep < 0.0_wp) then
         print *
         print *,'Error: the phase steplength should be a positive number!'
         stop
@@ -387,33 +387,33 @@ contains
 
     ! Declare the input/output variables
     character(8) :: ioname
-    real(dp)     :: gap        
-    real(dp)     :: length     
-    real(dp)     :: depairing
-    real(dp)     :: conductance_a
-    real(dp)     :: conductance_b
-    real(dp)     :: polarization_a
-    real(dp)     :: polarization_b
-    real(dp)     :: spinmixing_a
-    real(dp)     :: spinmixing_b
-    real(dp)     :: spinorbit_a
-    real(dp)     :: spinorbit_b
-    real(dp)     :: magnetization_a(3)
-    real(dp)     :: magnetization_b(3)
+    real(wp)     :: gap        
+    real(wp)     :: length     
+    real(wp)     :: depairing
+    real(wp)     :: conductance_a
+    real(wp)     :: conductance_b
+    real(wp)     :: polarization_a
+    real(wp)     :: polarization_b
+    real(wp)     :: spinmixing_a
+    real(wp)     :: spinmixing_b
+    real(wp)     :: spinorbit_a
+    real(wp)     :: spinorbit_b
+    real(wp)     :: magnetization_a(3)
+    real(wp)     :: magnetization_b(3)
     logical      :: reflecting_a
     logical      :: reflecting_b
 
     ! Set the default values
-    gap              = 1.00_dp
-    length           = 1.00_dp
-    magnetization_a  = 0.00_dp
-    magnetization_b  = 0.00_dp
-    polarization_a   = 0.00_dp
-    polarization_b   = 0.00_dp
-    conductance_a    = 0.30_dp
-    conductance_b    = 0.30_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
+    gap              = 1.00_wp
+    length           = 1.00_wp
+    magnetization_a  = 0.00_wp
+    magnetization_b  = 0.00_wp
+    polarization_a   = 0.00_wp
+    polarization_b   = 0.00_wp
+    conductance_a    = 0.30_wp
+    conductance_b    = 0.30_wp
+    spinorbit_a      = 0.00_wp
+    spinorbit_b      = 0.00_wp
     reflecting_a    = .false.
     reflecting_b    = .false.
 
@@ -455,7 +455,7 @@ contains
 
     ! Construct the superconductor
     s(m) = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
-                          points = points, coupling = coupling, gap = cmplx(gap,0,kind=dp))
+                          points = points, coupling = coupling, gap = cmplx(gap,0,kind=wp))
     
     ! Construct and connect a superconducting reservoir
     if (reservoirs) then
@@ -489,7 +489,7 @@ contains
 
     ! Connect it to the previous material and determine the interface location
     if (m == 1) then
-      connection(1) = 0.0_dp
+      connection(1) = 0.0_wp
       connection(2) = length
     else
       connection(size(connection)) = connection(size(connection)-1) + length
@@ -498,7 +498,7 @@ contains
 
     ! For non-selfconsistent calculations, assert that the material has converged
     if (.not. selfconsistent) then
-      s(m) % difference = 0.0_dp
+      s(m) % difference = 0.0_wp
     end if
 
     ! Set the information level
@@ -521,34 +521,34 @@ contains
 
     ! Declare the input variables
     character(len=8) :: ioname
-    real(dp)         :: gap
-    real(dp)         :: length     
-    real(dp)         :: depairing
-    real(dp)         :: conductance_a
-    real(dp)         :: conductance_b
-    real(dp)         :: polarization_a
-    real(dp)         :: polarization_b
-    real(dp)         :: spinmixing_a
-    real(dp)         :: spinmixing_b
-    real(dp)         :: spinorbit_a
-    real(dp)         :: spinorbit_b
-    real(dp)         :: exchange(3)
-    real(dp)         :: magnetization_a(3)
-    real(dp)         :: magnetization_b(3)
+    real(wp)         :: gap
+    real(wp)         :: length     
+    real(wp)         :: depairing
+    real(wp)         :: conductance_a
+    real(wp)         :: conductance_b
+    real(wp)         :: polarization_a
+    real(wp)         :: polarization_b
+    real(wp)         :: spinmixing_a
+    real(wp)         :: spinmixing_b
+    real(wp)         :: spinorbit_a
+    real(wp)         :: spinorbit_b
+    real(wp)         :: exchange(3)
+    real(wp)         :: magnetization_a(3)
+    real(wp)         :: magnetization_b(3)
 
     ! Set the default values
-    gap              = 1.00_dp
-    length           = 1.00_dp
-    depairing        = 0.00_dp
-    exchange         = 0.00_dp
-    conductance_a    = 0.30_dp
-    conductance_b    = 0.30_dp
-    magnetization_a  = 0.00_dp
-    magnetization_b  = 0.00_dp
-    polarization_a   = 0.00_dp
-    polarization_b   = 0.00_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
+    gap              = 1.00_wp
+    length           = 1.00_wp
+    depairing        = 0.00_wp
+    exchange         = 0.00_wp
+    conductance_a    = 0.30_wp
+    conductance_b    = 0.30_wp
+    magnetization_a  = 0.00_wp
+    magnetization_b  = 0.00_wp
+    polarization_a   = 0.00_wp
+    polarization_b   = 0.00_wp
+    spinorbit_a      = 0.00_wp
+    spinorbit_b      = 0.00_wp
 
     ! Determine the ferromagnet name
     write(ioname, '(a,i0)') 'f', m
@@ -581,7 +581,7 @@ contains
 
     ! Construct the ferromagnet
     f(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                       points = points, gap = cmplx(gap,0,kind=dp), exchange = exchange)
+                       points = points, gap = cmplx(gap,0,kind=wp), exchange = exchange)
 
     ! Set the internal fields
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
@@ -648,7 +648,7 @@ contains
   subroutine write_conductance(output)
     ! Saves the tunneling current at the first interface as a function of voltage to a file.
     integer,   intent(in) :: output
-    real(dp), allocatable :: conductance(:)
+    real(wp), allocatable :: conductance(:)
     integer               :: n
 
     if (size(f) > 0) then

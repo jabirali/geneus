@@ -8,7 +8,7 @@
 ! Updated: 2015-10-04
 
 module mod_math
-  use, intrinsic :: iso_fortran_env
+  use :: iso_fortran_env
 
   ! Declare floating-point precisions
   integer,     parameter :: sp  = REAL32              ! Single precision

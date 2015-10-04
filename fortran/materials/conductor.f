@@ -17,27 +17,27 @@ module mod_conductor
     logical                   :: transparent_b           =  .false.                           ! Whether the right interface is completely transparent
     logical                   :: reflecting_a            =  .false.                           ! Whether the left  interface is completely reflecting
     logical                   :: reflecting_b            =  .false.                           ! Whether the right interface is completely reflecting
-    real(dp)                  :: conductance_a           =  0.30_dp                           ! Normalized conductance at the left  interface
-    real(dp)                  :: conductance_b           =  0.30_dp                           ! Normalized conductance at the right interface
-    real(dp)                  :: spinmixing_a            =  0.00_dp                           ! Normalized spin-mixing at the left  interface
-    real(dp)                  :: spinmixing_b            =  0.00_dp                           ! Normalized spin-mixing at the right interface
-    real(dp)                  :: polarization_a          =  0.00_dp                           ! Spin-polarization at the left  interface
-    real(dp)                  :: polarization_b          =  0.00_dp                           ! Spin-polarization at the right interface
+    real(wp)                  :: conductance_a           =  0.30_wp                           ! Normalized conductance at the left  interface
+    real(wp)                  :: conductance_b           =  0.30_wp                           ! Normalized conductance at the right interface
+    real(wp)                  :: spinmixing_a            =  0.00_wp                           ! Normalized spin-mixing at the left  interface
+    real(wp)                  :: spinmixing_b            =  0.00_wp                           ! Normalized spin-mixing at the right interface
+    real(wp)                  :: polarization_a          =  0.00_wp                           ! Spin-polarization at the left  interface
+    real(wp)                  :: polarization_b          =  0.00_wp                           ! Spin-polarization at the right interface
 
     ! These parameters represent the physical fields in the material
-    real(dp)                  :: depairing               =  0.00_dp                           ! Magnetic orbital depairing
+    real(wp)                  :: depairing               =  0.00_wp                           ! Magnetic orbital depairing
     type(spin),   allocatable :: spinorbit(:)                                                 ! Spin-orbit coupling field (spin vector)
-    real(dp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left  interface (unit vector)
-    real(dp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector)
+    real(wp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left  interface (unit vector)
+    real(wp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(dp),      private :: M_a(4,4)                =  0.00_dp                           ! Interface magnetization matrix in Spin-Nambu space
-    complex(dp),      private :: M_b(4,4)                =  0.00_dp                           ! Interface magnetization matrix in Spin-Nambu space
-    complex(dp),      private :: GM_a, GM_b                                                   ! Normalized spin-mixing G_ϕ /G_T0 at the interfaces
-    real(dp),         private :: GF_a, GF_b                                                   ! Normalized spin-filter G_MR/G_T0 at the interfaces
-    real(dp),         private :: GC_a, GC_b                                                   ! Normalized correction  G_T1/G_T0 at the interfaces
-    complex(dp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
-    complex(dp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
+    complex(wp),      private :: M_a(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space
+    complex(wp),      private :: M_b(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space
+    complex(wp),      private :: GM_a, GM_b                                                   ! Normalized spin-mixing G_ϕ /G_T0 at the interfaces
+    real(wp),         private :: GF_a, GF_b                                                   ! Normalized spin-filter G_MR/G_T0 at the interfaces
+    real(wp),         private :: GC_a, GC_b                                                   ! Normalized correction  G_T1/G_T0 at the interfaces
+    complex(wp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
+    complex(wp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
   
     ! These variables are used by internal subroutines to handle spin-orbit coupling
     type(spin),       private :: Ax,  Ay,  Az,  A2                                            ! Spin-orbit coupling matrices (the components and square)
@@ -96,10 +96,10 @@ contains
   pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this         ! Conductor object that will be constructed
-    real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: see type declaration)
-    real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
-    complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
+    real(wp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: see type declaration)
+    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
+    complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
     integer,     intent(in), optional :: points       ! Number of positions   (default: see definition below)
     integer                           :: n, m         ! Loop variables
 
@@ -128,13 +128,13 @@ contains
 
     ! Initialize energy and position arrays
     this%energy   = energy
-    this%location = [ ((real(n,kind=dp)/real(size(this%location)-1,kind=dp)), n=0,size(this%location)-1) ]
+    this%location = [ ((real(n,kind=wp)/real(size(this%location)-1,kind=wp)), n=0,size(this%location)-1) ]
 
     ! Initialize the state
     if (present(gap)) then
       call this%init( gap )
     else
-      call this%init( cmplx(1.0_dp,0.0_dp,kind=dp) )
+      call this%init( cmplx(1.0_wp,0.0_wp,kind=wp) )
     end if
   end function
 
@@ -165,12 +165,12 @@ contains
   pure subroutine conductor_init(this, gap)
     ! Define the default initializer.
     class(conductor), intent(inout) :: this
-    complex(dp),      intent(in   ) :: gap
+    complex(wp),      intent(in   ) :: gap
     integer                         :: n, m
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%greenr(n,m) = green( cmplx(this%energy(n),this%scattering,kind=dp), gap )
+        this%greenr(n,m) = green( cmplx(this%energy(n),this%scattering,kind=wp), gap )
       end do
     end do
   end subroutine
@@ -182,8 +182,8 @@ contains
   pure subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(conductor), intent(in   ) :: this
-    complex(dp),      intent(in   ) :: e
-    real(dp),         intent(in   ) :: z
+    complex(wp),      intent(in   ) :: e
+    real(wp),         intent(in   ) :: z
     type(spin),       intent(in   ) :: g, gt, dg, dgt
     type(spin),       intent(inout) :: d2g, d2gt
     type(spin)                      :: N, Nt
@@ -193,8 +193,8 @@ contains
     Nt  = spin_inv( pauli0 - gt*g )
 
     ! Calculate the second-derivatives of the Riccati parameters
-    d2g  = (-2.0_dp,0.0_dp)*dg*Nt*gt*dg - (0.0_dp,2.0_dp)*e*g
-    d2gt = (-2.0_dp,0.0_dp)*dgt*N*g*dgt - (0.0_dp,2.0_dp)*e*gt
+    d2g  = (-2.0_wp,0.0_wp)*dg*Nt*gt*dg - (0.0_wp,2.0_wp)*e*g
+    d2gt = (-2.0_wp,0.0_wp)*dgt*N*g*dgt - (0.0_wp,2.0_wp)*e*gt
 
     ! Calculate the contribution from a spin-orbit coupling
     if (allocated(this%spinorbit)) then
@@ -202,9 +202,9 @@ contains
     end if
 
     ! Calculate the contribution from orbital magnetic depairing
-    if (this%depairing /= 0.0_dp) then
-      d2g  = d2g  + (4*this%depairing/this%thouless)*(2.0_dp*N  - pauli0)*g
-      d2gt = d2gt + (4*this%depairing/this%thouless)*(2.0_dp*Nt - pauli0)*gt
+    if (this%depairing /= 0.0_wp) then
+      d2g  = d2g  + (4*this%depairing/this%thouless)*(2.0_wp*N  - pauli0)*g
+      d2gt = d2gt + (4*this%depairing/this%thouless)*(2.0_wp*Nt - pauli0)*gt
     end if
   end subroutine
 

@@ -7,7 +7,7 @@
 pure subroutine spinactive_update_prehook(this)
   ! Updates the internal variables associated with spin-active interfaces.
   class(conductor), intent(inout) :: this 
-  real(dp)                        :: Pr
+  real(wp)                        :: Pr
 
   if (allocated(this % magnetization_a) .and. .not. this % reflecting_a) then
     if (norm2(this % magnetization_a) < 1e-10) then
@@ -102,9 +102,9 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
   type(spin),               intent(inout) :: r1, rt1
   type(spin)                              :: N0, Nt0
   type(spin)                              :: N1, Nt1
-  complex(dp)                             :: L(4,4)
-  complex(dp)                             :: R(4,4)
-  complex(dp)                             :: I(4,4)
+  complex(wp)                             :: L(4,4)
+  complex(wp)                             :: R(4,4)
+  complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
   associate(GC => this % GC_a,&
@@ -125,16 +125,16 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
   Nt1 = spin_inv( pauli0 - gt1*g1 )
 
   ! Calculate the 4×4 Green's function in the left material
-  L(1:2,1:2) = (+1.0_dp) * N0  * (pauli0 + g0*gt0)
-  L(1:2,3:4) = (+2.0_dp) * N0  * g0
-  L(3:4,1:2) = (-2.0_dp) * Nt0 * gt0
-  L(3:4,3:4) = (-1.0_dp) * Nt0 * (pauli0 + gt0*g0)
+  L(1:2,1:2) = (+1.0_wp) * N0  * (pauli0 + g0*gt0)
+  L(1:2,3:4) = (+2.0_wp) * N0  * g0
+  L(3:4,1:2) = (-2.0_wp) * Nt0 * gt0
+  L(3:4,3:4) = (-1.0_wp) * Nt0 * (pauli0 + gt0*g0)
 
   ! Calculate the 4×4 Green's function in the right material
-  R(1:2,1:2) = (+1.0_dp) * N1  * (pauli0 + g1*gt1)
-  R(1:2,3:4) = (+2.0_dp) * N1  * g1
-  R(3:4,1:2) = (-2.0_dp) * Nt1 * gt1
-  R(3:4,3:4) = (-1.0_dp) * Nt1 * (pauli0 + gt1*g1)
+  R(1:2,1:2) = (+1.0_wp) * N1  * (pauli0 + g1*gt1)
+  R(1:2,3:4) = (+2.0_wp) * N1  * g1
+  R(3:4,1:2) = (-2.0_wp) * Nt1 * gt1
+  R(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
 
   ! Calculate the spin-active terms in the interface current
   I = GC * (matmul(R,matmul(M,matmul(L,M)))    &
@@ -160,9 +160,9 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
 
   type(spin)                              :: N2, Nt2
   type(spin)                              :: N3, Nt3
-  complex(dp)                             :: L(4,4)
-  complex(dp)                             :: R(4,4)
-  complex(dp)                             :: I(4,4)
+  complex(wp)                             :: L(4,4)
+  complex(wp)                             :: R(4,4)
+  complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
   associate(GC => this % GC_b,&
@@ -183,16 +183,16 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   Nt3 = spin_inv( pauli0 - gt3*g3 )
 
   ! Calculate the 4×4 Green's function in the left material
-  L(1:2,1:2) = (+1.0_dp) * N2  * (pauli0 + g2*gt2)
-  L(1:2,3:4) = (+2.0_dp) * N2  * g2
-  L(3:4,1:2) = (-2.0_dp) * Nt2 * gt2
-  L(3:4,3:4) = (-1.0_dp) * Nt2 * (pauli0 + gt2*g2)
+  L(1:2,1:2) = (+1.0_wp) * N2  * (pauli0 + g2*gt2)
+  L(1:2,3:4) = (+2.0_wp) * N2  * g2
+  L(3:4,1:2) = (-2.0_wp) * Nt2 * gt2
+  L(3:4,3:4) = (-1.0_wp) * Nt2 * (pauli0 + gt2*g2)
 
   ! Calculate the 4×4 Green's function in the right material
-  R(1:2,1:2) = (+1.0_dp) * N3  * (pauli0 + g3*gt3)
-  R(1:2,3:4) = (+2.0_dp) * N3  * g3
-  R(3:4,1:2) = (-2.0_dp) * Nt3 * gt3
-  R(3:4,3:4) = (-1.0_dp) * Nt3 * (pauli0 + gt3*g3)
+  R(1:2,1:2) = (+1.0_wp) * N3  * (pauli0 + g3*gt3)
+  R(1:2,3:4) = (+2.0_wp) * N3  * g3
+  R(3:4,1:2) = (-2.0_wp) * Nt3 * gt3
+  R(3:4,3:4) = (-1.0_wp) * Nt3 * (pauli0 + gt3*g3)
 
   ! Calculate the spin-active terms in the interface current
   I = GC * (matmul(L,matmul(M,matmul(R,M)))    &

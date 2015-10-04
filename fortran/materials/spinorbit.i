@@ -47,18 +47,18 @@ pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
 
   ! Update the second derivatives of the Riccati parameters
   d2g  = d2g             + (A2 * g - g * A2t)                             &
-       + (2.0_dp,0.0_dp) * (Ax * g + g * Axt) * Nt * (Axt + gt * Ax * g)  &
-       + (2.0_dp,0.0_dp) * (Ay * g + g * Ayt) * Nt * (Ayt + gt * Ay * g)  &
-       + (2.0_dp,0.0_dp) * (Az * g + g * Azt) * Nt * (Azt + gt * Az * g)  &
-       + (0.0_dp,2.0_dp) * (Az + g * Azt * gt) * N * dg                   &
-       + (0.0_dp,2.0_dp) * dg * Nt * (gt * Az * g + Azt)
+       + (2.0_wp,0.0_wp) * (Ax * g + g * Axt) * Nt * (Axt + gt * Ax * g)  &
+       + (2.0_wp,0.0_wp) * (Ay * g + g * Ayt) * Nt * (Ayt + gt * Ay * g)  &
+       + (2.0_wp,0.0_wp) * (Az * g + g * Azt) * Nt * (Azt + gt * Az * g)  &
+       + (0.0_wp,2.0_wp) * (Az + g * Azt * gt) * N * dg                   &
+       + (0.0_wp,2.0_wp) * dg * Nt * (gt * Az * g + Azt)
 
   d2gt = d2gt            + (A2t * gt - gt * A2)                           &
-       + (2.0_dp,0.0_dp) * (Axt * gt + gt * Ax) * N * (Ax + g * Axt * gt) &
-       + (2.0_dp,0.0_dp) * (Ayt * gt + gt * Ay) * N * (Ay + g * Ayt * gt) &
-       + (2.0_dp,0.0_dp) * (Azt * gt + gt * Az) * N * (Az + g * Azt * gt) &
-       - (0.0_dp,2.0_dp) * (Azt + gt * Az * g) * Nt * dgt                 &
-       - (0.0_dp,2.0_dp) * dgt * N * (g * Azt * gt + Az)
+       + (2.0_wp,0.0_wp) * (Axt * gt + gt * Ax) * N * (Ax + g * Axt * gt) &
+       + (2.0_wp,0.0_wp) * (Ayt * gt + gt * Ay) * N * (Ay + g * Ayt * gt) &
+       + (2.0_wp,0.0_wp) * (Azt * gt + gt * Az) * N * (Az + g * Azt * gt) &
+       - (0.0_wp,2.0_wp) * (Azt + gt * Az * g) * Nt * dgt                 &
+       - (0.0_wp,2.0_wp) * dgt * N * (g * Azt * gt + Az)
 
   end associate
 end subroutine
@@ -74,8 +74,8 @@ pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1
             Azt => this % Azt)
 
   ! Update the residuals
-  r1  = r1  - (0.0_dp,1.0_dp) * (Az  * g1  + g1  * Azt)
-  rt1 = rt1 + (0.0_dp,1.0_dp) * (Azt * gt1 + gt1 * Az )
+  r1  = r1  - (0.0_wp,1.0_wp) * (Az  * g1  + g1  * Azt)
+  rt1 = rt1 + (0.0_wp,1.0_wp) * (Azt * gt1 + gt1 * Az )
 
   end associate
 end subroutine
@@ -91,8 +91,8 @@ pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2
             Azt  => this % Azt)
 
   ! Update the residuals
-  r2  = r2  - (0.0_dp,1.0_dp) * (Az  * g2  + g2  * Azt)
-  rt2 = rt2 + (0.0_dp,1.0_dp) * (Azt * gt2 + gt2 * Az )  
+  r2  = r2  - (0.0_wp,1.0_wp) * (Az  * g2  + g2  * Azt)
+  rt2 = rt2 + (0.0_wp,1.0_wp) * (Azt * gt2 + gt2 * Az )  
 
   end associate
 end subroutine

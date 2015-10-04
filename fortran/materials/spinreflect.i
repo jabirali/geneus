@@ -75,12 +75,12 @@ pure subroutine spinreflect_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, r
   type(spin),               intent(inout) :: r1, rt1
 
   type(spin)                              :: N1, Nt1
-  complex(dp)                             :: A(4,4)
-  complex(dp)                             :: B(4,4)
-  complex(dp)                             :: C(4,4)
-  complex(dp)                             :: D(4,4)
-  complex(dp)                             :: R(4,4)
-  complex(dp)                             :: I(4,4)
+  complex(wp)                             :: A(4,4)
+  complex(wp)                             :: B(4,4)
+  complex(wp)                             :: C(4,4)
+  complex(wp)                             :: D(4,4)
+  complex(wp)                             :: R(4,4)
+  complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
   associate(G0 => this % conductance_a, &
@@ -93,10 +93,10 @@ pure subroutine spinreflect_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, r
   Nt1 = spin_inv( pauli0 - gt1*g1 )
 
   ! Calculate the 4×4 Green's function in the left material
-  R(1:2,1:2) = (+1.0_dp) * N1  * (pauli0 + g1*gt1)
-  R(1:2,3:4) = (+2.0_dp) * N1  * g1
-  R(3:4,1:2) = (-2.0_dp) * Nt1 * gt1
-  R(3:4,3:4) = (-1.0_dp) * Nt1 * (pauli0 + gt1*g1)
+  R(1:2,1:2) = (+1.0_wp) * N1  * (pauli0 + g1*gt1)
+  R(1:2,3:4) = (+2.0_wp) * N1  * g1
+  R(3:4,1:2) = (-2.0_wp) * Nt1 * gt1
+  R(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
 
   ! Calculate intermediate matrices used in the equation below
   A = matmul(R,matmul(M,R)) - M
@@ -121,12 +121,12 @@ pure subroutine spinreflect_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, r
   type(spin),               intent(inout) :: r2, rt2
 
   type(spin)                              :: N2, Nt2
-  complex(dp)                             :: A(4,4)
-  complex(dp)                             :: B(4,4)
-  complex(dp)                             :: C(4,4)
-  complex(dp)                             :: D(4,4)
-  complex(dp)                             :: L(4,4)
-  complex(dp)                             :: I(4,4)
+  complex(wp)                             :: A(4,4)
+  complex(wp)                             :: B(4,4)
+  complex(wp)                             :: C(4,4)
+  complex(wp)                             :: D(4,4)
+  complex(wp)                             :: L(4,4)
+  complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
   associate(G0 => this % conductance_b, &
@@ -139,10 +139,10 @@ pure subroutine spinreflect_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, r
   Nt2 = spin_inv( pauli0 - gt2*g2 )
 
   ! Calculate the 4×4 Green's function in the left material
-  L(1:2,1:2) = (+1.0_dp) * N2  * (pauli0 + g2*gt2)
-  L(1:2,3:4) = (+2.0_dp) * N2  * g2
-  L(3:4,1:2) = (-2.0_dp) * Nt2 * gt2
-  L(3:4,3:4) = (-1.0_dp) * Nt2 * (pauli0 + gt2*g2)
+  L(1:2,1:2) = (+1.0_wp) * N2  * (pauli0 + g2*gt2)
+  L(1:2,3:4) = (+2.0_wp) * N2  * g2
+  L(3:4,1:2) = (-2.0_wp) * Nt2 * gt2
+  L(3:4,3:4) = (-1.0_wp) * Nt2 * (pauli0 + gt2*g2)
 
   ! Calculate intermediate matrices used in the equation below
   A = matmul(L,matmul(M,L)) - M

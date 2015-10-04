@@ -24,8 +24,8 @@ contains
     ! therefore be used to assemble individual material layers to a multilayer hybrid structure.
     class(conductor), target, intent(inout) :: material_a      ! This object represents the left  material
     class(conductor), target, intent(inout) :: material_b      ! This object represents the right material
-    real(dp),       optional, intent(in   ) :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
-    real(dp),       optional, intent(in   ) :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
+    real(wp),       optional, intent(in   ) :: conductance_a   ! Tunneling conductance of the interface (relative to the left  bulk conductance)
+    real(wp),       optional, intent(in   ) :: conductance_b   ! Tunneling conductance of the interface (relative to the right bulk conductance)
     
     ! Update the internal material pointers
     material_a % material_b => material_b
@@ -69,13 +69,13 @@ contains
     ! Numerically calculates the differential conductance at a tunneling interface.
     class(material), intent(in) :: material_a
     class(material), intent(in) :: material_b
-    real(dp),        intent(in) :: temperature
-    real(dp),        intent(in) :: voltage(:)
-    real(dp),       allocatable :: conductance(:)
-    real(dp),       allocatable :: current(:)
-    real(dp),       allocatable :: energy(:)
-    real(dp),       allocatable :: dos_a(:), ddos_a(:), idos_a(:)
-    real(dp),       allocatable :: dos_b(:), ddos_b(:), idos_b(:)
+    real(wp),        intent(in) :: temperature
+    real(wp),        intent(in) :: voltage(:)
+    real(wp),       allocatable :: conductance(:)
+    real(wp),       allocatable :: current(:)
+    real(wp),       allocatable :: energy(:)
+    real(wp),       allocatable :: dos_a(:), ddos_a(:), idos_a(:)
+    real(wp),       allocatable :: dos_b(:), ddos_b(:), idos_b(:)
     integer                     :: n, m, err
 
     ! Allocate memory
@@ -113,7 +113,7 @@ contains
                   size(energy), abs(energy-voltage(n)), idos_b, err)
 
       ! Calculate the current for this voltage
-      current(n) = 0.0_dp
+      current(n) = 0.0_wp
       do m = 1,size(energy)
         current(n) = current(n) + idos_a(m)*idos_b(m)*(fermi(energy(m)-voltage(n))-fermi(energy(m))) &
                                 * (maxval(energy)-minval(energy))/(size(energy)-1)
@@ -141,8 +141,8 @@ contains
   contains
     pure function fermi(energy)
       ! Evaluates the Fermi function at the given energy and current temperature.
-      real(dp), intent(in) :: energy
-      real(dp)             :: fermi
+      real(wp), intent(in) :: energy
+      real(wp)             :: fermi
 
       fermi = 1/(exp(energy/(temperature+1e-16))+1)
     end function
@@ -160,28 +160,28 @@ contains
     ! the Debye cutoff cosh(1/coupling), which is appropriate for selfconsistent calculations.  If not,
     ! it will only include energies up to 1.5Δ, which is sufficient for non-selfconsistent calculations.
 
-    real(dp), intent(out)          :: array(:)
-    real(dp), optional, intent(in) :: coupling
+    real(wp), intent(out)          :: array(:)
+    real(wp), optional, intent(in) :: coupling
     integer                        :: n
 
     ! Initialize the energy array
     if (present(coupling) .and. size(array) >= 600) then
       ! Positive energies from 0.0 to 1.5
       do n = 1,size(array)-300
-        array(n) = 1e-6_dp + (n-1) * (1.5_dp/(size(array)-300))
+        array(n) = 1e-6_wp + (n-1) * (1.5_wp/(size(array)-300))
       end do
       ! Positive energies from 1.5 to 4.5
       do n = 1,200
-        array(size(array)-300+n) = 1e-6_dp + 1.5_dp + (n-1) * (3.0_dp/200)
+        array(size(array)-300+n) = 1e-6_wp + 1.5_wp + (n-1) * (3.0_wp/200)
       end do
       ! Positive energies from 1.5 to cutoff
       do n = 1,100
-        array(size(array)-100+n) = 1e-6_dp + 4.5_dp + n * (cosh(1.0_dp/coupling)-4.5)/100
+        array(size(array)-100+n) = 1e-6_wp + 4.5_wp + n * (cosh(1.0_wp/coupling)-4.5)/100
       end do
     else
       ! Positive energies from 0.0 to 1.5
       do n = 1,size(array)
-        array(n) = 1e-6 + (n-1) * (1.5_dp/(size(array)-1))
+        array(n) = 1e-6 + (n-1) * (1.5_wp/(size(array)-1))
       end do
     end if
   end subroutine
@@ -189,22 +189,22 @@ contains
   pure function exchange_xy(strength, angle) result(field)
     ! This function returns a vector that describes an exchange field in the xy-plane,
     ! where the input arguments describe the exchange field using polar coordinates.
-    real(dp), intent(in) :: strength
-    real(dp), intent(in) :: angle
-    real(dp)             :: field(3)
+    real(wp), intent(in) :: strength
+    real(wp), intent(in) :: angle
+    real(wp)             :: field(3)
 
     field(1) = strength * cos(angle)
     field(2) = strength * sin(angle)
-    field(3) = 0.0_dp
+    field(3) = 0.0_wp
   end function
 
   pure function spinorbit_xy(strength, angle, alpha, beta) result(field)
     ! This function returns an SU(2) vector that describes a Rashba--Dresselhaus coupling
     ! in the xy-plane.  The coupling constants can also be provided in polar coordinates.
-    real(dp), intent(in), optional :: strength
-    real(dp), intent(in), optional :: angle
-    real(dp), intent(in), optional :: alpha
-    real(dp), intent(in), optional :: beta
+    real(wp), intent(in), optional :: strength
+    real(wp), intent(in), optional :: angle
+    real(wp), intent(in), optional :: alpha
+    real(wp), intent(in), optional :: beta
     type(spin)                     :: field(3)
 
     ! Initialize to zero
@@ -238,9 +238,9 @@ contains
     character(*),       intent(in) :: header
     integer,  optional, intent(in) :: bisection
     integer,  optional, intent(in) :: iteration
-    real(dp), optional, intent(in) :: change
-    real(dp), optional, intent(in) :: phasediff
-    real(dp), optional, intent(in) :: temperature
+    real(wp), optional, intent(in) :: change
+    real(wp), optional, intent(in) :: phasediff
+    real(wp), optional, intent(in) :: temperature
     real(sp)                       :: time
     character(len=33)              :: string
     character(len=4)               :: bar

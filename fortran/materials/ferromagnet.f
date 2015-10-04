@@ -11,7 +11,7 @@ module mod_ferromagnet
 
   ! Type declaration
   type, extends(conductor)           :: ferromagnet
-    real(dp),   allocatable          :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
+    real(wp),   allocatable          :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
     type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
   contains
     procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
@@ -33,11 +33,11 @@ contains
   pure function ferromagnet_construct_homogeneous(energy, exchange, gap, thouless, scattering, points) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor.
     type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
-    real(dp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
-    real(dp),    intent(in), optional :: exchange(3)  ! Magnetic exchange field
-    complex(dp), intent(in), optional :: gap          ! Superconducting gap   (default: conductor default)
-    real(dp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
-    real(dp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
+    real(wp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(wp),    intent(in), optional :: exchange(3)  ! Magnetic exchange field
+    complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: conductor default)
+    real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
+    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
     integer                           :: n            ! Loop variable
 
@@ -84,12 +84,12 @@ contains
   pure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(ferromagnet), intent(in   ) :: this
-    complex(dp),        intent(in   ) :: e
-    real(dp),           intent(in   ) :: z
+    complex(wp),        intent(in   ) :: e
+    real(wp),           intent(in   ) :: z
     type(spin),         intent(in   ) :: g, gt, dg, dgt
     type(spin),         intent(inout) :: d2g, d2gt
     type(spin)                        :: h, ht
-    real(dp)                          :: d
+    real(wp)                          :: d
     integer                           :: n
 
     ! Calculate the second derivatives of the Riccati parameters (conductor terms)
@@ -142,8 +142,8 @@ contains
 
         ! Update the internal variables
         do n = 1,size(exchange,2)
-          h(n)  = ((0.0_dp,-1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
-          ht(n) = ((0.0_dp,+1.0_dp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
+          h(n)  = ((0.0_wp,-1.0_wp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
+          ht(n) = ((0.0_wp,+1.0_wp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
         end do
 
         end associate

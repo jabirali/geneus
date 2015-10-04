@@ -6,7 +6,8 @@
 ! Updated: 2015-08-10
 
 module mod_system
-  use, intrinsic :: iso_fortran_env
+  use iso_fortran_env
+  use mod_math, only: wp
 
   ! Declare standard input/output units
   integer,      parameter :: stdin   = input_unit
@@ -58,7 +59,7 @@ contains
     ! Reads a command line option on the form option=value, where value is a real number.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
     ! should be initialized to a sensible default value before this subroutine is called.
-    double precision,   intent(inout) :: variable
+    real(kind=wp),      intent(inout) :: variable
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
     character(len= 22)                :: output
@@ -83,7 +84,7 @@ contains
     ! Reads a command line option on the form option=value, where value is a real vector.
     ! Note that 'variable' is only updated if the option is found, meaning that it should
     ! should be initialized to a sensible default value before this subroutine is called.
-    double precision,   intent(inout) :: array(3)
+    real(kind=wp),      intent(inout) :: array(3)
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
     character(len= 22)                :: output

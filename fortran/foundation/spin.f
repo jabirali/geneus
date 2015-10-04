@@ -14,7 +14,7 @@ module mod_spin
 
   ! Type declaration
   type spin
-    complex(dp) :: matrix(2,2)      =  0.0_dp        ! Stores the spin matrix
+    complex(wp) :: matrix(2,2)      =  0.0_wp        ! Stores the spin matrix
     contains
     procedure   :: inv              => spin_inv      ! Inverse of the matrix
     procedure   :: trace            => spin_trace    ! Trace of the matrix
@@ -98,7 +98,7 @@ contains
   pure function spin_construct_rscalar(scalar) result(this)
     ! This function constructs a spin object from a real scalar
     type(spin)             :: this
-    real(dp),  intent(in)  :: scalar
+    real(wp),  intent(in)  :: scalar
 
     this%matrix = scalar * pauli0%matrix
   end function
@@ -106,7 +106,7 @@ contains
   pure function spin_construct_cscalar(scalar) result(this)
     ! This function constructs a spin object from a complex scalar
     type(spin)               :: this
-    complex(dp), intent(in)  :: scalar
+    complex(wp), intent(in)  :: scalar
 
     this%matrix = scalar * pauli0%matrix
   end function
@@ -114,7 +114,7 @@ contains
   pure function spin_construct_cmatrix(matrix) result(this)
     ! This function constructs a spin object from a 2×2 complex matrix
     type(spin)              :: this
-    complex(dp), intent(in) :: matrix(2,2)
+    complex(wp), intent(in) :: matrix(2,2)
 
     this%matrix = matrix
   end function
@@ -122,7 +122,7 @@ contains
   pure function spin_construct_cvector(vector) result(this)
     ! This function constructs a spin object from a 4×1 complex vector
     type(spin)              :: this
-    complex(dp), intent(in) :: vector(4)
+    complex(wp), intent(in) :: vector(4)
 
     this%matrix = reshape(vector,[2,2],order=[2,1])
   end function
@@ -130,11 +130,11 @@ contains
   pure function spin_construct_rvector(vector) result(this)
     ! This function constructs a spin object from a 8×1 real vector
     type(spin)           :: this
-    real(dp), intent(in) :: vector(8)
+    real(wp), intent(in) :: vector(8)
 
     this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
                          reshape(vector(2:8:2),[2,2],order=[2,1]),&
-                         kind=dp )
+                         kind=wp )
   end function
 
   pure function spin_construct_spin(other) result(this)
@@ -148,7 +148,7 @@ contains
   pure subroutine spin_import_rscalar(this, scalar)
     ! This function assigns a spin object data from a real scalar
     type(spin), intent(out) :: this
-    real(dp),   intent(in)  :: scalar
+    real(wp),   intent(in)  :: scalar
 
     this%matrix = scalar * pauli0%matrix
   end subroutine
@@ -156,7 +156,7 @@ contains
   pure subroutine spin_import_cscalar(this, scalar)
     ! This function assigns a spin object data from a complex scalar
     type(spin),  intent(out) :: this
-    complex(dp), intent(in)  :: scalar
+    complex(wp), intent(in)  :: scalar
 
     this%matrix = scalar * pauli0%matrix
   end subroutine
@@ -164,7 +164,7 @@ contains
   pure subroutine spin_import_cmatrix(this, matrix)
     ! This function assigns a spin object data from a complex matrix
     type(spin),  intent(out) :: this
-    complex(dp), intent(in)  :: matrix(2,2)
+    complex(wp), intent(in)  :: matrix(2,2)
 
     this%matrix = matrix
   end subroutine
@@ -172,7 +172,7 @@ contains
   pure subroutine spin_import_cvector(this, vector)
     ! This function assigns a spin object data from a complex vector
     type(spin),  intent(out) :: this
-    complex(dp), intent(in)  :: vector(4)
+    complex(wp), intent(in)  :: vector(4)
 
     this%matrix = reshape(vector,[2,2],order=[2,1])
   end subroutine
@@ -180,16 +180,16 @@ contains
   pure subroutine spin_import_rvector(this, vector)
     ! This function assigns a spin object data from a real vector
     type(spin), intent(out) :: this
-    real(dp),   intent(in)  :: vector(8)
+    real(wp),   intent(in)  :: vector(8)
 
     this%matrix = cmplx( reshape(vector(1:7:2),[2,2],order=[2,1]),&
                          reshape(vector(2:8:2),[2,2],order=[2,1]),&
-                         kind=dp )
+                         kind=wp )
   end subroutine
 
   pure subroutine spin_export_cmatrix(matrix, this)
     ! This function assigns a complex matrix from a spin object
-    complex(dp), intent(out) :: matrix(2,2)
+    complex(wp), intent(out) :: matrix(2,2)
     type(spin),  intent(in)  :: this
 
     matrix = this%matrix 
@@ -197,7 +197,7 @@ contains
 
   pure subroutine spin_export_cvector(vector, this)
     ! This function assigns a complex vector from a spin object
-    complex(dp), intent(out) :: vector(4)
+    complex(wp), intent(out) :: vector(4)
     type(spin),  intent(in)  :: this
 
     vector = [ this%matrix(1,:), this%matrix(2,:) ]
@@ -205,7 +205,7 @@ contains
 
   pure subroutine spin_export_rvector(vector, this)
     ! This function assigns a real vector from a spin object
-    real(dp),  intent(out) :: vector(8)
+    real(wp),  intent(out) :: vector(8)
     type(spin), intent(in) :: this
 
     vector(1:7:2) =  real([ this%matrix(1,:), this%matrix(2,:) ])
@@ -228,7 +228,7 @@ contains
   elemental pure function spin_multl_rscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a real scalar
     type(spin)             :: r
-    real(dp),   intent(in) :: a
+    real(wp),   intent(in) :: a
     type(spin), intent(in) :: b
 
     r = spin(a * b%matrix)
@@ -238,7 +238,7 @@ contains
     ! Defines right multiplication of a spin matrix by a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
-    real(dp),   intent(in) :: b
+    real(wp),   intent(in) :: b
 
     r = spin(a%matrix * b)
   end function
@@ -246,7 +246,7 @@ contains
   elemental pure function spin_multl_cscalar(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a complex scalar
     type(spin)             :: r
-    complex(dp), intent(in) :: a
+    complex(wp), intent(in) :: a
     type(spin),  intent(in) :: b
 
     r = spin(a * b%matrix)
@@ -256,7 +256,7 @@ contains
     ! Defines right multiplication of a spin matrix by a complex scalar
     type(spin)              :: r
     type(spin),  intent(in) :: a
-    complex(dp), intent(in) :: b
+    complex(wp), intent(in) :: b
 
     r = spin(a%matrix * b)
   end function
@@ -264,7 +264,7 @@ contains
   pure function spin_multl_cmatrix(a,b) result(r)
     ! Defines left multiplication of a spin matrix by a complex matrix
     type(spin)              :: r
-    complex(dp), intent(in) :: a(2,2)
+    complex(wp), intent(in) :: a(2,2)
     type(spin),  intent(in) :: b
  
     r = spin(matmul(a, b%matrix))
@@ -274,7 +274,7 @@ contains
     ! Defines right multiplication of a spin matrix by a complex matrix
     type(spin)              :: r
     type(spin),  intent(in) :: a
-    complex(dp), intent(in) :: b(2,2)
+    complex(wp), intent(in) :: b(2,2)
 
     r = spin(matmul(a%matrix, b))
   end function
@@ -291,7 +291,7 @@ contains
     ! Defines division of a spin matrix by a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
-    real(dp),   intent(in) :: b
+    real(wp),   intent(in) :: b
 
     r = spin(a%matrix / b)
   end function
@@ -300,7 +300,7 @@ contains
     ! Defines division of a spin matrix by a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
-    complex(dp),intent(in) :: b
+    complex(wp),intent(in) :: b
 
     r = spin(a%matrix / b)
   end function
@@ -308,7 +308,7 @@ contains
   pure function spin_addl_rscalar(a,b) result(r)
     ! Defines left addition of a spin matrix and a real scalar
     type(spin)             :: r
-    real(dp),   intent(in) :: a
+    real(wp),   intent(in) :: a
     type(spin), intent(in) :: b
 
     r = spin(a*pauli0%matrix + b%matrix)
@@ -318,7 +318,7 @@ contains
     ! Defines right addition of a spin matrix and a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
-    real(dp),   intent(in) :: b
+    real(wp),   intent(in) :: b
 
     r = spin(a%matrix + b*pauli0%matrix)
   end function
@@ -326,7 +326,7 @@ contains
   pure function spin_addl_cscalar(a,b) result(r)
     ! Defines left addition of a spin matrix and a complex scalar
     type(spin)              :: r
-    complex(dp), intent(in) :: a
+    complex(wp), intent(in) :: a
     type(spin),  intent(in) :: b
 
     r = spin(a*pauli0%matrix + b%matrix)
@@ -336,7 +336,7 @@ contains
     ! Defines right addition of a spin matrix and a complex scalar
     type(spin)              :: r
     type(spin),  intent(in) :: a
-    complex(dp), intent(in) :: b
+    complex(wp), intent(in) :: b
 
     r = spin(a%matrix + b*pauli0%matrix)
   end function
@@ -344,7 +344,7 @@ contains
   pure function spin_addl_cmatrix(a,b) result(r)
     ! Defines left addition of a spin matrix and a complex matrix
     type(spin)              :: r
-    complex(dp), intent(in) :: a(2,2)
+    complex(wp), intent(in) :: a(2,2)
     type(spin),  intent(in) :: b
 
     r = spin(a + b%matrix)
@@ -354,7 +354,7 @@ contains
     ! Defines right addition of a spin matrix and a complex matrix
     type(spin)              :: r
     type(spin),  intent(in) :: a
-    complex(dp), intent(in) :: b(2,2)
+    complex(wp), intent(in) :: b(2,2)
 
     r = spin(a%matrix + b)
   end function
@@ -370,7 +370,7 @@ contains
   pure function spin_subl_rscalar(a,b) result(r)
     ! Defines left subtraction of a spin matrix and a real scalar
     type(spin)             :: r
-    real(dp),   intent(in) :: a
+    real(wp),   intent(in) :: a
     type(spin), intent(in) :: b
 
     r = spin(a*pauli0%matrix - b%matrix)
@@ -380,7 +380,7 @@ contains
     ! Defines right subtraction of a spin matrix and a real scalar
     type(spin)             :: r
     type(spin), intent(in) :: a
-    real(dp),   intent(in) :: b
+    real(wp),   intent(in) :: b
 
     r = spin(a%matrix - b*pauli0%matrix)
   end function
@@ -388,7 +388,7 @@ contains
   pure function spin_subl_cscalar(a,b) result(r)
     ! Defines left subtraction of a spin matrix and a complex scalar
     type(spin)              :: r
-    complex(dp), intent(in) :: a
+    complex(wp), intent(in) :: a
     type(spin),  intent(in) :: b
 
     r = spin(a*pauli0%matrix - b%matrix)
@@ -398,7 +398,7 @@ contains
     ! Defines right subtraction of a spin matrix and a complex scalar
     type(spin)              :: r
     type(spin),  intent(in) :: a
-    complex(dp), intent(in) :: b
+    complex(wp), intent(in) :: b
 
     r = spin(a%matrix - b*pauli0%matrix)
   end function
@@ -406,7 +406,7 @@ contains
   pure function spin_subl_cmatrix(a,b) result(r)
     ! Defines left subtraction of a spin matrix and a complex matrix
     type(spin)              :: r
-    complex(dp), intent(in) :: a(2,2)
+    complex(wp), intent(in) :: a(2,2)
     type(spin),  intent(in) :: b
 
     r = spin(a - b%matrix)
@@ -416,7 +416,7 @@ contains
     ! Defines right subtraction of a spin matrix and a complex matrix
     type(spin)              :: r
     type(spin),  intent(in) :: a
-    complex(dp), intent(in) :: b(2,2)
+    complex(wp), intent(in) :: b(2,2)
 
     r = spin(a%matrix - b)
   end function
@@ -441,7 +441,7 @@ contains
     ! Defines right matrix division of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
-    complex(dp)            :: invdet
+    complex(wp)            :: invdet
 
     r%matrix = matdivr2(a%matrix, b%matrix)
   end function
@@ -456,7 +456,7 @@ contains
 
   pure function spin_trace(this) result(r)
     ! Calculates the trace of the spin matrix
-    complex(dp)             :: r
+    complex(wp)             :: r
     class(spin), intent(in) :: this
 
     r = this%matrix(1,1) + this%matrix(2,2)
@@ -464,7 +464,7 @@ contains
 
   pure elemental function spin_norm(this) result(r)
     ! Calculates the Frobenius norm of the spin matrix
-    real(dp)                :: r, w(8)
+    real(wp)                :: r, w(8)
     class(spin), intent(in) :: this
 
     w = this
@@ -473,7 +473,7 @@ contains
 
   pure function spin_min(this) result(r)
     ! Calculates the size of the smallest element in the spin matrix
-    real(dp)                :: r
+    real(wp)                :: r
     class(spin), intent(in) :: this
 
     r = minval(abs(this%matrix))
@@ -481,7 +481,7 @@ contains
 
   pure function spin_max(this) result(r)
     ! Calculates the size of the largest element in the spin matrix
-    real(dp)                :: r
+    real(wp)                :: r
     class(spin), intent(in) :: this
 
     r = maxval(abs(this%matrix))

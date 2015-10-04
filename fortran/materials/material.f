@@ -14,12 +14,12 @@ module mod_material
   ! Type declarations
   type, abstract :: material
     ! These parameters determine the basic physical behaviour of a diffusive material
-    real(dp)                                  :: thouless        =  1.00_dp               ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(dp)                                  :: scattering      =  0.01_dp               ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    real(wp)                                  :: thouless        =  1.00_wp               ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(wp)                                  :: scattering      =  0.01_wp               ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical Green's functions
-    real(dp),                     allocatable :: energy(:)                                ! Discretized domain for the energies
-    real(dp),                     allocatable :: location(:)                              ! Discretized domain for the positions
+    real(wp),                     allocatable :: energy(:)                                ! Discretized domain for the energies
+    real(wp),                     allocatable :: location(:)                              ! Discretized domain for the positions
     type(green),                  allocatable :: greenr(:,:)                              ! Discretized values for the Green's function (retarded component)
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
@@ -31,8 +31,8 @@ module mod_material
     integer                                   :: order           =  4                     ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                                   :: control         =  2                     ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                                   :: information     =  0                     ! How much information that should be written to standard out (range: [-1,2])
-    real(dp)                                  :: tolerance       =  1e-6_dp               ! Error tolerance (determines the maximum allowed defect or global error)
-    real(dp)                                  :: difference      =  1e+6_dp               ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
+    real(wp)                                  :: tolerance       =  1e-6_wp               ! Error tolerance (determines the maximum allowed defect or global error)
+    real(wp)                                  :: difference      =  1e+6_wp               ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
     character(len=128)                        :: type_string     =  'MATERIAL'            ! The type string should describe the specific class(material) subtype
@@ -59,10 +59,10 @@ module mod_material
   abstract interface
     pure subroutine init(this, gap)
       ! This interface is used for the deferred procedure init.
-      import material, dp
+      import material, wp
 
       class(material), intent(inout) :: this
-      complex(dp),     intent(in   ) :: gap
+      complex(wp),     intent(in   ) :: gap
     end subroutine
   end interface
 
@@ -78,20 +78,20 @@ module mod_material
   abstract interface
     pure subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
       ! This interface is used for the deferred procedure diffusion_equation.
-      import material, spin, dp
+      import material, spin, wp
 
       class(material), intent(in   ) :: this
       type(spin),      intent(in   ) :: g, gt, dg, dgt
       type(spin),      intent(inout) :: d2g, d2gt
-      complex(dp),     intent(in   ) :: e
-      real(dp),        intent(in   ) :: z
+      complex(wp),     intent(in   ) :: e
+      real(wp),        intent(in   ) :: z
     end subroutine
   end interface
 
   abstract interface
     pure subroutine interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
       ! This interface is used for the deferred procedure interface_equation_a.
-      import material, green, spin, dp
+      import material, green, spin, wp
 
       class(material),          intent(in   ) :: this
       type(green),              intent(in   ) :: a
@@ -103,7 +103,7 @@ module mod_material
   abstract interface
     pure subroutine interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
       ! This interface is used for the deferred procedure interface_equation_b.
-      import material, green, spin, dp
+      import material, green, spin, wp
 
       class(material),          intent(in   ) :: this
       type(green),              intent(in   ) :: b
@@ -124,7 +124,7 @@ contains
     class(material), intent(inout) :: this  ! Material that will be updated
     type(green)                    :: a     ! State at this energy at the left  interface
     type(green)                    :: b     ! State at this energy at the right interface
-    complex(dp)                    :: e     ! Complex energy relative to the Thouless energy
+    complex(wp)                    :: e     ! Complex energy relative to the Thouless energy
     integer                        :: n     ! Outer loop variable (current energy)
 
     ! Call the prehook method
@@ -136,14 +136,14 @@ contains
     end if
 
     ! Reset the difference since last update to zero
-    this%difference = 0.0_dp
+    this%difference = 0.0_wp
 
     ! Loop over the discretized energy levels
     do n=1,size(this%energy)
       block
         ! Declare local block variables
-        real(dp)      :: u(32,size(this%location))  ! Representation of the retarded Green's functions
-        real(dp)      :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
+        real(wp)      :: u(32,size(this%location))  ! Representation of the retarded Green's functions
+        real(wp)      :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
         type(bvp_sol) :: sol                        ! Workspace for the bvp_solver procedures
         integer       :: m                          ! Inner loop variable (current location)
 
@@ -163,7 +163,7 @@ contains
         d = u
 
         ! Calculate the complex energy (relative to the Thouless energy)
-        e = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=dp)
+        e = cmplx(this%energy(n)/this%thouless, this%scattering/this%thouless, kind=wp)
 
         ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
@@ -212,9 +212,9 @@ contains
   contains
     pure subroutine ode(z, u, f)
       ! Definition of the differential equation u'=f(z,u).
-      real(dp), intent(in)  :: z
-      real(dp), intent(in)  :: u(32)
-      real(dp), intent(out) :: f(32)
+      real(wp), intent(in)  :: z
+      real(wp), intent(in)  :: u(32)
+      real(wp), intent(out) :: f(32)
       type(spin)            :: g, gt, dg, dgt, d2g, d2gt
 
       ! Extract the Riccati parameters
@@ -235,10 +235,10 @@ contains
 
     pure subroutine bc(ua, ub, bca, bcb)
       ! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
-      real(dp), intent(in)  :: ua(32)
-      real(dp), intent(in)  :: ub(32)
-      real(dp), intent(out) :: bca(16)
-      real(dp), intent(out) :: bcb(16)
+      real(wp), intent(in)  :: ua(32)
+      real(wp), intent(in)  :: ub(32)
+      real(wp), intent(out) :: bca(16)
+      real(wp), intent(out) :: bcb(16)
 
       type(spin)            :: g1, gt1, dg1, dgt1, r1, rt1
       type(spin)            :: g2, gt2, dg2, dgt2, r2, rt2
@@ -313,11 +313,11 @@ contains
     ! Writes the density of states as a function of position and energy to a given output unit.
     class(material), intent(in) :: this      ! Material that the density of states will be calculated from
     integer,         intent(in) :: unit      ! Output unit that determines where the information will be written
-    real(dp),        intent(in) :: a, b      ! Left and right end points of the material
-    real(dp)                    :: x         ! Current location
+    real(wp),        intent(in) :: a, b      ! Left and right end points of the material
+    real(wp)                    :: x         ! Current location
     integer                     :: n, m      ! Temporary loop variables
 
-    if (minval(this%energy) < -1e-16_dp) then
+    if (minval(this%energy) < -1e-16_wp) then
       ! If we have data for both positive and negative energies, simply write out the data
       do m=1,size(this%location)
         x = a+1e-8 + ((b-1e-8)-(a+1e-8)) * this%location(m)

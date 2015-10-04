@@ -27,14 +27,14 @@ program critical
   integer                           :: ferromagnets = 0
   integer                           :: energies     = 800
   integer                           :: points       = 150
-  real(dp)                          :: scattering   = 0.01_dp
-  real(dp)                          :: coupling     = 0.20_dp
-  real(dp)                          :: initgap      = 1e-5_dp
-  real(dp)                          :: minimum      = 0.00_dp
-  real(dp)                          :: maximum      = 1.00_dp
+  real(wp)                          :: scattering   = 0.01_wp
+  real(wp)                          :: coupling     = 0.20_wp
+  real(wp)                          :: initgap      = 1e-5_wp
+  real(wp)                          :: minimum      = 0.00_wp
+  real(wp)                          :: maximum      = 1.00_wp
 
   ! Declare the variables used by the program
-  real(dp),             allocatable :: energy_array(:)
+  real(wp),             allocatable :: energy_array(:)
   integer                           :: n, m, k
 
 
@@ -69,13 +69,13 @@ program critical
   ! Initialize the materials at zero temperature
   if (size(f) > 0) then
     ! Disable gap updates for the superconductor
-    s(1) % coupling = 0.0_dp
+    s(1) % coupling = 0.0_wp
 
     ! Loop until convergence for a fixed gap and zero temperature
     n = 0
     do while (max(maxval(s%difference/s%tolerance),maxval(f%difference/f%tolerance)) > 10)
       ! Status information
-      call print_status('         INITIALIZATION', bisection=0, iteration=n, change = maxval(f%difference), temperature = 0.0_dp)
+      call print_status('         INITIALIZATION', bisection=0, iteration=n, change = maxval(f%difference), temperature = 0.0_wp)
 
       ! Update the state of the system (including edges)
       do m=size(f),1,-1
@@ -111,8 +111,8 @@ program critical
   !                           BINARY SEARCH PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
-  ! Set the system temperature to the midpoint of the search space
-  s(1) % temperature = (minimum + maximum)/2.0_dp
+  ! Set the system temperature to the miwpoint of the search space
+  s(1) % temperature = (minimum + maximum)/2.0_wp
 
   ! Perform the binary search
   do n = 1,bisections
@@ -127,7 +127,7 @@ program critical
         call f(m) % load(fb(m))
       end do
     else
-      call s(1) % init( gap = cmplx(initgap,0,kind=dp) )
+      call s(1) % init( gap = cmplx(initgap,0,kind=wp) )
     end if
 
     ! Update the superconductor once
@@ -157,14 +157,14 @@ program critical
     end if
 
     ! Check whether the gap has increased or not, and update the search space accordingly
-    if (abs(s(1)%get_gap_mean()/initgap) >= 1.0_dp) then
+    if (abs(s(1)%get_gap_mean()/initgap) >= 1.0_wp) then
       minimum = s(1) % temperature
     else
       maximum = s(1) % temperature
     end if
 
-    ! Set the system temperature to the midpoint of the updated search space
-    s(1) % temperature = (maximum + minimum)/2.0_dp
+    ! Set the system temperature to the miwpoint of the updated search space
+    s(1) % temperature = (maximum + minimum)/2.0_wp
   end do
 
   ! Print the final results
@@ -301,28 +301,28 @@ contains
 
     ! Declare the input/output variables
     character(8) :: ioname
-    real(dp)     :: length     
-    real(dp)     :: conductance_a
-    real(dp)     :: conductance_b
-    real(dp)     :: polarization_a
-    real(dp)     :: polarization_b
-    real(dp)     :: spinmixing_a
-    real(dp)     :: spinmixing_b
-    real(dp)     :: spinorbit_a
-    real(dp)     :: spinorbit_b
-    real(dp)     :: magnetization_a(3)
-    real(dp)     :: magnetization_b(3)
+    real(wp)     :: length     
+    real(wp)     :: conductance_a
+    real(wp)     :: conductance_b
+    real(wp)     :: polarization_a
+    real(wp)     :: polarization_b
+    real(wp)     :: spinmixing_a
+    real(wp)     :: spinmixing_b
+    real(wp)     :: spinorbit_a
+    real(wp)     :: spinorbit_b
+    real(wp)     :: magnetization_a(3)
+    real(wp)     :: magnetization_b(3)
 
     ! Set the default values
-    length           = 1.00_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
-    magnetization_a  = 0.00_dp
-    magnetization_b  = 0.00_dp
-    polarization_a   = 0.00_dp
-    polarization_b   = 0.00_dp
-    conductance_a    = 0.30_dp
-    conductance_b    = 0.30_dp
+    length           = 1.00_wp
+    spinorbit_a      = 0.00_wp
+    spinorbit_b      = 0.00_wp
+    magnetization_a  = 0.00_wp
+    magnetization_b  = 0.00_wp
+    polarization_a   = 0.00_wp
+    polarization_b   = 0.00_wp
+    conductance_a    = 0.30_wp
+    conductance_b    = 0.30_wp
 
     ! Determine the superconductor name
     write(ioname, '(a,i0)') 's', m
@@ -353,11 +353,11 @@ contains
 
     ! Construct the superconductor
     s(m)  = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
-                          points = points, coupling = coupling, gap = cmplx(initgap,0,kind=dp))
+                          points = points, coupling = coupling, gap = cmplx(initgap,0,kind=wp))
 
     ! Construct the backup
     sb(m) = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
-                           points = points, coupling = coupling, gap = cmplx(initgap,0,kind=dp))
+                           points = points, coupling = coupling, gap = cmplx(initgap,0,kind=wp))
     
     ! Set the internal fields
     s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
@@ -392,30 +392,30 @@ contains
 
     ! Declare the input variables
     character(len=8) :: ioname
-    real(dp)         :: length     
-    real(dp)         :: conductance_a
-    real(dp)         :: conductance_b
-    real(dp)         :: polarization_a
-    real(dp)         :: polarization_b
-    real(dp)         :: spinmixing_a
-    real(dp)         :: spinmixing_b
-    real(dp)         :: spinorbit_a
-    real(dp)         :: spinorbit_b
-    real(dp)         :: exchange(3)
-    real(dp)         :: magnetization_a(3)
-    real(dp)         :: magnetization_b(3)
+    real(wp)         :: length     
+    real(wp)         :: conductance_a
+    real(wp)         :: conductance_b
+    real(wp)         :: polarization_a
+    real(wp)         :: polarization_b
+    real(wp)         :: spinmixing_a
+    real(wp)         :: spinmixing_b
+    real(wp)         :: spinorbit_a
+    real(wp)         :: spinorbit_b
+    real(wp)         :: exchange(3)
+    real(wp)         :: magnetization_a(3)
+    real(wp)         :: magnetization_b(3)
 
     ! Set the default values
-    length           = 1.00_dp
-    exchange         = 0.00_dp
-    conductance_a    = 0.30_dp
-    conductance_b    = 0.30_dp
-    magnetization_a  = 0.00_dp
-    magnetization_b  = 0.00_dp
-    polarization_a   = 0.00_dp
-    polarization_b   = 0.00_dp
-    spinorbit_a      = 0.00_dp
-    spinorbit_b      = 0.00_dp
+    length           = 1.00_wp
+    exchange         = 0.00_wp
+    conductance_a    = 0.30_wp
+    conductance_b    = 0.30_wp
+    magnetization_a  = 0.00_wp
+    magnetization_b  = 0.00_wp
+    polarization_a   = 0.00_wp
+    polarization_b   = 0.00_wp
+    spinorbit_a      = 0.00_wp
+    spinorbit_b      = 0.00_wp
 
     ! Determine the ferromagnet name
     write(ioname, '(a,i0)') 'f', m
@@ -446,11 +446,11 @@ contains
 
     ! Construct the ferromagnet
     f(m)  = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                        points = points, gap = cmplx(initgap,0,kind=dp), exchange = exchange)
+                        points = points, gap = cmplx(initgap,0,kind=wp), exchange = exchange)
 
     ! Construct the backup
     fb(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                        points = points, gap = cmplx(initgap,0,kind=dp), exchange = exchange)
+                        points = points, gap = cmplx(initgap,0,kind=wp), exchange = exchange)
 
     ! Set the internal fields
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
