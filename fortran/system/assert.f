@@ -4,22 +4,22 @@
 ! Created: 2015-07-13
 ! Updated: 2015-10-04
 
-
 module mod_assert
-  use mod_stdio
-  use mod_math, only: eps, wp
-  use mod_spin, only: spin
+  use mod_stdio, only: color_none, color_red, color_green
+  use mod_math,  only: eps, wp
+  use mod_spin,  only: spin
   implicit none
   private
 
-  ! Public interface
+  ! Public interface for unit testing
   public check, assert
 
-  ! Generic procedures
+  ! Check if some expression is numerically zero or logically true
   interface check
     module procedure check_scalar, check_array
   end interface
 
+  ! Assert that an expression is numerically zero or logically true
   interface assert
     module procedure assert_scalar, assert_array
   end interface

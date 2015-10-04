@@ -22,13 +22,13 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
 
 # Source files
-file(GLOB src_ext77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
-file(GLOB src_ext90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f")
-file(GLOB src_mod   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/foundation/*.f" "fortran/materials/*.f")
-file(GLOB src_exe   RELATIVE ${CMAKE_SOURCE_DIR} "fortran/programs/*.f")
+file(GLOB src_e77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
+file(GLOB src_e90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f")
+file(GLOB src_mod RELATIVE ${CMAKE_SOURCE_DIR} "fortran/system/*.f" "fortran/foundation/*.f" "fortran/materials/*.f")
+file(GLOB src_exe RELATIVE ${CMAKE_SOURCE_DIR} "fortran/programs/*.f")
 
 # Libraries
-add_library(s4tran STATIC ${src_mod} ${src_ext90} ${src_ext77})
+add_library(s4tran STATIC ${src_mod} ${src_e90} ${src_e77})
 
 # Executables
 foreach(src_name ${src_exe})
@@ -63,8 +63,8 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
 
   # Flags that apply to external files (imported from other projects)
-  set_source_files_properties(${src_ext77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
-  set_source_files_properties(${src_ext90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
+  set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
+  set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
 
   # Flags that apply to internal files (produced as part of this project)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")

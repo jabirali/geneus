@@ -9,10 +9,10 @@ module mod_option
   implicit none
   private
 
-  ! Public interface
+  ! Public interface for parsing command line arguments
   public option, print_option
 
-  ! Generic procedures
+  ! Set a variable based on a command line argument
   interface option
     module procedure option_logical, option_integer, option_real, option_reals, option_string
   end interface

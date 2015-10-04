@@ -16,7 +16,6 @@ module mod_stdio
 
   ! Define escape codes for terminal colors
   character(*), parameter :: color_none   = '[0m'
-  character(*), parameter :: color_bold   = '[1m'
   character(*), parameter :: color_red    = '[31m'
   character(*), parameter :: color_green  = '[32m'
   character(*), parameter :: color_yellow = '[33m'
