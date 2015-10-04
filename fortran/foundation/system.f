@@ -8,14 +8,6 @@
 module mod_system
   use, intrinsic :: iso_fortran_env
 
-  ! Declare whether the terminal supports colors
-  ! [disable this when using cmd.exe on Windows]
-  logical,      parameter :: colors  = .true.
-
-  ! Declare whether the terminal supports unicode
-  ! [disable this when using cmd.exe on Windows]
-  logical,      parameter :: unicode = .true.
-
   ! Declare standard input/output units
   integer,      parameter :: stdin   = input_unit
   integer,      parameter :: stdout  = output_unit
@@ -162,14 +154,8 @@ contains
 
   subroutine print_option
     ! Prints out a header for runtime parameters.
-    if (unicode) then
     write(*,'(a)') '╒═══════════════════════════════════╕'
     write(*,'(a)') '│        RUNTIME  PARAMETERS        │'
     write(*,'(a)') '╘═══════════════════════════════════╛'
-    else
-    write(*,'(a)') '+-----------------------------------+'
-    write(*,'(a)') '|        RUNTIME  PARAMETERS        |'
-    write(*,'(a)') '+-----------------------------------+'
-    end if
   end subroutine
 end module 

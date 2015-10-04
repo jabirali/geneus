@@ -252,19 +252,11 @@ contains
     string = header
 
     ! Print the progress information to standard out
-    if (unicode) then
     write(*,'(a)') '                                     '
     write(*,'(a)') '╒═══════════════════════════════════╕'
     write(*,'(a)') '│ '         // string //          ' │'
     write(*,'(a)') '├───────────────────────────────────┤'
     bar = '│'
-    else
-    write(*,'(a)') '                                     '
-    write(*,'(a)') '+-----------------------------------+'
-    write(*,'(a)') '| '         // string //          ' |'
-    write(*,'(a)') '+-----------------------------------+'
-    bar = '|'
-    end if
     if (present(bisection)) then
       write(*,'(a,3x,a,i8,3x,a)')                       &
         trim(bar),'Bisection:           ', bisection,   trim(bar)
@@ -290,11 +282,7 @@ contains
       int(time/3600.0_sp),':',                          &
       int(mod(time,3600.0_sp)/60.0_sp),':',             &
       int(mod(time,60.0_sp)),                           trim(bar)
-    if (unicode) then
     write(*,'(a)') '╘═══════════════════════════════════╛'
-    else
-    write(*,'(a)') '+-----------------------------------+'
-    end if
 
     ! Flush the progress information to standard out
     flush(unit=stdout)

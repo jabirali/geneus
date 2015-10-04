@@ -1,40 +1,76 @@
 ! This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
 ! floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
-! the type of the variable. It also defines some common mathematical functions, like matrix inversion of small matrices.
+! the type of the variable.  It also defines the working-precision wp,  which is the default kind for module procedures.
+! As for module procedures, this library defines common utility functions for working with complex numbers and matrices.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-09-23
-! Updated: 2015-09-28
+! Updated: 2015-10-04
 
 module mod_math
   use, intrinsic :: iso_fortran_env
 
   ! Declare floating-point precisions
-  integer,     parameter :: sp  = REAL32
-  integer,     parameter :: dp  = REAL64
-  integer,     parameter :: qp  = REAL128
+  integer,     parameter :: sp  = REAL32              ! Single precision
+  integer,     parameter :: dp  = REAL64              ! Double precision
+  integer,     parameter :: qp  = REAL128             ! Quadruple precision
+  integer,     parameter :: wp  = dp                  ! Working precision
 
   ! Define common mathematical constants
-  real(dp),    parameter :: inf = huge(1.0_dp)
-  real(dp),    parameter :: pi  = atan(1.0_dp)*4.0_dp
-  complex(dp), parameter :: i   = (0.0_dp,1.0_dp)
+  real(wp),    parameter :: inf = huge(1.0_wp)        ! Numerical infinity
+  real(wp),    parameter :: eps = epsilon(1.0_wp)     ! Numerical infinitesimal
+  real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp ! Mathematical circle constant
+  complex(wp), parameter :: i   = (0.0_wp,1.0_wp)     ! Mathematical imaginary unit
 
   ! Define common identity matrices
-  real(dp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])
-  real(dp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])
-  real(dp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4])
+  real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])
+  real(wp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])
+  real(wp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4])
 
 contains
+  !----------------------------------------------------------------------------!
+  !                        COMPLEX NUMBER PROCEDURES                           !
+  !----------------------------------------------------------------------------!
+
+  pure elemental function re(z) result(x)
+    ! Returns the real part of a complex number z=x+iy.
+    complex(wp), intent(in) :: z
+    real(wp)                :: x
+
+    x = real(z,kind=wp)
+  end function
+
+  pure elemental function im(z) result(y)
+    ! Returns the imaginary part of a complex number z=x+iy.
+    complex(wp), intent(in) :: z
+    real(wp)                :: y
+
+    y = aimag(z)
+  end function
+
+  pure elemental function cx(x,y) result(z)
+    ! Returns the complex number z=x+iy.
+    real(wp), intent(in) :: x
+    real(wp), intent(in) :: y
+    complex(wp)          :: z
+
+    z = cmplx(x,y,kind=wp)
+  end function
+
+  !----------------------------------------------------------------------------!
+  !                       ELEMENTARY MATRIX PROCEDURES                         !
+  !----------------------------------------------------------------------------!
+
   pure function mateye(n) result(A)
     ! Constructs an n×n identity matrix.
     integer, intent(in) :: n
     integer             :: i, j
-    real(dp)            :: A(n,n)
+    real(wp)            :: A(n,n)
 
     ! Initialize by exploiting integer arithmetic to avoid multiple passes
     do i=1,n
       do j=1,n
-        A(i,j) = (i/j)*(j/i)
+        A(j,i) = (i/j)*(j/i)
       end do
     end do
   end function
@@ -43,14 +79,14 @@ contains
     ! Constructs an n×n random matrix.
     integer, allocatable :: seed(:)
     integer              :: n, m, u
-    complex(dp)          :: A(n,n)
-    real(dp)             :: R(n,n)
-    real(dp)             :: I(n,n)
+    complex(wp)          :: A(n,n)
+    real(wp)             :: R(n,n)
+    real(wp)             :: I(n,n)
 
-    ! Check the size of an RNG seed
+    ! Check the size of a random seed
     call random_seed(size = m)
 
-    ! Allocate memory for the RNG seed
+    ! Allocate memory for the random seed
     allocate(seed(m))
 
     ! Initialize the seed using random numbers from the operating system
@@ -58,13 +94,13 @@ contains
     read(unit=u) seed
     close(unit=u)
 
-    ! Initialize the RNG using the seed
+    ! Initialize the random number generator
     call random_seed(put = seed)
 
     ! Construct a random complex matrix
     call random_number(R)
     call random_number(I)
-    A = cmplx(R,I,kind=dp)
+    A = cx(R,I)
 
     ! Deallocate dynamic memory
     deallocate(seed)
@@ -72,9 +108,9 @@ contains
 
   pure function matinv2(A) result(B)
     ! Performs a direct calculation of the inverse of a 2×2 matrix.
-    complex(dp), intent(in) :: A(2,2)
-    complex(dp)             :: B(2,2)
-    complex(dp)             :: detinv
+    complex(wp), intent(in) :: A(2,2)
+    complex(wp)             :: B(2,2)
+    complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the matrix
     detinv = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
@@ -88,10 +124,10 @@ contains
 
   pure function matdivl2(A,B) result(C)
     ! Performs a direct calculation of a 2×2 matrix left division.
-    complex(dp), intent(in) :: A(2,2)
-    complex(dp), intent(in) :: B(2,2)
-    complex(dp)             :: C(2,2)
-    complex(dp)             :: detinv
+    complex(wp), intent(in) :: A(2,2)
+    complex(wp), intent(in) :: B(2,2)
+    complex(wp)             :: C(2,2)
+    complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the left matrix
     detinv = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
@@ -105,10 +141,10 @@ contains
 
   pure function matdivr2(A,B) result(C)
     ! Performs a direct calculation of a 2×2 matrix right division.
-    complex(dp), intent(in) :: A(2,2)
-    complex(dp), intent(in) :: B(2,2)
-    complex(dp)             :: C(2,2)
-    complex(dp)             :: detinv
+    complex(wp), intent(in) :: A(2,2)
+    complex(wp), intent(in) :: B(2,2)
+    complex(wp)             :: C(2,2)
+    complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the right matrix
     detinv = 1/(B(1,1)*B(2,2) - B(1,2)*B(2,1))
@@ -123,9 +159,9 @@ contains
   pure function matinv3(A) result(B)
     ! Performs a direct calculation of the inverse of a 3×3 matrix.
     ! [Based on the subroutine M33INV by David G. Simpson, NASA.]
-    complex(dp), intent(in) :: A(3,3)
-    complex(dp)             :: B(3,3)
-    complex(dp)             :: detinv
+    complex(wp), intent(in) :: A(3,3)
+    complex(wp)             :: B(3,3)
+    complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the matrix
     detinv = 1/(A(1,1)*A(2,2)*A(3,3) - A(1,1)*A(2,3)*A(3,2)&
@@ -133,23 +169,23 @@ contains
               + A(1,3)*A(2,1)*A(3,2) - A(1,3)*A(2,2)*A(3,1))
 
     ! Calculate the inverse of the matrix
-    B(1,1) = +detinv * (A(2,2)*A(3,3)-A(2,3)*A(3,2))
-    B(2,1) = -detinv * (A(2,1)*A(3,3)-A(2,3)*A(3,1))
-    B(3,1) = +detinv * (A(2,1)*A(3,2)-A(2,2)*A(3,1))
-    B(1,2) = -detinv * (A(1,2)*A(3,3)-A(1,3)*A(3,2))
-    B(2,2) = +detinv * (A(1,1)*A(3,3)-A(1,3)*A(3,1))
-    B(3,2) = -detinv * (A(1,1)*A(3,2)-A(1,2)*A(3,1))
-    B(1,3) = +detinv * (A(1,2)*A(2,3)-A(1,3)*A(2,2))
-    B(2,3) = -detinv * (A(1,1)*A(2,3)-A(1,3)*A(2,1))
-    B(3,3) = +detinv * (A(1,1)*A(2,2)-A(1,2)*A(2,1))
+    B(1,1) = +detinv * (A(2,2)*A(3,3) - A(2,3)*A(3,2))
+    B(2,1) = -detinv * (A(2,1)*A(3,3) - A(2,3)*A(3,1))
+    B(3,1) = +detinv * (A(2,1)*A(3,2) - A(2,2)*A(3,1))
+    B(1,2) = -detinv * (A(1,2)*A(3,3) - A(1,3)*A(3,2))
+    B(2,2) = +detinv * (A(1,1)*A(3,3) - A(1,3)*A(3,1))
+    B(3,2) = -detinv * (A(1,1)*A(3,2) - A(1,2)*A(3,1))
+    B(1,3) = +detinv * (A(1,2)*A(2,3) - A(1,3)*A(2,2))
+    B(2,3) = -detinv * (A(1,1)*A(2,3) - A(1,3)*A(2,1))
+    B(3,3) = +detinv * (A(1,1)*A(2,2) - A(1,2)*A(2,1))
   end function
 
   pure function matinv4(A) result(B)
     ! Performs a direct calculation of the inverse of a 4×4 matrix.
     ! [Based on the subroutine M44INV by David G. Simpson, NASA.]
-    complex(dp), intent(in) :: A(4,4)
-    complex(dp)             :: B(4,4)
-    complex(dp)             :: detinv
+    complex(wp), intent(in) :: A(4,4)
+    complex(wp)             :: B(4,4)
+    complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the matrix
     detinv = &

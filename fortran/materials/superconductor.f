@@ -132,17 +132,10 @@ contains
     call this%conductor%update_prehook
 
     ! Modify the type string
-    if (colors) then
-      this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
-      if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
-      if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
-      if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // color_purple // ' [SAR]' // color_none
-    else
-      this%type_string = 'SUPERCONDUCTOR'
-      if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // ' [SOC]'
-      if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // ' [SAL]'
-      if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // ' [SAR]'
-    end if
+    this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+    if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
+    if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
+    if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // color_purple // ' [SAR]' // color_none
   end subroutine
 
   impure subroutine superconductor_update_posthook(this)

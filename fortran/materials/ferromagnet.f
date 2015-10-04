@@ -152,18 +152,10 @@ contains
 
     ! Modify the type string
     if (allocated(this%exchange)) then
-      if (colors) then
-        this%type_string = color_red // 'FERROMAGNET' // color_none
-        if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
-        if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
-        if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // color_purple // ' [SAR]' // color_none
-      else
-        this%type_string = 'FERROMAGNET'
-        this%type_string = 'SUPERCONDUCTOR'
-        if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // ' [SOC]'
-        if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // ' [SAL]'
-        if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // ' [SAR]'
-      end if
+      this%type_string = color_red // 'FERROMAGNET' // color_none
+      if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
+      if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
+      if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // color_purple // ' [SAR]' // color_none
     end if
   end subroutine
 

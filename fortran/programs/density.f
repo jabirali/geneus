@@ -423,11 +423,7 @@ contains
     ! Obtain the command line values
     if (m == 1) then
       print *
-      if (unicode) then
-        print *,'═══════════════════════════════════'
-      else
-        print *,'==================================='
-      end if
+      print *,'═══════════════════════════════════'
     end if
     if (selfconsistent) then
       call option(reflecting_a,   trim(ioname) // 'l.reflecting')
@@ -435,11 +431,7 @@ contains
       call option(spinmixing_a,    trim(ioname) // 'l.spinmixing')
       call option(polarization_a,  trim(ioname) // 'l.polarization')
       call option(magnetization_a, trim(ioname) // 'l.magnetization')
-      if (unicode) then
-        print *,'───────────────────────────────────'
-      else
-        print *,'-----------------------------------'
-      end if
+      print *,'───────────────────────────────────'
     end if
     call option(gap,               trim(ioname) // '.gap')
     if (selfconsistent) then
@@ -447,11 +439,7 @@ contains
       call option(spinorbit_a,     trim(ioname) // '.rashba')
       call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
       call option(depairing,       trim(ioname) // '.depairing')
-      if (unicode) then
-        print *,'───────────────────────────────────'
-      else
-        print *,'-----------------------------------'
-      end if
+      print *,'───────────────────────────────────'
       call option(reflecting_b,   trim(ioname) // 'r.reflecting')
       call option(conductance_b,   trim(ioname) // 'r.conductance')
       call option(spinmixing_b,    trim(ioname) // 'r.spinmixing')
@@ -459,11 +447,7 @@ contains
       call option(magnetization_b, trim(ioname) // 'r.magnetization')
     end if
     if (m == 2) then
-      if (unicode) then
-        print *,'═══════════════════════════════════'
-      else
-        print *,'==================================='
-      end if
+      print *,'═══════════════════════════════════'
       print *
       print *
     end if
@@ -570,41 +554,25 @@ contains
     write(ioname, '(a,i0)') 'f', m
 
     ! Obtain the command line values
-    if (unicode) then
-      print *,'═══════════════════════════════════'
-    else
-      print *,'==================================='
-    end if
+    print *,'═══════════════════════════════════'
     call option(conductance_a,   trim(ioname) // 'l.conductance')
     call option(spinmixing_a,    trim(ioname) // 'l.spinmixing')
     call option(polarization_a,  trim(ioname) // 'l.polarization')
     call option(magnetization_a, trim(ioname) // 'l.magnetization')
-    if (unicode) then
-      print *,'───────────────────────────────────'
-    else
-      print *,'-----------------------------------'
-    end if
+    print *,'───────────────────────────────────'
     call option(gap,             trim(ioname) // '.gap')
     call option(length,          trim(ioname) // '.length')
     call option(spinorbit_a,     trim(ioname) // '.rashba')
     call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
     call option(depairing,       trim(ioname) // '.depairing')
     call option(exchange,        trim(ioname) // '.exchange')
-    if (unicode) then
-      print *,'───────────────────────────────────'
-    else
-      print *,'-----------------------------------'
-    end if
+    print *,'───────────────────────────────────'
     call option(conductance_b,   trim(ioname) // 'r.conductance')
     call option(spinmixing_b,    trim(ioname) // 'r.spinmixing')
     call option(polarization_b,  trim(ioname) // 'r.polarization')
     call option(magnetization_b, trim(ioname) // 'r.magnetization')
     if (m == size(f)) then
-      if (unicode) then
-        print *,'═══════════════════════════════════'
-      else
-        print *,'==================================='
-      end if
+      print *,'═══════════════════════════════════'
       if (size(s) < 2) then
         print *
         print *
