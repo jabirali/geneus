@@ -52,7 +52,7 @@ contains
 
 
     ! Handle the exchange field argument
-    if (present(exchange) .and. norm2(exchange) > 1e-10) then
+    if (present(exchange) .and. norm2(exchange) > sqrt(eps)) then
       ! Allocate the exchange field array if necessary
       if (.not. allocated(this%exchange)) then
         allocate(this%exchange(3,size(this%location)))
@@ -113,7 +113,7 @@ contains
 
     ! Rename the internal variables
     if (allocated(this%exchange)) then
-      if (norm2(this%exchange) < 1e-10) then
+      if (norm2(this%exchange) < sqrt(eps)) then
         ! Deallocate negligible fields
         deallocate(this%exchange)
       else

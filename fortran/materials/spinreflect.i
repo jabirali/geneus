@@ -19,20 +19,19 @@ pure subroutine spinreflect_update_prehook(this)
       end if
 
       ! Rename the relevant variables
-      associate(G0 => this % conductance_a,   &
-                S1 => this % S1_a,            &
+      associate(S1 => this % S1_a,            &
                 S2 => this % S2_a,            &
+                M  => this % M_a,             &
                 H  => this % magnetization_a, & 
-                Q  => this % spinmixing_a,    &
-                M  => this % M_a)
+                Q  => this % spinmixing_a     )
 
       ! Calculate the elements of the magnetization matrix diag(h·σ,h·σ*)
       M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
       M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
 
       ! Calculate the relevant spin-mixing coefficients
-      S1 = (0.00,-0.25)*sin(pi*Q)
-      S2 = (0.50, 0.00)*sin(pi*Q/2)**2
+      S1 = (0.00,-0.25)*sin(Q*pi)
+      S2 = (0.50, 0.00)*sin(Q*pi/2)**2
 
       end associate
     end if
@@ -49,20 +48,19 @@ pure subroutine spinreflect_update_prehook(this)
       end if
 
       ! Rename the relevant variables
-      associate(G0 => this % conductance_b,   &
-                S1 => this % S1_b,            &
+      associate(S1 => this % S1_b,            &
                 S2 => this % S2_b,            &
+                M  => this % M_b,             &
                 H  => this % magnetization_b, & 
-                Q  => this % spinmixing_b,    &
-                M  => this % M_b)
+                Q  => this % spinmixing_b     )
 
       ! Calculate the elements of the magnetization matrix diag(h·σ,h·σ*)
       M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
       M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
 
       ! Calculate the relevant spin-mixing coefficients
-      S1 = (0.00,-0.25)*sin(Q)
-      S2 = (0.50, 0.00)*sin(Q/2)**2
+      S1 = (0.00,-0.25)*sin(Q*pi)
+      S2 = (0.50, 0.00)*sin(Q*pi/2)**2
 
       end associate
     end if
@@ -86,7 +84,7 @@ pure subroutine spinreflect_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, r
   associate(G0 => this % conductance_a, &
             S1 => this % S1_a,          &
             S2 => this % S2_a,          &
-            M  => this % M_a)
+            M  => this % M_a            )
 
   ! Calculate the normalization matrices
   N1  = spin_inv( pauli0 - g1*gt1 )
@@ -115,7 +113,7 @@ pure subroutine spinreflect_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, r
 end subroutine
 
 pure subroutine spinreflect_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-  ! Calculate the opaque spin-mixing terms in the right boundary condition, and update the residuals.
+  ! Calculate the reflecting spin-mixing terms in the right boundary condition, and update the residuals.
   class(conductor), target, intent(in   ) :: this
   type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2
@@ -132,7 +130,7 @@ pure subroutine spinreflect_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, r
   associate(G0 => this % conductance_b, &
             S1 => this % S1_b,          &
             S2 => this % S2_b,          &
-            M  => this % M_b)
+            M  => this % M_b            )
 
   ! Calculate the normalization matrices
   N2  = spin_inv( pauli0 - g2*gt2 )

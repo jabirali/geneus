@@ -1,7 +1,6 @@
 - Extend mod_spin with spin(3) vector methods, such as spin3_exp_integer and spin3_add_spin3, to simplify the ferromagnet_usadel_equation and spinorbit_usadel_equation implementations
 - Extend energy_range to include the possibility of negative energies
 - Extend the ferromagnet constructor to allow exchange field initialization from a function
-- Use namelists to construct and read config files
-- Move spinorbit_* and spinactive_* to submodules when GFortran supports it
 - Find a sensible way to append results to a file from critical temp calculations.
 - Improve output routines (inspired by CMake — red headers, yellow warnings, green status info, calculate percentage complete)
+- Create a module for reading config files, and migrate from the current option-hack to a modularized superconductor/ferromagnet initialization
