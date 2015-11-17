@@ -26,6 +26,7 @@ program density_sfi
   real(wp)              :: exponential          = 0.10_wp
   real(wp)              :: conductance          = 1.00_wp
   real(wp)              :: spinmixing           = 0.00_wp
+  real(wp)              :: scattering           = 0.05_wp
   real(wp)              :: length               = 3.00_wp
 
   ! Process command line options
@@ -34,6 +35,7 @@ program density_sfi
   call option(exponential, 'exponential')
   call option(conductance, 'conductance')
   call option(spinmixing,  'spinmixing')
+  call option(scattering,  'scattering')
   call option(length,      'length')
 
 
@@ -49,12 +51,13 @@ program density_sfi
   s = superconductor(energies)
   s % thouless    = 1/length**2
   s % temperature = temperature
+  s % scattering  = scattering
 
   ! Initialize the interface
   s % reflecting_b    = .true.
   s % spinmixing_b    = spinmixing
   s % magnetization_b = [0.0_wp, 0.0_wp, 1.0_wp]
-  s % conductance_b   = 1/0.01_wp
+  s % conductance_b   = 1000
 
   ! Open output file
   open(newunit=unit, file='density.dat')
@@ -67,7 +70,7 @@ program density_sfi
 
   do while (s%conductance_b > conductance)
     ! Status information
-    write(*,'(/,1x,a,f6.2,a)') 'BOOTSTRAP [ conductance: ', s%conductance_b, ' ]'
+    write(*,'(/,1x,a,f7.2,a)') 'BOOTSTRAP [ conductance: ', s%conductance_b, ' ]'
 
     ! Loop until weak convergence
     do while (s % difference > 0.05)
