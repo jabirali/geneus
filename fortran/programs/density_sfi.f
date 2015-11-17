@@ -22,16 +22,16 @@ program density_sfi
   integer               :: unit
 
   ! Declare the parameters that can be modified at runtime
-  real(wp)              :: exponential          = 1.10_wp
   real(wp)              :: temperature          = 0.00_wp
+  real(wp)              :: exponential          = 0.10_wp
   real(wp)              :: conductance          = 1.00_wp
   real(wp)              :: spinmixing           = 0.00_wp
   real(wp)              :: length               = 3.00_wp
 
   ! Process command line options
   write(*,*) 'CONFIGURATION:'
-  call option(exponential, 'exponential')
   call option(temperature, 'temperature')
+  call option(exponential, 'exponential')
   call option(conductance, 'conductance')
   call option(spinmixing,  'spinmixing')
   call option(length,      'length')
@@ -79,7 +79,7 @@ program density_sfi
     end do
 
     ! Update the interface conductance
-    s % conductance_b = max(s%conductance_b/exponential, conductance)
+    s % conductance_b = max(s%conductance_b/(1+exponential), conductance)
 
     ! Reset the difference counter
     s % difference = 1
