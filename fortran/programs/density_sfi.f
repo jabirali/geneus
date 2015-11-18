@@ -5,7 +5,7 @@
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-11-16
-! Updated: 2015-11-17
+! Updated: 2015-11-18
 
 program density_sfi
   use mod_option
@@ -26,8 +26,8 @@ program density_sfi
   real(wp)              :: exponential          = 0.10_wp
   real(wp)              :: conductance          = 1.00_wp
   real(wp)              :: spinmixing           = 0.00_wp
-  real(wp)              :: scattering           = 0.05_wp
-  real(wp)              :: length               = 3.00_wp
+  real(wp)              :: scattering           = 0.01_wp
+  real(wp)              :: length               = 1.00_wp
 
   ! Process command line options
   write(*,*) 'CONFIGURATION:'
