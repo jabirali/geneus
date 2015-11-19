@@ -11,8 +11,8 @@ program params_spinactive
   type(conductor)      :: f               ! Normal metal
   real(wp)             :: d               ! Density of states at zero excitation energy
   integer              :: u               ! Output unit
-  integer              :: n, nmax = 100   ! Polarization counter
-  integer              :: m, mmax = 100   ! Phaseshift counter
+  integer              :: n, nmax = 200   ! Polarization counter
+  integer              :: m, mmax = 200   ! Phaseshift counter
   integer              :: k, kmax = 3     ! Magnetization axis
 
   ! Construct the individual materials
@@ -30,19 +30,19 @@ program params_spinactive
     select case (k)
       case (1)
         ! Open the output file
-        Open(newunit=u, file='params_spinactive_x.dat')
+        open(newunit=u, file='params_spinactive_x.dat')
 
         ! Set the magnetization vector
         f % magnetization_a = [1,0,0]
       case(2)
         ! Open the output file
-        Open(newunit=u, file='params_spinactive_y.dat')
+        open(newunit=u, file='params_spinactive_y.dat')
 
         ! Set the magnetization vector
         f % magnetization_a = [0,1,0]
       case(3)
         ! Open the output file
-        Open(newunit=u, file='params_spinactive_z.dat')
+        open(newunit=u, file='params_spinactive_z.dat')
 
         ! Set the magnetization vector
         f % magnetization_a = [0,0,1]
@@ -63,7 +63,7 @@ program params_spinactive
         call f % update
 
         ! Calculate the zero-energy peak
-        d = f % greenr(1,75) % get_dos()
+        d = f % greenr(1,1) % get_dos()
 
         ! Write the result to file
         write(u,'(f10.6,2x)',advance='no') d
