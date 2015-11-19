@@ -28,9 +28,11 @@ program density_sfi
   real(wp)              :: spinmixing           = 0.00_wp
   real(wp)              :: scattering           = 0.01_wp
   real(wp)              :: length               = 1.00_wp
+  integer               :: information          = 0
 
   ! Process command line options
   write(*,*) 'CONFIGURATION:'
+  call option(information, 'information')
   call option(temperature, 'temperature')
   call option(exponential, 'exponential')
   call option(conductance, 'conductance')
@@ -52,6 +54,7 @@ program density_sfi
   s % thouless    = 1/length**2
   s % temperature = temperature
   s % scattering  = scattering
+  s % information = information
 
   ! Initialize the interface
   s % reflecting_b    = .true.
