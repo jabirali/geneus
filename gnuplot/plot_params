@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ -n "$1" ]; then
+  filename="$1"
+else
+  filename="params_spinactive_x.dat"
+fi
+
+cat ${filename} | gnuplot $(dirname $0)/plot_params.plt
