@@ -8,6 +8,7 @@
 ! Updated: 2015-11-18
 
 program density_sfi
+  use mod_stdio
   use mod_option
   use mod_hybrid
   implicit none
@@ -74,6 +75,7 @@ program density_sfi
   do while (s%conductance_b > conductance)
     ! Status information
     write(*,'(/,1x,a,f7.2,a)') 'BOOTSTRAP [ conductance: ', s%conductance_b, ' ]'
+    flush(stdout)
 
     ! Loop until weak convergence
     do while (s % difference > 0.05)
@@ -99,6 +101,7 @@ program density_sfi
 
   ! Status information
   write(*,'(/,1x,a)') 'CONVERGENCE'
+  flush(stdout)
 
   ! Loop until strong convergence
   do while ((s%difference/s%tolerance) > 10)
