@@ -24,7 +24,7 @@ set format y '%3.1f'
 
 # Plot a file provided from stdin to interactive terminal
 #set terminal wxt enhanced font 'Gillius ADF,12'
-set terminal pdf enhanced font 'Gillius ADF,12' linewidth 1.5
+set terminal pdf enhanced font 'Gillius ADF,16' linewidth 1.5
 set out 'params_spinactive.pdf'
 plot '/dev/stdin' using ($1/200-0.99575):($2/100-2):3 matrix notitle with image
 

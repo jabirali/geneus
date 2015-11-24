@@ -8,19 +8,19 @@ set style line 11 lc rgb '#808080' lt 1
 set tics nomirror out scale 0.75
 
 # Configure the axes
-set xlabel  'Energy ϵ/Δ'   offset 0,0
-set ylabel  'Position z/ξ' offset 0,0
+set xlabel  'Energy ϵ/Δ'   offset 0.0,0.5
+set ylabel  'Position z/ξ' offset 0.0,0.0
 
 set xrange  [-1.501:1.501]
 set cbrange [ 0.0:2.0]
 
 set xtics  -1.501,0.5,1.501
 set cbtics -10,1,10
-set ytics  -100,0.49999,100
-unset ytics
+set ytics  -100,1,100
+#unset ytics
 
 set format x '%3.1f'
-set format y '%3.1f'
+set format y '%3.0f'
 
 # Configure the heatmap
 set pm3d map
@@ -28,6 +28,9 @@ set pm3d map
 
 # Plot a file provided from stdin to interactive terminal
 set terminal wxt enhanced font 'Gillius ADF,12'
+#set terminal pdf enhanced font 'Gillius ADF,20' linewidth 1.5
+#set out 'density.pdf'
+#splot '/dev/stdin' using 2:($1-1):3 notitle
 splot '/dev/stdin' using 2:1:3 notitle
 
 # Wait for a mouse click
