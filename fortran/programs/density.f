@@ -139,7 +139,7 @@ program density
         end if
 
         ! Calculate the gap
-        gap   = exp((-i*pi/2)*phase)
+        gap   = exp(((0.0,-0.5)*pi)*phase)
         gapt  = conjg(gap)
 
         ! Status information
@@ -461,10 +461,10 @@ contains
     ! Construct and connect a superconducting reservoir
     if (reservoirs) then
       if (m == 1) then
-        r(m) = superconductor(energy_array, scattering = scattering, points = 1, gap = exp((-i*pi/2) * phasediff))
+        r(m) = superconductor(energy_array, scattering = scattering, points = 1, gap = exp(((0.0,-0.5)*pi) * phasediff))
         call transparent(r(m), s(m))
       else if (m == 2) then
-        r(m) = superconductor(energy_array, scattering = scattering, points = 1, gap = exp((+i*pi/2) * phasediff))
+        r(m) = superconductor(energy_array, scattering = scattering, points = 1, gap = exp(((0.0,+0.5)*pi) * phasediff))
         call transparent(s(m), r(m))
       end if
     end if

@@ -20,7 +20,7 @@ program density_sfi
   ! Declare the variables used internally by the program
   type(superconductor)  :: s
   real(wp)              :: energies(800)
-  integer               :: unit
+  integer               :: unit(4)
 
   ! Declare the parameters that can be modified at runtime
   real(wp)              :: temperature          = 0.00_wp
@@ -30,6 +30,9 @@ program density_sfi
   real(wp)              :: scattering           = 0.01_wp
   real(wp)              :: length               = 1.00_wp
   integer               :: information          = 0
+
+  ! Declare iterators used in do-loops
+  integer               :: i,j,k
 
   ! Process command line options
   write(*,*) 'CONFIGURATION:'
@@ -63,8 +66,11 @@ program density_sfi
   s % magnetization_b = [0.0_wp, 0.0_wp, 1.0_wp]
   s % conductance_b   = 1000
 
-  ! Open output file
-  open(newunit=unit, file='density.dat')
+  ! Open output files
+  open(newunit=unit(1), file='dos_l.dat')
+  open(newunit=unit(2), file='dos_c.dat')
+  open(newunit=unit(3), file='dos_r.dat')
+  open(newunit=unit(4), file='gap.dat')
 
 
 
@@ -118,25 +124,38 @@ program density_sfi
   !                              CLEANUP PROCEDURE                                 !
   !--------------------------------------------------------------------------------!
 
-  ! Close the output file
-  close(unit=unit)
+  ! Close the output files
+  do i=1,4
+    close(unit=unit(i))
+  end do
 
 contains
   impure subroutine output
-    integer :: n
-
-    ! Rewind the output file stream
-    rewind(unit)
+    ! Rewind the output file streams
+    do i=1,4
+      rewind(unit(i))
+    end do
 
     ! Write out the density of states as a function of energy
-    do n = size(s%energy),1,-1
-      write(unit,*) -s%energy(n), s%greenr(n,size(s%location))%get_dos()
+    do i = size(s%energy),1,-1
+      write(unit(1),*) -s%energy(i), s%greenr(i,1)%get_dos()
+      write(unit(2),*) -s%energy(i), s%greenr(i,size(s%location)/2)%get_dos()
+      write(unit(3),*) -s%energy(i), s%greenr(i,size(s%location))%get_dos()
     end do
-    do n = 1,size(s%energy),+1
-      write(unit,*) +s%energy(n), s%greenr(n,size(s%location))%get_dos()
+    do i = 1,size(s%energy),+1
+      write(unit(1),*) +s%energy(i), s%greenr(i,1)%get_dos()
+      write(unit(2),*) +s%energy(i), s%greenr(i,size(s%location)/2)%get_dos()
+      write(unit(3),*) +s%energy(i), s%greenr(i,size(s%location))%get_dos()
+    end do
+
+    ! Write out the superconducting gap as a function of position
+    do i = 1,size(s%location)
+      write(unit(4),*) s%location(i), abs(s%gap(i))
     end do
 
     ! Flush changes to output file
-    flush(unit)
+    do i=1,4
+      flush(unit(i))
+    end do
   end subroutine
 end program

@@ -39,12 +39,12 @@ pure subroutine spinactive_update_prehook(this)
         Pr = sqrt(1 - P**2 + eps)
         GF = 0.25 * G0 * P/(1 + Pr)
         GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
-        GM = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
+        GM = 0.25 * G0 * ((0,-2)*Q)/(1 + Pr)
       else
         ! Vacuum interfaces: spin-mixing term is normalized to the normal conductance
         GF = 0.00
         GC = 0.00
-        GM = 0.25 * (-2*i*Q)
+        GM = (0.00,-0.50) * Q
       end if
 
       end associate
@@ -81,12 +81,12 @@ pure subroutine spinactive_update_prehook(this)
         Pr = sqrt(1 - P**2 + eps)
         GF = 0.25 * G0 * P/(1 + Pr)
         GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
-        GM = 0.25 * G0 * (-2*i*Q)/(1 + Pr)
+        GM = 0.25 * G0 * ((0,-2)*Q)/(1 + Pr)
       else
         ! Vacuum interfaces: spin-mixing term is normalized to the normal conductance
         GF = 0.00
         GC = 0.00
-        GM = 0.25 * (-2*i*Q)
+        GM = (0.00,-0.50) * Q
       end if
 
       end associate

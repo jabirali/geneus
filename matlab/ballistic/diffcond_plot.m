@@ -17,8 +17,8 @@ function diffcond_plot(transmission, polarization, phaseshift, scattering, tempe
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
   % Parameters to use in calculations
-  voltage = linspace(-05,+05,300);
-  energy  = linspace(-10,+10,600);
+  voltage = linspace(-05,+05,1200);
+  energy  = linspace(-10,+10,2400);
 
   % Spin-dependent transmission probabilities
   D_up = transmission * (1+polarization);

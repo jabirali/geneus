@@ -22,7 +22,6 @@ module mod_math
   real(wp),    parameter :: inf = huge(1.0_wp)        ! Numerical infinity
   real(wp),    parameter :: eps = epsilon(1.0_wp)     ! Numerical infinitesimal
   real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp ! Circle constant
-  complex(wp), parameter :: i   = (0.0_wp,1.0_wp)     ! Imaginary unit
 
   ! Define common identity matrices
   real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])
