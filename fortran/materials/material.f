@@ -145,7 +145,7 @@ contains
     this%difference = 0.0_wp
 
     ! Loop over the discretized energy levels
-    do n=1,size(this%energy)
+    do n=size(this%energy),1,-1
       block
         ! Declare local block variables
         real(wp)      :: u(32,size(this%location))  ! Representation of the retarded Green's functions
