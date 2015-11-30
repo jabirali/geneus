@@ -125,7 +125,6 @@ contains
 
   impure subroutine material_update(this)
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
-    use bvp_m
 
     class(material), intent(inout) :: this  ! Material that will be updated
     type(green)                    :: a     ! State at this energy at the left  interface
@@ -147,6 +146,8 @@ contains
     ! Loop over the discretized energy levels
     do n=size(this%energy),1,-1
       block
+        use bvp_m
+
         ! Declare local block variables
         real(wp)      :: u(32,size(this%location))  ! Representation of the retarded Green's functions
         real(wp)      :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
