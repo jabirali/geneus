@@ -125,12 +125,17 @@ contains
 
   impure subroutine material_update(this)
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
+    use bvp_m
 
-    class(material), intent(inout) :: this  ! Material that will be updated
-    type(green)                    :: a     ! State at this energy at the left  interface
-    type(green)                    :: b     ! State at this energy at the right interface
-    complex(wp)                    :: e     ! Complex energy relative to the Thouless energy
-    integer                        :: n     ! Outer loop variable (current energy)
+    class(material), intent(inout) :: this                       ! Material that will be updated
+    type(bvp_sol)                  :: sol                        ! Workspace for the bvp_solver procedures
+    type(green)                    :: a                          ! State at this energy at the left  interface
+    type(green)                    :: b                          ! State at this energy at the right interface
+    complex(wp)                    :: e                          ! Complex energy relative to the Thouless energy
+    real(wp)                       :: u(32,size(this%location))  ! Representation of the retarded Green's functions
+    real(wp)                       :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
+    integer                        :: n                          ! Outer loop variable (current energy)
+    integer                        :: m                          ! Inner loop variable (current location)
 
     ! Call the prehook method
     call this%update_prehook
@@ -145,67 +150,59 @@ contains
 
     ! Loop over the discretized energy levels
     do n=size(this%energy),1,-1
-      block
-        use bvp_m
+      ! Status information
+      if (this%information >= 0) then
+        write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
+          '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
+        flush(stdout)
+      end if
 
-        ! Declare local block variables
-        real(wp)      :: u(32,size(this%location))  ! Representation of the retarded Green's functions
-        real(wp)      :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
-        type(bvp_sol) :: sol                        ! Workspace for the bvp_solver procedures
-        integer       :: m                          ! Inner loop variable (current location)
+      ! Convert all states at this energy level to real-valued state vectors
+      do m=1,size(this%location)
+        d(:,m) = this%greenr(n,m)
+      end do
 
-        ! Status information
-        if (this%information >= 0) then
-          write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
-            '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
-          flush(stdout)
-        end if
+      ! If there is little difference between the previous state and this one, use the previous state as an initial guess
+      if (this%difference < 0.05_wp) then
+        u = d
+      end if
 
-        ! Convert all states at this energy level to real-valued state vectors
-        do m=1,size(this%location)
-          u(:,m) = this%greenr(n,m)
-        end do
+      ! Calculate the complex energy (relative to the Thouless energy)
+      e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
 
-        ! Copy the contents of the state vector to the difference vector
-        d = u
+      ! Update the matrices used to evaluate boundary conditions
+      if (associated(this%material_a)) then
+        a = this%material_a%greenr(n,ubound(this%material_a%greenr,2))
+      else
+        a = green0
+      end if
 
-        ! Calculate the complex energy (relative to the Thouless energy)
-        e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
+      if (associated(this%material_b)) then
+        b = this%material_b%greenr(n,lbound(this%material_b%greenr,2))
+      else
+        b = green0
+      end if
 
-        ! Update the matrices used to evaluate boundary conditions
-        if (associated(this%material_a)) then
-          a = this%material_a%greenr(n,ubound(this%material_a%greenr,2))
-        else
-          a = green0
-        end if
+      ! Initialize bvp_solver
+      sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
 
-        if (associated(this%material_b)) then
-          b = this%material_b%greenr(n,lbound(this%material_b%greenr,2))
-        else
-          b = green0
-        end if
+      ! Solve the differential equation
+      sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
 
-        ! Initialize bvp_solver
-        sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
+      ! Use the results to update the state
+      call bvp_eval(sol, this%location, u)
+      do m=1,size(this%location)
+        this%greenr(n,m) = u(:,m)
+      end do
 
-        ! Solve the differential equation
-        sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
+      ! Update the difference vector
+      d = abs(u - d)
 
-        ! Use the results to update the state
-        call bvp_eval(sol, this%location, u)
-        do m=1,size(this%location)
-          this%greenr(n,m) = u(:,m)
-        end do
+      ! Update the maximal difference since last update
+      this%difference = max(this%difference,maxval(d))
 
-        ! Update the difference vector
-        d = abs(u - d)
-
-        ! Update the maximal difference since last update
-        this%difference = max(this%difference,maxval(d))
-
-        ! Clean up after bvp_solver
-        call bvp_terminate(sol)
-      end block
+      ! Clean up after bvp_solver
+      call bvp_terminate(sol)
     end do
 
     ! Status information
