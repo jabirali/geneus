@@ -16,11 +16,12 @@ module mod_config
 
   public config
 contains
-  impure subroutine config_readline(unit, iostat, output)
+  impure subroutine config_readline(unit, iostat, output, reverse)
     ! This subroutine reads one non-empty line from an initialization file, strips it of comments and whitespace, and returns it.
     ! If an error occurs during reading, such as an end-of-file or read error, this will be reflected by a non-zero iostat value.
     integer,            intent(in)  :: unit
     integer,            intent(out) :: iostat
+    logical, optional,  intent(in)  :: reverse
     character(len=132), intent(out) :: output
     character(len=132)              :: input
     character(len=132)              :: string
@@ -35,6 +36,14 @@ contains
 
     ! Process one non-empty line before returning
     do while (output == "")
+      ! Move backwards if 'reverse' is enabled
+      if (present(reverse)) then
+        if (reverse) then
+          backspace(unit)
+          backspace(unit)
+        end if
+      end if
+
       ! Read one line from file
       read(unit,'(a)',iostat=iostat) input
       if (iostat /= 0) then
@@ -135,13 +144,10 @@ contains
       ! Read another line from the input file
       call config_readline(unit, iostat, string)
     end do
-
-    ! Reset the input file
-    rewind(unit)
   end subroutine
 
-  impure subroutine config_region(unit, iostat, region)
-    ! This subroutine 
+  impure subroutine config_interface(unit, iostat, region)
+    ! This subroutine moves to the next [interface] section of the initialization file if region>0, or the previous one if region<0.
     integer,            intent(in)  :: unit
     integer,            intent(in)  :: region
     integer,            intent(out) :: iostat
@@ -156,13 +162,13 @@ contains
         ! Exit if a new section is found
         if (string(1:1) == '[') then
           if (string /= '[interface]') then
-            iostat = 1
+            iostat = -2
           end if
           exit
         end if
 
         ! Read another line from the file
-        call config_readline(unit, iostat, string)
+        call config_readline(unit, iostat, string, reverse=.true.)
       end do
     else if (region > 0) then
       ! Loop until the interface is found or an error occurs
@@ -170,15 +176,12 @@ contains
         ! Exit if a new section is found
         if (string(1:1) == '[') then
           if (string /= '[interface]') then
-            iostat = 1
+            iostat = -2
           end if
           exit
         end if
 
         ! Read another line from the file
-        backspace(unit)
-        backspace(unit)
-        read(unit, string)
         call config_readline(unit, iostat, string)
       end do
     end if
@@ -196,25 +199,30 @@ contains
     character(len=132)                :: string
 
     ! Check the global section first
-    call string_check('global', 0)
+    call string_check('global', 1, 0)
     call string_parse
 
     ! Check the local section second
     if (number > 0) then
-      call string_check(section, number)
+      call string_check(section, number, region)
       call string_parse
     end if
 
     ! Write out the current value
     call string_print
+
+    ! Reset the input file
+    rewind(unit)
   contains
-    subroutine string_check(section, number)
+    subroutine string_check(section, number, region)
       ! Check for a variable in a given section
       character(len=*) :: section
       integer          :: number
+      integer          :: region
       integer          :: n
 
       string = ""
+      iostat = 0
       do n=1,number
         call config_section(unit, iostat, section)
         if (iostat /= 0) then
@@ -222,7 +230,7 @@ contains
         end if
       end do
       if (iostat == 0) then
-        call config_region(unit, iostat, region)
+        call config_interface(unit, iostat, region)
       end if
       if (iostat == 0) then
         call config_setting(unit, iostat, setting, string)
@@ -277,25 +285,30 @@ contains
     character(len=132)                :: string
 
     ! Check the global section first
-    call string_check('global', 0)
+    call string_check('global', 1, 0)
     call string_parse
 
     ! Check the local section second
     if (number > 0) then
-      call string_check(section, number)
+      call string_check(section, number, region)
       call string_parse
     end if
 
     ! Write out the current value
     call string_print
+
+    ! Reset the input file
+    rewind(unit)
   contains
-    subroutine string_check(section, number)
+    subroutine string_check(section, number, region)
       ! Check for a variable in a given section
       character(len=*) :: section
       integer          :: number
+      integer          :: region
       integer          :: n
 
       string = ""
+      iostat = 0
       do n=1,number
         call config_section(unit, iostat, section)
         if (iostat /= 0) then
@@ -303,7 +316,7 @@ contains
         end if
       end do
       if (iostat == 0) then
-        call config_region(unit, iostat, region)
+        call config_interface(unit, iostat, region)
       end if
       if (iostat == 0) then
         call config_setting(unit, iostat, setting, string)
@@ -412,17 +425,18 @@ program config_test
   call config(unit, 'ferromagnet',    'ferromagnets',    1, 0, ferromagnets)
   call config(unit, 'ferromagnet',    'test',            1, 0, test)
   call config(unit, 'ferromagnet',    'magnetization',   1, 0, magnetization)
+  call config(unit, 'ferromagnet',    'magnetization',   1, +1, magnetization)
   print *,'[superconductor 1]'
-  call config(unit, 'superconductor', 'magnetization',   1, 0, magnetization)
-  call config(unit, 'superconductor', 'iterations',      1, 0, ferromagnets)
+  magnetization = [0,0,0]
+  call config(unit, 'superconductor', 'magnetization',   1, -1, magnetization)
+  magnetization = [0,0,0]
+  call config(unit, 'superconductor', 'magnetization',   1,  0, magnetization)
+  magnetization = [0,0,0]
+  call config(unit, 'superconductor', 'magnetization',   1, +1, magnetization)
   print *
   print *,'[superconductor 2]'
   call config(unit, 'superconductor', 'magnetization',   2, 0, magnetization)
   call config(unit, 'superconductor', 'iterations',      2, 0, ferromagnets)
-  print *
-  print *,'[superconductor 1]'
-  call config(unit, 'superconductor', 'magnetization',   1, -1, magnetization)
-  call config(unit, 'superconductor', 'magnetization',   1, +1, magnetization)
   print *
   print *,'[superconductor 3]'
   call config(unit, 'superconductor', 'magnetization',   3, 0, magnetizations)
