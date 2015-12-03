@@ -86,6 +86,7 @@ contains
     ! Initialize the material layers
     rewind(unit)
     iostat = 0
+    string = ""
     prev => null()
     this => null()
     s = 0
@@ -172,7 +173,6 @@ program equilibrium
 
   ! Process configuration file
   write(*,'(a)') '[equilibrium]'
-  call config(unit, 'equilibrium', 'energies', 1, 0, energies)
   call config(unit, 'equilibrium', 'debug',    1, 0, debug)
 
   ! Count the material layers
