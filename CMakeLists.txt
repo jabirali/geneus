@@ -60,7 +60,7 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # Flags that apply to all files
   set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace -fsanitize=thread -fno-underscoring")
   set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -fno-underscoring -s")
-  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program")
+  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
 
   # Flags that apply to external files (imported from other projects)
   set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
