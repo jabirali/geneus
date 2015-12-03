@@ -1,4 +1,5 @@
 ! This modules define the interface 'option', which can be used to read and parse command line arguments.
+! [DEPRECATED: This module is deprecated, and will likely be fully replaced by mod_config in the future.]
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10

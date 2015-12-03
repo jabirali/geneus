@@ -1,16 +1,30 @@
+! This module define the interface 'config', which can be used to read and parse configuration settings from file or command line.
+!
+! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
+! Created: 2015-12-03
+! Updated: 2015-12-03
 module mod_config 
+  use mod_stdio, only: warning
+  use mod_math,  only: wp
   implicit none
-  public config_file_section, config_file_setting
   private
+
+  interface config
+    module procedure config_scalar, config_vector
+  end interface
+
+  public config
 contains
-  impure subroutine config_file_readline(unit, iostat, output)
+  impure subroutine config_readline(unit, iostat, output)
     ! This subroutine reads one non-empty line from an initialization file, strips it of comments and whitespace, and returns it.
     ! If an error occurs during reading, such as an end-of-file or read error, this will be reflected by a non-zero iostat value.
     integer,            intent(in)  :: unit
     integer,            intent(out) :: iostat
     character(len=132), intent(out) :: output
     character(len=132)              :: input
-    integer                         :: n, m
+    character(len=132)              :: string
+    integer                         :: n, m, k
+    logical, save                   :: warned = .false.
 
     ! Variable initialization
     m      = 1
@@ -38,6 +52,22 @@ contains
           cycle
         end if
 
+        ! Substitute command line arguments
+        if (input(n:n) == '$') then
+          call get_command_argument(number=1, value=string, length=k)
+          if (k <= 0) then
+            if (.not. warned) then
+              call warning("failed to parse parts of the configuration file due to missing command line arguments.")
+              warned = .true.
+            end if
+            output = ""
+            exit
+          end if
+          output(m:m+k) = string
+          m = m + k
+          cycle
+        end if
+
         ! Copy characters to output string
         output(m:m) = input(n:n) 
         m = m + 1
@@ -45,7 +75,7 @@ contains
     end do
   end subroutine
 
-  impure subroutine config_file_section(unit, iostat, section)
+  impure subroutine config_section(unit, iostat, section)
     ! This subroutine searches an initialization file for a given section, and returns an iostat:
     ! iostat = 0 if section found, iostat < 0 if end of file reached, iostat > 0 for misc errors.
     integer,            intent(in)  :: unit
@@ -66,11 +96,11 @@ contains
       end if
 
       ! Read another line from the file
-      call config_file_readline(unit, iostat, string)
+      call config_readline(unit, iostat, string)
     end do
   end subroutine
 
-  impure subroutine config_file_setting(unit, iostat, setting, value)
+  impure subroutine config_setting(unit, iostat, setting, value)
     ! This subroutine searches an initialization section for a given setting, and returns an iostat:
     ! iostat = 0 if setting found, iostat < 0 if end of section reached, iostat > 0 for misc errors.
     ! If the setting is successfully found, its value will be returned through the argument 'value'.
@@ -103,21 +133,135 @@ contains
       end if
 
       ! Read another line from the input file
-      call config_file_readline(unit, iostat, string)
+      call config_readline(unit, iostat, string)
     end do
-
-    ! Rewind until the beginning of the section
-    string = ""
-    do while (string(1:1) /= '[')
-      backspace(unit)
-      backspace(unit)
-      read(unit,'(1a)') string
-    end do
-
   end subroutine
 
+  impure subroutine config_scalar(unit, section, setting, variable)
+    ! This subroutine searches an initialization file for a section and setting, and initializes a scalar variable.
+    character(len= * ), intent(in)    :: section
+    character(len= * ), intent(in)    :: setting
+    class(*),           intent(inout) :: variable
+    integer,            intent(in)    :: unit
+    integer                           :: iostat
+    character(len=132)                :: string
 
+    ! Check the global section first
+    call string_check('global')
+    call string_parse
 
+    ! Check the local section second
+    if (section /= 'global') then
+      call string_check(section)
+      call string_parse
+    end if
+
+    ! Write out the current value
+    call string_print
+  contains
+    subroutine string_check(section)
+      ! Check for a variable in a given section
+      character(len=*) :: section
+
+      string = ""
+      call config_section(unit, iostat, section)
+      if (iostat == 0) then
+        call config_setting(unit, iostat, setting, string)
+      end if
+    end subroutine
+
+    subroutine string_parse
+      ! If the string is set, parse it
+      if (string /= "") then
+        select type(variable)
+          type is (logical)
+            read(string, '(l1)',    iostat=iostat) variable
+          type is (integer)
+            read(string, '(i10)',   iostat=iostat) variable
+          type is (real(wp))
+            read(string, '(g24.0)', iostat=iostat) variable
+          type is (character(*))
+            read(string, '(a)',     iostat=iostat) variable
+        end select
+        if (iostat /= 0) then
+          call warning("failed to parse '" // setting // '=' // trim(string) // "' as a scalar.")
+        end if
+      end if
+    end subroutine
+
+    subroutine string_print
+      ! Print a config option
+      write(string, '(a)') trim(setting)
+
+      select type(variable)
+        type is (logical)
+          write(string(21:), '("= ",l10)')   variable
+        type is (integer)
+          write(string(21:), '("= ",i10)')   variable
+        type is (real(wp))
+          write(string(21:), '("= ",f10.5)') variable
+      end select
+
+      write(*, '(a)') string
+    end subroutine
+  end subroutine
+
+  impure subroutine config_vector(unit, section, setting, variable)
+    ! This subroutine searches an initialization file for a section and setting, and initializes a vector variable.
+    character(len= * ), intent(in)    :: section
+    character(len= * ), intent(in)    :: setting
+    class(*),           intent(inout) :: variable(:)
+    integer,            intent(in)    :: unit
+    integer                           :: iostat
+    character(len=132)                :: string
+
+    ! Check the global section first
+    call string_check('global')
+    call string_parse
+
+    ! Check the local section second
+    if (section /= 'global') then
+      call string_check(section)
+      call string_parse
+    end if
+
+    ! Write out the current value
+    call string_print
+  contains
+    subroutine string_check(section)
+      ! Check for a variable in a given section
+      character(len=*) :: section
+
+      string = ""
+      call config_section(unit, iostat, section)
+      if (iostat == 0) then
+        call config_setting(unit, iostat, setting, string)
+      end if
+    end subroutine
+
+    subroutine string_parse
+      ! If the string is set, parse it
+      if (string /= "") then
+        select type(variable)
+          type is (real(wp))
+            read(string, *, iostat=iostat) variable
+        end select
+        if (iostat /= 0) then
+          call warning("failed to parse '" // setting // '=' // trim(string) // "' as a vector.")
+        end if
+      end if
+    end subroutine
+
+    subroutine string_print
+      ! Print a config option
+      write(string, '(a)') trim(setting)
+
+      select type(variable)
+        type is (real(wp))
+          write(*, '(a,"= ",f10.5,",",f10.5,",",f10.5)') string(1:20), variable
+      end select
+    end subroutine
+  end subroutine
 
 
 !subroutine structure_allocate(unit, conductors, superconductors, ferromagnets)
@@ -169,57 +313,34 @@ contains
 !end subroutine
 end module
 
-!program config
-!  use mod_config
-!  implicit none
-!
-!  integer            :: unit
-!  integer            :: iostat = 0
-!  character(len=132) :: string = ""
-!
-!  integer :: c, s, f
-!
-!  integer, pointer     :: structure
-!  integer, allocatable :: conductors(:)   
-!  integer, allocatable :: superconductors(:)
-!  integer, allocatable :: ferromagnets(:)
-!
-!  ! Open the configuration file
-!  open(newunit=unit, file="config.ini")
-!
-!  ! Allocate memory
-!  call structure_allocate(unit, conductors, superconductors, ferromagnets)
-!
-!  ! Close the configuration file
-!  close(unit)
-!
-!  write(*,*) size(conductors), size(superconductors), size(ferromagnets)
-
-program config
+program config_test
   use mod_config
+  use mod_math
   implicit none
 
+  logical  :: selfconsistent = .false.
+  integer  :: ferromagnets   = 10
+  integer  :: superconductors = 100
+  real(wp) :: magnetization(3) = [10,20,30]
+  real(wp) :: test = 0.0_wp
   integer :: iostat = 0
   integer :: unit   = 0
   character(len=132) :: string = ""
 
   open(newunit=unit,file='config.ini')
-  call config_file_section(unit, iostat, 'general')
-  write(*,*) iostat
-  call config_file_setting(unit, iostat, 'magnetization',   string)
-  write(*,*) string
-  write(*,*) iostat
-  call config_file_setting(unit, iostat, 'ferromagnets',    string)
-  write(*,*) string
-  write(*,*) iostat
-  call config_file_setting(unit, iostat, 'superconductors', string)
-  write(*,*) string
-  write(*,*) iostat
-  call config_file_setting(unit, iostat, 'magnetization',   string)
-  write(*,*) string
-  write(*,*) iostat
-  call config_file_setting(unit, iostat, 'superconductors', string)
-  write(*,*) string
-  write(*,*) iostat
-end program
-
+  print *,'[global]'
+  call config(unit, 'global',         'selfconsistent',  selfconsistent)
+  call config(unit, 'global',         'superconductors', superconductors)
+  call config(unit, 'global',         'ferromagnets',    ferromagnets)
+  call config(unit, 'global',         'test',            test)
+  print *
+  print *,'[superconductor]'
+  call config(unit, 'superconductor', 'magnetization',   magnetization)
+  print *
+  print *,'[ferromagnet]'
+  call config(unit, 'ferromagnet',         'selfconsistent',  selfconsistent)
+  call config(unit, 'ferromagnet',         'superconductors', superconductors)
+  call config(unit, 'ferromagnet',         'ferromagnets',    ferromagnets)
+  call config(unit, 'ferromagnet',         'test',            test)
+  call config(unit, 'ferromagnet', 'magnetization',   magnetization)
+end program  
