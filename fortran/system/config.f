@@ -11,7 +11,7 @@ module mod_config
   private
 
   interface config
-    module procedure config_scalar, config_vector
+    module procedure config_scalar, config_vector, config_next
   end interface
 
   public config
@@ -347,6 +347,27 @@ contains
     end subroutine
   end subroutine
 
+  impure subroutine config_next(unit, iostat, string)
+    ! This subroutine searches an initialization file for the next section and returns it.
+    integer,            intent(in)  :: unit
+    integer,            intent(out) :: iostat
+    character(len=132)              :: string
+
+    ! File and variable initialization
+    string = ""
+    iostat = 0
+
+    ! Loop until a section is found or an error occurs
+    do while (iostat == 0)
+      ! Exit if the correct section is found
+      if (string(1:1) == '[') then
+        exit
+      end if
+
+      ! Read another line from the file
+      call config_readline(unit, iostat, string)
+    end do
+  end subroutine
 
 !subroutine structure_allocate(unit, conductors, superconductors, ferromagnets)
 !  integer,              intent(in)  :: unit

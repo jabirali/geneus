@@ -52,16 +52,18 @@ contains
 
 
     ! Handle the exchange field argument
-    if (present(exchange) .and. norm2(exchange) > sqrt(eps)) then
-      ! Allocate the exchange field array if necessary
-      if (.not. allocated(this%exchange)) then
-        allocate(this%exchange(3,size(this%location)))
-      end if
+    if (present(exchange)) then
+      if (norm2(exchange) > sqrt(eps)) then
+        ! Allocate the exchange field array if necessary
+        if (.not. allocated(this%exchange)) then
+          allocate(this%exchange(3,size(this%location)))
+        end if
 
-      ! Copy data from input array
-      do n = 1,size(this%location)
-        this%exchange(:,n) = exchange
-      end do
+        ! Copy data from input array
+        do n = 1,size(this%location)
+          this%exchange(:,n) = exchange
+        end do
+      end if
     end if
   end function
 

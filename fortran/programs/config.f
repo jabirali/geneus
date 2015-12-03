@@ -18,10 +18,10 @@ program config_test
     call error('failed to open config file')
   end if
   print *,'[global]'
-  call config(unit, 'global',         'selfconsistent',  0, 0, selfconsistent)
-  call config(unit, 'global',         'superconductors', 0, 0, superconductors)
-  call config(unit, 'global',         'ferromagnets',    0, 0, ferromagnets)
-  call config(unit, 'global',         'test',            0, 0, test)
+  call config(unit, 'global',         'selfconsistent',  1, 0, selfconsistent)
+  call config(unit, 'global',         'superconductors', 1, 0, superconductors)
+  call config(unit, 'global',         'ferromagnets',    1, 0, ferromagnets)
+  call config(unit, 'global',         'test',            1, 0, test)
   print *
   print *,'[ferromagnet]'
   call config(unit, 'ferromagnet',    'selfconsistent',  1, 0, selfconsistent)
