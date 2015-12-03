@@ -84,7 +84,6 @@ contains
     character(len=132)              :: string
 
     ! File and variable initialization
-    rewind(unit)
     string = ""
     iostat = 0
 
@@ -135,36 +134,47 @@ contains
       ! Read another line from the input file
       call config_readline(unit, iostat, string)
     end do
+
+    ! Reset the input file
+    rewind(unit)
   end subroutine
 
-  impure subroutine config_scalar(unit, section, setting, variable)
+  impure subroutine config_scalar(unit, section, setting, number, variable)
     ! This subroutine searches an initialization file for a section and setting, and initializes a scalar variable.
     character(len= * ), intent(in)    :: section
     character(len= * ), intent(in)    :: setting
     class(*),           intent(inout) :: variable
+    integer,            intent(in)    :: number
     integer,            intent(in)    :: unit
     integer                           :: iostat
     character(len=132)                :: string
 
     ! Check the global section first
-    call string_check('global')
+    call string_check('global', 0)
     call string_parse
 
     ! Check the local section second
-    if (section /= 'global') then
-      call string_check(section)
+    if (number > 0) then
+      call string_check(section, number)
       call string_parse
     end if
 
     ! Write out the current value
     call string_print
   contains
-    subroutine string_check(section)
+    subroutine string_check(section, number)
       ! Check for a variable in a given section
       character(len=*) :: section
+      integer          :: number
+      integer          :: n
 
       string = ""
-      call config_section(unit, iostat, section)
+      do n=1,number
+        call config_section(unit, iostat, section)
+        if (iostat /= 0) then
+          exit
+        end if
+      end do
       if (iostat == 0) then
         call config_setting(unit, iostat, setting, string)
       end if
@@ -206,34 +216,42 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine config_vector(unit, section, setting, variable)
+  impure subroutine config_vector(unit, section, setting, number, variable)
     ! This subroutine searches an initialization file for a section and setting, and initializes a vector variable.
     character(len= * ), intent(in)    :: section
     character(len= * ), intent(in)    :: setting
     class(*),           intent(inout) :: variable(:)
+    integer,            intent(in)    :: number
     integer,            intent(in)    :: unit
     integer                           :: iostat
     character(len=132)                :: string
 
     ! Check the global section first
-    call string_check('global')
+    call string_check('global', 0)
     call string_parse
 
     ! Check the local section second
-    if (section /= 'global') then
-      call string_check(section)
+    if (number > 0) then
+      call string_check(section, number)
       call string_parse
     end if
 
     ! Write out the current value
     call string_print
   contains
-    subroutine string_check(section)
+    subroutine string_check(section, number)
       ! Check for a variable in a given section
       character(len=*) :: section
+      integer          :: number
+      integer          :: n
 
       string = ""
-      call config_section(unit, iostat, section)
+      do n=1,number
+        call config_section(unit, iostat, section)
+        if (iostat /= 0) then
+          exit
+        end if
+      end do
       if (iostat == 0) then
         call config_setting(unit, iostat, setting, string)
       end if
@@ -322,6 +340,7 @@ program config_test
   integer  :: ferromagnets   = 10
   integer  :: superconductors = 100
   real(wp) :: magnetization(3) = [10,20,30]
+  real(wp) :: magnetizations(3) = [10,20,30]
   real(wp) :: test = 0.0_wp
   integer :: iostat = 0
   integer :: unit   = 0
@@ -329,18 +348,31 @@ program config_test
 
   open(newunit=unit,file='config.ini')
   print *,'[global]'
-  call config(unit, 'global',         'selfconsistent',  selfconsistent)
-  call config(unit, 'global',         'superconductors', superconductors)
-  call config(unit, 'global',         'ferromagnets',    ferromagnets)
-  call config(unit, 'global',         'test',            test)
-  print *
-  print *,'[superconductor]'
-  call config(unit, 'superconductor', 'magnetization',   magnetization)
+  call config(unit, 'global',         'selfconsistent',  0, selfconsistent)
+  call config(unit, 'global',         'superconductors', 0, superconductors)
+  call config(unit, 'global',         'ferromagnets',    0, ferromagnets)
+  call config(unit, 'global',         'test',            0, test)
   print *
   print *,'[ferromagnet]'
-  call config(unit, 'ferromagnet',         'selfconsistent',  selfconsistent)
-  call config(unit, 'ferromagnet',         'superconductors', superconductors)
-  call config(unit, 'ferromagnet',         'ferromagnets',    ferromagnets)
-  call config(unit, 'ferromagnet',         'test',            test)
-  call config(unit, 'ferromagnet', 'magnetization',   magnetization)
+  call config(unit, 'ferromagnet',    'selfconsistent',  1, selfconsistent)
+  call config(unit, 'ferromagnet',    'superconductors', 1, superconductors)
+  call config(unit, 'ferromagnet',    'ferromagnets',    1, ferromagnets)
+  call config(unit, 'ferromagnet',    'test',            1, test)
+  call config(unit, 'ferromagnet',    'magnetization',   1, magnetization)
+  print *,'[superconductor 1]'
+  call config(unit, 'superconductor', 'magnetization',   1, magnetization)
+  call config(unit, 'superconductor', 'iterations',   1, ferromagnets)
+  print *
+  print *,'[superconductor 2]'
+  call config(unit, 'superconductor', 'magnetization',   2, magnetization)
+  call config(unit, 'superconductor', 'iterations',   2, ferromagnets)
+  print *
+  print *,'[superconductor 1]'
+  call config(unit, 'superconductor', 'magnetization',   1, magnetization)
+  call config(unit, 'superconductor', 'iterations',   1, ferromagnets)
+  print *
+  print *,'[superconductor 3]'
+  call config(unit, 'superconductor', 'magnetization',   3, magnetizations)
+  call config(unit, 'superconductor', 'iterations',   3, ferromagnets)
+  print *
 end program  
