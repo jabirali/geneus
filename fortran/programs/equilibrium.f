@@ -86,7 +86,7 @@ contains
     ! Initialize the material layers
     rewind(unit)
     iostat = 0
-    string = ""
+    string = "-"
     prev => null()
     this => null()
     s = 0
@@ -122,6 +122,87 @@ contains
         end if
       end if
       call config(unit, iostat, string)
+    end do
+
+    ! Configure the material layers
+    s = 0
+    f = 0
+    c = 0
+    this => m % top
+    do while (associated(this))
+      select type(this)
+        class is (superconductor)
+          s = s + 1
+
+          m % s(s) % magnetization_a = [0,0,0]
+          m % s(s) % magnetization_b = [0,0,0]
+
+          write(*,'(/,a)') '[interface]'
+          call config(unit, 'superconductor', 'transparent',   1, -1, m % s(s) % transparent_a)
+          call config(unit, 'superconductor', 'reflecting',    1, -1, m % s(s) % reflecting_a)
+          call config(unit, 'superconductor', 'conductance',   1, -1, m % s(s) % conductance_a)
+          call config(unit, 'superconductor', 'spinmixing',    1, -1, m % s(s) % spinmixing_a)
+          call config(unit, 'superconductor', 'polarization',  1, -1, m % s(s) % polarization_a)
+          call config(unit, 'superconductor', 'magnetization', 1, -1, m % s(s) % magnetization_a)
+
+          write(*,'(/,a)') '[superconductor]'
+
+          write(*,'(/,a)') '[interface]'
+          call config(unit, 'superconductor', 'transparent',   1, +1, m % s(s) % transparent_b)
+          call config(unit, 'superconductor', 'reflecting',    1, +1, m % s(s) % reflecting_b)
+          call config(unit, 'superconductor', 'conductance',   1, +1, m % s(s) % conductance_b)
+          call config(unit, 'superconductor', 'spinmixing',    1, +1, m % s(s) % spinmixing_b)
+          call config(unit, 'superconductor', 'polarization',  1, +1, m % s(s) % polarization_b)
+          call config(unit, 'superconductor', 'magnetization', 1, +1, m % s(s) % magnetization_b)
+        class is (ferromagnet)
+          f = f + 1
+
+          m % f(f) % magnetization_a = [0,0,0]
+          m % f(f) % magnetization_b = [0,0,0]
+
+          write(*,'(/,a)') '[interface]'
+          call config(unit, 'ferromagnet', 'transparent',   1, -1, m % f(f) % transparent_a)
+          call config(unit, 'ferromagnet', 'reflecting',    1, -1, m % f(f) % reflecting_a)
+          call config(unit, 'ferromagnet', 'conductance',   1, -1, m % f(f) % conductance_a)
+          call config(unit, 'ferromagnet', 'spinmixing',    1, -1, m % f(f) % spinmixing_a)
+          call config(unit, 'ferromagnet', 'polarization',  1, -1, m % f(f) % polarization_a)
+          call config(unit, 'ferromagnet', 'magnetization', 1, -1, m % f(f) % magnetization_a)
+
+          write(*,'(/,a)') '[ferromagnet]'
+
+          write(*,'(/,a)') '[interface]'
+          call config(unit, 'ferromagnet', 'transparent',   1, +1, m % f(f) % transparent_b)
+          call config(unit, 'ferromagnet', 'reflecting',    1, +1, m % f(f) % reflecting_b)
+          call config(unit, 'ferromagnet', 'conductance',   1, +1, m % f(f) % conductance_b)
+          call config(unit, 'ferromagnet', 'spinmixing',    1, +1, m % f(f) % spinmixing_b)
+          call config(unit, 'ferromagnet', 'polarization',  1, +1, m % f(f) % polarization_b)
+          call config(unit, 'ferromagnet', 'magnetization', 1, +1, m % f(f) % magnetization_b)
+        class is (conductor)
+          c = c + 1
+
+          m % c(c) % magnetization_a = [0,0,0]
+          m % c(c) % magnetization_b = [0,0,0]
+
+          write(*,'(/,a)') '[interface]'
+          call config(unit, 'conductor', 'transparent',   1, -1, m % c(c) % transparent_a)
+          call config(unit, 'conductor', 'reflecting',    1, -1, m % c(c) % reflecting_a)
+          call config(unit, 'conductor', 'conductance',   1, -1, m % c(c) % conductance_a)
+          call config(unit, 'conductor', 'spinmixing',    1, -1, m % c(c) % spinmixing_a)
+          call config(unit, 'conductor', 'polarization',  1, -1, m % c(c) % polarization_a)
+          call config(unit, 'conductor', 'magnetization', 1, -1, m % c(c) % magnetization_a)
+
+          write(*,'(/,a)') '[conductor]'
+
+          write(*,'(/,a)') '[interface]'
+          call config(unit, 'conductor', 'transparent',   1, +1, m % c(c) % transparent_b)
+          call config(unit, 'conductor', 'reflecting',    1, +1, m % c(c) % reflecting_b)
+          call config(unit, 'conductor', 'conductance',   1, +1, m % c(c) % conductance_b)
+          call config(unit, 'conductor', 'spinmixing',    1, +1, m % c(c) % spinmixing_b)
+          call config(unit, 'conductor', 'polarization',  1, +1, m % c(c) % polarization_b)
+          call config(unit, 'conductor', 'magnetization', 1, +1, m % c(c) % magnetization_b)
+      end select
+
+      this => this % material_b
     end do
   end subroutine
 
