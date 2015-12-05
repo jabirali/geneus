@@ -2,7 +2,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-12-03
-! Updated: 2015-12-03
+! Updated: 2015-12-05
 
 module mod_config 
   use mod_stdio, only: error
@@ -23,19 +23,19 @@ contains
     integer,            intent(out) :: iostat
     logical, optional,  intent(in)  :: reverse
     character(len=132), intent(out) :: output
-    character(len=396)              :: input
+    character(len=132)              :: input
     character(len=132)              :: string
-    integer                         :: n, m, k
     integer                         :: conts
+    integer                         :: n, m, i, j
 
     ! Variable initialization
-    m      = 1
-    iostat = 0
-    output = ""
     input  = ""
+    output = ""
+    iostat = 0
     conts  = 0
+    m      = 1
 
-    ! Process one non-empty line before returning
+    ! Process one non-empty line
     do while (output == "")
       ! Move backwards if 'reverse' is enabled
       if (present(reverse)) then
@@ -45,7 +45,7 @@ contains
         end if
       end if
 
-      ! Read one line from file
+      ! Read one line from the input file
       read(unit,'(a)',iostat=iostat) input
       if (iostat /= 0) then
         exit
@@ -56,10 +56,18 @@ contains
         cycle
       end if
 
-      ! Process the input line
-      do n=1,len(input)
+      ! Parse the current line
+      n = 0
+      do
+        ! Make sure we stop at the end of the line
+        n = n + 1
+        if (n > len(input)) then
+          exit
+        end if
+
+        ! Process the current character of the line
         select case(input(n:n))
-          ! Whitespace will be ignored
+          ! Skip space and tab characters
           case (' ', char(11))
             cycle
 
@@ -67,31 +75,53 @@ contains
           case ('#')
             exit
 
-          ! '$' is interpreted as a command line argument
+          ! '$n' is interpreted as a command line argument
           case ('$')
-            call get_command_argument(number=1, value=string, length=k)
-            if (k <= 0) then
-              call error("failed to parse parts of the configuration file due to missing command line arguments.")
+            ! Interpret the next character as the argument number
+            n = n + 1
+            read(input(n:n),*,iostat=iostat) i
+            if (iostat /= 0) then
+              call error("failed to parse config file: bad argument '$" // input(n:n) // "'.")
             end if
 
-          ! ',' may be interpreted as a line continuation
+            ! Read the corresponding command line argument
+            call get_command_argument(number=i, value=string, length=j)
+            if (j <= 0) then
+              call error("failed to parse config file: missing argument '$" // input(n:n) // "'.")
+            end if
+
+            ! Update the output string 
+            output(m:m+j) = string
+            m = m + j
+            cycle
+
+          ! ',' may require a line continuation
           case (',')
-            if (input(n+1:) == '') then
+            ! Read another line if neccessary
+            if (scan(input(n+1:),'0123456789') == 0) then
+              n = 1
               conts = conts + 1
-              read(unit,'(a)',iostat=iostat) input(n+1:)
+              read(unit,'(a)',iostat=iostat) input
               if (iostat /= 0) then
-                call error("failed to parse parts of the configuration file due to a bad line continuation.")
+                call error("failed to parse config file: file ended with a comma.")
               end if
             end if
-        end select
 
-        ! Copy characters to output string
-        output(m:m) = input(n:n) 
-        m = m + 1
+            ! Update the output string
+            output(m:m) = ','
+            m = m + 1
+            cycle
+
+          ! Other characters require no special handling
+          case default
+            output(m:m) = input(n:n)
+            m = m + 1
+            cycle
+        end select
       end do
     end do
 
-    ! Revert continuations by moving back
+    ! Revert continuations by moving backwards
     do n=1,conts
       backspace(unit)
     end do
@@ -263,7 +293,7 @@ contains
             read(string, '(a)',     iostat=iostat) variable
         end select
         if (iostat /= 0) then
-          call error("failed to parse '" // setting // '=' // trim(string) // "' as a scalar.")
+          call error("failed to parse config file: '" // setting // '=' // trim(string) // "' is not a valid scalar assignment.")
         end if
       end if
     end subroutine
@@ -343,7 +373,7 @@ contains
             read(string, *, iostat=iostat) variable
         end select
         if (iostat /= 0) then
-          call error("failed to parse '" // setting // '=' // trim(string) // "' as a vector.")
+          call error("failed to parse config file: '" // setting // '=' // trim(string) // "' is not a valid vector assignment.")
         end if
       end if
     end subroutine
