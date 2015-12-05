@@ -97,8 +97,8 @@ contains
 
     ! Calculate the density of states at the interface
     do n = 1,size(material_a%energy)
-      dos_a(n) = material_a % greenr(n,ubound(material_a%location,1)) % get_dos()
-      dos_b(n) = material_b % greenr(n,lbound(material_b%location,1)) % get_dos()
+      dos_a(n) = material_a % propagator(n,ubound(material_a%location,1)) % get_dos()
+      dos_b(n) = material_b % propagator(n,lbound(material_b%location,1)) % get_dos()
     end do
 
     ! Create a PCHIP interpolation of the numerical results above

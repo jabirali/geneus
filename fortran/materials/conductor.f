@@ -52,11 +52,11 @@ module mod_conductor
     type(spin),       private :: Axt, Ayt, Azt, A2t                                           ! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
     ! These methods are required by the class(material) abstract interface
-    procedure                 :: init                    => conductor_init                    ! Initializes the Green's functions
+    procedure                 :: init                    => conductor_init                    ! Initializes the propagators
     procedure                 :: interface_equation_a    => conductor_interface_equation_a    ! Boundary condition at the left  interface
     procedure                 :: interface_equation_b    => conductor_interface_equation_b    ! Boundary condition at the right interface
-    procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the Green's functions
-    procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the Green's functions
+    procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the propagators
+    procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the propagators
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation (conductor terms)
@@ -119,13 +119,13 @@ contains
     end if
 
     ! Allocate memory (if necessary)
-    if (.not. allocated(this%greenr)) then
+    if (.not. allocated(this%propagator)) then
       if (present(points)) then
-        allocate(this%greenr(size(energy), points))
+        allocate(this%propagator(size(energy), points))
         allocate(this%energy(size(energy)))
         allocate(this%location(points))
       else
-        allocate(this%greenr(size(energy), 150))
+        allocate(this%propagator(size(energy), 150))
         allocate(this%energy(size(energy)))
         allocate(this%location(150))
       end if
@@ -151,7 +151,7 @@ contains
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%greenr(n,m) = green( cx(this%energy(n),this%scattering), gap )
+        this%propagator(n,m) = green( cx(this%energy(n),this%scattering), gap )
       end do
     end do
   end subroutine

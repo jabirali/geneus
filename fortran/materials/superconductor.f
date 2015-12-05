@@ -24,10 +24,10 @@ module mod_superconductor
     real(wp)                 :: coupling            =  0.20_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
-    procedure                :: init                => superconductor_init                ! Initializes the Green's functions
+    procedure                :: init                => superconductor_init                ! Initializes the propagators
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
-    procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the Green's functions
-    procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the Green's functions
+    procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the propagators
+    procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the propagators
 
     ! These methods are used to access and mutate the parameters
     procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
@@ -130,12 +130,12 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_posthook(this)
-    ! Updates the superconducting order parameter based on the Green's functions of the system.
+    ! Updates the superconducting order parameter based on the propagators of the system.
     class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
     real(wp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
     real(wp), allocatable                :: gap_imag(:), dgap_imag(:) ! Imag part of the superconducting order parameter and its derivative
     complex(wp)                          :: gap_diff                  ! Used to calculate the change in the mean superconducting order parameter
-    complex(wp)                          :: singlet                   ! Singlet component of the anomalous Green's function at a given point
+    complex(wp)                          :: singlet                   ! Singlet component of the anomalous propagators at a given point
     real(wp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
     integer                              :: err                       ! PCHIP error status
     integer                              :: n, m                      ! Loop variables
@@ -154,11 +154,11 @@ contains
       ! Calculate the mean superconducting order parameter
       gap_diff = this%get_gap_mean()
 
-      ! Iterate over the stored Green's functions
+      ! Iterate over the stored propagators
       do n = 1,size(this%location)
         do m = 1,size(this%energy)
-          ! Calculate the singlet component of the anomalous Green's function
-          singlet     = ( this%greenr(m,n)%get_f_s() - conjg(this%greenr(m,n)%get_ft_s()) )/2.0_wp
+          ! Calculate the singlet component of the anomalous propagators
+          singlet     = ( this%propagator(m,n)%get_f_s() - conjg(this%propagator(m,n)%get_ft_s()) )/2.0_wp
 
           ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
           gap_real(m) = re(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)

@@ -63,7 +63,7 @@ program params_spinactive
         call f % update
 
         ! Calculate the zero-energy peak
-        d = f % greenr(1,1) % get_dos()
+        d = f % propagator(1,1) % get_dos()
 
         ! Write the result to file
         write(u,'(f10.6,2x)',advance='no') d

@@ -22,8 +22,8 @@ module mod_ferromagnet
     type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
   contains
     procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
-    procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the Green's functions
-    procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the Green's functions
+    procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the propagators
+    procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the propagators
   end type
 
   ! Type constructor

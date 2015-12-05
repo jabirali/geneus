@@ -24,10 +24,10 @@ module mod_material
     real(wp)                                  :: thouless        =  1.00_wp               ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(wp)                                  :: scattering      =  0.01_wp               ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
 
-    ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical Green's functions
+    ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                ! Discretized domain for the energies
     real(wp),                     allocatable :: location(:)                              ! Discretized domain for the positions
-    type(green),                  allocatable :: greenr(:,:)                              ! Discretized values for the Green's function (retarded component)
+    type(green),                  allocatable :: propagator(:,:)                          ! Discretized values for the propagator (retarded component)
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
     class(material),                  pointer :: material_a      => null()                ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
@@ -45,10 +45,10 @@ module mod_material
     character(len=128)                        :: type_string     =  'MATERIAL'            ! The type string should describe the specific class(material) subtype
   contains
     ! These methods define how to update the physical state of the material
-    procedure(init),                 deferred :: init                                     ! Initializes  the Green's functions
-    procedure                                 :: update          => material_update       ! Recalculates the Green's functions
-    procedure(update),               deferred :: update_prehook                           ! Executed before calculating the Green's functions
-    procedure(update),               deferred :: update_posthook                          ! Executed after  calculating the Green's functions
+    procedure(init),                 deferred :: init                                     ! Initializes  the propagators
+    procedure                                 :: update          => material_update       ! Recalculates the propagators
+    procedure(update),               deferred :: update_prehook                           ! Executed before calculating the propagators
+    procedure(update),               deferred :: update_posthook                          ! Executed after  calculating the propagators
 
     ! These methods define the physical equations used by the update methods
     procedure(diffusion_equation),   deferred :: diffusion_equation                       ! Diffusion equation that describes the material
@@ -132,7 +132,7 @@ contains
     type(green)                    :: a                          ! State at this energy at the left  interface
     type(green)                    :: b                          ! State at this energy at the right interface
     complex(wp)                    :: e                          ! Complex energy relative to the Thouless energy
-    real(wp)                       :: u(32,size(this%location))  ! Representation of the retarded Green's functions
+    real(wp)                       :: u(32,size(this%location))  ! Representation of the retarded propagators
     real(wp)                       :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
     integer                        :: n                          ! Outer loop variable (current energy)
     integer                        :: m                          ! Inner loop variable (current location)
@@ -159,7 +159,7 @@ contains
 
       ! Convert all states at this energy level to real-valued state vectors
       do m=1,size(this%location)
-        d(:,m) = this%greenr(n,m)
+        d(:,m) = this%propagator(n,m)
       end do
 
       ! If there is little difference between the previous state and this one, use the previous state as an initial guess
@@ -172,13 +172,13 @@ contains
 
       ! Update the matrices used to evaluate boundary conditions
       if (associated(this%material_a)) then
-        a = this%material_a%greenr(n,ubound(this%material_a%greenr,2))
+        a = this%material_a%propagator(n,ubound(this%material_a%propagator,2))
       else
         a = green0
       end if
 
       if (associated(this%material_b)) then
-        b = this%material_b%greenr(n,lbound(this%material_b%greenr,2))
+        b = this%material_b%propagator(n,lbound(this%material_b%propagator,2))
       else
         b = green0
       end if
@@ -192,7 +192,7 @@ contains
       ! Use the results to update the state
       call bvp_eval(sol, this%location, u)
       do m=1,size(this%location)
-        this%greenr(n,m) = u(:,m)
+        this%propagator(n,m) = u(:,m)
       end do
 
       ! Update the difference vector
@@ -281,17 +281,18 @@ contains
     class(material), intent(inout) :: backup
 
     ! Make sure enough memory is allocated
-    if (allocated(backup%greenr)) then
-      if (ubound(this%greenr,1) /= ubound(backup%greenr,1) .or. ubound(this%greenr,2) /= ubound(backup%greenr,2)) then
-        deallocate(backup%greenr)
-        allocate(backup%greenr(ubound(this%greenr,1),ubound(this%greenr,2)))
+    if (allocated(backup%propagator)) then
+      if (ubound(this%propagator,1) /= ubound(backup%propagator,1)  .or. &
+          ubound(this%propagator,2) /= ubound(backup%propagator,2)) then
+        deallocate(backup%propagator)
+        allocate(backup%propagator(ubound(this%propagator,1),ubound(this%propagator,2)))
       end if
     else
-      allocate(backup%greenr(ubound(this%greenr,1),ubound(this%greenr,2)))
+      allocate(backup%propagator(ubound(this%propagator,1),ubound(this%propagator,2)))
     end if
 
-    ! Save the Green's functions to the object
-    backup % greenr = this % greenr
+    ! Save the propagators to the object
+    backup % propagator = this % propagator
   end subroutine
 
   pure subroutine material_load(this, backup)
@@ -300,17 +301,18 @@ contains
     class(material), intent(inout) :: backup
 
     ! Make sure enough memory is allocated
-    if (allocated(this%greenr)) then
-      if (ubound(this%greenr,1) /= ubound(backup%greenr,1) .or. ubound(this%greenr,2) /= ubound(backup%greenr,2)) then
-        deallocate(this%greenr)
-        allocate(this%greenr(ubound(backup%greenr,1),ubound(backup%greenr,2)))
+    if (allocated(this%propagator)) then
+      if (ubound(this%propagator,1) /= ubound(backup%propagator,1)  .or. &
+          ubound(this%propagator,2) /= ubound(backup%propagator,2)) then
+        deallocate(this%propagator)
+        allocate(this%propagator(ubound(backup%propagator,1),ubound(backup%propagator,2)))
       end if
     else
-      allocate(this%greenr(ubound(backup%greenr,1),ubound(backup%greenr,2)))
+      allocate(this%propagator(ubound(backup%propagator,1),ubound(backup%propagator,2)))
     end if
 
-    ! Load the Green's functions from the object
-    this % greenr = backup % greenr
+    ! Load the propagators from the object
+    this % propagator = backup % propagator
   end subroutine
 
   impure subroutine material_write_dos(this, unit, a, b)
@@ -326,7 +328,7 @@ contains
       do m=1,size(this%location)
         x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
         do n=1,size(this%energy)
-          write(unit,*) x, this%energy(n), this%greenr(n,m)%get_dos()
+          write(unit,*) x, this%energy(n), this%propagator(n,m)%get_dos()
         end do
       end do
     else
@@ -334,10 +336,10 @@ contains
       do m=1,size(this%location)
         x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
         do n=size(this%energy),1,-1
-          write(unit,*) x, -this%energy(n), this%greenr(n,m)%get_dos()
+          write(unit,*) x, -this%energy(n), this%propagator(n,m)%get_dos()
         end do
         do n=1,size(this%energy),+1
-          write(unit,*) x, +this%energy(n), this%greenr(n,m)%get_dos()
+          write(unit,*) x, +this%energy(n), this%propagator(n,m)%get_dos()
         end do
       end do
     end if

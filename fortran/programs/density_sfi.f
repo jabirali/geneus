@@ -138,14 +138,14 @@ contains
 
     ! Write out the density of states as a function of energy
     do i = size(s%energy),1,-1
-      write(unit(1),*) -s%energy(i), s%greenr(i,1)%get_dos()
-      write(unit(2),*) -s%energy(i), s%greenr(i,size(s%location)/2)%get_dos()
-      write(unit(3),*) -s%energy(i), s%greenr(i,size(s%location))%get_dos()
+      write(unit(1),*) -s%energy(i), s%propagator(i,1)%get_dos()
+      write(unit(2),*) -s%energy(i), s%propagator(i,size(s%location)/2)%get_dos()
+      write(unit(3),*) -s%energy(i), s%propagator(i,size(s%location))%get_dos()
     end do
     do i = 1,size(s%energy),+1
-      write(unit(1),*) +s%energy(i), s%greenr(i,1)%get_dos()
-      write(unit(2),*) +s%energy(i), s%greenr(i,size(s%location)/2)%get_dos()
-      write(unit(3),*) +s%energy(i), s%greenr(i,size(s%location))%get_dos()
+      write(unit(1),*) +s%energy(i), s%propagator(i,1)%get_dos()
+      write(unit(2),*) +s%energy(i), s%propagator(i,size(s%location)/2)%get_dos()
+      write(unit(3),*) +s%energy(i), s%propagator(i,size(s%location))%get_dos()
     end do
 
     ! Write out the superconducting gap as a function of position
