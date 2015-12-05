@@ -5,7 +5,7 @@
 ! Updated: 2015-12-03
 
 module mod_config 
-  use mod_stdio, only: warning
+  use mod_stdio, only: error
   use mod_math,  only: wp
   implicit none
   private
@@ -23,16 +23,17 @@ contains
     integer,            intent(out) :: iostat
     logical, optional,  intent(in)  :: reverse
     character(len=132), intent(out) :: output
-    character(len=132)              :: input
+    character(len=396)              :: input
     character(len=132)              :: string
     integer                         :: n, m, k
-    logical, save                   :: warned = .false.
+    integer                         :: conts
 
     ! Variable initialization
     m      = 1
     iostat = 0
     output = ""
     input  = ""
+    conts  = 0
 
     ! Process one non-empty line before returning
     do while (output == "")
@@ -50,38 +51,49 @@ contains
         exit
       end if
 
+      ! Skip lines without sections or statements
+      if (scan(input,'[=]') == 0) then
+        cycle
+      end if
+
       ! Process the input line
       do n=1,len(input)
-        ! Ignore comments
-        if (input(n:n) == '#') then
-          exit
-        end if
+        select case(input(n:n))
+          ! Whitespace will be ignored
+          case (' ', char(11))
+            cycle
 
-        ! Ignore whitespace
-        if (input(n:n) == ' ') then
-          cycle
-        end if
-
-        ! Substitute command line arguments
-        if (input(n:n) == '$') then
-          call get_command_argument(number=1, value=string, length=k)
-          if (k <= 0) then
-            if (.not. warned) then
-              call warning("failed to parse parts of the configuration file due to missing command line arguments.")
-              warned = .true.
-            end if
-            output = ""
+          ! '#' is interpreted as a start of a comment
+          case ('#')
             exit
-          end if
-          output(m:m+k) = string
-          m = m + k
-          cycle
-        end if
+
+          ! '$' is interpreted as a command line argument
+          case ('$')
+            call get_command_argument(number=1, value=string, length=k)
+            if (k <= 0) then
+              call error("failed to parse parts of the configuration file due to missing command line arguments.")
+            end if
+
+          ! ',' may be interpreted as a line continuation
+          case (',')
+            if (input(n+1:) == '') then
+              conts = conts + 1
+              read(unit,'(a)',iostat=iostat) input(n+1:)
+              if (iostat /= 0) then
+                call error("failed to parse parts of the configuration file due to a bad line continuation.")
+              end if
+            end if
+        end select
 
         ! Copy characters to output string
         output(m:m) = input(n:n) 
         m = m + 1
       end do
+    end do
+
+    ! Revert continuations by moving back
+    do n=1,conts
+      backspace(unit)
     end do
   end subroutine
 
@@ -251,7 +263,7 @@ contains
             read(string, '(a)',     iostat=iostat) variable
         end select
         if (iostat /= 0) then
-          call warning("failed to parse '" // setting // '=' // trim(string) // "' as a scalar.")
+          call error("failed to parse '" // setting // '=' // trim(string) // "' as a scalar.")
         end if
       end if
     end subroutine
@@ -331,7 +343,7 @@ contains
             read(string, *, iostat=iostat) variable
         end select
         if (iostat /= 0) then
-          call warning("failed to parse '" // setting // '=' // trim(string) // "' as a vector.")
+          call error("failed to parse '" // setting // '=' // trim(string) // "' as a vector.")
         end if
       end if
     end subroutine
@@ -342,7 +354,7 @@ contains
 
       select type(variable)
         type is (real(wp))
-          write(*, '(a,"= ",f10.5,",",f10.5,",",f10.5)') string(1:20), variable
+          write(*, '(a,"= ",f10.5,",",/,22x,f10.5,",",/,22x,f10.5)') string(1:20), variable
       end select
     end subroutine
   end subroutine
