@@ -24,18 +24,25 @@ module mod_stdio
   character(*), parameter :: color_cyan   = '[36m'
   character(*), parameter :: color_white  = '[37m'
 contains
-  impure subroutine warning(message)
-    ! This subroutine provides a way to report a warning message.
-    character(*),      intent(in) :: message
+  impure subroutine message(msg)
+    ! This subroutine provides a way to report a status message.
+    character(*), intent(in) :: msg
 
-    write(stderr,'(a)') color_yellow // '>> WARNING: ' // color_none // message
+    write(stderr,'(a)') color_green  // '>> INFO: '    // color_none // msg
   end subroutine
 
-  impure subroutine error(message)
-    ! This subroutine provides a way to report an error message and halt the program.
-    character(*),      intent(in) :: message
+  impure subroutine warning(msg)
+    ! This subroutine provides a way to report a warning message.
+    character(*), intent(in) :: msg
 
-    write(stderr,'(a)') color_red // '>> ERROR: ' // color_none // message
+    write(stderr,'(a)') color_yellow // '>> WARNING: ' // color_none // msg
+  end subroutine
+
+  impure subroutine error(msg)
+    ! This subroutine provides a way to report an error message and halt the program.
+    character(*), intent(in) :: msg
+
+    write(stderr,'(a)') color_red    // '>> ERROR: '   // color_none // msg
     stop
   end subroutine
 end module 
