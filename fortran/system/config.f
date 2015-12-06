@@ -96,7 +96,7 @@ contains
       associate(section => config % section(n))
         do m = 1,section%size
           associate(statement => section % statement(m))
-            call substitute(statement % value)
+            call statement_substitute(statement % value)
             do k = 1,m-1
               associate(current => section % statement(k))
                 if (current % field == statement % field) then
@@ -126,8 +126,6 @@ contains
         section % name = adjustl(string(i+1:j-1))
         section % size = 0
       end associate
-
-      write(*,*) config % section(config % size) % name, config % size
     end subroutine
 
     subroutine statement_register
@@ -153,10 +151,6 @@ contains
           statement % value = adjustl(string(i+1:j-1))
         end associate
       end associate
-
-      write(*,*) config % section(config%size) % size
-      write(*,*) config % section(config%size) % statement(config%section(config%size)%size) % field 
-      write(*,*) config % section(config%size) % statement(config%section(config%size)%size) % value
     end subroutine
 
     subroutine statement_append
@@ -172,11 +166,9 @@ contains
           statement % value = trim(statement % value) // trim(adjustl(string(1:j)))
         end associate
       end associate
-
-      write(*,*) config % section(config%size) % statement(config%section(config%size)%size) % value
     end subroutine
 
-    subroutine substitute(statement)
+    subroutine statement_substitute(statement)
       character(len=132), intent(inout) :: statement
       integer                           :: length
 
@@ -202,9 +194,22 @@ contains
 
       ! Replace the statement with the argument
       statement = string
-
-      write(*,*) statement
     end subroutine
+  end function
+
+  pure function config_count(name) result(count)
+    character(len=132), intent(in) :: name
+    integer                        :: count
+
+    count = 0
+  end function
+
+  pure function config_find(name, number) result(count)
+    character(len=132), intent(in) :: name
+    integer,            intent(in) :: number
+    integer                        :: count
+
+    count = 0
   end function
 
 
