@@ -254,7 +254,33 @@ contains
     r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
   end function
 
-  !pure function interpolate(x, y, p) result(r)
-  !end function
+  function interpolate(x, y, p) result(r)
+    ! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
+    ! and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.
+    real(wp), intent(in)  :: x(:)
+    real(wp), intent(in)  :: y(:)
+    real(wp), intent(in)  :: p(:)
+    real(wp), allocatable :: r(:)
+    real(wp), allocatable :: d(:)
+    integer               :: err
+    integer               :: n
+    integer               :: m
 
+    ! Check the size of input arrays
+    n = max(size(x), size(y))
+    m = size(p)
+
+    ! Allocate memory for the derivatives and results
+    allocate(d(n))
+    allocate(r(m))
+
+    ! Create a PCHIP interpolation of the input data
+    call dpchez(n, x, y, d, .false., 0, 0, err)
+
+    ! Extract the interpolated data at provided points
+    call dpchfe(n, x, y, d, 1, .false., m, p, r, err)
+
+    ! Clean up workspace memory
+    deallocate(d)
+  end function
 end module

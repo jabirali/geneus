@@ -76,8 +76,8 @@ contains
     real(wp),       allocatable :: conductance(:)
     real(wp),       allocatable :: current(:)
     real(wp),       allocatable :: energy(:)
-    real(wp),       allocatable :: dos_a(:), ddos_a(:), idos_a(:)
-    real(wp),       allocatable :: dos_b(:), ddos_b(:), idos_b(:)
+    real(wp),       allocatable :: dos_a(:), idos_a(:)
+    real(wp),       allocatable :: dos_b(:), idos_b(:)
     integer                     :: n, m, err
 
     ! Allocate memory
@@ -86,8 +86,6 @@ contains
 
     allocate(dos_a(size(material_a%energy)))
     allocate(dos_b(size(material_b%energy)))
-    allocate(ddos_a(size(material_a%energy)))
-    allocate(ddos_b(size(material_b%energy)))
     allocate(idos_a(size(energy)))
     allocate(idos_b(size(energy)))
 
@@ -100,18 +98,13 @@ contains
       dos_b(n) = material_b % propagator(n,lbound(material_b%location,1)) % get_dos()
     end do
 
-    ! Create a PCHIP interpolation of the numerical results above
-    call dpchez(size(material_a%energy), material_a%energy, dos_a, ddos_a, .false., 0, 0, err)
-    call dpchez(size(material_b%energy), material_b%energy, dos_b, ddos_b, .false., 0, 0, err)
-
-    ! Extract the interpolated density of states in the left material
-    call dpchfe(size(material_a%energy), material_a%energy, dos_a, ddos_a, 1, .false., size(energy), energy, idos_a, err)
+    ! Interpolate the density of states in the left material
+    idos_a = interpolate(material_a%energy, dos_a, energy)
 
     ! Calculate the current as a function of voltage by numerical integration
     do n = 1,size(voltage)
-      ! Extract the voltage-shifted density of states in the right material
-      call dpchfe(size(material_b%energy), material_b%energy, dos_b, ddos_b, 1, .false., &
-                  size(energy), abs(energy-voltage(n)), idos_b, err)
+      ! Interpolate the voltage-shifted density of states in the right material
+      idos_b = interpolate(material_b%energy, dos_b, abs(energy-voltage(n)))
 
       ! Calculate the current for this voltage
       current(n) = integrate(energy, idos_a*idos_b*(fermi(energy-voltage(n))-fermi(energy)))
@@ -125,8 +118,6 @@ contains
    deallocate(energy)
    deallocate(dos_a)
    deallocate(dos_b)
-   deallocate(ddos_a)
-   deallocate(ddos_b)
    deallocate(idos_a)
    deallocate(idos_b)
   contains
