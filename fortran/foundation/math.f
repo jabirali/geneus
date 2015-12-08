@@ -222,13 +222,15 @@ contains
     ! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation 
     ! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     ! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: y(:)
     real(wp), intent(in)  :: x(:)
+    real(wp), intent(in)  :: y(:)
     real(wp), allocatable :: r(:)
     integer               :: n
 
-    ! Allocate array memory for the results
+    ! Check the size of input arrays
     n = max(size(x), size(y))
+
+    ! Allocate memory for the results
     allocate(r(n))
 
     ! Differentiate using finite differences
@@ -237,8 +239,20 @@ contains
     r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
   end function
 
-  !pure function integrate(x, y) result(r)
-  !end function
+  pure function integrate(x, y) result(r)
+    ! This function calculates the integral of an array y with respect to x using a trapezoid 
+    ! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
+    real(wp), intent(in)  :: x(:)
+    real(wp), intent(in)  :: y(:)
+    real(wp)              :: r
+    integer               :: n
+
+    ! Check the size of input arrays
+    n = max(size(x), size(y))
+
+    ! Integrate using the trapezoidal rule
+    r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
+  end function
 
   !pure function interpolate(x, y, p) result(r)
   !end function

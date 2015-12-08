@@ -114,11 +114,7 @@ contains
                   size(energy), abs(energy-voltage(n)), idos_b, err)
 
       ! Calculate the current for this voltage
-      current(n) = 0.0_wp
-      do m = 1,size(energy)
-        current(n) = current(n) + idos_a(m)*idos_b(m)*(fermi(energy(m)-voltage(n))-fermi(energy(m))) &
-                                * (maxval(energy)-minval(energy))/(size(energy)-1)
-      end do
+      current(n) = integrate(energy, idos_a*idos_b*(fermi(energy-voltage(n))-fermi(energy)))
     end do
 
     ! Calculate the differential conductance by differentiation
@@ -134,7 +130,7 @@ contains
    deallocate(idos_a)
    deallocate(idos_b)
   contains
-    pure function fermi(energy)
+    pure elemental function fermi(energy)
       ! Evaluates the Fermi function at the given energy and current temperature.
       real(wp), intent(in) :: energy
       real(wp)             :: fermi
