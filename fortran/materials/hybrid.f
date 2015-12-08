@@ -81,7 +81,6 @@ contains
     integer                     :: n, m, err
 
     ! Allocate memory
-    allocate(conductance(size(voltage)))
     allocate(current(size(voltage)))
     allocate(energy(2*size(voltage)))
 
@@ -122,14 +121,8 @@ contains
       end do
     end do
 
-    ! Calculate the differential conductance by numerical differentiation (interior points)
-    do n = 2,size(voltage)-1
-      conductance(n) = (current(n+1)-current(n-1))/(voltage(n+1)-voltage(n-1))
-    end do
-
-    ! Calculate the differential conductance by numerical extrapolation (exterior points)
-    conductance(lbound(voltage,1)) = 2*conductance(lbound(voltage,1)+1) - conductance(lbound(voltage,1)+2)
-    conductance(ubound(voltage,1)) = 2*conductance(ubound(voltage,1)-1) - conductance(ubound(voltage,1)-2)
+    ! Calculate the differential conductance by differentiation
+    conductance = differentiate(voltage, current)
 
    ! Deallocate workspace memory
    deallocate(current)

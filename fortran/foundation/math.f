@@ -213,4 +213,34 @@ contains
     B(3,4) = detinv*(A(1,1)*(A(2,4)*A(3,2)-A(2,2)*A(3,4))+A(1,2)*(A(2,1)*A(3,4)-A(2,4)*A(3,1))+A(1,4)*(A(2,2)*A(3,1)-A(2,1)*A(3,2)))
     B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
   end function
+
+  !----------------------------------------------------------------------------!
+  !                       ELEMENTARY CALCULUS PROCEDURES                       !
+  !----------------------------------------------------------------------------!
+
+  pure function differentiate(x, y) result(r)
+    ! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation 
+    ! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
+    ! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
+    real(wp), intent(in)  :: y(:)
+    real(wp), intent(in)  :: x(:)
+    real(wp), allocatable :: r(:)
+    integer               :: n
+
+    ! Allocate array memory for the results
+    n = max(size(x), size(y))
+    allocate(r(n))
+
+    ! Differentiate using finite differences
+    r(   1   ) = (y( 1+1 ) - y(  1  ))/(x( 1+1 ) - x(  1  ))
+    r(1+1:n-1) = (y(1+2:n) - y(1:n-2))/(x(1+2:n) - x(1:n-2))
+    r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
+  end function
+
+  !pure function integrate(x, y) result(r)
+  !end function
+
+  !pure function interpolate(x, y, p) result(r)
+  !end function
+
 end module
