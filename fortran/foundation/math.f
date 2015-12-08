@@ -27,6 +27,20 @@ module mod_math
   real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])
   real(wp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])
   real(wp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4])
+
+  ! Interfaces for math routines
+  interface differentiate
+    module procedure differentiate_twopoint, differentiate_twopoint_complex
+  end interface
+
+  interface integrate
+    module procedure integrate_twopoint, integrate_twopoint_complex, &
+                     integrate_pchip,    integrate_pchip_complex
+  end interface
+
+  interface interpolate
+    module procedure interpolate_pchip, interpolate_pchip_complex
+  end interface
 contains
 
   !----------------------------------------------------------------------------!
@@ -218,7 +232,7 @@ contains
   !                       ELEMENTARY CALCULUS PROCEDURES                       !
   !----------------------------------------------------------------------------!
 
-  pure function differentiate(x, y) result(r)
+  pure function differentiate_twopoint(x, y) result(r)
     ! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation 
     ! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     ! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
@@ -228,7 +242,7 @@ contains
     integer               :: n
 
     ! Check the size of input arrays
-    n = max(size(x), size(y))
+    n = min(size(x), size(y))
 
     ! Allocate memory for the results
     allocate(r(n))
@@ -239,7 +253,26 @@ contains
     r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
   end function
 
-  pure function integrate(x, y) result(r)
+  pure function differentiate_twopoint_complex(x, y) result(r)
+    ! Complex version of differentiate_twopoint.
+    real(wp),    intent(in)  :: x(:)
+    complex(wp), intent(in)  :: y(:)
+    complex(wp), allocatable :: r(:)
+    integer                  :: n
+
+    ! Check the size of input arrays
+    n = min(size(x), size(y))
+
+    ! Allocate memory for the results
+    allocate(r(n))
+
+    ! Differentiate using finite differences
+    r(   1   ) = (y( 1+1 ) - y(  1  ))/(x( 1+1 ) - x(  1  ))
+    r(1+1:n-1) = (y(1+2:n) - y(1:n-2))/(x(1+2:n) - x(1:n-2))
+    r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
+  end function
+
+  pure function integrate_twopoint(x, y) result(r)
     ! This function calculates the integral of an array y with respect to x using a trapezoid 
     ! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
@@ -248,13 +281,71 @@ contains
     integer               :: n
 
     ! Check the size of input arrays
-    n = max(size(x), size(y))
+    n = min(size(x), size(y))
 
     ! Integrate using the trapezoidal rule
     r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
   end function
 
-  function interpolate(x, y, p) result(r)
+  pure function integrate_twopoint_complex(x, y) result(r)
+    ! Complex version of integrate_twopoint.
+    real(wp),    intent(in) :: x(:)
+    complex(wp), intent(in) :: y(:)
+    complex(wp)             :: r
+    integer                 :: n
+
+    ! Check the size of input arrays
+    n = min(size(x), size(y))
+
+    ! Integrate using the trapezoidal rule
+    r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
+  end function
+
+  function integrate_pchip(x, y, a, b) result(r)
+    ! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on
+    ! discrete numerical data, and subsequently evaluates the integral of the interpolation in the
+    ! range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.
+    real(wp), external    :: dpchqa
+    real(wp), intent(in)  :: x(:)
+    real(wp), intent(in)  :: y(:)
+    real(wp), allocatable :: d(:)
+    real(wp), intent(in)  :: a
+    real(wp), intent(in)  :: b
+    real(wp)              :: r
+    integer               :: err
+    integer               :: n
+    integer               :: m
+
+    ! Check the size of input arrays
+    n = min(size(x), size(y))
+
+    ! Allocate memory for the derivatives
+    allocate(d(n))
+
+    ! Create a PCHIP interpolation of the input data
+    call dpchez(n, x, y, d, .false., 0, 0, err)
+
+    ! Integrate the interpolation in the provided range
+    r = dpchqa(n, x, y, d, a, b, err)
+
+    ! Clean up workspace memory
+    deallocate(d)
+  end function
+
+  function integrate_pchip_complex(x, y, a, b) result(r)
+    ! Wrapper for integrate_pchip that accepts complex arguments.
+    real(wp),    intent(in)  :: x(:)
+    complex(wp), intent(in)  :: y(:)
+    real(wp),    intent(in)  :: a
+    real(wp),    intent(in)  :: b
+    complex(wp)              :: r
+
+    ! Integrate the real and imaginary parts separately
+    r = cx( integrate_pchip(x, re(y), a, b),&
+            integrate_pchip(x, im(y), a, b) )
+  end function
+
+  function interpolate_pchip(x, y, p) result(r)
     ! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
     ! and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
@@ -267,7 +358,7 @@ contains
     integer               :: m
 
     ! Check the size of input arrays
-    n = max(size(x), size(y))
+    n = min(size(x), size(y))
     m = size(p)
 
     ! Allocate memory for the derivatives and results
@@ -282,5 +373,17 @@ contains
 
     ! Clean up workspace memory
     deallocate(d)
+  end function
+
+  function interpolate_pchip_complex(x, y, p) result(r)
+    ! Wrapper for interpolate_pchip that accepts complex arguments.
+    real(wp),    intent(in)  :: x(:)
+    real(wp),    intent(in)  :: p(:)
+    complex(wp), intent(in)  :: y(:)
+    complex(wp), allocatable :: r(:)
+
+    ! Interpolate the real and imaginary parts separately
+    r = cx( interpolate_pchip(x, re(y), p),&
+            interpolate_pchip(x, im(y), p) )
   end function
 end module

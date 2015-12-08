@@ -131,14 +131,11 @@ contains
 
   impure subroutine superconductor_update_posthook(this)
     ! Updates the superconducting order parameter based on the propagators of the system.
-    class(superconductor), intent(inout) :: this                      ! Superconductor object that will be updated
-    real(wp), allocatable                :: gap_real(:), dgap_real(:) ! Real part of the superconducting order parameter and its derivative
-    real(wp), allocatable                :: gap_imag(:), dgap_imag(:) ! Imag part of the superconducting order parameter and its derivative
-    complex(wp)                          :: gap_diff                  ! Used to calculate the change in the mean superconducting order parameter
-    complex(wp)                          :: singlet                   ! Singlet component of the anomalous propagators at a given point
-    real(wp), external                   :: dpchqa                    ! PCHIP function that evaluates an interpolation at a given point
-    integer                              :: err                       ! PCHIP error status
-    integer                              :: n, m                      ! Loop variables
+    class(superconductor), intent(inout) :: this         ! Superconductor object that will be updated
+    complex(wp),           allocatable   :: gap(:)       ! Used to calculate the superconducting order parameter
+    complex(wp)                          :: diff         ! Change in the superconducting order parameter mean
+    complex(wp)                          :: singlet      ! Singlet component of the anomalous propagators
+    integer                              :: n, m         ! Loop variables
 
     ! Call the superclass posthook
     call this%conductor%update_posthook
@@ -146,48 +143,36 @@ contains
     ! Update the superconducting gap if the BCS coupling constant is set
     if (this % coupling > 0) then
       ! Allocate workspace memory
-      allocate(gap_real(size(this%energy)))
-      allocate(gap_imag(size(this%energy)))
-      allocate(dgap_real(size(this%energy)))
-      allocate(dgap_imag(size(this%energy)))
+      allocate(gap(size(this%energy)))
 
       ! Calculate the mean superconducting order parameter
-      gap_diff = this%get_gap_mean()
+      diff = this%get_gap_mean()
 
       ! Iterate over the stored propagators
       do n = 1,size(this%location)
         do m = 1,size(this%energy)
-          ! Calculate the singlet component of the anomalous propagators
-          singlet     = ( this%propagator(m,n)%get_f_s() - conjg(this%propagator(m,n)%get_ft_s()) )/2.0_wp
+          ! Calculate the singlet components of the anomalous propagators
+          singlet = ( this%propagator(m,n)%get_f_s() - conjg(this%propagator(m,n)%get_ft_s()) )/2.0_wp
 
-          ! Calculate the real and imaginary parts of the gap equation integrand, and store them in arrays
-          gap_real(m) = re(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
-          gap_imag(m) = im(singlet) * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+          ! Calculate the gap equation integrand and store it in an array
+          gap(m)  = singlet * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
         end do
 
-        ! Create a PCHIP interpolation of the numerical results above
-        call dpchez(size(this%energy), this%energy, gap_real, dgap_real, .false., 0, 0, err)
-        call dpchez(size(this%energy), this%energy, gap_imag, dgap_imag, .false., 0, 0, err)
-
-        ! Perform a numerical integration of the interpolation, and update the superconducting order parameter
-        this%gap(n) = cx( dpchqa(size(this%energy), this%energy, gap_real, dgap_real, 1e-6_wp, cosh(1.0_wp/this%coupling), err),&
-                          dpchqa(size(this%energy), this%energy, gap_imag, dgap_imag, 1e-6_wp, cosh(1.0_wp/this%coupling), err) )
+        ! Interpolate and integrate the results, and update the superconducting order parameter
+        this%gap(n) = integrate(this%energy, gap, 1e-6_wp, cosh(1.0_wp/this%coupling))
       end do
 
       ! Calculate the difference in mean superconducting order parameter
-      gap_diff = this%get_gap_mean() - gap_diff
+      diff = this%get_gap_mean() - diff
 
       ! Status information
       if (this%information >= 0) then
-        write(stdout,'(4x,a,f10.8,a)') 'Gap change: ',abs(gap_diff),'                                        '
+        write(stdout,'(4x,a,f10.8,a)') 'Gap change: ',abs(diff),'                                        '
         flush(stdout)
       end if
 
       ! Deallocate workspace memory
-      deallocate(gap_real)
-      deallocate(gap_imag)
-      deallocate(dgap_real)
-      deallocate(dgap_imag)
+      deallocate(gap)
     end if
   end subroutine
 
