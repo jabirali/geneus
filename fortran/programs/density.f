@@ -413,10 +413,12 @@ contains
     polarization_b   = 0.00_wp
     conductance_a    = 0.30_wp
     conductance_b    = 0.30_wp
+    spinmixing_a     = 0.00_wp
+    spinmixing_b     = 0.00_wp
     spinorbit_a      = 0.00_wp
     spinorbit_b      = 0.00_wp
-    reflecting_a    = .false.
-    reflecting_b    = .false.
+    reflecting_a     = .false.
+    reflecting_b     = .false.
 
     ! Determine the superconductor name
     write(ioname, '(a,i0)') 's', m
