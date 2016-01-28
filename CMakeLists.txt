@@ -2,7 +2,7 @@
 #
 # Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 # Created: 2015-07-12
-# Updated: 2015-07-28
+# Updated: 2016-01-28
 
 
 
@@ -16,10 +16,6 @@ cmake_minimum_required(VERSION 2.6)
 
 # Programming languages
 enable_language(Fortran)
-
-# Use static libraries
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-set(BUILD_SHARED_LIBRARIES OFF)
 
 # Source files
 file(GLOB src_e77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
@@ -54,24 +50,20 @@ else()
   message(STATUS "Using custom build type: '" ${CMAKE_BUILD_TYPE} "'.")
 endif()
 
-# Set the compiler flags
-get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
-if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-  # Flags that apply to all files
-  set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace -fno-underscoring")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -fno-underscoring -s")
-  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
+# Compiler flags that apply to all files
+set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace -fno-underscoring")
+set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -fno-underscoring -s")
+set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program")
 
-  # Flags that apply to external files (imported from other projects)
-  set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
-  set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
+# Compiler flags that apply to external files (imported from other projects)
+set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
+set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
 
-  # Flags that apply to internal files (produced as part of this project)
-  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
-  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
-  endif()
+# Compiler flags that apply to internal files (produced as part of this project)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
 endif()
 
 # Print the results
