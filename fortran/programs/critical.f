@@ -303,6 +303,7 @@ contains
     ! Declare the input/output variables
     character(8) :: ioname
     real(wp)     :: length     
+    real(wp)     :: depairing
     real(wp)     :: conductance_a
     real(wp)     :: conductance_b
     real(wp)     :: polarization_a
@@ -316,6 +317,7 @@ contains
 
     ! Set the default values
     length           = 1.00_wp
+    depairing        = 0.00_wp
     spinorbit_a      = 0.00_wp
     spinorbit_b      = 0.00_wp
     magnetization_a  = 0.00_wp
@@ -341,6 +343,7 @@ contains
     call option(length,          trim(ioname) // '.length')
     call option(spinorbit_a,     trim(ioname) // '.rashba')
     call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
+    call option(depairing,       trim(ioname) // '.depairing')
     print *,'───────────────────────────────────'
     call option(conductance_b,   trim(ioname) // 'r.conductance')
     call option(spinmixing_b,    trim(ioname) // 'r.spinmixing')
@@ -361,6 +364,7 @@ contains
                            points = points, coupling = coupling, gap = cmplx(initgap,0,kind=wp))
     
     ! Set the internal fields
+    s(m) % depairing   = depairing
     s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
 
     ! Set the interface parameters
@@ -394,6 +398,7 @@ contains
     ! Declare the input variables
     character(len=8) :: ioname
     real(wp)         :: length     
+    real(wp)         :: depairing
     real(wp)         :: conductance_a
     real(wp)         :: conductance_b
     real(wp)         :: polarization_a
@@ -409,6 +414,7 @@ contains
     ! Set the default values
     length           = 1.00_wp
     exchange         = 0.00_wp
+    depairing        = 0.00_wp
     conductance_a    = 0.30_wp
     conductance_b    = 0.30_wp
     magnetization_a  = 0.00_wp
@@ -431,6 +437,7 @@ contains
     call option(length,          trim(ioname) // '.length')
     call option(spinorbit_a,     trim(ioname) // '.rashba')
     call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
+    call option(depairing,       trim(ioname) // '.depairing')
     call option(exchange,        trim(ioname) // '.exchange')
     print *,'───────────────────────────────────'
     call option(conductance_b,   trim(ioname) // 'r.conductance')
@@ -454,6 +461,7 @@ contains
                         points = points, gap = cmplx(initgap,0,kind=wp), exchange = exchange)
 
     ! Set the internal fields
+    f(m) % depairing = depairing
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
 
     ! Set the interface parameters
