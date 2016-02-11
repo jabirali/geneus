@@ -184,8 +184,8 @@ contains
 
     ! Calculate the contribution from orbital magnetic depairing
     if (this%depairing /= 0.0_wp) then
-      d2g  = d2g  + (4*this%depairing/this%thouless)*(2.0_wp*N  - pauli0)*g
-      d2gt = d2gt + (4*this%depairing/this%thouless)*(2.0_wp*Nt - pauli0)*gt
+      d2g  = d2g  + (this%depairing/this%thouless)*(2.0_wp*N  - pauli0)*g
+      d2gt = d2gt + (this%depairing/this%thouless)*(2.0_wp*Nt - pauli0)*gt
     end if
   end subroutine
 
