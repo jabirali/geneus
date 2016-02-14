@@ -211,6 +211,17 @@ contains
     end if
   end function
 
+  pure function spinorbit_z(alpha) result(field)
+    ! This function returns an SU(2) vector that describes a Rashba coupling along the z-axis. 
+    real(wp), intent(in) :: alpha
+    type(spin)           :: field(3)
+
+    ! Initialize components
+    field(1) = spin(0)
+    field(2) = spin(0)
+    field(3) = alpha*(pauli1-pauli2)
+  end function
+
   !--------------------------------------------------------------------------------!
   !                             INPUT/OUTPUT PROCEDURES                            !
   !--------------------------------------------------------------------------------!
