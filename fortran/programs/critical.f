@@ -312,7 +312,6 @@ contains
     real(wp)     :: spinmixing_b
     real(wp)     :: spinorbit_a
     real(wp)     :: spinorbit_b
-    real(wp)     :: spinorbit_az
     real(wp)     :: magnetization_a(3)
     real(wp)     :: magnetization_b(3)
 
@@ -321,7 +320,6 @@ contains
     depairing        = 0.00_wp
     spinorbit_a      = 0.00_wp
     spinorbit_b      = 0.00_wp
-    spinorbit_az     = 0.00_wp
     magnetization_a  = 0.00_wp
     magnetization_b  = 0.00_wp
     polarization_a   = 0.00_wp
@@ -345,7 +343,6 @@ contains
     call option(length,          trim(ioname) // '.length')
     call option(spinorbit_a,     trim(ioname) // '.rashba')
     call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
-    call option(spinorbit_az,    trim(ioname) // '.rashbaz')
     call option(depairing,       trim(ioname) // '.depairing')
     print *,'───────────────────────────────────'
     call option(conductance_b,   trim(ioname) // 'r.conductance')
@@ -368,7 +365,7 @@ contains
     
     ! Set the internal fields
     s(m) % depairing   = depairing
-    s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b) + spinorbit_z(spinorbit_az)
+    s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
 
     ! Set the interface parameters
     s(m) % conductance_a   = conductance_a
@@ -410,7 +407,6 @@ contains
     real(wp)         :: spinmixing_b
     real(wp)         :: spinorbit_a
     real(wp)         :: spinorbit_b
-    real(wp)         :: spinorbit_az
     real(wp)         :: exchange(3)
     real(wp)         :: magnetization_a(3)
     real(wp)         :: magnetization_b(3)
@@ -427,7 +423,6 @@ contains
     polarization_b   = 0.00_wp
     spinorbit_a      = 0.00_wp
     spinorbit_b      = 0.00_wp
-    spinorbit_az     = 0.00_wp
 
     ! Determine the ferromagnet name
     write(ioname, '(a,i0)') 'f', m
@@ -442,7 +437,6 @@ contains
     call option(length,          trim(ioname) // '.length')
     call option(spinorbit_a,     trim(ioname) // '.rashba')
     call option(spinorbit_b,     trim(ioname) // '.dresselhaus')
-    call option(spinorbit_az,    trim(ioname) // '.rashbaz')
     call option(depairing,       trim(ioname) // '.depairing')
     call option(exchange,        trim(ioname) // '.exchange')
     print *,'───────────────────────────────────'
@@ -468,7 +462,7 @@ contains
 
     ! Set the internal fields
     f(m) % depairing = depairing
-    f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b) + spinorbit_z(spinorbit_az)
+    f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
 
     ! Set the interface parameters
     f(m) % conductance_a   = conductance_a

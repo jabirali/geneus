@@ -361,7 +361,7 @@ contains
     r = spin(a%matrix + b)
   end function
 
-  pure elemental function spin_add_spin(a,b) result(r)
+  pure function spin_add_spin(a,b) result(r)
     ! Defines addition of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
