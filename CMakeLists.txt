@@ -17,6 +17,10 @@ cmake_minimum_required(VERSION 2.6)
 # Programming languages
 enable_language(Fortran)
 
+# Use static libraries
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+set(BUILD_SHARED_LIBRARIES OFF)
+
 # Source files
 file(GLOB src_e77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
 file(GLOB src_e90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f")
@@ -53,7 +57,7 @@ endif()
 # Compiler flags that apply to all files
 set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace -fno-underscoring")
 set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -fno-underscoring -s")
-set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program")
+set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program -static")
 
 # Compiler flags that apply to external files (imported from other projects)
 set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
