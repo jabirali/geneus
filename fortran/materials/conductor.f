@@ -1,6 +1,6 @@
 ! This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
 ! of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
-! such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures. 
+! such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
@@ -20,7 +20,7 @@ module mod_conductor
 
   ! Type declarations
   type, extends(material) :: conductor
-    ! These parameters control the physical characteristics of the material 
+    ! These parameters control the physical characteristics of the material
     logical                   :: transparent_a           =  .false.                           ! Whether the left  interface is completely transparent
     logical                   :: transparent_b           =  .false.                           ! Whether the right interface is completely transparent
     logical                   :: reflecting_a            =  .false.                           ! Whether the left  interface is completely reflecting

@@ -3,7 +3,7 @@
 !
 ! WORK IN PROGRESS:
 !   The development of this program was prompted by the maintenance issues with density.f,
-!   and this propgram is supposed to generalize and eventually replace density.f altogether.
+!   and this program is supposed to generalize and eventually replace density.f altogether.
 !   The ideal is to make it run based on a config file (using mod_config) instead of command
 !   line options, and to eventually reduce code duplication between density.f and critical.f.
 !
