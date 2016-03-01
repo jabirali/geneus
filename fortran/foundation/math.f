@@ -233,7 +233,7 @@ contains
   !----------------------------------------------------------------------------!
 
   pure function differentiate_linear(x, y) result(r)
-    ! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation 
+    ! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation
     ! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     ! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
@@ -273,7 +273,7 @@ contains
   end function
 
   pure function integrate_linear(x, y) result(r)
-    ! This function calculates the integral of an array y with respect to x using a trapezoid 
+    ! This function calculates the integral of an array y with respect to x using a trapezoid
     ! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
     real(wp), intent(in)  :: y(:)
