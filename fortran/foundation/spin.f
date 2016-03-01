@@ -15,7 +15,7 @@ module mod_spin
   ! Public interface
   public spin
   public assignment(=), operator(+), operator(-), operator(*), operator(/), operator(**), operator(.divl.), operator(.divr.)
-  public spin_inv, spin_trace, spin_norm, spin_min, spin_max, spin_print
+  public spin_inv, spin_trace, spin_norm, spin_min, spin_max, spin_print, spin_conjg, conjg
   public pauli, pauli0, pauli1, pauli2, pauli3
 
   ! Type declaration
@@ -23,6 +23,7 @@ module mod_spin
     complex(wp) :: matrix(2,2)      =  0.0_wp        ! Spin matrix
   contains
     procedure   :: inv              => spin_inv      ! Inverse of the matrix
+    procedure   :: conjg            => spin_conjg    ! Complex conjugate of the matrix
     procedure   :: trace            => spin_trace    ! Trace of the matrix
     procedure   :: norm             => spin_norm     ! Frobenius norm of the matrix
     procedure   :: min              => spin_min      ! Size of the smallest element
@@ -52,7 +53,7 @@ module mod_spin
   interface operator(**)
     module procedure spin_exp_integer
   end interface
-  
+
   ! Multiplication operator
   interface operator(*)
     module procedure spin_multl_rscalar, spin_multr_rscalar, &
@@ -80,6 +81,11 @@ module mod_spin
                      spin_subl_cscalar, spin_subr_cscalar, &
                      spin_subl_cmatrix, spin_subr_cmatrix, &
                      spin_sub_spin
+  end interface
+
+  ! Complex conjugation
+  interface conjg
+    module procedure spin_conjg
   end interface
 
   ! Matrix division operator (left)
@@ -471,6 +477,14 @@ contains
 
     w = this
     r = norm2(w)
+  end function
+
+  pure elemental function spin_conjg(this) result(r)
+    ! Calculates the complex conjugate of the spin matrix
+    class(spin), intent(in)  :: this
+    type(spin)               :: r
+
+    r%matrix = conjg(this%matrix)
   end function
 
   pure function spin_min(this) result(r)
