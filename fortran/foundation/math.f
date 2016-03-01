@@ -43,9 +43,9 @@ module mod_math
   end interface
 contains
 
-  !----------------------------------------------------------------------------!
-  !                        COMPLEX NUMBER PROCEDURES                           !
-  !----------------------------------------------------------------------------!
+  !---------------------------------------------------------------------------!
+  !                        COMPLEX NUMBER PROCEDURES                          !
+  !---------------------------------------------------------------------------!
 
   pure elemental function re(z) result(x)
     ! Returns the real part of a complex number z=x+iy.
@@ -72,9 +72,9 @@ contains
     z = cmplx(x,y,kind=wp)
   end function
 
-  !----------------------------------------------------------------------------!
-  !                       ELEMENTARY MATRIX PROCEDURES                         !
-  !----------------------------------------------------------------------------!
+  !---------------------------------------------------------------------------!
+  !                       ELEMENTARY MATRIX PROCEDURES                        !
+  !---------------------------------------------------------------------------!
 
   pure function mateye(n) result(A)
     ! Constructs an n×n identity matrix.
@@ -228,9 +228,9 @@ contains
     B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
   end function
 
-  !----------------------------------------------------------------------------!
-  !                       ELEMENTARY CALCULUS PROCEDURES                       !
-  !----------------------------------------------------------------------------!
+  !---------------------------------------------------------------------------!
+  !                       ELEMENTARY CALCULUS PROCEDURES                      !
+  !---------------------------------------------------------------------------!
 
   pure function differentiate_linear(x, y) result(r)
     ! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation
