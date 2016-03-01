@@ -21,44 +21,49 @@ module mod_material
   ! Type declarations
   type, abstract :: material
     ! These parameters determine the basic physical behaviour of a diffusive material
-    real(wp)                                  :: thouless        =  1.00_wp               ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(wp)                                  :: scattering      =  0.01_wp               ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    real(wp)                                  :: thouless        =  1.00_wp                 ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(wp)                                  :: scattering      =  0.01_wp                 ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    real(wp)                                  :: temperature     =  sqrt(eps)               ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
-    real(wp),                     allocatable :: energy(:)                                ! Discretized domain for the energies
-    real(wp),                     allocatable :: location(:)                              ! Discretized domain for the positions
-    type(green),                  allocatable :: propagator(:,:)                          ! Discretized values for the propagator (retarded component)
+    real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
+    real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
+    type(green),                  allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
+    real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
+    real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
-    class(material),                  pointer :: material_a      => null()                ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
-    class(material),                  pointer :: material_b      => null()                ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
+    class(material),                  pointer :: material_a      => null()                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
+    class(material),                  pointer :: material_b      => null()                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
-    integer                                   :: scaling         =  128                   ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
-    integer                                   :: order           =  4                     ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
-    integer                                   :: control         =  2                     ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
-    integer                                   :: information     =  0                     ! How much information that should be written to standard out (range: [-1,2])
-    real(wp)                                  :: tolerance       =  1e-8_wp               ! Error tolerance (determines the maximum allowed defect or global error)
-    real(wp)                                  :: difference      =  1e+8_wp               ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
+    integer                                   :: scaling         =  128                     ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
+    integer                                   :: order           =  4                       ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
+    integer                                   :: control         =  2                       ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
+    integer                                   :: information     =  0                       ! How much information that should be written to standard out (range: [-1,2])
+    real(wp)                                  :: tolerance       =  1e-8_wp                 ! Error tolerance (determines the maximum allowed defect or global error)
+    real(wp)                                  :: difference      =  1e+8_wp                 ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
-    character(len=128)                        :: type_string     =  'MATERIAL'            ! The type string should describe the specific class(material) subtype
+    character(len=128)                        :: type_string     =  'MATERIAL'              ! The type string should describe the specific class(material) subtype
   contains
     ! These methods define how to update the physical state of the material
-    procedure(init),                 deferred :: init                                     ! Initializes  the propagators
-    procedure                                 :: update          => material_update       ! Recalculates the propagators
-    procedure(update),               deferred :: update_prehook                           ! Executed before calculating the propagators
-    procedure(update),               deferred :: update_posthook                          ! Executed after  calculating the propagators
+    procedure(init),                 deferred :: init                                       ! Initializes  the propagators
+    procedure                                 :: update          => material_update         ! Recalculates the propagators
+    procedure                                 :: update_current  => material_update_current ! Calculates the electric and spin currents
+    procedure                                 :: update_density  => material_update_density ! Calculates the density of states
+    procedure(update),               deferred :: update_prehook                             ! Executed before calculating the propagators
+    procedure(update),               deferred :: update_posthook                            ! Executed after  calculating the propagators
 
     ! These methods define the physical equations used by the update methods
-    procedure(diffusion_equation),   deferred :: diffusion_equation                       ! Diffusion equation that describes the material
-    procedure(interface_equation_a), deferred :: interface_equation_a                     ! Boundary condition at the left  interface
-    procedure(interface_equation_b), deferred :: interface_equation_b                     ! Boundary condition at the right interface
+    procedure(diffusion_equation),   deferred :: diffusion_equation                         ! Diffusion equation that describes the material
+    procedure(interface_equation_a), deferred :: interface_equation_a                       ! Boundary condition at the left  interface
+    procedure(interface_equation_b), deferred :: interface_equation_b                       ! Boundary condition at the right interface
 
     ! These methods define miscellaneous utility functions
-    procedure                                 :: save            => material_save         ! Saves the state of the conductor to a different object
-    procedure                                 :: load            => material_load         ! Loads the state of the conductor from a different object
-    procedure                                 :: write_dos       => material_write_dos    ! Writes the density of states to a given output unit
+    procedure                                 :: save            => material_save           ! Saves the state of the conductor to a different object
+    procedure                                 :: load            => material_load           ! Loads the state of the conductor from a different object
+    procedure                                 :: write_dos       => material_write_dos      ! Writes the density of states to a given output unit
   end type
 
   ! Interface declarations
@@ -211,6 +216,10 @@ contains
       flush(stdout)
     end if
 
+    ! Calculate the density of states and currents
+    call this%update_density
+    call this%update_current
+
     ! Call the posthook method
     call this%update_posthook
   contains
@@ -269,6 +278,72 @@ contains
       bcb(1: 8) = r2
       bcb(9:16) = rt2
     end subroutine
+  end subroutine
+
+  impure subroutine material_update_current(this)
+    ! Calculate the charge and spin currents in the material.
+    class(material), intent(inout) :: this
+    real(wp),        allocatable   :: current(:,:)
+    real(wp)                       :: prefactor
+    type(spin)                     :: kernel
+    integer                        :: n, m, k
+
+    ! Allocate memory if necessary
+    if (.not. allocated(this%current)) then
+      allocate(this%current(0:3,size(this%location)))
+    end if
+
+    ! Allocate workspace memory
+    allocate(current(size(this%energy),0:3))
+
+    ! Iterate over the stored propagators
+    do n = 1,size(this%location)
+      do m = 1,size(this%energy)
+        ! Calculate the kernel matrix at this position and energy
+        associate(g   => this%propagator(m,n)%g ,&
+                  gt  => this%propagator(m,n)%gt,&
+                  dg  => this%propagator(m,n)%dg,&
+                  dgt => this%propagator(m,n)%dgt)
+
+          kernel =      ( ( pauli0 - g*gt ) .divl. ( dg*gt - g*dgt ) .divr. ( pauli0 - g*gt ) ) &
+                 - conjg( ( pauli0 - gt*g ) .divl. ( dgt*g - gt*dg ) .divr. ( pauli0 - gt*g ) )
+        end associate
+
+        ! Calculate the current equation integrands and store them in arrays
+        prefactor = 8 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+        current(m,0) = prefactor * re(spin_trace(pauli0*kernel))
+        current(m,1) = prefactor * re(spin_trace(pauli1*kernel))
+        current(m,2) = prefactor * re(spin_trace(pauli2*kernel))
+        current(m,3) = prefactor * re(spin_trace(pauli3*kernel))
+      end do
+
+      ! Interpolate and integrate the results, and update the superconducting order parameter
+      this%current(0,n) = integrate(this%energy, current(:,0), 1e-6_wp, this%energy(ubound(this%energy,1)))
+      this%current(1,n) = integrate(this%energy, current(:,1), 1e-6_wp, this%energy(ubound(this%energy,1)))
+      this%current(2,n) = integrate(this%energy, current(:,2), 1e-6_wp, this%energy(ubound(this%energy,1)))
+      this%current(3,n) = integrate(this%energy, current(:,3), 1e-6_wp, this%energy(ubound(this%energy,1)))
+    end do
+
+    ! Deallocate workspace memory
+    deallocate(current)
+  end subroutine
+
+  pure subroutine material_update_density(this)
+    ! Calculate the density of states in the material.
+    class(material), intent(inout) :: this
+    integer                        :: n, m
+
+    ! Allocate memory if necessary
+    if (.not. allocated(this%density)) then
+      allocate(this%density(size(this%location),size(this%energy)))
+    end if
+
+    ! Calculate the density of states at each position and energy
+    do m=1,size(this%location)
+      do n=1,size(this%energy)
+        this%density(n,m) = this%propagator(n,m)%get_dos()
+      end do
+    end do
   end subroutine
 
   !--------------------------------------------------------------------------------!

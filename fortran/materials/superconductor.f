@@ -20,7 +20,6 @@ module mod_superconductor
   type, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
     complex(wp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp)                 :: temperature         =  sqrt(eps)                          ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
     real(wp)                 :: coupling            =  0.20_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
