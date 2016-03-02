@@ -352,6 +352,7 @@ contains
 
   pure subroutine material_save(this, backup)
     ! Exports the state of the material to a different object.
+    ! TODO: Implement that it saves to an internal variable, not a different object.
     class(material), intent(inout) :: this
     class(material), intent(inout) :: backup
 
@@ -372,6 +373,9 @@ contains
 
   pure subroutine material_load(this, backup)
     ! Imports the state of the material from a different object.
+    ! TODO: Implement that it loads from an internal variable, not different object.
+    !       Make sure type(superconductor) overrides this by also recalculating the gap after backup.
+    !       Perhaps make a method for posthooks, that e.g. restores DOS/current/gap after load?
     class(material), intent(inout) :: this
     class(material), intent(inout) :: backup
 

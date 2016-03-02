@@ -53,7 +53,6 @@ contains
     real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
     integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
-    integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
     this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
@@ -80,7 +79,6 @@ contains
     ! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
     complex(wp),           intent(in   ) :: gap
-    integer                              :: n, m
 
     ! Call the superclass initializer
     call this%conductor%init(gap)
