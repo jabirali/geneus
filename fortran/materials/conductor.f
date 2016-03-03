@@ -46,7 +46,7 @@ module mod_conductor
     real(wp),         private :: GC_a, GC_b                                                   ! Normalized correction  G_T1/G_T0 at the interfaces
     complex(wp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
     complex(wp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
-  
+ 
     ! These variables are used by internal subroutines to handle spin-orbit coupling
     type(spin),       private :: Ax,  Ay,  Az,  A2                                            ! Spin-orbit coupling matrices (the components and square)
     type(spin),       private :: Axt, Ayt, Azt, A2t                                           ! Spin-orbit coupling matrices (tilde-conjugated versions)
@@ -98,18 +98,18 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function conductor_construct(cutoff, gap, thouless, scattering) result(this)
+  pure function conductor_construct(cutoff, gap, length, scattering) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this         ! Conductor object that will be constructed
     real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
-    real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: see type declaration)
-    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
-    complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
+    real(wp),    intent(in), optional :: length       ! Length of the material
+    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
+    complex(wp), intent(in), optional :: gap          ! Superconducting gap
     integer                           :: n            ! Loop variable
 
-    ! Optional argument: Thouless energy
-    if (present(thouless)) then
-      this%thouless = thouless
+    ! Optional argument: Length
+    if (present(length)) then
+      this%thouless = 1/length**2
     end if
 
     ! Optional argument: imaginary energy

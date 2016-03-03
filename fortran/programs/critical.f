@@ -331,10 +331,10 @@ contains
     end if
 
     ! Construct the superconductor
-    s(m)  = superconductor(cutoff=cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp))
+    s(m)  = superconductor(cutoff=cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp))
 
     ! Construct the backup
-    sb(m) = superconductor(cutoff=cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp))
+    sb(m) = superconductor(cutoff=cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp))
     
     ! Set the internal fields
     s(m) % depairing   = depairing
@@ -426,10 +426,10 @@ contains
     end if
 
     ! Construct the ferromagnet
-    f(m)  = ferromagnet(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
+    f(m)  = ferromagnet(cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
 
     ! Construct the backup
-    fb(m) = ferromagnet(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
+    fb(m) = ferromagnet(cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
 
     ! Set the internal fields
     f(m) % depairing = depairing

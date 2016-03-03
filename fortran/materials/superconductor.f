@@ -44,16 +44,16 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function superconductor_construct(cutoff, gap, thouless, scattering) result(this)
+  pure function superconductor_construct(cutoff, gap, length, scattering) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
     real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
-    complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: 1.0)
-    real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
-    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
+    complex(wp), intent(in), optional :: gap          ! Superconducting gap
+    real(wp),    intent(in), optional :: length       ! Length of the material
+    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(cutoff=cutoff, gap=gap, thouless=thouless, scattering=scattering)
+    this%conductor = conductor_construct(cutoff=cutoff, gap=gap, length=length, scattering=scattering)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then

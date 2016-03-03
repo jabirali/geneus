@@ -36,18 +36,18 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function ferromagnet_construct_homogeneous(cutoff, exchange, gap, thouless, scattering) result(this)
+  pure function ferromagnet_construct_homogeneous(cutoff, exchange, gap, length, scattering) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor.
     type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
     real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
+    real(wp),    intent(in), optional :: length       ! Length of the material
     real(wp),    intent(in), optional :: exchange(3)  ! Magnetic exchange field
-    complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: conductor default)
-    real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
-    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
+    complex(wp), intent(in), optional :: gap          ! Superconducting gap
+    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
     integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(cutoff, gap=gap, thouless=thouless, scattering=scattering)
+    this%conductor = conductor_construct(cutoff, gap=gap, length=length, scattering=scattering)
 
 
     ! Handle the exchange field argument

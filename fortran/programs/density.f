@@ -420,8 +420,8 @@ contains
 
 
     ! Construct the superconductor
-    s(m) = superconductor(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(gap,0,kind=wp))
-    
+    s(m) = superconductor(cutoff, scattering = scattering, length = length, gap = cmplx(gap,0,kind=wp))
+
     ! Construct and connect a superconducting reservoir
     if (reservoirs) then
       if (m == 1) then
@@ -545,7 +545,7 @@ contains
     end if
 
     ! Construct the ferromagnet
-    f(m) = ferromagnet(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(gap,0,kind=wp), exchange = exchange)
+    f(m) = ferromagnet(cutoff, scattering = scattering, length = length, gap = cmplx(gap,0,kind=wp), exchange = exchange)
 
     ! Set the internal fields
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
