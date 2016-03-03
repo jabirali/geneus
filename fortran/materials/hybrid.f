@@ -78,7 +78,7 @@ contains
     real(wp),       allocatable :: energy(:)
     real(wp),       allocatable :: dos_a(:), idos_a(:)
     real(wp),       allocatable :: dos_b(:), idos_b(:)
-    integer                     :: n, m, err
+    integer                     :: n
 
     ! Allocate memory
     allocate(current(size(voltage)))
@@ -141,6 +141,9 @@ contains
     ! If the coupling constant 'coupling' is provided,  the array will include values all the way up to
     ! the Debye cutoff cosh(1/coupling), which is appropriate for selfconsistent calculations.  If not,
     ! it will only include energies up to 1.5Δ, which is sufficient for non-selfconsistent calculations.
+    !
+    ! TODO: Deprecate this function, and make this action be performed by the class(material) constructor.
+    ! TODO: If zero Debye energy, use 0..1.5; if finite Debye energy, use up to cutoff.
 
     real(wp), intent(out)          :: array(:)
     real(wp), optional, intent(in) :: coupling
@@ -152,13 +155,9 @@ contains
       do n = 1,size(array)-300
         array(n) = 1e-6_wp + (n-1) * (1.5_wp/(size(array)-300))
       end do
-      ! Positive energies from 1.5 to 4.5
-      do n = 1,200
-        array(size(array)-300+n) = 1e-6_wp + 1.5_wp + (n-1) * (3.0_wp/200)
-      end do
       ! Positive energies from 1.5 to cutoff
-      do n = 1,100
-        array(size(array)-100+n) = 1e-6_wp + 4.5_wp + n * (cosh(1.0_wp/coupling)-4.5)/100
+      do n = 1,300
+        array(size(array)-300+n) = 1e-6_wp + 1.5_wp + n * (cosh(1.0_wp/coupling)-1.5)/300
       end do
     else
       ! Positive energies from 0.0 to 1.5

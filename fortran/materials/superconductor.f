@@ -20,7 +20,7 @@ module mod_superconductor
   type, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
     complex(wp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp)                 :: coupling            =  0.20_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    real(wp)                 :: coupling            =  0.25_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
@@ -156,7 +156,7 @@ contains
         end do
 
         ! Interpolate and integrate the results, and update the superconducting order parameter
-        this%gap(n) = integrate(this%energy, gap, 1e-6_wp, cosh(1.0_wp/this%coupling))
+        this%gap(n) = integrate(this%energy, gap, 1e-6_wp, this%energy(ubound(this%energy,1)))
       end do
 
       ! Calculate the difference in mean superconducting order parameter
