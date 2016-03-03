@@ -106,7 +106,7 @@ contains
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
     complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
     integer,     intent(in), optional :: points       ! Number of positions   (default: see definition below)
-    integer                           :: n, m         ! Loop variables
+    integer                           :: n            ! Loop variables
 
     ! Optional argument: Thouless energy
     if (present(thouless)) then
@@ -183,7 +183,7 @@ contains
     end if
 
     ! Calculate the contribution from orbital magnetic depairing
-    if (this%depairing /= 0.0_wp) then
+    if (this%depairing > 0) then
       d2g  = d2g  + (this%depairing**2/this%thouless)*(2.0_wp*N  - pauli0)*g
       d2gt = d2gt + (this%depairing**2/this%thouless)*(2.0_wp*Nt - pauli0)*gt
     end if
