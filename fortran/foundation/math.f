@@ -314,7 +314,6 @@ contains
     real(wp)              :: r
     integer               :: err
     integer               :: n
-    integer               :: m
 
     ! Check the size of input arrays
     n = min(size(x), size(y))

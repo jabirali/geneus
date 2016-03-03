@@ -286,7 +286,7 @@ contains
     real(wp),        allocatable   :: current(:,:)
     real(wp)                       :: prefactor
     type(spin)                     :: kernel
-    integer                        :: n, m, k
+    integer                        :: n, m
 
     ! Allocate memory if necessary
     if (.not. allocated(this%current)) then
