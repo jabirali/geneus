@@ -31,6 +31,7 @@ module mod_material
     type(green),                  allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
     real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
     real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
+    real(wp),                     allocatable :: backup(:,:)                                ! Backup values for the propagator [TODO]
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
     class(material),                  pointer :: material_a      => null()                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
