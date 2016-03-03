@@ -152,6 +152,7 @@ contains
     ! Code to execute after running the update method of a class(ferromagnet) object.
     class(ferromagnet), intent(inout) :: this
 
-    continue
+    ! Call the superclass posthook
+    call this%conductor%update_posthook
   end subroutine
 end module

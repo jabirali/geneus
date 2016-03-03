@@ -18,8 +18,6 @@ program critical
   ! Declare the materials in the hybrid structure
   type(superconductor), allocatable :: s(:)                ! Superconducting layer
   type(ferromagnet),    allocatable :: f(:)                ! Ferromagnetic layers
-  type(superconductor), allocatable :: sb(:)               ! Superconducting backups
-  type(ferromagnet),    allocatable :: fb(:)               ! Ferromagnetic backups
 
   ! Declare global parameters that can be modified at runtime
   integer                           :: information  = 0
@@ -93,10 +91,9 @@ program critical
     s(1) % coupling = coupling
 
     ! Save the current state of the materials
-    sb(1) % gap = s(1) % gap
-    call s(1) % save(sb(1))
+    call s(1) % save
     do n=1,size(f)
-      call f(n) % save(fb(n))
+      call f(n) % save
     end do
   end if
 
@@ -114,10 +111,9 @@ program critical
 
     ! Load the states from backup
     if (size(f) > 0) then
-      s(1) % gap = sb(1) % gap
-      call s(1) % load(sb(1))
+      call s(1) % load
       do m = 1,size(f)
-        call f(m) % load(fb(m))
+        call f(m) % load
       end do
     else
       call s(1) % init( gap = cmplx(initgap,0,kind=wp) )
@@ -171,8 +167,6 @@ program critical
   ! Deallocate memory
   deallocate(s)
   deallocate(f)
-  deallocate(sb)
-  deallocate(fb)
 contains
 
   !--------------------------------------------------------------------------------!
@@ -195,7 +189,6 @@ contains
 
     ! Allocate memory for the superconducting layer
     allocate(s(1))
-    allocate(sb(1))
 
     ! Determine the number of iterations of the binary search
     call option(bisections, 'bisections')
@@ -221,7 +214,6 @@ contains
       stop
     else 
       allocate(f(ferromagnets))
-      allocate(fb(ferromagnets))
     end if
 
     ! Determine the inelastic scattering rate
@@ -333,9 +325,6 @@ contains
     ! Construct the superconductor
     s(m)  = superconductor(cutoff=cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp))
 
-    ! Construct the backup
-    sb(m) = superconductor(cutoff=cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp))
-    
     ! Set the internal fields
     s(m) % depairing   = depairing
     s(m) % spinorbit   = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
@@ -427,9 +416,6 @@ contains
 
     ! Construct the ferromagnet
     f(m)  = ferromagnet(cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
-
-    ! Construct the backup
-    fb(m) = ferromagnet(cutoff, scattering = scattering, length = length, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
 
     ! Set the internal fields
     f(m) % depairing = depairing

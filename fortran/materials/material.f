@@ -29,9 +29,9 @@ module mod_material
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
     real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
     type(green),                  allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
+    type(green),                  allocatable :: backup(:,:)                                ! Backup values for the propagator
     real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
     real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
-    real(wp),                     allocatable :: backup(:,:)                                ! Backup values for the propagator [TODO]
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
     class(material),                  pointer :: material_a      => null()                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
@@ -62,8 +62,8 @@ module mod_material
     procedure(interface_equation_b), deferred :: interface_equation_b                       ! Boundary condition at the right interface
 
     ! These methods define miscellaneous utility functions
-    procedure                                 :: save            => material_save           ! Saves the state of the conductor to a different object
-    procedure                                 :: load            => material_load           ! Loads the state of the conductor from a different object
+    procedure                                 :: save            => material_save           ! Saves the state of the material
+    procedure                                 :: load            => material_load           ! Loads the state of the material
     procedure                                 :: write_dos       => material_write_dos      ! Writes the density of states to a given output unit
   end type
 
@@ -217,10 +217,6 @@ contains
       flush(stdout)
     end if
 
-    ! Calculate the density of states and currents
-    call this%update_density
-    call this%update_current
-
     ! Call the posthook method
     call this%update_posthook
   contains
@@ -336,7 +332,7 @@ contains
 
     ! Allocate memory if necessary
     if (.not. allocated(this%density)) then
-      allocate(this%density(size(this%location),size(this%energy)))
+      allocate(this%density(size(this%energy),size(this%location)))
     end if
 
     ! Calculate the density of states at each position and energy
@@ -351,48 +347,37 @@ contains
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine material_save(this, backup)
-    ! Exports the state of the material to a different object.
-    ! TODO: Implement that it saves to an internal variable, not a different object.
+  impure subroutine material_save(this)
+    ! Save a backup of the current material state.
     class(material), intent(inout) :: this
-    class(material), intent(inout) :: backup
 
-    ! Make sure enough memory is allocated
-    if (allocated(backup%propagator)) then
-      if (ubound(this%propagator,1) /= ubound(backup%propagator,1)  .or. &
-          ubound(this%propagator,2) /= ubound(backup%propagator,2)) then
-        deallocate(backup%propagator)
-        allocate(backup%propagator(ubound(this%propagator,1),ubound(this%propagator,2)))
-      end if
-    else
-      allocate(backup%propagator(ubound(this%propagator,1),ubound(this%propagator,2)))
+    if (.not. allocated(this%backup)) then
+      allocate(this%backup(size(this%propagator,1),size(this%propagator,2)))
     end if
-
-    ! Save the propagators to the object
-    backup % propagator = this % propagator
+    this%backup = this%propagator
   end subroutine
 
-  pure subroutine material_load(this, backup)
-    ! Imports the state of the material from a different object.
-    ! TODO: Implement that it loads from an internal variable, not different object.
-    !       Make sure type(superconductor) overrides this by also recalculating the gap after backup.
-    !       Perhaps make a method for posthooks, that e.g. restores DOS/current/gap after load?
+  impure subroutine material_load(this)
+    ! Load a backup of a previous material state.
     class(material), intent(inout) :: this
-    class(material), intent(inout) :: backup
+    integer                        :: info
 
-    ! Make sure enough memory is allocated
-    if (allocated(this%propagator)) then
-      if (ubound(this%propagator,1) /= ubound(backup%propagator,1)  .or. &
-          ubound(this%propagator,2) /= ubound(backup%propagator,2)) then
-        deallocate(this%propagator)
-        allocate(this%propagator(ubound(backup%propagator,1),ubound(backup%propagator,2)))
-      end if
-    else
-      allocate(this%propagator(ubound(backup%propagator,1),ubound(backup%propagator,2)))
+    ! Load the saved propagators
+    if (allocated(this%backup)) then
+      this%propagator = this%backup
     end if
 
-    ! Load the propagators from the object
-    this % propagator = backup % propagator
+    ! Disable status messages
+    info = this%information
+    if (this%information >= 0) then
+      this%information = -1
+    end if
+
+    ! Silently recalculate derived properties
+    call this%update_posthook
+
+    ! Reenable status messages
+    this%information = info
   end subroutine
 
   impure subroutine material_write_dos(this, unit, a, b)
@@ -403,25 +388,27 @@ contains
     real(wp)                    :: x         ! Current location
     integer                     :: n, m      ! Temporary loop variables
 
-    if (minval(this%energy) < -eps) then
-      ! If we have data for both positive and negative energies, simply write out the data
-      do m=1,size(this%location)
-        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
-        do n=1,size(this%energy)
-          write(unit,*) x, this%energy(n), this%propagator(n,m)%get_dos()
+    if (allocated(this%density)) then
+      if (minval(this%energy) < -eps) then
+        ! If we have data for both positive and negative energies, simply write out the data
+        do m=1,size(this%location)
+          x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
+          do n=1,size(this%energy)
+            write(unit,*) x, this%energy(n), this%density(n,m)
+          end do
         end do
-      end do
-    else
-      ! If we only have data for positive energies, assume that the negative region is symmetric
-      do m=1,size(this%location)
-        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
-        do n=size(this%energy),1,-1
-          write(unit,*) x, -this%energy(n), this%propagator(n,m)%get_dos()
+      else
+        ! If we only have data for positive energies, assume that the negative region is symmetric
+        do m=1,size(this%location)
+          x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
+          do n=size(this%energy),1,-1
+            write(unit,*) x, -this%energy(n), this%density(n,m)
+          end do
+          do n=1,size(this%energy),+1
+            write(unit,*) x, +this%energy(n), this%density(n,m)
+          end do
         end do
-        do n=1,size(this%energy),+1
-          write(unit,*) x, +this%energy(n), this%propagator(n,m)%get_dos()
-        end do
-      end do
+      end if
     end if
   end subroutine
 end module

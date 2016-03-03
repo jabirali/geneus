@@ -402,6 +402,10 @@ contains
     ! Code to execute after running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
 
-    continue
+    ! Calculate the density of states
+    call this%update_density
+
+    ! Calculate the charge and spin currents
+    call this%update_current
   end subroutine
 end module

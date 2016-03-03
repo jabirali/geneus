@@ -19,12 +19,13 @@ module mod_superconductor
   ! Type declaration
   type, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(wp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp)                 :: coupling            =  0.00_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    complex(wp), allocatable :: gap(:)             ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
+    real(wp)                 :: coupling = 0.00_wp ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
+    procedure                :: update_gap          => superconductor_update_gap          ! Calculates the superconducting order parameter
     procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the propagators
     procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the propagators
 
@@ -126,17 +127,24 @@ contains
 
   impure subroutine superconductor_update_posthook(this)
     ! Updates the superconducting order parameter based on the propagators of the system.
+    class(superconductor), intent(inout) :: this
+
+    ! Call the superclass posthook
+    call this%conductor%update_posthook
+
+    ! Update the superconducting gap
+    call this%update_gap
+  end subroutine
+
+  impure subroutine superconductor_update_gap(this)
+    ! Update the superconducting gap if the BCS coupling constant is nonzero.
     class(superconductor), intent(inout) :: this         ! Superconductor object that will be updated
     complex(wp),           allocatable   :: gap(:)       ! Used to calculate the superconducting order parameter
     complex(wp)                          :: diff         ! Change in the superconducting order parameter mean
     complex(wp)                          :: singlet      ! Singlet component of the anomalous propagators
     integer                              :: n, m         ! Loop variables
 
-    ! Call the superclass posthook
-    call this%conductor%update_posthook
-
-    ! Update the superconducting gap if the BCS coupling constant is set
-    if (this % coupling > 0) then
+    if (this%coupling > 0) then
       ! Allocate workspace memory
       allocate(gap(size(this%energy)))
 
