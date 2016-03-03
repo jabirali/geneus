@@ -30,18 +30,15 @@ program density
   integer                           :: superconductors = 1
   integer                           :: ferromagnets    = 1
   integer                           :: voltages        = 150
-  integer                           :: energies        = 150
-  integer                           :: points          = 150
   real(wp)                          :: scattering      = 0.01_wp
-  real(wp)                          :: coupling        = 0.20_wp
   real(wp)                          :: phasediff       = 0.00_wp
   real(wp)                          :: phasestep       = 0.15_wp
   real(wp)                          :: temperature     = 0.00_wp
+  real(wp)                          :: cutoff          = 30.0_wp
 
   ! Declare the variables used by the program
   integer                           :: output_density
   integer                           :: output_conduct
-  real(wp),             allocatable :: energy_array(:)
   real(wp),             allocatable :: voltage_array(:)
   real(wp),             allocatable :: connection(:)
   integer                           :: n, m
@@ -54,13 +51,6 @@ program density
 
   ! Process the generic command line options
   call generic_io
-
-  ! Initialize the energy array
-  if (selfconsistent) then
-    call energy_range(energy_array, coupling = coupling)
-  else
-    call energy_range(energy_array)
-  end if
 
   ! Initialize the voltage array
   voltage_array = [ ((1.5_wp*(n-1)/size(voltage_array)), n=1,size(voltage_array)) ]
@@ -77,9 +67,6 @@ program density
   if (size(s) > 1) then
     call superconductor_io(s, 2)
   end if
-
-  ! Deallocate the energy array
-  deallocate(energy_array)
 
 
 
@@ -288,10 +275,11 @@ contains
     ! Determine whether to perform a selfconsistent calculation
     call option(selfconsistent, 'selfconsistent')
     if (selfconsistent) then
-      energies = 800
       if (superconductors > 1) then
         reservoirs = .true.
       end if
+    else
+      cutoff = 0
     end if
 
     ! Determine whether to use vacuum or reservoirs as the outer boundaries
@@ -302,23 +290,6 @@ contains
       end if
     end if
 
-    ! Determine the number of energies to use
-    call option(energies, 'energies')
-    if (selfconsistent) then
-      if (energies < 600) then
-        print *
-        print *,'Error: minimum 600 energies required for self-consistent calculations!'
-        stop
-      end if
-    else
-      if (energies < 1) then
-        print *
-        print *,'Error: minimum one energy required for the calculations!'
-        stop
-      end if
-    end if
-    allocate(energy_array(energies))
-
     call option(voltages, 'voltages')
     if (voltages < 2) then
       print *
@@ -326,14 +297,6 @@ contains
       stop
     end if
     allocate(voltage_array(voltages))
-
-    ! Determine the internal position mesh size
-    call option(points, 'points')
-    if (points < 10) then
-      print *
-      print *,'Error: minimum 10 points required for the calculations!'
-      stop
-    end if
 
     ! Determine the inelastic scattering rate
     call option(scattering, 'scattering')
@@ -457,16 +420,15 @@ contains
 
 
     ! Construct the superconductor
-    s(m) = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
-                          points = points, coupling = coupling, gap = cmplx(gap,0,kind=wp))
+    s(m) = superconductor(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(gap,0,kind=wp))
     
     ! Construct and connect a superconducting reservoir
     if (reservoirs) then
       if (m == 1) then
-        r(m) = superconductor(energy_array, scattering = scattering, points = 1, gap = exp(((0.0,-0.5)*pi) * phasediff))
+        r(m) = superconductor(cutoff, scattering = scattering, gap = exp(((0.0,-0.5)*pi) * phasediff))
         call transparent(r(m), s(m))
       else if (m == 2) then
-        r(m) = superconductor(energy_array, scattering = scattering, points = 1, gap = exp(((0.0,+0.5)*pi) * phasediff))
+        r(m) = superconductor(cutoff, scattering = scattering, gap = exp(((0.0,+0.5)*pi) * phasediff))
         call transparent(s(m), r(m))
       end if
     end if
@@ -583,8 +545,7 @@ contains
     end if
 
     ! Construct the ferromagnet
-    f(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                       points = points, gap = cmplx(gap,0,kind=wp), exchange = exchange)
+    f(m) = ferromagnet(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(gap,0,kind=wp), exchange = exchange)
 
     ! Set the internal fields
     f(m) % spinorbit = spinorbit_xy(alpha = spinorbit_a, beta = spinorbit_b)
@@ -626,7 +587,6 @@ contains
   subroutine write_density(output)
     ! Saves the density of states as a function of position and energy to a file.
     integer, intent(in) :: output
-    integer             :: n
 
     ! Go to the start of the file
     rewind(unit=output)

@@ -20,7 +20,7 @@ module mod_superconductor
   type, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
     complex(wp), allocatable :: gap(:)                                                    ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp)                 :: coupling            =  0.25_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    real(wp)                 :: coupling            =  0.00_wp                            ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
@@ -44,18 +44,16 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function superconductor_construct(energy, gap, coupling, thouless, scattering, points) result(this)
+  pure function superconductor_construct(cutoff, gap, thouless, scattering) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
-    real(wp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
-    real(wp),    intent(in), optional :: coupling     ! BCS coupling constant
+    real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
     complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: 1.0)
     real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: conductor default)
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: conductor default)
-    integer,     intent(in), optional :: points       ! Number of positions   (default: conductor default)
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(energy, gap=gap, thouless=thouless, scattering=scattering, points=points)
+    this%conductor = conductor_construct(cutoff=cutoff, gap=gap, thouless=thouless, scattering=scattering)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then
@@ -70,8 +68,8 @@ contains
     end if
 
     ! Initialize the BCS coupling constant
-    if (present(coupling)) then
-      this%coupling = coupling
+    if (cutoff > 0) then
+      this%coupling = 1/acosh(cutoff)
     end if
   end function
 

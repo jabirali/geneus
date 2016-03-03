@@ -90,7 +90,7 @@ contains
     allocate(idos_b(size(energy)))
 
     ! Initialize the energy array
-    call energy_range(energy)
+    call linspace(energy, 1e-6_wp, 1.50_wp)
 
     ! Calculate the density of states at the interface
     do n = 1,size(material_a%energy)
@@ -135,37 +135,6 @@ contains
   !--------------------------------------------------------------------------------!
   !              PROCEDURES FOR CLASS(CONDUCTOR) CONSTRUCTOR ARGUMENTS             !
   !--------------------------------------------------------------------------------!
-
-  pure subroutine energy_range(array, coupling)
-    ! Initializes an array of energies,  which can be passed on to class(material) constructor methods.
-    ! If the coupling constant 'coupling' is provided,  the array will include values all the way up to
-    ! the Debye cutoff cosh(1/coupling), which is appropriate for selfconsistent calculations.  If not,
-    ! it will only include energies up to 1.5Δ, which is sufficient for non-selfconsistent calculations.
-    !
-    ! TODO: Deprecate this function, and make this action be performed by the class(material) constructor.
-    ! TODO: If zero Debye energy, use 0..1.5; if finite Debye energy, use up to cutoff.
-
-    real(wp), intent(out)          :: array(:)
-    real(wp), optional, intent(in) :: coupling
-    integer                        :: n
-
-    ! Initialize the energy array
-    if (present(coupling) .and. size(array) >= 600) then
-      ! Positive energies from 0.0 to 1.5
-      do n = 1,size(array)-300
-        array(n) = 1e-6_wp + (n-1) * (1.5_wp/(size(array)-300))
-      end do
-      ! Positive energies from 1.5 to cutoff
-      do n = 1,300
-        array(size(array)-300+n) = 1e-6_wp + 1.5_wp + n * (cosh(1.0_wp/coupling)-1.5)/300
-      end do
-    else
-      ! Positive energies from 0.0 to 1.5
-      do n = 1,size(array)
-        array(n) = 1e-6 + (n-1) * (1.5_wp/(size(array)-1))
-      end do
-    end if
-  end subroutine
 
   pure function exchange_xy(strength, angle) result(field)
     ! This function returns a vector that describes an exchange field in the xy-plane,

@@ -98,15 +98,14 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function conductor_construct(energy, gap, thouless, scattering, points) result(this)
+  pure function conductor_construct(cutoff, gap, thouless, scattering) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this         ! Conductor object that will be constructed
-    real(wp),    intent(in)           :: energy(:)    ! Discretized energy domain that will be used
+    real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
     real(wp),    intent(in), optional :: thouless     ! Thouless energy       (default: see type declaration)
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term (default: see type declaration)
     complex(wp), intent(in), optional :: gap          ! Superconducting gap   (default: see definition below)
-    integer,     intent(in), optional :: points       ! Number of positions   (default: see definition below)
-    integer                           :: n            ! Loop variables
+    integer                           :: n            ! Loop variable
 
     ! Optional argument: Thouless energy
     if (present(thouless)) then
@@ -118,28 +117,32 @@ contains
       this%scattering = scattering
     end if
 
-    ! Allocate memory (if necessary)
+    ! Allocate and initialize memory
     if (.not. allocated(this%propagator)) then
-      if (present(points)) then
-        allocate(this%propagator(size(energy), points))
-        allocate(this%energy(size(energy)))
-        allocate(this%location(points))
+      ! Locations
+      allocate(this%location(150))
+      call linspace(this%location, 0.0_wp, 1.0_wp)
+
+      ! Energies
+      if (cutoff > 0) then
+        allocate(this%energy(600))
+        call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
+        call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
+        call linspace(this%energy(500:   ), 4.50_wp, cutoff)
+      else if (cutoff == 0) then
+        allocate(this%energy(150))
+        call linspace(this%energy, 1e-6_wp, 1.50_wp)
       else
-        allocate(this%propagator(size(energy), 150))
-        allocate(this%energy(size(energy)))
-        allocate(this%location(150))
+        this%energy = [ 1e-6 ]
       end if
-    end if
 
-    ! Initialize energy and position arrays
-    this%energy   = energy
-    this%location = [ ((real(n,kind=wp)/(size(this%location)-1)), n=0,size(this%location)-1) ]
-
-    ! Initialize the state
-    if (present(gap)) then
-      call this%init( gap )
-    else
-      call this%init( cx(1.0_wp,0.0_wp) )
+      ! Propagators
+      allocate(this%propagator(size(this%energy),size(this%location)))
+      if (present(gap)) then
+        call this%init( gap )
+      else
+        call this%init( cx(1.0_wp,0.0_wp) )
+      end if
     end if
   end function
 

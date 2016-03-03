@@ -76,6 +76,17 @@ contains
   !                       ELEMENTARY MATRIX PROCEDURES                        !
   !---------------------------------------------------------------------------!
 
+  pure subroutine linspace(array, first, last)
+    ! Populates an array with elements from 'first' to 'last', inclusive.
+    real(wp), intent(inout) :: array(:)
+    real(wp), intent(in   ) :: first, last
+    integer                 :: n
+
+    do n=1,size(array)
+      array(n) = first + ((last-first)*(n-1))/(size(array)-1)
+    end do
+  end subroutine
+
   pure function mateye(n) result(A)
     ! Constructs an n×n identity matrix.
     integer, intent(in) :: n

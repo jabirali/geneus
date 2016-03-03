@@ -26,16 +26,14 @@ program critical
   integer                           :: bisections   = 12
   integer                           :: iterations   = 6
   integer                           :: ferromagnets = 0
-  integer                           :: energies     = 800
-  integer                           :: points       = 150
   real(wp)                          :: scattering   = 0.01_wp
   real(wp)                          :: coupling     = 0.20_wp
   real(wp)                          :: initgap      = 1e-5_wp
   real(wp)                          :: minimum      = 0.00_wp
   real(wp)                          :: maximum      = 1.00_wp
+  real(wp)                          :: cutoff       = 30.0_wp
 
   ! Declare the variables used by the program
-  real(wp),             allocatable :: energy_array(:)
   integer                           :: n, m, k
 
 
@@ -47,9 +45,6 @@ program critical
   ! Process the generic command line options
   call generic_io
 
-  ! Initialize the energy array
-  call energy_range(energy_array, coupling = coupling)
-
   ! Construct the left superconducting layer
   call superconductor_io(s, 1)
 
@@ -57,9 +52,6 @@ program critical
   do m=1,size(f)
     call ferromagnet_io(f, m)
   end do
-
-  ! Deallocate the energy array
-  deallocate(energy_array)
 
 
 
@@ -232,23 +224,6 @@ contains
       allocate(fb(ferromagnets))
     end if
 
-    ! Determine the number of energies to use
-    call option(energies, 'energies')
-    if (energies < 600) then
-      print *
-      print *,'Error: minimum 600 energies required for self-consistent calculations!'
-      stop
-    end if
-    allocate(energy_array(energies))
-
-    ! Determine the internal position mesh size
-    call option(points, 'points')
-    if (points < 10) then
-      print *
-      print *,'Error: minimum 10 points required for the calculations!'
-      stop
-    end if
-
     ! Determine the inelastic scattering rate
     call option(scattering, 'scattering')
     if (scattering < 0) then
@@ -356,12 +331,10 @@ contains
     end if
 
     ! Construct the superconductor
-    s(m)  = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
-                          points = points, coupling = coupling, gap = cmplx(initgap,0,kind=wp))
+    s(m)  = superconductor(cutoff=cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp))
 
     ! Construct the backup
-    sb(m) = superconductor(energy_array, scattering = scattering, thouless = 1/length**2, &
-                           points = points, coupling = coupling, gap = cmplx(initgap,0,kind=wp))
+    sb(m) = superconductor(cutoff=cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp))
     
     ! Set the internal fields
     s(m) % depairing   = depairing
@@ -453,12 +426,10 @@ contains
     end if
 
     ! Construct the ferromagnet
-    f(m)  = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                        points = points, gap = cmplx(initgap,0,kind=wp), exchange = exchange)
+    f(m)  = ferromagnet(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
 
     ! Construct the backup
-    fb(m) = ferromagnet(energy_array, scattering = scattering, thouless = 1/length**2, &
-                        points = points, gap = cmplx(initgap,0,kind=wp), exchange = exchange)
+    fb(m) = ferromagnet(cutoff, scattering = scattering, thouless = 1/length**2, gap = cmplx(initgap,0,kind=wp), exchange=exchange)
 
     ! Set the internal fields
     f(m) % depairing = depairing

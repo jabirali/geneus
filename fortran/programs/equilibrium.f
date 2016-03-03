@@ -19,37 +19,40 @@
 
 
 program equilibrium
-  use mod_stdio,  only: error
-  use mod_config, only: config
-  use mod_multilayer
-  implicit none
+  continue
+!  use mod_stdio,  only: error
+!  use mod_config, only: config
+!  use mod_multilayer
+!  implicit none
+!
+!  ! Setting that control the program
+!  integer :: unit            = 0
+!  integer :: iostat          = 0
+!  integer :: energies        = 800
+!  integer :: debug           = 0
+!
+!  ! Computational model of the system
+!  real(wp), allocatable :: e(:)
+!  type(multilayer), target :: system
+!
+!  ! Open configuration file
+!  open(newunit=unit, file='config.ini', action='read', status='old', iostat=iostat)
+!  if (iostat /= 0) then
+!    call error('failed to open configuration file ''config.ini''!')
+!  end if
+!
+!  ! Process configuration file
+!  write(*,'(a)') '[equilibrium]'
+!  call config(unit, 'equilibrium', 'debug',    1, 0, debug)
+!  write(*,*)
+!
+!  ! Computation
+!  call system % config(unit)
+!  call system % update
+!  call system % update
+!
+!  ! Close configuration file
+!  close(unit)
 
-  ! Setting that control the program
-  integer :: unit            = 0
-  integer :: iostat          = 0
-  integer :: energies        = 800
-  integer :: debug           = 0
-
-  ! Computational model of the system
-  real(wp), allocatable :: e(:)
-  type(multilayer), target :: system
-
-  ! Open configuration file
-  open(newunit=unit, file='config.ini', action='read', status='old', iostat=iostat)
-  if (iostat /= 0) then
-    call error('failed to open configuration file ''config.ini''!')
-  end if
-
-  ! Process configuration file
-  write(*,'(a)') '[equilibrium]'
-  call config(unit, 'equilibrium', 'debug',    1, 0, debug)
-  write(*,*)
-
-  ! Computation
-  call system % config(unit)
-  call system % update
-  call system % update
-
-  ! Close configuration file
-  close(unit)
+  write(*,*) 'test'
 end program

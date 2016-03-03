@@ -19,7 +19,6 @@ program density_sfi
 
   ! Declare the variables used internally by the program
   type(superconductor)  :: s
-  real(wp)              :: energies(800)
   integer               :: unit(4)
 
   ! Declare the parameters that can be modified at runtime
@@ -29,10 +28,11 @@ program density_sfi
   real(wp)              :: spinmixing           = 0.00_wp
   real(wp)              :: scattering           = 0.01_wp
   real(wp)              :: length               = 1.00_wp
+  real(wp)              :: cutoff               = 30.0_wp
   integer               :: information          = 0
 
   ! Declare iterators used in do-loops
-  integer               :: i,j,k
+  integer               :: i
 
   ! Process command line options
   write(*,*) 'CONFIGURATION:'
@@ -50,11 +50,8 @@ program density_sfi
   !                           VARIABLE INITIALIZATION                              !
   !--------------------------------------------------------------------------------!
 
-  ! Initialize the energy array
-  call energy_range(energies, coupling = s % coupling)
-
   ! Initialize the superconductor
-  s = superconductor(energies)
+  s = superconductor(cutoff)
   s % thouless    = 1/length**2
   s % temperature = temperature
   s % scattering  = scattering
