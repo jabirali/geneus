@@ -22,10 +22,10 @@ module mod_spin
   type spin
     complex(wp) :: matrix(2,2)      =  0.0_wp        ! Spin matrix
   contains
-    procedure   :: inv              => spin_inv      ! Inverse of the matrix
-    procedure   :: conjg            => spin_conjg    ! Complex conjugate of the matrix
-    procedure   :: trace            => spin_trace    ! Trace of the matrix
-    procedure   :: norm             => spin_norm     ! Frobenius norm of the matrix
+    procedure   :: inv              => spin_inv      ! Matrix inverse
+    procedure   :: trace            => spin_trace    ! Matrix trace
+    procedure   :: norm             => spin_norm     ! Frobenius norm
+    procedure   :: conjg            => spin_conjg    ! Complex conjugate
     procedure   :: min              => spin_min      ! Size of the smallest element
     procedure   :: max              => spin_max      ! Size of the largest element
     procedure   :: print            => spin_print    ! Prints the matrix to standard out
@@ -449,7 +449,6 @@ contains
     ! Defines right matrix division of two spin matrices
     type(spin)             :: r
     type(spin), intent(in) :: a, b
-    complex(wp)            :: invdet
 
     r%matrix = matdivr2(a%matrix, b%matrix)
   end function
@@ -470,7 +469,7 @@ contains
     r = this%matrix(1,1) + this%matrix(2,2)
   end function
 
-  pure elemental function spin_norm(this) result(r)
+  elemental pure function spin_norm(this) result(r)
     ! Calculates the Frobenius norm of the spin matrix
     real(wp)                :: r, w(8)
     class(spin), intent(in) :: this
@@ -479,7 +478,7 @@ contains
     r = norm2(w)
   end function
 
-  pure elemental function spin_conjg(this) result(r)
+  elemental pure function spin_conjg(this) result(r)
     ! Calculates the complex conjugate of the spin matrix
     class(spin), intent(in)  :: this
     type(spin)               :: r

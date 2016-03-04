@@ -1,5 +1,5 @@
 ! This module defines the data type 'green', which represents the Green's function at a given position and energy. This
-! is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dx and dγ~/dx. These are
+! is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dz and dγ~/dz. These are
 ! sufficient to reconstruct the normal Green's function g and anomalous Green's function f, and derived quantities like
 ! the density of states.  To make it easier to interact with differential equation solvers, which often operate on real
 ! state vectors, the assignment operator is overloaded so objects can be easily imported/exported to a real vector(32).
@@ -19,7 +19,7 @@ module mod_green
 
   ! Type declaration
   type green
-    type(spin) :: g                            ! Riccati parameter γ  
+    type(spin) :: g                            ! Riccati parameter γ
     type(spin) :: gt                           ! Riccati parameter γ~
     type(spin) :: dg                           ! Derivative dγ /dz
     type(spin) :: dgt                          ! Derivative dγ~/dz
@@ -67,7 +67,7 @@ contains
 
     t = atanh(abs(gap)/energy)
     p = atan(im(gap)/re(gap))
-    a =  sinh(t)/(1+cosh(t)) * exp( (0, 1) * p )
+    a =  sinh(t)/(1+cosh(t)) * exp( (0,+1) * p )
     b = -sinh(t)/(1+cosh(t)) * exp( (0,-1) * p )
 
     ! Calculate the matrix Riccati parameters γ and γ~
@@ -133,7 +133,7 @@ contains
     ! Calculates the singlet component of the anomalous Green's function f.
     complex(wp)              :: r
     class(green), intent(in) :: this
-    
+
     type(spin)               :: f
     f = this%get_f()
 
@@ -144,7 +144,7 @@ contains
     ! Calculates the singlet component of the tilde-conjugated anomalous Green's function f~.
     complex(wp)              :: r
     class(green), intent(in) :: this
-    
+
     type(spin)               :: ft
     ft = this%get_ft()
 
