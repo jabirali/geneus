@@ -54,18 +54,6 @@ contains
     call assert_print(check(expr), msg)
   end subroutine
 
-  pure function check_array(expr) result(r)
-    ! Implements a polymorphic comparison function for array arguments, which returns .true. when all expressions are numerically zero.
-    class(*), intent(in) :: expr(:)
-    integer              :: n
-    logical              :: r
-
-    do n=1,size(expr)
-      r = check_scalar(expr(n))
-      if (.not. r) return
-    end do
-  end function
-
   pure recursive function check_scalar(expr) result(r)
     ! Implements a polymorphic comparison function for scalar arguments, which returns .true. when the expression is numerically zero.
     class(*), intent(in) :: expr
@@ -83,5 +71,17 @@ contains
       type is(spin)
         r = check(reshape(expr%matrix,[4]))
     end select
+  end function
+
+  pure function check_array(expr) result(r)
+    ! Implements a polymorphic comparison function for array arguments, which returns .true. when all expressions are numerically zero.
+    class(*), intent(in) :: expr(:)
+    integer              :: n
+    logical              :: r
+
+    do n=1,size(expr)
+      r = check_scalar(expr(n))
+      if (.not. r) return
+    end do
   end function
 end module

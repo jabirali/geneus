@@ -1,4 +1,5 @@
 ! This module define the interface 'config', which can be used to read and parse configuration settings from file or command line.
+! TODO: This file is still incomplete. It should be finished, and then replace the option(...) routines used previously.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-12-03

@@ -1,4 +1,4 @@
-! This modules define the interface 'option', which can be used to read and parse command line arguments.
+! This module defines the interface 'option', which can be used to read and parse command line arguments.
 ! [DEPRECATED: This module is deprecated, and will likely be fully replaced by mod_config in the future.]
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
@@ -27,7 +27,7 @@ contains
     character(len=128)                :: string
     character(len= 22)                :: output
     integer                           :: n
-    
+ 
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
       call get_command_argument(n,string)
@@ -52,7 +52,7 @@ contains
     character(len=128)                :: string
     character(len= 22)                :: output
     integer                           :: n
-    
+
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
       call get_command_argument(n,string)
@@ -77,7 +77,7 @@ contains
     character(len=128)                :: string
     character(len= 22)                :: output
     integer                           :: n
-    
+ 
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
       call get_command_argument(n,string)
@@ -102,7 +102,7 @@ contains
     character(len=128)                :: string
     character(len= 22)                :: output
     integer                           :: n
-    
+
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
       call get_command_argument(n,string)
@@ -126,7 +126,7 @@ contains
     character(len= * ), intent(in   ) :: option
     character(len=128)                :: string
     integer                           :: n
-    
+ 
     do n = 1,command_argument_count()
       ! Iterate over all command line arguments
       call get_command_argument(n,string)
