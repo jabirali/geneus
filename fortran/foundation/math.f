@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-09-23
-! Updated: 2015-10-04
+! Updated: 2016-03-04
 
 module mod_math
   use :: iso_fortran_env

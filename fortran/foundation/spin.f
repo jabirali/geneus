@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-10
-! Updated: 2015-10-04
+! Updated: 2015-03-01
 
 module mod_spin
   use mod_math

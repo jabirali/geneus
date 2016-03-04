@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
-! Updated: 2015-10-04
+! Updated: 2016-03-04
 
 module mod_ferromagnet
   use mod_stdio

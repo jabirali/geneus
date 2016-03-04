@@ -4,7 +4,7 @@
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-21
-! Updated: 2015-08-14
+! Updated: 2016-03-04
 
 program critical
   use mod_option
