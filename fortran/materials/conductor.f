@@ -105,7 +105,6 @@ contains
     real(wp),    intent(in), optional :: length       ! Length of the material
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
     complex(wp), intent(in), optional :: gap          ! Superconducting gap
-    integer                           :: n            ! Loop variable
 
     ! Optional argument: Length
     if (present(length)) then
@@ -138,11 +137,13 @@ contains
 
       ! Propagators
       allocate(this%propagator(size(this%energy),size(this%location)))
-      if (present(gap)) then
-        call this%init( gap )
-      else
-        call this%init( cx(1.0_wp,0.0_wp) )
-      end if
+    end if
+
+    ! Initialize the propagators
+    if (present(gap)) then
+      call this%init( gap )
+    else
+      call this%init( cx(1.0_wp,0.0_wp) )
     end if
   end function
 
@@ -233,43 +234,43 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
-      ! Calculate residuals from the boundary conditions at the right interface.
-      class(conductor),          intent(in   ) :: this
-      type(green),               intent(in   ) :: b
-      type(spin),                intent(in   ) :: g, gt, dg, dgt
-      type(spin),                intent(inout) :: r, rt
+    ! Calculate residuals from the boundary conditions at the right interface.
+    class(conductor),          intent(in   ) :: this
+    type(green),               intent(in   ) :: b
+    type(spin),                intent(in   ) :: g, gt, dg, dgt
+    type(spin),                intent(inout) :: r, rt
 
-      if (associated(this%material_b)) then
-        if (this%transparent_b) then
-          ! Interface is transparent
-          call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
-        else if (this%reflecting_b) then
-          ! Interface is reflecting
-          call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
-        else
-          ! Interface is tunneling
-          call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
-        end if
-      else
-        ! Interface is vacuum
+    if (associated(this%material_b)) then
+      if (this%transparent_b) then
+        ! Interface is transparent
+        call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
+      else if (this%reflecting_b) then
+        ! Interface is reflecting
         call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
+      else
+        ! Interface is tunneling
+        call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
       end if
+    else
+      ! Interface is vacuum
+      call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
+    end if
 
-      if (allocated(this%spinorbit)) then
-        ! Interface has spin-orbit coupling
-        call this%interface_spinorbit_b(g, gt, dg, dgt, r, rt)
-      end if
+    if (allocated(this%spinorbit)) then
+      ! Interface has spin-orbit coupling
+      call this%interface_spinorbit_b(g, gt, dg, dgt, r, rt)
+    end if
 
-      if (allocated(this%magnetization_b)) then
-        ! Interface is spin-active
-        if (this%reflecting_b) then
-          ! Must be a reflecting interface
-          call this%interface_spinreflect_b(g, gt, dg, dgt, r, rt)
-        else
-          ! May be a tunneling interface
-          call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
-        end if
+    if (allocated(this%magnetization_b)) then
+      ! Interface is spin-active
+      if (this%reflecting_b) then
+        ! Must be a reflecting interface
+        call this%interface_spinreflect_b(g, gt, dg, dgt, r, rt)
+      else
+        ! May be a tunneling interface
+        call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
       end if
+    end if
   end subroutine
 
   pure subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
