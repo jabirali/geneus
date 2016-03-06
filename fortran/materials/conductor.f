@@ -79,6 +79,9 @@ module mod_conductor
     ! These methods contain the equations that describe spin-active reflecting interfaces
     procedure                 :: interface_spinreflect_a => spinreflect_interface_equation_a  ! Defines the left  boundary condition (spin-active terms)
     procedure                 :: interface_spinreflect_b => spinreflect_interface_equation_b  ! Defines the right boundary condition (spin-active terms)
+
+    ! These methods define miscellaneous utility functions
+    procedure                 :: conf                    => conductor_conf                    ! Configures material parameters
   end type
 
   ! Type constructors
@@ -408,5 +411,21 @@ contains
 
     ! Calculate the charge and spin currents
     call this%update_current
+  end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                      IMPLEMENTATION OF UTILITY METHODS                         !
+  !--------------------------------------------------------------------------------!
+
+  impure subroutine conductor_conf(this, key, val)
+    !! Configure a material property based on a key-value pair.
+    class(conductor), intent(inout) :: this
+    character(*),     intent(in   ) :: key
+    character(*),     intent(in   ) :: val
+
+    select case(key)
+      case default
+        call material_conf(this, key, val)
+    end select
   end subroutine
 end module

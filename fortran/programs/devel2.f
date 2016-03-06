@@ -11,13 +11,19 @@ program test
   f = ferromagnet(30.0_wp)
   call connect(s,f)
 
-  call f%conf('temperature', '0.1')
-  call f%conf('scattering',  '0.1')
-  call f%conf('length',      '0.5')
+  call f%conf('temperature', '0.10')
+  call f%conf('scattering',  '0.05')
+  call f%conf('length',      '0.50')
+
+  call s%conf('temperature', '0.10')
+  call s%conf('scattering',  '0.05')
+  call s%conf('length',      '0.75')
+  call s%conf('coupling',    '0.25')
 
   write(*,*) f%thouless
   write(*,*) f%temperature
   write(*,*) f%scattering
 
   call f%update
+  call s%update
 end program

@@ -16,7 +16,7 @@ module mod_material
   private
 
   ! Public interface
-  public material
+  public material, material_conf
 
   ! Type declarations
   type, abstract :: material
@@ -348,8 +348,8 @@ contains
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine material_conf(this, key, val)
-    !! @TODO: Implement this config routine properly.
+  impure subroutine material_conf(this, key, val)
+    !! Configure a material property based on a key-value pair.
     class(material), intent(inout) :: this
     character(*),    intent(in   ) :: key
     character(*),    intent(in   ) :: val
@@ -363,6 +363,8 @@ contains
         read(val,*) this%scattering
       case("temperature")
         read(val,*) this%temperature
+      case default
+        call warning("Unknown option '" // key // "' ignored.")
     end select
   end subroutine
 

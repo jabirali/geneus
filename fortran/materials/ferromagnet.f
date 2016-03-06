@@ -21,9 +21,13 @@ module mod_ferromagnet
     real(wp),   allocatable          :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
     type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
   contains
+    ! These methods contain the equations that describe ferromagnets
     procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
     procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the propagators
     procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the propagators
+
+    ! These methods define miscellaneous utility functions
+    procedure                        :: conf               => ferromagnet_conf                ! Configures material parameters
   end type
 
   ! Type constructor
@@ -154,5 +158,21 @@ contains
 
     ! Call the superclass posthook
     call this%conductor%update_posthook
+  end subroutine
+
+  !--------------------------------------------------------------------------------!
+  !                      IMPLEMENTATION OF UTILITY METHODS                         !
+  !--------------------------------------------------------------------------------!
+
+  impure subroutine ferromagnet_conf(this, key, val)
+    !! Configure a material property based on a key-value pair.
+    class(ferromagnet), intent(inout) :: this
+    character(*),       intent(in   ) :: key
+    character(*),       intent(in   ) :: val
+
+    select case(key)
+      case default
+        call this%conductor%conf(key, val)
+    end select
   end subroutine
 end module

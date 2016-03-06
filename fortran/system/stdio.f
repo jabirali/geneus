@@ -28,21 +28,21 @@ contains
     ! This subroutine provides a way to report a status message.
     character(*), intent(in) :: msg
 
-    write(stderr,'(a)') color_green  // '>> INFO: '    // color_none // msg
+    write(stderr,'(a)') color_green  // ' >> INFO: '    // color_none // msg
   end subroutine
 
   impure subroutine warning(msg)
     ! This subroutine provides a way to report a warning message.
     character(*), intent(in) :: msg
 
-    write(stderr,'(a)') color_yellow // '>> WARNING: ' // color_none // msg
+    write(stderr,'(a)') color_yellow // ' >> WARNING: ' // color_none // msg
   end subroutine
 
   impure subroutine error(msg)
     ! This subroutine provides a way to report an error message and halt the program.
     character(*), intent(in) :: msg
 
-    write(stderr,'(a)') color_red    // '>> ERROR: '   // color_none // msg
+    write(stderr,'(a)') color_red    // ' >> ERROR: '   // color_none // msg
     stop
   end subroutine
 end module 
