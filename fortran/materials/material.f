@@ -62,6 +62,7 @@ module mod_material
     procedure(interface_equation_b), deferred :: interface_equation_b                       ! Boundary condition at the right interface
 
     ! These methods define miscellaneous utility functions
+    procedure                                 :: conf            => material_conf           ! Configures material parameters
     procedure                                 :: save            => material_save           ! Saves the state of the material
     procedure                                 :: load            => material_load           ! Loads the state of the material
     procedure                                 :: write_dos       => material_write_dos      ! Writes the density of states to a given output unit
@@ -346,6 +347,24 @@ contains
   !--------------------------------------------------------------------------------!
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
+
+  pure subroutine material_conf(this, key, val)
+    !! @TODO: Implement this config routine properly.
+    class(material), intent(inout) :: this
+    character(*),    intent(in   ) :: key
+    character(*),    intent(in   ) :: val
+    real(wp)                       :: tmp
+
+    select case(key)
+      case("length")
+        read(val,*) tmp
+        this%thouless = 1/tmp**2
+      case("scattering")
+        read(val,*) this%scattering
+      case("temperature")
+        read(val,*) this%temperature
+    end select
+  end subroutine
 
   impure subroutine material_save(this)
     ! Save a backup of the current material state.

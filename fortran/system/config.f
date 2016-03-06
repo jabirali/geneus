@@ -34,13 +34,6 @@ module mod_config
     module procedure config_construct
   end interface
 contains
-
-
-
-  ! NEW OBJECT ORIENTED APPROACH
-
-
-
   impure function config_construct(file) result(config)
     character(len= * ), intent(in) :: file
     type(config_t)                 :: config
