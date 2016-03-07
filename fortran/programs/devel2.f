@@ -1,8 +1,31 @@
 
+module mod_neoconf
+  use mod_material
+
+  type :: dict
+    !! Stores simple key-value mappings in a single-linked list.
+    character(len=132)   :: key  =  ''      ! Dictionary key
+    character(len=132)   :: val  =  ''      ! Dictionary value
+    class(dict), pointer :: next => null()  ! Next element
+  end type
+
+  type :: conf
+    !! Stores a multilayer configuration as a double-linked list.
+    character(len=132)   :: node =  ''      ! Name of the node
+    class(conf), pointer :: next => null()  ! Next node
+    class(conf), pointer :: prev => null()  ! Previous node
+    class(dict), pointer :: dict => null()  ! Dictionary
+  end type
+contains
+  impure subroutine neoconf_parse()
+    continue
+  end subroutine
+end module
 
 program test
   use mod_hybrid
   use mod_material
+  use mod_neoconf
 
   type(superconductor) :: s
   type(ferromagnet)    :: f
