@@ -17,7 +17,18 @@ module mod_neoconf
     class(dict), pointer :: dict => null()  ! Dictionary
   end type
 contains
+  impure subroutine neoconf_read()
+    !! Read one record from a config file, filtering whitespace and comments in the process, and respecting line continuations.
+    continue
+  end subroutine
+
   impure subroutine neoconf_parse()
+    !! Parse one record from a config file, creating either a node or a dict mapping in the process.
+    continue
+  end subroutine
+
+  impure subroutine neoconf()
+    !! Perform the entire process.
     continue
   end subroutine
 end module
