@@ -104,7 +104,7 @@ contains
   pure function conductor_construct(cutoff, gap, length, scattering) result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this         ! Conductor object that will be constructed
-    real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
+    real(wp),    intent(in), optional :: cutoff       ! Debye cutoff for the energy domain
     real(wp),    intent(in), optional :: length       ! Length of the material
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
     complex(wp), intent(in), optional :: gap          ! Superconducting gap
@@ -126,7 +126,12 @@ contains
       call linspace(this%location, 0.0_wp, 1.0_wp)
 
       ! Energies
-      if (cutoff > 0) then
+      if (.not. present(cutoff)) then
+        allocate(this%energy(600))
+        call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
+        call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
+        call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
+      else if (cutoff > 0) then
         allocate(this%energy(600))
         call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
         call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)

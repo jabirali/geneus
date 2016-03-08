@@ -78,11 +78,11 @@ contains
 
       select type(ptr)
         type is (ferromagnet)
-          ptr = ferromagnet(30.0_wp, exchange = [10.0_wp,0.0_wp,0.0_wp])
+          ptr = ferromagnet()
         type is (superconductor)
-          ptr = superconductor(30.0_wp)
+          ptr = superconductor()
         type is (conductor)
-          ptr = conductor(30.0_wp)
+          ptr = conductor()
         class default
           call error('Attempted to construct an unsupported material type!')
       end select

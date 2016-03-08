@@ -26,6 +26,9 @@ module mod_ferromagnet
     procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the propagators
     procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the propagators
 
+    ! These methods are used to access and mutate the parameters
+    procedure                        :: set_exchange       => ferromagnet_set_exchange        ! Updates the ferromagnetic order parameter from a given vector
+
     ! These methods define miscellaneous utility functions
     procedure                        :: conf               => ferromagnet_conf                ! Configures material parameters
   end type
@@ -43,29 +46,19 @@ contains
   pure function ferromagnet_construct_homogeneous(cutoff, exchange, gap, length, scattering) result(this)
     ! Constructs a ferromagnet object initialized to a weak superconductor.
     type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
-    real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
+    real(wp),    intent(in), optional :: cutoff       ! Debye cutoff for the energy domain
     real(wp),    intent(in), optional :: length       ! Length of the material
     real(wp),    intent(in), optional :: exchange(3)  ! Magnetic exchange field
     complex(wp), intent(in), optional :: gap          ! Superconducting gap
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
-    integer                           :: n            ! Loop variable
 
     ! Call the superclass constructor
     this%conductor = conductor_construct(cutoff, gap=gap, length=length, scattering=scattering)
 
-
     ! Handle the exchange field argument
     if (present(exchange)) then
       if (norm2(exchange) > sqrt(eps)) then
-        ! Allocate the exchange field array if necessary
-        if (.not. allocated(this%exchange)) then
-          allocate(this%exchange(3,size(this%location)))
-        end if
-
-        ! Copy data from input array
-        do n = 1,size(this%location)
-          this%exchange(:,n) = exchange
-        end do
+        call this % set_exchange(exchange)
       end if
     end if
   end function
@@ -161,6 +154,27 @@ contains
   end subroutine
 
   !--------------------------------------------------------------------------------!
+  !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
+  !--------------------------------------------------------------------------------!
+
+  pure subroutine ferromagnet_set_exchange(this, exchange)
+    ! Updates the ferromagnetic order parameter from a vector.
+    class(ferromagnet), intent(inout) :: this
+    real(wp),           intent(in   ) :: exchange(3)
+    integer                           :: n
+
+    ! Allocate the exchange field array if necessary
+    if (.not. allocated(this%exchange)) then
+      allocate(this%exchange(3,size(this%location)))
+    end if
+
+    ! Copy data from input array
+    do n = 1,size(this%location)
+      this%exchange(:,n) = exchange
+    end do
+  end subroutine
+
+  !--------------------------------------------------------------------------------!
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
@@ -169,10 +183,14 @@ contains
     class(ferromagnet), intent(inout) :: this
     character(*),       intent(in   ) :: key
     character(*),       intent(in   ) :: val
+    real(wp)                          :: exchange(3)
 
     select case(key)
+      case ('magnetization')
+        read(val,*) exchange
+        call this % set_exchange(exchange)
       case default
-        call this%conductor%conf(key, val)
+        call this % conductor % conf(key, val)
     end select
   end subroutine
 end module

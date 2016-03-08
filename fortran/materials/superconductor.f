@@ -51,7 +51,7 @@ contains
   pure function superconductor_construct(cutoff, gap, length, scattering) result(this)
     ! Constructs a superconductor object initialized to a superconducting state.
     type(superconductor)              :: this         ! Superconductor object that will be constructed
-    real(wp),    intent(in)           :: cutoff       ! Debye cutoff for the energy domain
+    real(wp),    intent(in), optional :: cutoff       ! Debye cutoff for the energy domain
     complex(wp), intent(in), optional :: gap          ! Superconducting gap
     real(wp),    intent(in), optional :: length       ! Length of the material
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
@@ -72,8 +72,8 @@ contains
     end if
 
     ! Initialize the BCS coupling constant
-    if (cutoff > 0) then
-      this%coupling = 1/acosh(cutoff)
+    if (this%energy(size(this%energy)) > 0) then
+      this%coupling = 1/acosh(this%energy(size(this%energy)))
     end if
   end function
 
@@ -147,7 +147,7 @@ contains
     complex(wp)                          :: singlet      ! Singlet component of the anomalous propagators
     integer                              :: n, m         ! Loop variables
 
-    if (this%coupling > 0) then
+    if (abs(this%coupling) > eps) then
       ! Allocate workspace memory
       allocate(gap(size(this%energy)))
 

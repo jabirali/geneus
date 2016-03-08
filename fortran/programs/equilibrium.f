@@ -8,15 +8,14 @@
 
 program equilibrium
   use mod_structure
-  use mod_math
 
-  type(structure) :: bilayer
-  bilayer = structure('simulation.conf')
+  type(structure) :: stack
+  stack = structure('simulation.conf')
 
-  do while (bilayer % difference() > 1e-4)
-    call bilayer % update
-    call bilayer % write_density('density.dat')
-    call bilayer % write_current('current.dat')
-    call bilayer % write_gap('gap.dat')
+  do while (stack % difference() > 1e-4)
+    call stack % update
+    call stack % write_density('density.dat')
+    call stack % write_current('current.dat')
+    call stack % write_gap('gap.dat')
   end do
 end program
