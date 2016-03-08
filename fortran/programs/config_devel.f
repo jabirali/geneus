@@ -7,6 +7,7 @@ module mod_structure
     class(material), pointer :: b => null()
   contains
     procedure :: push   => structure_push
+    procedure :: conf   => structure_conf
     procedure :: update => structure_update
   end type
 contains
@@ -62,24 +63,37 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_update(s)
-    ! This subroutine updates the state of the entire hybrid structure.
-    class(structure), target  :: s
-    class(material),  pointer :: p
+  impure subroutine structure_conf(struct, key, val)
+    !! Configures the last material pushed to the multilayer stack.
+    class(structure), intent(inout) :: struct
+    character(*),     intent(in   ) :: key
+    character(*),     intent(in   ) :: val
+
+    if (associated(struct % b)) then
+      call struct % b % conf(key, val)
+    else
+      call error('Attempted to configure a non-existant material!')
+    end if
+  end subroutine
+
+  impure subroutine structure_update(struct)
+    !! Updates the state of the entire multilayer stack.
+    class(structure), target  :: struct
+    class(material),  pointer :: ptr
 
     ! Initialize the material pointer to the top of the stack
-    p => s % a
+    ptr => struct % a
 
     ! Update all materials (going down)
-    do while (associated(p % material_b))
-      p => p % material_b
-      call p % update
+    do while (associated(ptr % material_b))
+      ptr => ptr % material_b
+      call ptr % update
     end do
 
     ! Update all materials (going up)
-    do while (associated(p % material_a))
-      p => p % material_a
-      call p % update
+    do while (associated(ptr % material_a))
+      ptr => ptr % material_a
+      call ptr % update
     end do
   end subroutine
 end module
@@ -92,16 +106,15 @@ program test
   type(structure) :: bilayer
 
   call bilayer % push('superconductor')
+  call bilayer % conf('temperature', '0.10')
+  call bilayer % conf('scattering',  '0.05')
+  call bilayer % conf('length',      '0.75')
+  call bilayer % conf('coupling',    '0.25')
+
   call bilayer % push('ferromagnet')
-
-  call bilayer % a % conf('temperature', '0.10')
-  call bilayer % a % conf('scattering',  '0.05')
-  call bilayer % a % conf('length',      '0.75')
-  call bilayer % a % conf('coupling',    '0.25')
-
-  call bilayer % b % conf('temperature', '0.10')
-  call bilayer % b % conf('scattering',  '0.05')
-  call bilayer % b % conf('length',      '0.50')
+  call bilayer % conf('temperature', '0.10')
+  call bilayer % conf('scattering',  '0.05')
+  call bilayer % conf('length',      '0.50')
 
   call bilayer % update
 end program
