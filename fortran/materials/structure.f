@@ -288,9 +288,9 @@ contains
         x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
         select type (ptr)
           class is (superconductor)
-            write(unit,*) x, abs(ptr % gap(m))
+            write(unit,*) x, abs(ptr%gap(m)), atan2(im(ptr%gap(m)),re(ptr%gap(m)))/pi
           class default
-            write(unit,*) x, 0.0_wp
+            write(unit,*) x, 0.0_wp, 0.0_wp
         end select
       end do
 

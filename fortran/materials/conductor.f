@@ -429,6 +429,21 @@ contains
     character(*),     intent(in   ) :: val
 
     select case(key)
+      case ('gap')
+        block
+          real(wp) :: gap
+          real(wp) :: phase
+          integer  :: iostat
+
+          iostat = 0
+          read(val,*,iostat=iostat) gap, phase
+          if ( iostat /= 0 ) then
+            read(val,*) gap
+            phase = 0
+          end if
+
+          call this % init( gap = gap * exp( (0.0,1.0)*pi*phase ) )
+        end block
       case default
         call material_conf(this, key, val)
     end select

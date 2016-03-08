@@ -38,6 +38,7 @@ module mod_material
     class(material),                  pointer :: material_b      => null()                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
+    logical                                   :: lock            =  .false.                 ! When this parameter is set to true, the material will not be updated
     integer                                   :: scaling         =  128                     ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
     integer                                   :: order           =  4                       ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                                   :: control         =  2                       ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
@@ -147,75 +148,78 @@ contains
     ! Call the prehook method
     call this%update_prehook
 
-    ! Status information
-    if (this%information >= 0) then
-      write(stdout,'(a)') ' :: ' // trim(this%type_string) // '                                     '
-    end if
-
-    ! Reset the difference since last update to zero
-    this%difference = 0.0_wp
-
-    ! Loop over the discretized energy levels
-    do n=size(this%energy),1,-1
+    ! Only update the material state if it is not locked down
+    if (.not. this % lock) then
       ! Status information
       if (this%information >= 0) then
-        write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
-          '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
+        write(stdout,'(a)') ' :: ' // trim(this%type_string) // '                                     '
+      end if
+
+      ! Reset the difference since last update to zero
+      this%difference = 0.0_wp
+
+      ! Loop over the discretized energy levels
+      do n=size(this%energy),1,-1
+        ! Status information
+        if (this%information >= 0) then
+          write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
+            '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
+          flush(stdout)
+        end if
+
+        ! Convert all states at this energy level to real-valued state vectors
+        do m=1,size(this%location)
+          d(:,m) = this%propagator(n,m)
+        end do
+
+        ! If there is little difference between the previous state and this one, use the previous state as an initial guess
+        if (this%difference < 0.05_wp) then
+          u = d
+        end if
+
+        ! Calculate the complex energy (relative to the Thouless energy)
+        e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
+
+        ! Update the matrices used to evaluate boundary conditions
+        if (associated(this%material_a)) then
+          a = this%material_a%propagator(n,ubound(this%material_a%propagator,2))
+        else
+          a = green0
+        end if
+
+        if (associated(this%material_b)) then
+          b = this%material_b%propagator(n,lbound(this%material_b%propagator,2))
+        else
+          b = green0
+        end if
+
+        ! Initialize bvp_solver
+        sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
+
+        ! Solve the differential equation
+        sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
+
+        ! Use the results to update the state
+        call bvp_eval(sol, this%location, u)
+        do m=1,size(this%location)
+          this%propagator(n,m) = u(:,m)
+        end do
+
+        ! Update the difference vector
+        d = abs(u - d)
+
+        ! Update the maximal difference since last update
+        this%difference = max(this%difference,maxval(d))
+
+        ! Clean up after bvp_solver
+        call bvp_terminate(sol)
+      end do
+
+      ! Status information
+      if (this%information >= 0) then
+        write(stdout,'(4x,a,f10.8,a)') 'Max change: ',this%difference,'                                        '
         flush(stdout)
       end if
-
-      ! Convert all states at this energy level to real-valued state vectors
-      do m=1,size(this%location)
-        d(:,m) = this%propagator(n,m)
-      end do
-
-      ! If there is little difference between the previous state and this one, use the previous state as an initial guess
-      if (this%difference < 0.05_wp) then
-        u = d
-      end if
-
-      ! Calculate the complex energy (relative to the Thouless energy)
-      e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
-
-      ! Update the matrices used to evaluate boundary conditions
-      if (associated(this%material_a)) then
-        a = this%material_a%propagator(n,ubound(this%material_a%propagator,2))
-      else
-        a = green0
-      end if
-
-      if (associated(this%material_b)) then
-        b = this%material_b%propagator(n,lbound(this%material_b%propagator,2))
-      else
-        b = green0
-      end if
-
-      ! Initialize bvp_solver
-      sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
-
-      ! Solve the differential equation
-      sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
-
-      ! Use the results to update the state
-      call bvp_eval(sol, this%location, u)
-      do m=1,size(this%location)
-        this%propagator(n,m) = u(:,m)
-      end do
-
-      ! Update the difference vector
-      d = abs(u - d)
-
-      ! Update the maximal difference since last update
-      this%difference = max(this%difference,maxval(d))
-
-      ! Clean up after bvp_solver
-      call bvp_terminate(sol)
-    end do
-
-    ! Status information
-    if (this%information >= 0) then
-      write(stdout,'(4x,a,f10.8,a)') 'Max change: ',this%difference,'                                        '
-      flush(stdout)
     end if
 
     ! Call the posthook method
@@ -363,6 +367,8 @@ contains
         read(val,*) this%scattering
       case("temperature")
         read(val,*) this%temperature
+      case("lock")
+        read(val,*) this%lock
       case default
         call warning("Unknown option '" // key // "' ignored.")
     end select
