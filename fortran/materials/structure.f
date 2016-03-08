@@ -13,6 +13,7 @@ module mod_structure
   use mod_conductor
   use mod_superconductor
   use mod_ferromagnet
+  use mod_halfmetal
   implicit none
   private
 
@@ -61,6 +62,8 @@ contains
       character(*),             intent(in   ) :: str
 
       select case(str)
+        case('halfmetal')
+          allocate(halfmetal      :: ptr)
         case('ferromagnet')
           allocate(ferromagnet    :: ptr)
         case('superconductor')
@@ -77,6 +80,8 @@ contains
       class(material), pointer, intent(inout) :: ptr
 
       select type(ptr)
+        type is (halfmetal)
+          ptr = halfmetal()
         type is (ferromagnet)
           ptr = ferromagnet()
         type is (superconductor)
