@@ -24,6 +24,8 @@ module mod_structure
   contains
     procedure :: push_back     => structure_push_back
     procedure :: conf_back     => structure_conf_back
+    procedure :: save          => structure_save
+    procedure :: load          => structure_load
     procedure :: update        => structure_update
     procedure :: difference    => structure_difference
     procedure :: write_density => structure_write_density
@@ -35,22 +37,22 @@ module mod_structure
     module procedure structure_construct
   end interface
 contains
-  impure subroutine structure_push_back(struct, string)
+  impure subroutine structure_push_back(this, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
-    class(structure), intent(inout) :: struct
+    class(structure), intent(inout) :: this
     character(*),     intent(in   ) :: string
 
-    if (.not. associated(struct % b)) then
+    if (.not. associated(this % b)) then
       ! This is the first layer in the structure
-      call material_allocate(struct % b, string)
-      call material_construct(struct % b)
-      struct % a => struct % b
+      call material_allocate(this % b, string)
+      call material_construct(this % b)
+      this % a => this % b
     else
       ! This is not the first layer in the structure
-      call material_allocate(struct % b % material_b, string)
-      call material_construct(struct % b % material_b)
-      struct % b % material_b % material_a => struct % b
-      struct % b => struct % b % material_b
+      call material_allocate(this % b % material_b, string)
+      call material_construct(this % b % material_b)
+      this % b % material_b % material_a => this % b
+      this % b => this % b % material_b
     end if
   contains
     impure subroutine material_allocate(ptr, str)
@@ -87,26 +89,56 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_conf_back(struct, key, val)
+  impure subroutine structure_conf_back(this, key, val)
     !! Configures the last material pushed to the multilayer stack.
-    class(structure), intent(inout) :: struct
+    class(structure), intent(inout) :: this
     character(*),     intent(in   ) :: key
     character(*),     intent(in   ) :: val
 
-    if (associated(struct % b)) then
-      call struct % b % conf(key, val)
+    if (associated(this % b)) then
+      call this % b % conf(key, val)
     else
       call error('Attempted to configure a non-existant material!')
     end if
   end subroutine
 
-  impure subroutine structure_update(struct)
-    !! Updates the state of the entire multilayer stack.
-    class(structure), target  :: struct
+  impure subroutine structure_save(this)
+    !! Saves the state of the entire multilayer stack.
+    class(structure), target  :: this
     class(material),  pointer :: ptr
 
     ! Initialize the material pointer to the top of the stack
-    ptr => struct % a
+    ptr => this % a
+
+    ! Save all material states (going down)
+    do while (associated(ptr % material_b))
+      ptr => ptr % material_b
+      call ptr % save
+    end do
+  end subroutine
+
+  impure subroutine structure_load(this)
+    !! Loads the state of the entire multilayer stack.
+    class(structure), target  :: this
+    class(material),  pointer :: ptr
+
+    ! Initialize the material pointer to the top of the stack
+    ptr => this % a
+
+    ! Load all material states (going down)
+    do while (associated(ptr % material_b))
+      ptr => ptr % material_b
+      call ptr % load
+    end do
+  end subroutine
+
+  impure subroutine structure_update(this)
+    !! Updates the state of the entire multilayer stack.
+    class(structure), target  :: this
+    class(material),  pointer :: ptr
+
+    ! Initialize the material pointer to the top of the stack
+    ptr => this % a
 
     ! Update all materials (going down)
     do while (associated(ptr % material_b))
@@ -121,15 +153,15 @@ contains
     end do
   end subroutine
 
-  impure function structure_difference(struct) result(difference)
+  impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
-    class(structure), target  :: struct
+    class(structure), target  :: this
     class(material),  pointer :: ptr
     real(wp)                  :: difference
 
     ! Initialize variables
     difference = 0
-    ptr => struct % a
+    ptr => this % a
 
     ! Check all materials (going down)
     do while (associated(ptr))
