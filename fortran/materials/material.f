@@ -402,7 +402,8 @@ contains
   end subroutine
 
   impure subroutine material_write_dos(this, unit, a, b)
-    ! Writes the density of states as a function of position and energy to a given output unit.
+    !! Writes the density of states as a function of position and energy to a given output unit.
+    !! @TODO: This function is staged for removal, since it has been implemented in type(structure).
     class(material), intent(in) :: this      ! Material that the density of states will be calculated from
     integer,         intent(in) :: unit      ! Output unit that determines where the information will be written
     real(wp),        intent(in) :: a, b      ! Left and right end points of the material

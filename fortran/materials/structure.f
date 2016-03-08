@@ -22,9 +22,13 @@ module mod_structure
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
   contains
-    procedure :: push_back => structure_push_back
-    procedure :: conf_back => structure_conf_back
-    procedure :: update    => structure_update
+    procedure :: push_back     => structure_push_back
+    procedure :: conf_back     => structure_conf_back
+    procedure :: update        => structure_update
+    procedure :: difference    => structure_difference
+    procedure :: write_density => structure_write_density
+    procedure :: write_current => structure_write_current
+    procedure :: write_gap     => structure_write_gap
   end type
 
   interface structure
@@ -115,6 +119,155 @@ contains
       ptr => ptr % material_a
       call ptr % update
     end do
+  end subroutine
+
+  impure function structure_difference(struct) result(difference)
+    !! Checks how much the multilayer stack has changed recently.
+    class(structure), target  :: struct
+    class(material),  pointer :: ptr
+    real(wp)                  :: difference
+
+    ! Initialize variables
+    difference = 0
+    ptr => struct % a
+
+    ! Check all materials (going down)
+    do while (associated(ptr))
+      difference = max(difference, ptr % difference)
+      ptr => ptr % material_b
+    end do
+  end function
+
+  impure subroutine structure_write_density(this, file)
+    ! Writes the density of states as a function of position and energy to a given output file.
+    class(structure), target, intent(in) :: this
+    character(*),             intent(in) :: file
+    integer                              :: unit
+    integer                              :: iostat
+    class(material),  pointer            :: ptr
+    real(wp)                             :: a, b, x
+    integer                              :: n, m
+
+    ! Open output file
+    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('failed to open output file "' // file // '"!')
+    end if
+
+    ! Initialize variables
+    ptr => this % a
+    b = 0
+
+    ! Traverse all materials (going down)
+    do while (associated(ptr))
+      ! Calculate the endpoints of this layer
+      a = b
+      b = b + 1/sqrt(ptr % thouless)
+
+      ! Write out the density of states in this layer
+      do m=1,size(ptr % location)
+        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
+        do n=size(ptr % energy),1,-1
+          ! Negative energies
+          write(unit,*) x, -ptr % energy(n), ptr % density(n,m)
+        end do
+        do n=1,size(ptr % energy),+1
+          ! Positive energies
+          write(unit,*) x, +ptr % energy(n), ptr % density(n,m)
+        end do
+      end do
+
+      ! Move on to the next material layer
+      ptr => ptr % material_b
+    end do
+
+    ! Close output file
+    close(unit = unit)
+  end subroutine
+
+  impure subroutine structure_write_current(this, file)
+    ! Writes the charge and spin currents as a function of position to a given output file.
+    class(structure), target, intent(in) :: this
+    character(*),             intent(in) :: file
+    integer                              :: unit
+    integer                              :: iostat
+    class(material),  pointer            :: ptr
+    real(wp)                             :: a, b, x
+    integer                              :: m
+
+    ! Open output file
+    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('failed to open output file "' // file // '"!')
+    end if
+
+    ! Initialize variables
+    ptr => this % a
+    b = 0
+
+    ! Traverse all materials (going down)
+    do while (associated(ptr))
+      ! Calculate the endpoints of this layer
+      a = b
+      b = b + 1/sqrt(ptr % thouless)
+
+      ! Write out the currents in this layer
+      do m=1,size(ptr % location)
+        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
+        write(unit,*) x, ptr % current(:,m)
+      end do
+
+      ! Move on to the next material layer
+      ptr => ptr % material_b
+    end do
+
+    ! Close output file
+    close(unit = unit)
+  end subroutine
+
+  impure subroutine structure_write_gap(this, file)
+    ! Writes the superconducting order parameter as a function of position to a given output file.
+    class(structure), target, intent(in) :: this
+    character(*),             intent(in) :: file
+    integer                              :: unit
+    integer                              :: iostat
+    class(material),  pointer            :: ptr
+    real(wp)                             :: a, b, x
+    integer                              :: m
+
+    ! Open output file
+    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('failed to open output file "' // file // '"!')
+    end if
+
+    ! Initialize variables
+    ptr => this % a
+    b = 0
+
+    ! Traverse all materials (going down)
+    do while (associated(ptr))
+      ! Calculate the endpoints of this layer
+      a = b
+      b = b + 1/sqrt(ptr % thouless)
+
+      ! Write out the gap in this layer
+      do m=1,size(ptr % location)
+        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
+        select type (ptr)
+          class is (superconductor)
+            write(unit,*) x, abs(ptr % gap(m))
+          class default
+            write(unit,*) x, 0.0_wp
+        end select
+      end do
+
+      ! Move on to the next material layer
+      ptr => ptr % material_b
+    end do
+
+    ! Close output file
+    close(unit = unit)
   end subroutine
 
   impure function structure_construct(file) result(this)

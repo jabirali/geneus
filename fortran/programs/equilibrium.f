@@ -1,58 +1,22 @@
-! This program calculates the equilibrium propagators in a superconducting multilayer structure, and saves
-! some physical observables such as the density of states and superconducting gap to separate output files.
-!
-! WORK IN PROGRESS:
-!   The development of this program was prompted by the maintenance issues with density.f,
-!   and this program is supposed to generalize and eventually replace density.f altogether.
-!   The ideal is to make it run based on a config file (using mod_config) instead of command
-!   line options, and to eventually reduce code duplication between density.f and critical.f.
-!
-!   Hopefully, the multilayer structure defined here will also replace and supersede the
-!   methods in hybrid.f, and make it easier to construct and prototype new driver programs
-!   based on superconducting materials. As well as making it easily extensible for new materials.
-!
-!   The program should write out files dos, dos_1l, dos_1c, dos_1r, ..., conductance_12, ..., gap_1, etc.
-!
-! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-12-03
-! Updated: 2015-12-05
-
+!! This program calculates various equilibrium properties for a superconducting multilayer thin-film structure,
+!! such as the density of states, charge currents, spin currents, and superconducting gap in the structure.
+!! @TODO: This module is supposed to replace/supersede the older program 'density.f'.
+!!
+!! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
+!! Created: 2016-03-08
+!! Updated: 2016-03-08
 
 program equilibrium
-  continue
-!  use mod_stdio,  only: error
-!  use mod_config, only: config
-!  use mod_multilayer
-!  implicit none
-!
-!  ! Setting that control the program
-!  integer :: unit            = 0
-!  integer :: iostat          = 0
-!  integer :: energies        = 800
-!  integer :: debug           = 0
-!
-!  ! Computational model of the system
-!  real(wp), allocatable :: e(:)
-!  type(multilayer), target :: system
-!
-!  ! Open configuration file
-!  open(newunit=unit, file='config.ini', action='read', status='old', iostat=iostat)
-!  if (iostat /= 0) then
-!    call error('failed to open configuration file ''config.ini''!')
-!  end if
-!
-!  ! Process configuration file
-!  write(*,'(a)') '[equilibrium]'
-!  call config(unit, 'equilibrium', 'debug',    1, 0, debug)
-!  write(*,*)
-!
-!  ! Computation
-!  call system % config(unit)
-!  call system % update
-!  call system % update
-!
-!  ! Close configuration file
-!  close(unit)
+  use mod_structure
+  use mod_math
 
-  write(*,*) 'test'
+  type(structure) :: bilayer
+  bilayer = structure('simulation.conf')
+
+  do while (bilayer % difference() > 1e-4)
+    call bilayer % update
+    call bilayer % write_density('density.dat')
+    call bilayer % write_current('current.dat')
+    call bilayer % write_gap('gap.dat')
+  end do
 end program
