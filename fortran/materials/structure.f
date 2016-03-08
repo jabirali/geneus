@@ -26,6 +26,10 @@ module mod_structure
     procedure :: conf_back => structure_conf_back
     procedure :: update    => structure_update
   end type
+
+  interface structure
+    module procedure structure_construct
+  end interface
 contains
   impure subroutine structure_push_back(struct, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
@@ -58,7 +62,7 @@ contains
         case('conductor')
           allocate(conductor      :: ptr)
         case default
-          call error('Material type "' // str // '" unknown!')
+          call error('Material type "' // trim(str) // '" unknown!')
       end select
     end subroutine
 
@@ -112,4 +116,88 @@ contains
       call ptr % update
     end do
   end subroutine
+
+  impure function structure_construct(file) result(this)
+    !! Constructs a multilayer stack from a configuration file.
+    type(structure)          :: this
+    character(*), intent(in) :: file
+    integer                  :: unit
+    integer                  :: iostat
+    character(len=132)       :: str, lhs, rhs, arg
+    integer                  :: line, i, j, k
+
+    ! Initialize variables
+    line   = 0
+    unit   = 0
+    iostat = 0
+
+    ! Open the config file
+    open(newunit = unit, file = file, iostat = iostat, action = 'read', status = 'old')
+    if (iostat /= 0) then
+      call error('failed to open configuration file "' // file // '"!')
+    end if
+
+    ! Read the config file
+    do while (iostat == 0)
+      ! Increase line counter
+      line = line + 1
+
+      ! Read one line from file
+      str = ''
+      read(unit, '(a)', iostat = iostat) str
+
+      ! Strip comments from line
+      i = scan(str, '#')
+      if ( i > 0 ) then
+        str = str(:i-1)
+      end if
+
+      ! Strip whitespace from line
+      str = trim(str)
+
+      ! Ignore simulation properties
+      ! @TODO: implementation
+      if (scan(str, '@') /= 0) then
+        cycle
+      end if
+ 
+      ! Substitute command line arguments
+      i = scan(str, '{')
+      j = scan(str, '}')
+      do while ( i > 0 .and. j-1 >= i+1 )
+        read(str(i+1:j-1),*) k
+        call get_command_argument(k, arg, status=k)
+        if ( k /= 0 ) then
+          call error('missing command line arguments.')
+        end if
+        str = str(:i-1) // trim(arg) // str(j+1:)
+        i = scan(str, '{')
+        j = scan(str, '}')
+      end do
+
+      ! Configure or construct a material
+      i = scan(str, ':')
+      if ( i > 0 ) then
+        lhs = adjustl(str(:i-1))
+        rhs = adjustl(str(i+1:))
+        if (lhs /= '') then
+          if (rhs /= '') then
+            call this % conf_back(lhs, rhs)
+          else
+            call this % push_back(lhs)
+          end if
+          cycle
+        end if
+      end if
+
+      ! Check if this line contains garbage
+      if ( str /= '' ) then
+        write(str,'(i0)') line
+        call error('failed to parse line ' // trim(str) // ' in the config file.')
+      end if
+    end do
+
+    ! Close the config file
+    close(unit = unit)
+  end function
 end module
