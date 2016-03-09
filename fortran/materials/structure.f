@@ -23,6 +23,7 @@ module mod_structure
   contains
     procedure :: push_back     => structure_push_back
     procedure :: conf_back     => structure_conf_back
+    procedure :: init          => structure_init
     procedure :: save          => structure_save
     procedure :: load          => structure_load
     procedure :: update        => structure_update
@@ -105,6 +106,22 @@ contains
     end if
   end subroutine
 
+  impure subroutine structure_init(this, gap)
+    !! Initializes the state of the entire multilayer stack.
+    class(structure), target  :: this
+    class(material),  pointer :: ptr
+    complex(wp)               :: gap
+
+    ! Initialize the material pointer to the top of the stack
+    ptr => this % a
+
+    ! Initialize all material states (going down)
+    do while (associated(ptr % material_b))
+      ptr => ptr % material_b
+      call ptr % init(gap)
+    end do
+  end subroutine
+
   impure subroutine structure_save(this)
     !! Saves the state of the entire multilayer stack.
     class(structure), target  :: this
@@ -135,25 +152,31 @@ contains
     end do
   end subroutine
 
-  impure subroutine structure_update(this)
+  impure subroutine structure_update(this, freeze)
     !! Updates the state of the entire multilayer stack.
-    class(structure), target  :: this
-    class(material),  pointer :: ptr
+    class(structure), target   :: this
+    class(material),  pointer  :: ptr
+    logical,          optional :: freeze
 
     ! Initialize the material pointer to the top of the stack
     ptr => this % a
 
-    ! Update all materials (going down)
-    do while (associated(ptr % material_b))
-      ptr => ptr % material_b
-      call ptr % update
-    end do
+    if (.not. associated(ptr % material_b)) then
+      ! Update this material if it is the only one
+      call ptr % update(freeze)
+    else
+      ! Update all materials (going down)
+      do while (associated(ptr % material_b))
+        ptr => ptr % material_b
+        call ptr % update(freeze)
+      end do
 
-    ! Update all materials (going up)
-    do while (associated(ptr % material_a))
-      ptr => ptr % material_a
-      call ptr % update
-    end do
+      ! Update all materials (going up)
+      do while (associated(ptr % material_a))
+        ptr => ptr % material_a
+        call ptr % update(freeze)
+      end do
+    end if
   end subroutine
 
   impure function structure_difference(this) result(difference)

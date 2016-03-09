@@ -131,19 +131,20 @@ contains
   !                    IMPLEMENTATION OF STATE UPDATE METHODS                      !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine material_update(this)
+  impure subroutine material_update(this, freeze)
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
     use bvp_m
 
-    class(material), intent(inout) :: this                       ! Material that will be updated
-    type(bvp_sol)                  :: sol                        ! Workspace for the bvp_solver procedures
-    type(green)                    :: a                          ! State at this energy at the left  interface
-    type(green)                    :: b                          ! State at this energy at the right interface
-    complex(wp)                    :: e                          ! Complex energy relative to the Thouless energy
-    real(wp)                       :: u(32,size(this%location))  ! Representation of the retarded propagators
-    real(wp)                       :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
-    integer                        :: n                          ! Outer loop variable (current energy)
-    integer                        :: m                          ! Inner loop variable (current location)
+    class(material),   intent(inout) :: this                       ! Material that will be updated
+    logical, optional, intent(in   ) :: freeze                     ! This flag prevents update posthooks
+    type(bvp_sol)                    :: sol                        ! Workspace for the bvp_solver procedures
+    type(green)                      :: a                          ! State at this energy at the left  interface
+    type(green)                      :: b                          ! State at this energy at the right interface
+    complex(wp)                      :: e                          ! Complex energy relative to the Thouless energy
+    real(wp)                         :: u(32,size(this%location))  ! Representation of the retarded propagators
+    real(wp)                         :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
+    integer                          :: n                          ! Outer loop variable (current energy)
+    integer                          :: m                          ! Inner loop variable (current location)
 
     ! Call the prehook method
     call this%update_prehook
@@ -219,6 +220,13 @@ contains
       if (this%information >= 0) then
         write(stdout,'(4x,a,f10.8,a)') 'Max change: ',this%difference,'                                        '
         flush(stdout)
+      end if
+    end if
+
+    ! Stop here if the material is frozen
+    if (present(freeze)) then
+      if (freeze) then
+        return
       end if
     end if
 
