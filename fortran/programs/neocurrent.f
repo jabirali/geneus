@@ -1,5 +1,8 @@
-! This program does not perform any important operations by itself, but is
-! merely used to test new functions and subroutines as they are developed.
+! @TODO: Port this program to using mod_structure instead.
+!        Idea: make one structure object, then link it to
+!        two BCS superconductors using the equivalent of:
+!          connect(s1, stack % a)
+!          connect(s2, stack % b)
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 
