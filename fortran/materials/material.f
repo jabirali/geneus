@@ -15,11 +15,11 @@ module mod_material
   implicit none
   private
 
-  ! Public interface
-  public material, material_conf
+  ! Public declarations
+  public material_conf
 
   ! Type declarations
-  type, abstract :: material
+  type, public, abstract :: material
     ! These parameters determine the basic physical behaviour of a diffusive material
     real(wp)                                  :: thouless        =  1.00_wp                 ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(wp)                                  :: scattering      =  0.01_wp                 ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)

@@ -14,11 +14,8 @@ module mod_halfmetal
   implicit none
   private
 
-  ! Public interface
-  public halfmetal, halfmetal_construct
-
   ! Type declarations
-  type, extends(material) :: halfmetal
+  type, public, extends(material) :: halfmetal
     ! These parameters control the physical characteristics of the material
     real(wp)                  :: polarization            =  0.99_wp                        ! Spin-polarization of the ferromagnet
   contains

@@ -13,11 +13,8 @@ module mod_superconductor
   implicit none
   private
 
-  ! Public interface
-  public superconductor, superconductor_construct
-
   ! Type declaration
-  type, extends(conductor) :: superconductor
+  type, public, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
     complex(wp), allocatable :: gap(:)             ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
     real(wp)                 :: coupling = 0.00_wp ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
@@ -57,7 +54,7 @@ contains
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(cutoff=cutoff, gap=gap, length=length, scattering=scattering)
+    this%conductor = conductor(cutoff=cutoff, gap=gap, length=length, scattering=scattering)
 
     ! Allocate memory (if necessary)
     if (.not. allocated(this%gap)) then

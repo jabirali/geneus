@@ -13,11 +13,8 @@ module mod_ferromagnet
   implicit none
   private
 
-  ! Public interface
-  public ferromagnet, ferromagnet_construct_homogeneous
-
   ! Type declaration
-  type, extends(conductor)           :: ferromagnet
+  type, public, extends(conductor)   :: ferromagnet
     real(wp),   allocatable          :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
     type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
   contains
@@ -53,7 +50,7 @@ contains
     real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
 
     ! Call the superclass constructor
-    this%conductor = conductor_construct(cutoff, gap=gap, length=length, scattering=scattering)
+    this%conductor = conductor(cutoff, gap=gap, length=length, scattering=scattering)
 
     ! Handle the exchange field argument
     if (present(exchange)) then

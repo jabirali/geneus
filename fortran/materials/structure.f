@@ -17,9 +17,7 @@ module mod_structure
   implicit none
   private
 
-  public structure
-
-  type :: structure
+  type, public :: structure
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
   contains
