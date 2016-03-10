@@ -25,6 +25,7 @@ program critical
   real(wp)        :: maximum      = 1.00_wp
 
   ! Declare variables used by the program
+  real(wp)        :: temperature
   integer         :: n, m, k
 
 
@@ -51,7 +52,20 @@ program critical
   !                           BINARY SEARCH PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
-  call stack % update
+  do n = 1,bisections
+    ! Load the saved material states
+    call stack % load
+
+    ! Set the temperature
+    temperature = (minimum+maximum)/2
+    call stack % temperature(temperature)
+    write(*,*) temperature
+
+    ! Update the stack
+    call stack % update
+
+    minimum = temperature
+  end do
 
   ! Set the system temperature to the midpoint of the search space
   !s(1) % temperature = (minimum + maximum)/2.0_wp

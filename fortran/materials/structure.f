@@ -28,6 +28,7 @@ module mod_structure
     procedure :: load          => structure_load
     procedure :: update        => structure_update
     procedure :: difference    => structure_difference
+    procedure :: temperature   => structure_temperature
     procedure :: write_density => structure_write_density
     procedure :: write_current => structure_write_current
     procedure :: write_gap     => structure_write_gap
@@ -195,6 +196,23 @@ contains
       ptr => ptr % material_b
     end do
   end function
+
+  impure subroutine structure_temperature(this, temperature)
+    !! Modifies the temperature of the multilayer stack.
+    class(structure), target  :: this
+    class(material),  pointer :: ptr
+    real(wp)                  :: temperature
+
+    ! Initialize variables
+    ptr => this % a
+
+    ! Update all materials (going down)
+    do while (associated(ptr))
+      ptr % temperature = temperature
+      ptr => ptr % material_b
+    end do
+  end subroutine
+
 
   impure subroutine structure_write_density(this, file)
     ! Writes the density of states as a function of position and energy to a given output file.
