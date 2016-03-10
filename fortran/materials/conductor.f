@@ -444,6 +444,11 @@ contains
 
           call this % init( gap = gap * exp( (0.0,1.0)*pi*phase ) )
         end block
+      ! case ('rashba')
+      !   @TODO: Alternative 1: Read an xy-coupling as the first argument, and a z-coupling as an optional second
+      !          Alternative 2: Read an n=(x,y,z) vector, and create the A-field corresponding to H=(sigma×p)·n
+      ! case ('dresselhaus')
+      !   @TODO: Same as above.
       case default
         call material_conf(this, key, val)
     end select
