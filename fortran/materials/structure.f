@@ -23,6 +23,7 @@ module mod_structure
   contains
     procedure :: push_back     => structure_push_back
     procedure :: conf_back     => structure_conf_back
+    procedure :: map           => structure_map
     procedure :: init          => structure_init
     procedure :: save          => structure_save
     procedure :: load          => structure_load
@@ -107,110 +108,120 @@ contains
     end if
   end subroutine
 
-  impure subroutine structure_init(this, gap)
-    !! Initializes the state of the entire multilayer stack.
+  impure subroutine structure_map(this, routine, loop)
+    !! Maps a subroutine onto each element of the multilayer stack.
     class(structure), target  :: this
     class(material),  pointer :: ptr
-    complex(wp)               :: gap
-
-    ! Initialize the material pointer to the top of the stack
-    ptr => this % a
-
-    ! Initialize all material states (going down)
-    do while (associated(ptr % material_b))
-      ptr => ptr % material_b
-      call ptr % init(gap)
-    end do
-  end subroutine
-
-  impure subroutine structure_save(this)
-    !! Saves the state of the entire multilayer stack.
-    class(structure), target  :: this
-    class(material),  pointer :: ptr
-
-    ! Initialize the material pointer to the top of the stack
-    ptr => this % a
-
-    ! Save all material states (going down)
-    do while (associated(ptr % material_b))
-      ptr => ptr % material_b
-      call ptr % save
-    end do
-  end subroutine
-
-  impure subroutine structure_load(this)
-    !! Loads the state of the entire multilayer stack.
-    class(structure), target  :: this
-    class(material),  pointer :: ptr
-
-    ! Initialize the material pointer to the top of the stack
-    ptr => this % a
-
-    ! Load all material states (going down)
-    do while (associated(ptr % material_b))
-      ptr => ptr % material_b
-      call ptr % load
-    end do
-  end subroutine
-
-  impure subroutine structure_update(this, freeze)
-    !! Updates the state of the entire multilayer stack.
-    class(structure), target   :: this
-    class(material),  pointer  :: ptr
-    logical,          optional :: freeze
+    external                  :: routine
+    logical, optional         :: loop
 
     ! Initialize the material pointer to the top of the stack
     ptr => this % a
 
     if (.not. associated(ptr % material_b)) then
-      ! Update this material if it is the only one
-      call ptr % update(freeze)
-    else
-      ! Update all materials (going down)
+      ! Operate on this layer if it is the only one
+      call routine(ptr)
+    else if (.not. present(loop)) then
+      ! Iterate through all layers once if 'loop' is not set
       do while (associated(ptr % material_b))
         ptr => ptr % material_b
-        call ptr % update(freeze)
+        call routine(ptr)
       end do
-
-      ! Update all materials (going up)
+    else
+      ! Iterate through all layers but the first (going down)
+      do while (associated(ptr % material_b))
+        ptr => ptr % material_b
+        call routine(ptr)
+      end do
+      ! Iterate through all layers but the last  (going up)
       do while (associated(ptr % material_a))
         ptr => ptr % material_a
-        call ptr % update(freeze)
+        call routine(ptr)
       end do
     end if
+  end subroutine
+
+  impure subroutine structure_init(this, gap)
+    !! Initializes the state of the entire multilayer stack.
+    class(structure), target  :: this
+    complex(wp)               :: gap
+
+    ! Initialize all material states
+    call this % map(init)
+  contains
+    subroutine init(m)
+      class(material) :: m
+      call m % init(gap)
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_save(this)
+    !! Saves the state of the entire multilayer stack.
+    class(structure), target  :: this
+
+    ! Save all material states
+    call this % map(save)
+  contains
+    subroutine save(m)
+      class(material) :: m
+      call m % save
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_load(this)
+    !! Loads the saved state of the multilayer stack.
+    class(structure), target  :: this
+
+    ! Load all material states
+    call this % map(load)
+  contains
+    subroutine load(m)
+      class(material) :: m
+      call m % load
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_update(this, freeze)
+    !! Updates the state of the entire multilayer stack.
+    class(structure), target   :: this
+    logical,          optional :: freeze
+
+    ! Update all materials in a loop-pattern
+    call this % map(update, loop = .true.)
+  contains
+    subroutine update(m)
+      class(material) :: m
+      call m % update(freeze)
+    end subroutine
   end subroutine
 
   impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
     class(structure), target  :: this
-    class(material),  pointer :: ptr
     real(wp)                  :: difference
 
-    ! Initialize variables
+    ! Check all materials
     difference = 0
-    ptr => this % a
-
-    ! Check all materials (going down)
-    do while (associated(ptr))
-      difference = max(difference, ptr % difference)
-      ptr => ptr % material_b
-    end do
+    call this % map(check)
+  contains
+    subroutine check(m)
+      class(material) :: m
+      difference = max(difference, m % difference)
+    end subroutine
   end function
 
   impure subroutine structure_temperature(this, temperature)
     !! Modifies the temperature of the multilayer stack.
     class(structure), target  :: this
-    class(material),  pointer :: ptr
     real(wp)                  :: temperature
 
-    ! Initialize variables
-    ptr => this % a
-
-    ! Update all materials (going down)
-    do while (associated(ptr))
-      ptr % temperature = temperature
-      ptr => ptr % material_b
-    end do
+    ! Update the temperature of all materials
+    call this % map(set)
+  contains
+    subroutine set(m)
+      class(material) :: m
+      m % temperature = temperature
+    end subroutine
   end subroutine
 
 
