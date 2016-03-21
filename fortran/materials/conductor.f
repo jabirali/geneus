@@ -427,8 +427,57 @@ contains
     class(conductor), intent(inout) :: this
     character(*),     intent(in   ) :: key
     character(*),     intent(in   ) :: val
+    real(wp)                        :: tmp
 
     select case(key)
+      case ('transparent_a')
+        call evaluate(val, this % transparent_a)
+      case ('transparent_b')
+        call evaluate(val, this % transparent_b)
+      case ('reflecting_a')
+        call evaluate(val, this % reflecting_a)
+      case ('reflecting_b')
+        call evaluate(val, this % reflecting_b)
+      case ('conductance_a')
+        call evaluate(val, this % conductance_a)
+      case ('conductance_b')
+        call evaluate(val, this % conductance_b)
+      case ('spinmixing_a')
+        call evaluate(val, this % spinmixing_a)
+      case ('spinmixing_b')
+        call evaluate(val, this % spinmixing_b)
+      case ('polarization_a')
+        call evaluate(val, this % polarization_a)
+      case ('polarization_b')
+        call evaluate(val, this % polarization_b)
+      case ('magnetization_a')
+        if (.not. allocated(this % magnetization_a)) then
+          allocate(this % magnetization_a(3))
+        end if
+        call evaluate(val, this % magnetization_a)
+      case ('magnetization_b')
+        if (.not. allocated(this % magnetization_b)) then
+          allocate(this % magnetization_b(3))
+        end if
+        call evaluate(val, this % magnetization_b)
+      case ('rashba')
+        call evaluate(val, tmp)
+        if (.not. allocated(this % spinorbit)) then
+          allocate(this % spinorbit(3))
+          this % spinorbit = spin(0)
+        end if
+        this % spinorbit(1) = this % spinorbit(1) + (+tmp)*pauli2
+        this % spinorbit(2) = this % spinorbit(2) + (-tmp)*pauli1
+      case ('dresselhaus')
+        call evaluate(val, tmp)
+        if (.not. allocated(this % spinorbit)) then
+          allocate(this % spinorbit(3))
+          this % spinorbit = spin(0)
+        end if
+        this % spinorbit(1) = this % spinorbit(1) + (+tmp)*pauli1
+        this % spinorbit(2) = this % spinorbit(2) + (-tmp)*pauli2
+      case ('depairing')
+        call evaluate(val, this % depairing)
       case ('gap')
         block
           real(wp) :: gap
@@ -444,11 +493,6 @@ contains
 
           call this % init( gap = gap * exp( (0.0,1.0)*pi*phase ) )
         end block
-      ! case ('rashba')
-      !   @TODO: Alternative 1: Read an xy-coupling as the first argument, and a z-coupling as an optional second
-      !          Alternative 2: Read an n=(x,y,z) vector, and create the A-field corresponding to H=(sigma×p)·n
-      ! case ('dresselhaus')
-      !   @TODO: Same as above.
       case default
         call material_conf(this, key, val)
     end select

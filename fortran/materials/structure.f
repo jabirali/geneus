@@ -365,7 +365,7 @@ contains
     character(*), intent(in) :: file
     integer                  :: unit
     integer                  :: iostat
-    character(len=132)       :: str, lhs, rhs, arg
+    character(len=132)       :: str, arg
     integer                  :: line, i, j, k
 
     ! Initialize variables
@@ -395,7 +395,7 @@ contains
       end if
 
       ! Strip whitespace from line
-      str = trim(str)
+      str = trim(adjustl(str))
 
       ! Substitute command line arguments
       i = scan(str, '{')
@@ -411,19 +411,19 @@ contains
         j = scan(str, '}')
       end do
 
-      ! Configure or construct a material
+      ! Construct a material
+      i = scan(str, '[')
+      j = scan(str, ']')
+      if (i == 1 .and. j > i) then
+        call this % push_back(trim(adjustl(str(i+1:j-1))))
+        cycle
+      end if
+
+      ! Construct a material
       i = scan(str, ':')
       if ( i > 0 ) then
-        lhs = adjustl(str(:i-1))
-        rhs = adjustl(str(i+1:))
-        if (lhs /= '') then
-          if (rhs /= '') then
-            call this % conf_back(lhs, rhs)
-          else
-            call this % push_back(lhs)
-          end if
-          cycle
-        end if
+        call this % conf_back(trim(adjustl(str(:i-1))), trim(adjustl(str(i+1:))))
+        cycle
       end if
 
       ! Check if this line contains garbage

@@ -248,7 +248,7 @@ contains
 
       ! Calculate the second-derivatives of the Riccati parameters
       call this%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
-       
+
       ! Pack the results into a state vector
       f( 1: 8) = dg
       f( 9:16) = dgt
