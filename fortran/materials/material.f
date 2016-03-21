@@ -369,14 +369,14 @@ contains
 
     select case(key)
       case("length")
-        read(val,*) tmp
-        this%thouless = 1/tmp**2
+        call evaluate(val, tmp)
+        this%thouless = 1/(eps+tmp**2)
       case("scattering")
-        read(val,*) this%scattering
+        call evaluate(val, this%scattering)
       case("temperature")
-        read(val,*) this%temperature
+        call evaluate(val, this%temperature)
       case("lock")
-        read(val,*) this%lock
+        call evaluate(val, this%lock)
       case default
         call warning("Unknown option '" // key // "' ignored.")
     end select

@@ -183,7 +183,7 @@ contains
 
     select case(key)
       case ('magnetization')
-        this % exchange = evaluate_vector(val, this % location)
+        call evaluate(val, this % location, this % exchange)
       case default
         call this % conductor % conf(key, val)
     end select

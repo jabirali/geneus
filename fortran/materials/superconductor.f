@@ -232,7 +232,7 @@ contains
 
     select case(key)
       case("coupling")
-        read(val,*) this%coupling
+        call evaluate(val, this%coupling)
       case ('gap')
         ! @TODO: Split this into two parts, namely 'gap' and 'phase'.
         !        * Constructor should initialize to (1,0).

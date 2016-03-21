@@ -42,6 +42,12 @@ module mod_math
   interface interpolate
     module procedure interpolate_pchip, interpolate_pchip_cx
   end interface
+
+  interface evaluate
+    module procedure evaluate_scalar_value, evaluate_scalar_field, &
+                     evaluate_vector_value, evaluate_vector_field, &
+                     evaluate_logical_value
+  end interface
 contains
 
   !---------------------------------------------------------------------------!
@@ -402,50 +408,77 @@ contains
   !                          MATH PARSING PROCEDURES                          !
   !---------------------------------------------------------------------------!
 
-  impure function evaluate_scalar(expression, location) result(field)
-    !! This function takes a mathematical function of z and a position array
-    !! as input, and returns the function evaluated at each of the locations
-    !! in the array. This is useful for initializing a numeric array of real
-    !! values from a corresponding analytical expression.
+  impure subroutine evaluate_logical_value(expression, value)
+    !! This subroutine takes a scalar logical expression as input, and returns the value.
+    character(*), intent(in)  :: expression
+    logical,      intent(out) :: value
+
+    select case(expression)
+      case ('T', 't')
+        value = .true.
+      case ('F', 'f')
+        value = .false.
+      case default
+        call error('Invalid logical expression: "' // trim(expression) // '"')
+    end select
+  end subroutine
+
+  impure subroutine evaluate_scalar_value(expression, value)
+    !! This subroutine takes a scalar math expression as input, and returns the value.
+    use fparser
+
+    character(*), intent(in)  :: expression
+    real(wp),     intent(out) :: value
+
+    ! Make sure the expression is non-empty
+    if (scan(expression, '0123456789pi') <= 0) then
+      call error('Invalid scalar expression: "' // trim(expression) // '"')
+    end if
+
+    ! Initialize the function parser
+    call initf(1)
+    call parsef(1, expression, ['pi'])
+
+    ! Evaluate the parsed function
+    value = evalf(1, [pi])
+  end subroutine
+
+  impure subroutine evaluate_scalar_field(expression, domain, value)
+    !! This function takes a mathematical function of a variable 'z' and
+    !! array defining the discretized domain, and evaluates the function
+    !! at each position in the domain to form a discretized scalar field.
     use fparser
 
     character(*), intent(in) :: expression
-    real(wp),     intent(in) :: location(:)
-    real(wp),    allocatable :: field(:)
+    real(wp),     intent(in) :: domain(:)
+    real(wp),    allocatable :: value(:)
     integer                  :: n
 
     ! Make sure the expression is non-empty
     if (scan(expression, '0123456789piz') <= 0) then
-      call error('Invalid scalar expression: "' // expression // '"')
+      call error('Invalid scalar expression: "' // trim(expression) // '"')
     end if
-    
+
     ! Initialize the function parser
     call initf(1)
     call parsef(1, expression, ['pi', 'z '])
 
     ! Allocate memory for the output
-    allocate(field(size(location)))
+    allocate(value(size(domain)))
 
     ! Evaluate the parsed function
-    do n=1,size(location)
-      field(n) = evalf(1, [pi, location(n)])
+    do n=1,size(domain)
+      value(n) = evalf(1, [pi, domain(n)])
     end do
-  end function
+  end subroutine
 
-  impure function evaluate_vector(expression, location) result(field)
-    !! This function takes a mathematical function of z and a position array
-    !! as input, and returns the function evaluated at each of the locations
-    !! in the array. This is useful for initializing a numeric array of real
-    !! vectors from a corresponding analytical expression.
+  impure subroutine evaluate_vector_value(expression, value)
+    !! This function takes a vector math expression as input, and returns the value.
     use fparser
 
-    character(*), intent(in) :: expression
-    real(wp),     intent(in) :: location(:)
-    real(wp),    allocatable :: field(:,:)
-    integer                  :: n, sep(4)
-
-    ! Allocate memory for the output
-    allocate(field(3,size(location)))
+    character(*), intent(in)  :: expression
+    real(wp),     intent(out) :: value(3)
+    integer                   :: sep(4)
 
     ! Find the vector delimiters
     sep(1) = scan(expression, '[', back=.false.)
@@ -455,14 +488,56 @@ contains
 
     ! Make sure the expressions are non-empty
     if (sep(1) <= 0 .or. any(sep(2:4)-sep(1:3) <= 1)) then
-      call error('Invalid vector expression: "' // expression // '"')
+      call error('Invalid vector expression: "' // trim(expression) // '"')
+    end if
+    if (scan(expression(sep(1)+1:sep(2)-1), '0123456789pi') <= 0 .or. &
+        scan(expression(sep(2)+1:sep(3)-1), '0123456789pi') <= 0 .or. &
+        scan(expression(sep(3)+1:sep(4)-1), '0123456789pi') <= 0) then
+      call error('Invalid vector expression: "' // trim(expression) // '"')
+    end if
+
+    ! Initialize the function parser
+    call initf(3)
+    call parsef(1, expression(sep(1)+1:sep(2)-1), ['pi'])
+    call parsef(2, expression(sep(2)+1:sep(3)-1), ['pi'])
+    call parsef(3, expression(sep(3)+1:sep(4)-1), ['pi'])
+
+    ! Evaluate the parsed function
+    value(1) = evalf(1, [pi])
+    value(2) = evalf(2, [pi])
+    value(3) = evalf(3, [pi])
+  end subroutine
+
+  impure subroutine evaluate_vector_field(expression, domain, value)
+    !! This function takes a mathematical function of a variable 'z' and
+    !! array defining the discretized domain, and evaluates the function
+    !! at each position in the domain to form a discretized vector field.
+    use fparser
+
+    character(*), intent(in) :: expression
+    real(wp),     intent(in) :: domain(:)
+    real(wp),    allocatable :: value(:,:)
+    integer                  :: n, sep(4)
+
+    ! Allocate memory for the output
+    allocate(value(3,size(domain)))
+
+    ! Find the vector delimiters
+    sep(1) = scan(expression, '[', back=.false.)
+    sep(2) = scan(expression, ',', back=.false.)
+    sep(3) = scan(expression, ',', back=.true. )
+    sep(4) = scan(expression, ']', back=.true. )
+
+    ! Make sure the expressions are non-empty
+    if (sep(1) <= 0 .or. any(sep(2:4)-sep(1:3) <= 1)) then
+      call error('Invalid vector expression: "' // trim(expression) // '"')
     end if
     if (scan(expression(sep(1)+1:sep(2)-1), '0123456789piz') <= 0 .or. &
         scan(expression(sep(2)+1:sep(3)-1), '0123456789piz') <= 0 .or. &
         scan(expression(sep(3)+1:sep(4)-1), '0123456789piz') <= 0) then
-      call error('Invalid vector expression: "' // expression // '"')
+      call error('Invalid vector expression: "' // trim(expression) // '"')
     end if
-    
+
     ! Initialize the function parser
     call initf(3)
     call parsef(1, expression(sep(1)+1:sep(2)-1), ['pi', 'z '])
@@ -470,10 +545,10 @@ contains
     call parsef(3, expression(sep(3)+1:sep(4)-1), ['pi', 'z '])
 
     ! Evaluate the parsed function
-    do n=1,size(location)
-      field(1,n) = evalf(1, [pi, location(n)])
-      field(2,n) = evalf(2, [pi, location(n)])
-      field(3,n) = evalf(3, [pi, location(n)])
+    do n=1,size(domain)
+      value(1,n) = evalf(1, [pi, domain(n)])
+      value(2,n) = evalf(2, [pi, domain(n)])
+      value(3,n) = evalf(3, [pi, domain(n)])
     end do
-  end function
+  end subroutine
 end module
