@@ -9,6 +9,7 @@
 
 module mod_math
   use :: iso_fortran_env
+  use :: mod_stdio
   implicit none
   public
 
@@ -395,5 +396,84 @@ contains
     ! Interpolate the real and imaginary parts separately
     r = cx( interpolate_pchip(x, re(y), p),&
             interpolate_pchip(x, im(y), p) )
+  end function
+
+  !---------------------------------------------------------------------------!
+  !                          MATH PARSING PROCEDURES                          !
+  !---------------------------------------------------------------------------!
+
+  impure function evaluate_scalar(expression, location) result(field)
+    !! This function takes a mathematical function of z and a position array
+    !! as input, and returns the function evaluated at each of the locations
+    !! in the array. This is useful for initializing a numeric array of real
+    !! values from a corresponding analytical expression.
+    use fparser
+
+    character(*), intent(in) :: expression
+    real(wp),     intent(in) :: location(:)
+    real(wp),    allocatable :: field(:)
+    integer                  :: n
+
+    ! Make sure the expression is non-empty
+    if (scan(expression, '0123456789piz') <= 0) then
+      call error('Invalid scalar expression: "' // expression // '"')
+    end if
+    
+    ! Initialize the function parser
+    call initf(1)
+    call parsef(1, expression, ['pi', 'z '])
+
+    ! Allocate memory for the output
+    allocate(field(size(location)))
+
+    ! Evaluate the parsed function
+    do n=1,size(location)
+      field(n) = evalf(1, [pi, location(n)])
+    end do
+  end function
+
+  impure function evaluate_vector(expression, location) result(field)
+    !! This function takes a mathematical function of z and a position array
+    !! as input, and returns the function evaluated at each of the locations
+    !! in the array. This is useful for initializing a numeric array of real
+    !! vectors from a corresponding analytical expression.
+    use fparser
+
+    character(*), intent(in) :: expression
+    real(wp),     intent(in) :: location(:)
+    real(wp),    allocatable :: field(:,:)
+    integer                  :: n, sep(4)
+
+    ! Allocate memory for the output
+    allocate(field(3,size(location)))
+
+    ! Find the vector delimiters
+    sep(1) = scan(expression, '[', back=.false.)
+    sep(2) = scan(expression, ',', back=.false.)
+    sep(3) = scan(expression, ',', back=.true. )
+    sep(4) = scan(expression, ']', back=.true. )
+
+    ! Make sure the expressions are non-empty
+    if (sep(1) <= 0 .or. any(sep(2:4)-sep(1:3) <= 1)) then
+      call error('Invalid vector expression: "' // expression // '"')
+    end if
+    if (scan(expression(sep(1)+1:sep(2)-1), '0123456789piz') <= 0 .or. &
+        scan(expression(sep(2)+1:sep(3)-1), '0123456789piz') <= 0 .or. &
+        scan(expression(sep(3)+1:sep(4)-1), '0123456789piz') <= 0) then
+      call error('Invalid vector expression: "' // expression // '"')
+    end if
+    
+    ! Initialize the function parser
+    call initf(3)
+    call parsef(1, expression(sep(1)+1:sep(2)-1), ['pi', 'z '])
+    call parsef(2, expression(sep(2)+1:sep(3)-1), ['pi', 'z '])
+    call parsef(3, expression(sep(3)+1:sep(4)-1), ['pi', 'z '])
+
+    ! Evaluate the parsed function
+    do n=1,size(location)
+      field(1,n) = evalf(1, [pi, location(n)])
+      field(2,n) = evalf(2, [pi, location(n)])
+      field(3,n) = evalf(3, [pi, location(n)])
+    end do
   end function
 end module

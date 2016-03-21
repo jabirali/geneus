@@ -234,6 +234,13 @@ contains
       case("coupling")
         read(val,*) this%coupling
       case ('gap')
+        ! @TODO: Split this into two parts, namely 'gap' and 'phase'.
+        !        * Constructor should initialize to (1,0).
+        !        * Gap as a function of z, should change the magnitude:
+        !            gap(n) -> gap(n)*(gap/abs(gap(n)))
+        !        * Phase as a function of z, should change the phase:
+        !            gap(n) -> abs(gap(n)) * exp((0,pi)*phase(n))
+        !        * So gap and phase should become two distinct parameters.
         block
           real(wp) :: gap
           real(wp) :: phase
