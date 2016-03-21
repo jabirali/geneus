@@ -180,12 +180,10 @@ contains
     class(ferromagnet), intent(inout) :: this
     character(*),       intent(in   ) :: key
     character(*),       intent(in   ) :: val
-    real(wp)                          :: exchange(3)
 
     select case(key)
       case ('magnetization')
-        read(val,*) exchange
-        call this % set_exchange(exchange)
+        this % exchange = evaluate_vector(val, this % location)
       case default
         call this % conductor % conf(key, val)
     end select
