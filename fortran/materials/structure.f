@@ -105,6 +105,8 @@ contains
       call this % b % conf(key, val)
     else
       call error('Attempted to configure a non-existant material!')
+      ! @TODO: Rewrite this to call this%conf(key,val), which stores config options that will affect all constructed materials.
+      !        That way, global config options can be declared before materials.
     end if
   end subroutine
 
@@ -395,12 +397,6 @@ contains
       ! Strip whitespace from line
       str = trim(str)
 
-      ! Ignore simulation properties
-      ! @TODO: implementation
-      if (scan(str, '@') /= 0) then
-        cycle
-      end if
- 
       ! Substitute command line arguments
       i = scan(str, '{')
       j = scan(str, '}')
