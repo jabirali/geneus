@@ -21,7 +21,7 @@ program critical_current
 
   ! Declare program control parameters
   integer,  parameter                 :: iterations = 101
-  real(wp), parameter                 :: tolerance  = 1e-4
+  real(wp), parameter                 :: tolerance  = 1d-6
 
   ! Declare variables used by the program
   real(wp), dimension(iterations)     :: current     = 0
