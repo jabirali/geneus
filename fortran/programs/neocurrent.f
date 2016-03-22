@@ -25,8 +25,9 @@ program critical_current
   real(wp), parameter                 :: tolerance  = 1d-6
 
   ! Declare variables used by the program
-  real(wp), dimension(iterations)     :: current     = 0
+  character(len=132)                  :: filename    = ''
   real(wp)                            :: critical    = 0
+  real(wp), dimension(iterations)     :: current     = 0
   real(wp), dimension(100*iterations) :: domain
   real(wp), dimension(iterations)     :: phase
   integer                             :: n
@@ -77,6 +78,10 @@ program critical_current
     ! Calculate the current
     current(n) = stack % a % current(0,1)
     write(*,*) phase(n), current(n)
+
+    ! Write results to file
+    write(filename,'(a,f5.3,a)') 'current.', phase(n), '.dat'
+    call stack % write_current(filename)
 
     ! Flush output
     flush(stdout)
