@@ -1,70 +1,66 @@
-! @TODO: Port this program to using mod_structure instead.
-!        Idea: make one structure object, then link it to
-!        two BCS superconductors using the equivalent of:
-!          connect(s1, stack % a)
-!          connect(s2, stack % b)
-!
-! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
+!! This program calculates the critical current in an S/X/S heterostructure as a function of the phase
+!! difference between the two superconductors. The heterostructure is constructed based in the config
+!! file 'simulation.conf', and the output is written to the file 'critical_current.dat'.
+!!
+!! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
+!! Created: 2016-03-22
+!! Updated: 2016-03-22
 
-program density
-  use mod_hybrid
-  implicit none
+program critical_current
+  use mod_structure
+  use mod_superconductor
+  use mod_stdio
+  use mod_math
 
-  type(superconductor) :: s1
-  type(superconductor) :: s2
-  type(ferromagnet)    :: f
-  real(wp)             :: phase, x(3)
-  real(wp)             :: m(0:3), s(0:3)
-  integer              :: n
+  ! Declare variables 
+  type(structure) :: stack
+  real(wp)        :: phase
+  integer         :: n
 
-  x = [3.0_wp, 0.0_wp, 0.0_wp]
-  s1 = superconductor(30.0_wp)
-  s2 = superconductor(30.0_wp)
-  !sj = superconductor(e, coupling=-0.2_wp)
-  f  = ferromagnet(30.0_wp, length = 0.5_wp, exchange = x)
-  call connect(s1, f , 0.3_wp)
-  call connect(f , s2, 0.3_wp)
-  f % information = -1
-  f % magnetization_a = [1.0_wp,+1.0_wp,0.0_wp]
-  f % magnetization_b = [1.0_wp,-1.0_wp,0.0_wp]
-  f % spinmixing_a    = 0.5
-  f % spinmixing_b    = 0.5
-  f % polarization_a  = 0.5
-  f % polarization_b  = 0.5
+  ! Construct the multilayer stack based on a config file
+  stack = structure('simulation.conf')
 
-  do n=0,200
+  ! Verify that this is an S/X/S junction of some kind, and lock the superconductors
+  associate(a => stack % a, b => stack % b)
+    if (associated(stack % a, stack % b)) then
+      call error('Minimum two superconductors required for the calculations!')
+    end if
+
+    select type(a)
+      class is (superconductor)
+        call a % conf('lock', 'T')
+      class default
+        call error('First material in the heterostructure is not a superconductor!')
+    end select
+
+    select type(b)
+      class is (superconductor)
+        call b % conf('lock', 'T')
+      class default
+        call error('Last material in the heterostructure is not a superconductor!')
+    end select
+
+    if (associated(a % material_b, b)) then
+      call error('Minimum one material required between the two superconductors!')
+    end if
+  end associate
+
+  do n=0,100
     ! Update the phase
-    phase = n/200.0
-    call s1 % init( gap = exp(((0.0,-0.5)*pi)*phase) )
-    call s2 % init( gap = exp(((0.0,+0.5)*pi)*phase) )
-    write(*,*) n
+    phase = (n+1e-6)/(100+2e-6)
+    call stack % a % init( gap = exp(((0.0,-0.5)*pi)*phase) )
+    call stack % b % init( gap = exp(((0.0,+0.5)*pi)*phase) )
 
     ! Update the system
-    call f % update
-    !do while (f %difference > 1e-4)
-    !  write(*,*) '.'
-    !  call f  % update
-    !end do
+    call stack % update
+    do while (stack % difference() > 1e-4)
+      call stack % update
+    end do
 
-    ! Calculate the density of states
-    !write(*,*) f  % density(1,1)
-
-    ! Calculate the mean current
-    m(0) = sum(f%current(0,:))/size(f%current(0,:))
-    m(1) = sum(f%current(1,:))/size(f%current(1,:))
-    m(2) = sum(f%current(2,:))/size(f%current(2,:))
-    m(3) = sum(f%current(3,:))/size(f%current(3,:))
-    write(*,*) m
-
-    ! Calculate the max deviation 
-    s(0) = maxval(abs(f %current(0,:)-m(0)))
-    s(1) = maxval(abs(f %current(1,:)-m(1)))
-    s(2) = maxval(abs(f %current(2,:)-m(2)))
-    s(3) = maxval(abs(f %current(3,:)-m(3)))
-    write(*,*) s
+    ! Calculate the critical current
+    write(*,*) phase, abs(stack % a % material_b % current(1,1))
 
     ! Flush output
     flush(stdout)
   end do
-
-end program 
+end program

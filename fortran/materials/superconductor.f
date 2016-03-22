@@ -169,7 +169,7 @@ contains
       diff = this%get_gap_mean() - diff
 
       ! Status information
-      if (this%information >= 0) then
+      if (this%information >= 0 .and. .not. this % lock) then
         write(stdout,'(4x,a,f10.8,a)') 'Gap change: ',abs(diff),'                                        '
         flush(stdout)
       end if

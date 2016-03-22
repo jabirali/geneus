@@ -208,7 +208,9 @@ contains
   contains
     subroutine check(m)
       class(material) :: m
-      difference = max(difference, m % difference)
+      if (.not. m % lock) then
+        difference = max(difference, m % difference)
+      end if
     end subroutine
   end function
 
