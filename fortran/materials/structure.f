@@ -464,5 +464,10 @@ contains
 
     ! Close the config file
     close(unit = unit)
+
+    ! Confirm that there is at least one material layer
+    if (.not. associated(this % a)) then
+      call error('No material layers are described in the config file!')
+    end if
   end function
 end module
