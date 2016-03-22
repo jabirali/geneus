@@ -119,31 +119,32 @@ contains
     class(material),  pointer :: ptr
     external                  :: routine
     logical, optional         :: loop
+    logical                   :: loop_
 
-    ! Initialize the material pointer to the top of the stack
-    ptr => this % a
-
-    if (.not. associated(ptr % material_b)) then
-      ! Operate on this layer if it is the only one
-      call routine(ptr)
-    else if (.not. present(loop)) then
-      ! Iterate through all layers once if 'loop' is not set
-      do while (associated(ptr % material_b))
-        ptr => ptr % material_b
-        call routine(ptr)
-      end do
-    else
-      ! Iterate through all layers but the first (going down)
-      do while (associated(ptr % material_b))
-        ptr => ptr % material_b
-        call routine(ptr)
-      end do
-      ! Iterate through all layers but the last  (going up)
-      do while (associated(ptr % material_a))
-        ptr => ptr % material_a
-        call routine(ptr)
-      end do
+    ! Whether to traverse bidirectionally
+    loop_ = .false.
+    if (present(loop) .and. .not. associated(this%a,this%b)) then
+      loop_ = loop
     end if
+
+    ! Initialize and process the first element
+    ptr => this % a
+    if (loop_) then
+      ptr => ptr % material_b
+    end if
+    call routine(ptr)
+
+    ! In all cases, traverse the stack downwards
+    do while (.not. associated(ptr, this%b))
+      ptr => ptr % material_b
+      call routine(ptr)
+    end do
+
+    ! If we will loop, traverse the stack upwards
+    do while (.not. associated(ptr, this%a))
+      ptr => ptr % material_a
+      call routine(ptr)
+    end do
   end subroutine
 
   impure subroutine structure_init(this, gap)

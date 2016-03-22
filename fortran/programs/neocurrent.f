@@ -18,6 +18,7 @@ program critical_current
 
   ! Declare the superconducting structure
   type(structure)                     :: stack
+  type(superconductor), target        :: sa, sb
 
   ! Declare program control parameters
   integer,  parameter                 :: iterations = 101
@@ -39,30 +40,17 @@ program critical_current
   ! Construct the multilayer stack based on a config file
   stack = structure('simulation.conf')
 
-  ! Verify that this is an S/X/S junction of some kind, and lock the superconductors
-  associate(a => stack % a, b => stack % b)
-    if (associated(stack % a, stack % b)) then
-      call error('Minimum two superconductors required for the calculations!')
-    end if
+  ! Construct two superconductors
+  sa = superconductor(30.0_wp)
+  sb = superconductor(30.0_wp)
 
-    select type(a)
-      class is (superconductor)
-        call a % conf('lock', 'T')
-      class default
-        call error('First material in the heterostructure is not a superconductor!')
-    end select
+  ! Lock the new superconductors
+  sa % lock = .true.
+  sb % lock = .true.
 
-    select type(b)
-      class is (superconductor)
-        call b % conf('lock', 'T')
-      class default
-        call error('Last material in the heterostructure is not a superconductor!')
-    end select
-
-    if (associated(a % material_b, b)) then
-      call error('Minimum one material required between the two superconductors!')
-    end if
-  end associate
+  ! Connect the superconductors to the stack
+  stack % a % material_a => sa
+  stack % b % material_b => sb
 
 
 
@@ -77,8 +65,8 @@ program critical_current
   ! Calculate the charge current as a function of phase difference
   do n=1,iterations
     ! Update the phase
-    call stack % a % init( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
-    call stack % b % init( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
+    call sa % init( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
+    call sb % init( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
 
     ! Update the system
     call stack % update
@@ -87,7 +75,7 @@ program critical_current
     end do
 
     ! Calculate the current
-    current(n) = stack % a % material_b % current(0,1)
+    current(n) = stack % a % current(0,1)
     write(*,*) phase(n), current(n)
 
     ! Flush output
