@@ -1,6 +1,6 @@
 !! This program calculates the critical current in an S/X/S heterostructure as a function of the phase
 !! difference between the two superconductors. The heterostructure is constructed based in the config
-!! file 'simulation.conf', and the output is written to the file 'critical_current.dat'.
+!! file 'simulation.conf', and the output is written to the files 'current.dat' and 'critical.dat'.
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-22
@@ -8,14 +8,33 @@
 
 program critical_current
   use mod_structure
-  use mod_superconductor
   use mod_stdio
   use mod_math
+  implicit none
 
-  ! Declare variables 
-  type(structure) :: stack
-  real(wp)        :: phase
-  integer         :: n
+  !--------------------------------------------------------------------------------!
+  !                                GLOBAL VARIABLES                                !
+  !--------------------------------------------------------------------------------!
+
+  ! Declare the superconducting structure
+  type(structure)                     :: stack
+
+  ! Declare program control parameters
+  integer,  parameter                 :: iterations = 101
+  real(wp), parameter                 :: tolerance  = 1e-4
+
+  ! Declare variables used by the program
+  real(wp), dimension(iterations)     :: current     = 0
+  real(wp)                            :: critical    = 0
+  real(wp), dimension(100*iterations) :: domain
+  real(wp), dimension(iterations)     :: phase
+  integer                             :: n
+
+
+
+  !--------------------------------------------------------------------------------!
+  !                          INITIALIZATION PROCEDURE                              !
+  !--------------------------------------------------------------------------------!
 
   ! Construct the multilayer stack based on a config file
   stack = structure('simulation.conf')
@@ -45,22 +64,43 @@ program critical_current
     end if
   end associate
 
-  do n=0,100
+
+
+  !--------------------------------------------------------------------------------!
+  !                           LINEAR SEARCH PROCEDURE                              !
+  !--------------------------------------------------------------------------------!
+
+  ! Calculate which phase differences to check
+  call linspace(phase,  1d-6, 1-1d-6)
+  call linspace(domain, 1d-6, 1-1d-6)
+
+  ! Calculate the charge current as a function of phase difference
+  do n=1,iterations
     ! Update the phase
-    phase = (n+1e-6)/(100+2e-6)
-    call stack % a % init( gap = exp(((0.0,-0.5)*pi)*phase) )
-    call stack % b % init( gap = exp(((0.0,+0.5)*pi)*phase) )
+    call stack % a % init( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
+    call stack % b % init( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
 
     ! Update the system
     call stack % update
-    do while (stack % difference() > 1e-4)
+    do while (stack % difference() > tolerance)
       call stack % update
     end do
 
-    ! Calculate the critical current
-    write(*,*) phase, abs(stack % a % material_b % current(1,1))
+    ! Calculate the current
+    current(n) = stack % a % material_b % current(0,1)
+    write(*,*) phase(n), current(n)
 
     ! Flush output
     flush(stdout)
   end do
+
+  ! Calculate the critical current
+  critical = maxval(abs(current))
+  write(*,*) 'Critical current:', critical
+
+  ! Interpolate the critical current
+  critical = maxval(abs(interpolate(phase, current, domain)))
+  write(*,*) 'Interpolated:', critical
+
+  ! Write current(0:3,:) to current.dat, and critical to critical.dat
 end program

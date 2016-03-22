@@ -17,6 +17,8 @@ module mod_structure
   implicit none
   private
 
+  public conductor, superconductor, ferromagnet, halfmetal
+
   type, public :: structure
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
@@ -28,6 +30,7 @@ module mod_structure
     procedure :: save          => structure_save
     procedure :: load          => structure_load
     procedure :: update        => structure_update
+    procedure :: count         => structure_count
     procedure :: difference    => structure_difference
     procedure :: temperature   => structure_temperature
     procedure :: write_density => structure_write_density
@@ -188,14 +191,37 @@ contains
     class(structure), target   :: this
     logical,          optional :: freeze
 
-    ! Update all materials in a loop-pattern
-    call this % map(update, loop = .true.)
+    if (this % count() <= 2) then
+      ! Update all materials in a pass-pattern
+      call this % map(update, loop = .false.)
+    else
+      ! Update all materials in a loop-pattern
+      call this % map(update, loop = .true.)
+    end if
   contains
     subroutine update(m)
       class(material) :: m
       call m % update(freeze)
     end subroutine
   end subroutine
+
+  impure function structure_count(this) result(num)
+    !! Checks the number of unlocked materials in the multilayer stack.
+    class(structure), target  :: this
+    real(wp)                  :: num
+
+    ! Check all materials
+    num = 0
+    call this % map(count)
+  contains
+    subroutine count(m)
+      class(material) :: m
+      if (.not. m % lock) then
+        num = num + 1
+      end if
+    end subroutine
+  end function
+
 
   impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
