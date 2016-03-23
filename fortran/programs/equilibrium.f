@@ -16,8 +16,7 @@ program equilibrium
   type(structure) :: stack
   stack = structure('structure.conf')
 
-  ! Update the structure until convergence
-  do while (stack % difference() > 1e-6)
+  do
     ! Status information
     call status_head('UPDATING STATE')
     call status_body('Last change', stack % difference())
@@ -30,6 +29,11 @@ program equilibrium
     call stack % write_density('density.dat')
     call stack % write_current('current.dat')
     call stack % write_gap('gap.dat')
+
+    ! Stop if we have convergence
+    if (stack % difference() < 1e-6) then
+      exit
+    end if
   end do
 
   ! Status information

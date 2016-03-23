@@ -2,7 +2,7 @@
 !
 ! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2016-03-09
-! Updated: 2016-03-09
+! Updated: 2016-03-23
 
 program critical_temperature
   use mod_structure

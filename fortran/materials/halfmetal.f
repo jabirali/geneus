@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2016-03-08
-! Updated: 2016-03-08
+! Updated: 2016-03-23
 
 module mod_halfmetal
   use mod_stdio

@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-17
-! Updated: 2016-03-04
+! Updated: 2016-03-23
 
 module mod_superconductor
   use mod_stdio

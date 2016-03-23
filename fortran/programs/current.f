@@ -25,6 +25,7 @@ program critical_current
   ! Declare program control parameters
   integer,  parameter             :: iterations = 21
   real(wp), parameter             :: tolerance  = 1e-6
+  logical                         :: loop       = .true.
 
   ! Declare variables used by the program
   character(len=132)              :: filename   = ''
@@ -47,6 +48,10 @@ program critical_current
   ! Construct the surrounding superconductors
   sa = superconductor()
   sb = superconductor()
+
+  ! Lock the superconductors from updates
+  call sa % conf('lock','T')
+  call sb % conf('lock','T')
 
   ! Connect the superconductors to the stack
   stack % a % material_a => sa
@@ -74,16 +79,18 @@ program critical_current
 
     ! Update the state
     call stack % update
-    do while (stack % difference() > tolerance)
-      ! Status information
-      call status_head('UPDATING STATE')
-      call status_body('Phase difference', phase(n))
-      call status_body('State difference', stack % difference())
-      call status_foot
+    if (loop) then
+      do while (stack % difference() > tolerance)
+        ! Status information
+        call status_head('UPDATING STATE')
+        call status_body('Phase difference', phase(n))
+        call status_body('State difference', stack % difference())
+        call status_foot
 
-      ! Update the state
-      call stack % update
-    end do
+        ! Update the state
+        call stack % update
+      end do
+    end if
 
     ! Write all currents to file
     write(filename,'(a,f5.3,a)') 'current.', phase(n), '.dat'
@@ -101,6 +108,17 @@ program critical_current
   call status_body('Critical current', critical)
   call status_foot
 
+  ! Write the current-phase relation to file
+  filename = 'current.dat'
+  open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
+  if (iostat /= 0) then
+    call error('Failed to open output file "' // filename // '"!')
+  end if
+  do n=1,size(phase)
+    write(unit,*) phase(n), current(n)
+  end do
+  close(unit = unit)
+
   ! Write the critical current to file
   filename = 'critical.dat'
   open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
@@ -112,4 +130,5 @@ program critical_current
     write(unit,'(a,2x)',advance='no') trim(filename)
   end do
   write(unit,*) critical
+  close(unit = unit)
 end program

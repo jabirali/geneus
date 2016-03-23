@@ -1,10 +1,9 @@
 !! This module defines a data type 'structure', which is useful for constructing and using multilayer hybrid structures.
 !! @NOTE: This module only exports a single object 'structure', which encapsulates all other required objects/routines!
-!! @TODO: This module is supposed to replace/supersede mod_multilayer, mod_hybrid, mod_option, and the older mod_config.
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-08
-!! Updated: 2016-03-08
+!! Updated: 2016-03-23
 
 module mod_structure
   use mod_math
@@ -108,8 +107,6 @@ contains
       call this % b % conf(key, val)
     else
       call error('Attempted to configure a non-existant material!')
-      ! @TODO: Rewrite this to call this%conf(key,val), which stores config options that will affect all constructed materials.
-      !        That way, global config options can be declared before materials.
     end if
   end subroutine
 
@@ -120,31 +117,89 @@ contains
     external                  :: routine
     logical, optional         :: loop
     logical                   :: loop_
+    integer                   :: n
 
-    ! Whether to traverse bidirectionally
+    ! Count the number of materials
+    n = 0
+
+    ! Determine whether or not we need to loop
     loop_ = .false.
-    if (present(loop) .and. .not. associated(this%a,this%b)) then
+    if (present(loop)) then
       loop_ = loop
     end if
 
-    ! Initialize and process the first element
-    ptr => this % a
+    ! Determine where to start the traversation
+    call top(ptr)
     if (loop_) then
-      ptr => ptr % material_b
+      call next(ptr)
+      n = n + 1
     end if
-    call routine(ptr)
 
-    ! In all cases, traverse the stack downwards
-    do while (.not. associated(ptr, this%b))
-      ptr => ptr % material_b
+    ! Traverse the structure from top to bottom
+    do while (associated(ptr))
       call routine(ptr)
+      call next(ptr)
+      n = n + 1
     end do
 
-    ! If we will loop, traverse the stack upwards
-    do while (.not. associated(ptr, this%a))
-      ptr => ptr % material_a
-      call routine(ptr)
-    end do
+    ! Traverse the structure from bottom to top
+    if (loop_) then
+      call bottom(ptr)
+      if (n > 1) then
+        call prev(ptr)
+      end if
+      do while (associated(ptr))
+        call routine(ptr)
+        call prev(ptr)
+      end do
+    end if
+  contains
+    function check(ptr) result(q)
+      ! Check if a material layer should be skipped.
+      class(material), pointer :: ptr
+      logical                  :: q
+      if (.not. associated(ptr)) then
+        q = .false.
+      else
+        q = ptr % lock
+      end if
+    end function
+    subroutine top(ptr)
+      ! Find the first unlocked material in the stack.
+      class(material), pointer :: ptr
+      ptr => this % a
+      do while (check(ptr))
+        ptr => ptr % material_b
+      end do
+    end subroutine
+    subroutine next(ptr)
+      ! Find the next unlocked material in the stack.
+      class(material), pointer :: ptr
+      if (associated(ptr)) then
+        ptr => ptr % material_b
+        do while (check(ptr))
+          ptr => ptr % material_b
+        end do
+      end if
+    end subroutine
+    subroutine prev(ptr)
+      ! Find the previous unlocked material in the stack.
+      class(material), pointer :: ptr
+      if (associated(ptr)) then
+        ptr => ptr % material_a
+        do while (check(ptr))
+          ptr => ptr % material_a
+        end do
+      end if
+    end subroutine
+    subroutine bottom(ptr)
+      ! Find the last unlocked material in the stack.
+      class(material), pointer :: ptr
+      ptr => this % b
+      do while (check(ptr))
+        ptr => ptr % material_a
+      end do
+    end subroutine
   end subroutine
 
   impure subroutine structure_init(this, gap)
@@ -192,52 +247,61 @@ contains
     class(structure), target   :: this
     logical,          optional :: freeze
 
-    if (this % count() <= 2) then
-      ! Update all materials in a pass-pattern
-      call this % map(update, loop = .false.)
-    else
-      ! Update all materials in a loop-pattern
-      call this % map(update, loop = .true.)
-    end if
+    ! Update all materials in a loop-pattern
+    call this % map(update, loop = .true.)
   contains
     subroutine update(m)
       class(material) :: m
       call m % update(freeze)
-    end subroutine
+    end subroutine 
   end subroutine
-
+ 
   impure function structure_count(this) result(num)
     !! Checks the number of unlocked materials in the multilayer stack.
-    class(structure), target  :: this
-    real(wp)                  :: num
+    class(structure), target :: this
+    integer                  :: num
 
-    ! Check all materials
+    ! Initialize variables
     num = 0
+
+    ! Count the number of materials
     call this % map(count)
   contains
-    subroutine count(m)
-      class(material) :: m
-      if (.not. m % lock) then
-        num = num + 1
-      end if
+    subroutine count
+      num = num + 1
     end subroutine
   end function
-
 
   impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
     class(structure), target  :: this
+    integer                   :: n, s
     real(wp)                  :: difference
 
-    ! Check all materials
+    ! Initialize variables
+    n = 0
+    s = 0
     difference = 0
+
+    ! Traverse all materials
     call this % map(check)
+
+    ! Check whether we can assume convergence
+    if (s == 0 .and. n <= 1) then
+      difference = 0
+    end if
   contains
     subroutine check(m)
       class(material) :: m
-      if (.not. m % lock) then
-        difference = max(difference, m % difference)
-      end if
+      ! Count the material types
+      select type (m)
+        class is (superconductor)
+          s = s + 1
+        class default
+          n = n + 1
+      end select
+      ! Accumulate the difference
+      difference = max(difference, m % difference)
     end subroutine
   end function
 
@@ -465,8 +529,8 @@ contains
     close(unit = unit)
 
     ! Confirm that there is at least one material layer
-    if (.not. associated(this % a)) then
-      call error('No material layers are described in the config file!')
+    if (this % count() < 1) then
+      call error('The material stack described by "' // file // '" has no unlocked layers!')
     end if
   end function
 
