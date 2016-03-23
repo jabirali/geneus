@@ -4,7 +4,7 @@
 ! Created: 2016-03-09
 ! Updated: 2016-03-09
 
-program critical
+program critical_temperature
   use mod_structure
   use mod_math
   implicit none
@@ -26,7 +26,7 @@ program critical
 
   ! Declare variables used by the program
   real(wp)        :: temperature
-  integer         :: n, m, k
+  integer         :: n
 
 
 
