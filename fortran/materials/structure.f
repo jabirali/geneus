@@ -1,4 +1,5 @@
-!! This module defines a data type 'structure', which is useful for constructing and using multilayer hybrid structures.
+!! This module defines a data type 'structure', which is useful for constructing and using multilayer hybrid structures. It
+!! also exports the type definitions and constructors for all class(material) types, although these should rarely be needed.
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-08
