@@ -147,7 +147,7 @@ contains
     class(halfmetal), intent(inout) :: this
 
     ! Modify the type string
-    this%type_string = color_red // 'HALFMETAL' // color_none
+    this%type_string = color_purple // 'HALFMETAL' // color_none
   end subroutine
 
   impure subroutine halfmetal_update_posthook(this)

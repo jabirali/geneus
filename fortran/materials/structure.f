@@ -23,26 +23,26 @@ module mod_structure
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
   contains
-    procedure :: push_back     => structure_push_back
-    procedure :: conf_back     => structure_conf_back
-    procedure :: map           => structure_map
-    procedure :: init          => structure_init
-    procedure :: save          => structure_save
-    procedure :: load          => structure_load
-    procedure :: update        => structure_update
-    procedure :: count         => structure_count
-    procedure :: difference    => structure_difference
-    procedure :: temperature   => structure_temperature
-    procedure :: write_density => structure_write_density
-    procedure :: write_current => structure_write_current
-    procedure :: write_gap     => structure_write_gap
+    procedure :: push            => structure_push
+    procedure :: conf            => structure_conf
+    procedure :: map             => structure_map
+    procedure :: init            => structure_init
+    procedure :: save            => structure_save
+    procedure :: load            => structure_load
+    procedure :: update          => structure_update
+    procedure :: count           => structure_count
+    procedure :: difference      => structure_difference
+    procedure :: temperature     => structure_temperature
+    procedure :: write_density   => structure_write_density
+    procedure :: write_current   => structure_write_current
+    procedure :: write_gap       => structure_write_gap
   end type
 
   interface structure
     module procedure structure_construct
   end interface
 contains
-  impure subroutine structure_push_back(this, string)
+  impure subroutine structure_push(this, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
     class(structure), intent(inout) :: this
     character(*),     intent(in   ) :: string
@@ -98,7 +98,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_conf_back(this, key, val)
+  impure subroutine structure_conf(this, key, val)
     !! Configures the last material pushed to the multilayer stack.
     class(structure), intent(inout) :: this
     character(*),     intent(in   ) :: key
@@ -443,14 +443,14 @@ contains
       i = scan(str, '[')
       j = scan(str, ']')
       if (i == 1 .and. j > i) then
-        call this % push_back(trim(adjustl(str(i+1:j-1))))
+        call this % push(trim(adjustl(str(i+1:j-1))))
         cycle
       end if
 
       ! Construct a material
       i = scan(str, ':')
       if ( i > 0 ) then
-        call this % conf_back(trim(adjustl(str(:i-1))), trim(adjustl(str(i+1:))))
+        call this % conf(trim(adjustl(str(:i-1))), trim(adjustl(str(i+1:))))
         cycle
       end if
 
@@ -536,63 +536,4 @@ contains
       fermi = 1/(exp(energy/(temperature+1e-16))+1)
     end function
   end function
-
-  !--------------------------------------------------------------------------------!
-  !                      @TODO: INPUT/OUTPUT PROCEDURES                            !
-  !--------------------------------------------------------------------------------!
-
-  subroutine print_status(header, bisection, iteration, change, phasediff, temperature)
-    ! Prints a status message to stdout including iteration number, elapsed time, and physical parameters.
-    character(*),       intent(in) :: header
-    integer,  optional, intent(in) :: bisection
-    integer,  optional, intent(in) :: iteration
-    real(wp), optional, intent(in) :: change
-    real(wp), optional, intent(in) :: phasediff
-    real(wp), optional, intent(in) :: temperature
-    real(sp)                       :: time
-    character(len=33)              :: string
-    character(len=4)               :: bar
-
-    ! Determine how much CPU time has elapsed
-    call cpu_time(time)
-
-    ! Copy the header to a string of correct size
-    string = header
-
-    ! Print the progress information to standard out
-    write(*,'(a)') '                                     '
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│ '         // string //          ' │'
-    write(*,'(a)') '├───────────────────────────────────┤'
-    bar = '│'
-    if (present(bisection)) then
-      write(*,'(a,3x,a,i8,3x,a)')                       &
-        trim(bar),'Bisection:           ', bisection,   trim(bar)
-    end if
-    if (present(iteration)) then
-      write(*,'(a,3x,a,i8,3x,a)')                       &
-        trim(bar),'Iteration:           ', iteration,   trim(bar)
-    end if
-    if (present(phasediff)) then
-      write(*,'(a,3x,a,f8.6,3x,a)')                     &
-        trim(bar),'Phase difference:    ', phasediff,   trim(bar)
-    end if
-    if (present(temperature)) then
-      write(*,'(a,3x,a,f8.6,3x,a)')                     &
-        trim(bar),'Temperature:         ', temperature, trim(bar)
-    end if
-    if (present(change)) then
-      write(*,'(a,3x,a,f8.6,3x,a)')                     &
-        trim(bar),'Maximum change:      ', change,      trim(bar)
-    end if
-    write(*,'(a,3x,a,i2.2,a,i2.2,a,i2.2,3x,a)')         &
-      trim(bar),'Elapsed time:        ',                &
-      int(time/3600.0_sp),':',                          &
-      int(mod(time,3600.0_sp)/60.0_sp),':',             &
-      int(mod(time,60.0_sp)),                           trim(bar)
-    write(*,'(a)') '╘═══════════════════════════════════╛'
-
-    ! Flush the progress information to standard out
-    flush(unit=stdout)
-  end subroutine
 end module

@@ -103,11 +103,11 @@ contains
 
   pure function conductor_construct() result(this)
     ! Constructs a conductor object initialized to a superconducting state.
-    type(conductor)                   :: this         ! Conductor object that will be constructed
+    type(conductor) :: this
 
     ! Initialize locations
     allocate(this%location(150))
-    call linspace(this%location, 0.0_wp+10*eps, 1.0_wp-10*eps)
+    call linspace(this%location, 0.0_wp, 1.0_wp)
 
     ! Initialize energies
     allocate(this%energy(600))
