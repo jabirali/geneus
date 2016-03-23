@@ -46,35 +46,18 @@ contains
     type(halfmetal)                :: this   ! Halfmetal object that will be constructed
     real(wp), intent(in), optional :: cutoff ! Debye cutoff for the energy domain
 
-    ! Allocate and initialize memory
-    if (.not. allocated(this%propagator)) then
-      ! Locations
-      allocate(this%location(150))
-      call linspace(this%location, 0.0_wp, 1.0_wp)
+    ! Initialize locations
+    allocate(this%location(150))
+    call linspace(this%location, 0.0_wp, 1.0_wp)
 
-      ! Energies
-      if (.not. present(cutoff)) then
-        allocate(this%energy(600))
-        call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
-        call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
-        call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
-      else if (cutoff > 0) then
-        allocate(this%energy(600))
-        call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
-        call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
-        call linspace(this%energy(500:   ), 4.50_wp, cutoff)
-      else if (cutoff == 0) then
-        allocate(this%energy(150))
-        call linspace(this%energy, 1e-6_wp, 1.50_wp)
-      else
-        this%energy = [ 1e-6 ]
-      end if
+    ! Initialize energies
+    allocate(this%energy(600))
+    call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
+    call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
+    call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
 
-      ! Propagators
-      allocate(this%propagator(size(this%energy),size(this%location)))
-    end if
-
-    ! Initialize the propagators
+    ! Initialize propagators
+    allocate(this%propagator(size(this%energy),size(this%location)))
     call this%init( cx(1.0_wp,0.0_wp) )
   end function
 

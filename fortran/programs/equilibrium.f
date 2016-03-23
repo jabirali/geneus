@@ -10,7 +10,7 @@ program equilibrium
   use mod_structure
 
   type(structure) :: stack
-  stack = structure('simulation.conf')
+  stack = structure('structure.conf')
 
   do while (stack % difference() > 1e-4)
     call stack % update

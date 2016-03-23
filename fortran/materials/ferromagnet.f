@@ -32,7 +32,7 @@ module mod_ferromagnet
 
   ! Type constructor
   interface ferromagnet
-    module procedure ferromagnet_construct_homogeneous
+    module procedure ferromagnet_construct
   end interface
 contains
 
@@ -40,24 +40,12 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function ferromagnet_construct_homogeneous(cutoff, exchange, gap, length, scattering) result(this)
-    ! Constructs a ferromagnet object initialized to a weak superconductor.
-    type(ferromagnet)                 :: this         ! Ferromagnet object that will be constructed
-    real(wp),    intent(in), optional :: cutoff       ! Debye cutoff for the energy domain
-    real(wp),    intent(in), optional :: length       ! Length of the material
-    real(wp),    intent(in), optional :: exchange(3)  ! Magnetic exchange field
-    complex(wp), intent(in), optional :: gap          ! Superconducting gap
-    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
+  pure function ferromagnet_construct() result(this)
+    ! Constructs a ferromagnetic material that is initialized as a weak superconductor.
+    type(ferromagnet) :: this
 
     ! Call the superclass constructor
-    this%conductor = conductor(cutoff, gap=gap, length=length, scattering=scattering)
-
-    ! Handle the exchange field argument
-    if (present(exchange)) then
-      if (norm2(exchange) > sqrt(eps)) then
-        call this % set_exchange(exchange)
-      end if
-    end if
+    this%conductor = conductor()
   end function
 
   !--------------------------------------------------------------------------------!

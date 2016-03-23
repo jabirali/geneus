@@ -45,30 +45,18 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function superconductor_construct(cutoff, gap, length, scattering) result(this)
-    ! Constructs a superconductor object initialized to a superconducting state.
-    type(superconductor)              :: this         ! Superconductor object that will be constructed
-    real(wp),    intent(in), optional :: cutoff       ! Debye cutoff for the energy domain
-    complex(wp), intent(in), optional :: gap          ! Superconducting gap
-    real(wp),    intent(in), optional :: length       ! Length of the material
-    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
+  pure function superconductor_construct() result(this)
+    ! Constructs a superconducting material that is initialized to a superconducting state.
+    type(superconductor) :: this
 
     ! Call the superclass constructor
-    this%conductor = conductor(cutoff=cutoff, gap=gap, length=length, scattering=scattering)
+    this%conductor = conductor()
 
-    ! Allocate memory (if necessary)
-    if (.not. allocated(this%gap)) then
-      allocate(this%gap(size(this%location)))
-    end if
+    ! Initialize the order parameter
+    allocate(this%gap(size(this%location)))
+    call this%set_gap( (1.0_wp,0.0_wp) )
 
-    ! Initialize the superconducting order parameter
-    if (present(gap)) then
-      call this%set_gap(gap)
-    else
-      call this%set_gap( (1.0_wp,0.0_wp) )
-    end if
-
-    ! Initialize the BCS coupling constant
+    ! Initialize the coupling constant
     if (this%energy(size(this%energy)) > 0) then
       this%coupling = 1/acosh(this%energy(size(this%energy)))
     end if

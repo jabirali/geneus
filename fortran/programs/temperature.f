@@ -35,7 +35,7 @@ program critical_temperature
   !--------------------------------------------------------------------------------!
 
   ! Construct the multilayer stack based on a config file
-  stack = structure('simulation.conf')
+  stack = structure('structure.conf')
 
   ! Initialize the stack to a barely superconducting state
   call stack % init(cx(initgap,0.0_wp))

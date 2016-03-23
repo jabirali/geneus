@@ -289,7 +289,7 @@ contains
 
       ! Write out the density of states in this layer
       do m=1,size(ptr % location)
-        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
+        x = a + (b-a) * ptr % location(m)
         do n=size(ptr % energy),1,-1
           ! Negative energies
           write(unit,*) x, -ptr % energy(n), ptr % density(n,m)
@@ -336,7 +336,7 @@ contains
 
       ! Write out the currents in this layer
       do m=1,size(ptr % location)
-        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
+        x = a + (b-a) * ptr % location(m)
         write(unit,*) x, ptr % current(:,m)
       end do
     end subroutine
@@ -376,7 +376,7 @@ contains
 
       ! Write out the gap in this layer
       do m=1,size(ptr % location)
-        x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * ptr % location(m)
+        x = a + (b-a) * ptr % location(m)
         select type (ptr)
           class is (superconductor)
             write(unit,*) x, abs(ptr%gap(m)), atan2(im(ptr%gap(m)),re(ptr%gap(m)))/pi

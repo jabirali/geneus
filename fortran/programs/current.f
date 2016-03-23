@@ -1,6 +1,7 @@
-!! This program calculates the critical current in an S/X/S heterostructure as a function of the phase
-!! difference between the two superconductors. The heterostructure is constructed based in the config
-!! file 'simulation.conf', and the output is written to the files 'current.dat' and 'critical.dat'.
+!! This program calculates the charge and spin currents in an S/X/S structure as a function of the
+!! phase difference between the two superconductors, and in particular the critical current of the
+!! junction. This heterostructure is constructed based on the configuration file 'structure.conf',
+!! and the output is written to a series of output files in the same directory.
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-22
@@ -21,7 +22,7 @@ program critical_current
   type(superconductor), target        :: sa, sb
 
   ! Declare program control parameters
-  integer,  parameter                 :: iterations = 101
+  integer,  parameter                 :: iterations = 6
   real(wp), parameter                 :: tolerance  = 1d-6
 
   ! Declare variables used by the program
@@ -38,12 +39,12 @@ program critical_current
   !                          INITIALIZATION PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
-  ! Construct the multilayer stack based on a config file
-  stack = structure('simulation.conf')
+  ! Construct the central material stack
+  stack = structure('structure.conf')
 
-  ! Construct two superconductors
-  sa = superconductor(30.0_wp)
-  sb = superconductor(30.0_wp)
+  ! Construct the surrounding superconductors
+  sa = superconductor()
+  sb = superconductor()
 
   ! Connect the superconductors to the stack
   stack % a % material_a => sa

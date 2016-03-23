@@ -101,58 +101,23 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function conductor_construct(cutoff, gap, length, scattering) result(this)
+  pure function conductor_construct() result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor)                   :: this         ! Conductor object that will be constructed
-    real(wp),    intent(in), optional :: cutoff       ! Debye cutoff for the energy domain
-    real(wp),    intent(in), optional :: length       ! Length of the material
-    real(wp),    intent(in), optional :: scattering   ! Imaginary energy term
-    complex(wp), intent(in), optional :: gap          ! Superconducting gap
 
-    ! Optional argument: Length
-    if (present(length)) then
-      this%thouless = 1/length**2
-    end if
+    ! Initialize locations
+    allocate(this%location(150))
+    call linspace(this%location, 0.0_wp+10*eps, 1.0_wp-10*eps)
 
-    ! Optional argument: imaginary energy
-    if (present(scattering)) then
-      this%scattering = scattering
-    end if
+    ! Initialize energies
+    allocate(this%energy(600))
+    call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
+    call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
+    call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
 
-    ! Allocate and initialize memory
-    if (.not. allocated(this%propagator)) then
-      ! Locations
-      allocate(this%location(150))
-      call linspace(this%location, 0.0_wp, 1.0_wp)
-
-      ! Energies
-      if (.not. present(cutoff)) then
-        allocate(this%energy(600))
-        call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
-        call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
-        call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
-      else if (cutoff > 0) then
-        allocate(this%energy(600))
-        call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
-        call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
-        call linspace(this%energy(500:   ), 4.50_wp, cutoff)
-      else if (cutoff == 0) then
-        allocate(this%energy(150))
-        call linspace(this%energy, 1e-6_wp, 1.50_wp)
-      else
-        this%energy = [ 1e-6 ]
-      end if
-
-      ! Propagators
-      allocate(this%propagator(size(this%energy),size(this%location)))
-    end if
-
-    ! Initialize the propagators
-    if (present(gap)) then
-      call this%init( gap )
-    else
-      call this%init( cx(1.0_wp,0.0_wp) )
-    end if
+    ! Initialize propagators
+    allocate(this%propagator(size(this%energy),size(this%location)))
+    call this%init( cx(1.0_wp,0.0_wp) )
   end function
 
   pure subroutine conductor_init(this, gap)
