@@ -45,10 +45,6 @@ program critical_current
   sa = superconductor(30.0_wp)
   sb = superconductor(30.0_wp)
 
-  ! Lock the new superconductors
-  sa % lock = .true.
-  sb % lock = .true.
-
   ! Connect the superconductors to the stack
   stack % a % material_a => sa
   stack % b % material_b => sb
