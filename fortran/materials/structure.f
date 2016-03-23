@@ -157,14 +157,14 @@ contains
       end do
     end if
   contains
-    function check(ptr) result(q)
+    function check(ptr) result(skip)
       ! Check if a material layer should be skipped.
       class(material), pointer :: ptr
-      logical                  :: q
+      logical                  :: skip
       if (.not. associated(ptr)) then
-        q = .false.
+        skip = .false.
       else
-        q = ptr % lock
+        skip = ptr % lock
       end if
     end function
     subroutine top(ptr)
@@ -471,7 +471,7 @@ contains
     ! Open the config file
     open(newunit = unit, file = file, iostat = iostat, action = 'read', status = 'old')
     if (iostat /= 0) then
-      call error('failed to open configuration file "' // file // '"!')
+      call error('Failed to open configuration file "' // file // '"!')
     end if
 
     ! Read the config file
@@ -499,7 +499,7 @@ contains
         read(str(i+1:j-1),*) k
         call get_command_argument(k, arg, status=k)
         if ( k /= 0 ) then
-          call error('missing command line arguments.')
+          call error('Missing command line arguments.')
         end if
         str = str(:i-1) // trim(arg) // str(j+1:)
         i = scan(str, '{')
@@ -524,7 +524,7 @@ contains
       ! Check if this line contains garbage
       if ( str /= '' ) then
         write(str,'(i0)') line
-        call error('failed to parse line ' // trim(str) // ' in the config file.')
+        call error('Failed to parse line ' // trim(str) // ' in the config file.')
       end if
     end do
 
@@ -539,10 +539,12 @@ contains
 
   !--------------------------------------------------------------------------------!
   !        @TODO: PROCEDURES FOR CALCULATING MULTILAYER INTERACTIONS               !
+  !        This procedure was salvaged from my old hybrid module, and              !
+  !        should at some point be integrated into the new code above.             !
   !--------------------------------------------------------------------------------!
 
   function differential_conductance(material_a, material_b, voltage, temperature) result(conductance)
-    ! Numerically calculates the differential conductance at a tunneling interface.
+    !! Numerically calculates the differential conductance at a tunneling interface.
     class(material), intent(in) :: material_a
     class(material), intent(in) :: material_b
     real(wp),        intent(in) :: temperature
