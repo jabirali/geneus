@@ -1,5 +1,4 @@
 !! This module defines a data type 'structure', which is useful for constructing and using multilayer hybrid structures.
-!! @NOTE: This module only exports a single object 'structure', which encapsulates all other required objects/routines!
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-08
