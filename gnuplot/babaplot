@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ -n "$1" ]; then
+  cmdname="$1"
+else
+  echo 'Usage: babaplot <command> [filename]'
+  exit
+fi
+
+if [ -n "$2" ]; then
+  filename="$2"
+else
+  filename="${cmdname}.dat"
+fi
+
+if [ "$cmdname" == "density" ]; then
+  cat ${filename} | awk -f $(dirname $0)/addblanks.awk | gnuplot "$(dirname $0)/${cmdname}.plt"
+else
+  cat ${filename} | gnuplot -e "filename='$filename';" "$(dirname $0)/${cmdname}.plt"
+fi
