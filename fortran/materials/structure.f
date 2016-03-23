@@ -16,8 +16,10 @@ module mod_structure
   implicit none
   private
 
+  ! Export class(material) types
   public conductor, superconductor, ferromagnet, halfmetal
 
+  ! Type declaration
   type, public :: structure
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
@@ -37,6 +39,7 @@ module mod_structure
     procedure :: write_gap       => structure_write_gap
   end type
 
+  ! Type constructor
   interface structure
     module procedure structure_construct
   end interface
