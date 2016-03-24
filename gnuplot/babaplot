@@ -14,6 +14,8 @@ case "$(head -1 $filename)" in
     gnuplot -e "filename='${filename}'" "$(dirname $0)/position-gap.plt"                                         ;;
   '# Position          	  Charge current    	  Spin-x current    	  Spin-y current    	  Spin-z current    '   )
     gnuplot -e "filename='${filename}'" "$(dirname $0)/position-current.plt"                                     ;;
+  '# Phase             	  Charge current    '                                                                     )
+    gnuplot -e "filename='${filename}'" "$(dirname $0)/phase-current.plt"                                        ;;
   '# Position          	  Energy            	  Density of states '                                               )
     cat ${filename} | awk -f "$(dirname $0)/addblanks.awk" | gnuplot "$(dirname $0)/position-energy-density.plt" ;;
                                                                                                                  *)

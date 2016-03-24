@@ -1,8 +1,8 @@
-!! This program calculates the charge and spin currents in an Josephson junction as a function of the
-!! phase difference between the two surrounding superconductors.  In particular, the critical current
-!! of the junction is calculated.  The heterostructure is constructed based on the configuration file
-!! 'materials.conf', which the program expects to find in the runtime directory. The results are then
-!! written to various output files that will be created in the same directory.
+!! This program calculates the charge and spin currents in a Josephson junction as a function of the
+!! phase difference between the two surrounding superconductors. In particular, the critical current
+!! of the junction is calculated. The heterostructure is constructed based on the configuration file
+!! 'materials.conf', which the program expects to find in the runtime directory. The results are
+!! then written to various output files that will be created in the same directory.
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-22
@@ -23,7 +23,7 @@ program critical_current
   type(superconductor), target    :: sa, sb
 
   ! Declare program control parameters
-  integer,  parameter             :: iterations = 21
+  integer,  parameter             :: iterations = 51
   real(wp), parameter             :: tolerance  = 1e-6
   logical                         :: loop       = .true.
 
@@ -114,8 +114,9 @@ program critical_current
   if (iostat /= 0) then
     call error('Failed to open output file "' // filename // '"!')
   end if
+  write(unit,'(*(a,:,"	"))') '# Phase             ', '  Charge current    '
   do n=1,size(phase)
-    write(unit,*) phase(n), current(n)
+    write(unit,'(*(es20.12e3,:,"	"))') phase(n), current(n)
   end do
   close(unit = unit)
 
@@ -127,8 +128,8 @@ program critical_current
   end if
   do n=1,command_argument_count()
     call get_command_argument(n, filename)
-    write(unit,'(a,2x)',advance='no') trim(filename)
+    write(unit,'(a,"	")',advance='no') trim(filename)
   end do
-  write(unit,*) critical
+  write(unit,'(es20.12e3)') critical
   close(unit = unit)
 end program
