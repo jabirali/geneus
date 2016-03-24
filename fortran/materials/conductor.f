@@ -444,6 +444,9 @@ contains
       case ('depairing')
         call evaluate(val, this % depairing)
       case ('gap')
+        ! @TODO: Split this into two options 'gap' and 'phase'. Note that in mod_green, the phase option can actually be decoupled
+        !        as g -> g * exp(i*pi*phase) and gt -> gt * exp(-i*pi*phase), so it would be possible to have a phase option that
+        !        is applied separately from the gap option! Note that this is even easier for a superconductor than a conductor.
         block
           real(wp) :: gap
           real(wp) :: phase
