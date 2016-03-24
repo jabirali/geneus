@@ -1,12 +1,12 @@
 !! This program calculates the charge and spin currents in a Josephson junction as a function of the
 !! phase difference between the two surrounding superconductors. In particular, the critical current
-!! of the junction is calculated. The heterostructure is constructed based on the configuration file
-!! 'materials.conf', which the program expects to find in the runtime directory. The results are
-!! then written to various output files that will be created in the same directory.
+!! of the junction is also calculated. The heterostructure is constructed based on the configuration
+!! file 'materials.conf', which the program expects to find in the runtime directory. The results are
+!! then written to various output files that will be created in the runtime directory.
 !!
 !! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 !! Created: 2016-03-22
-!! Updated: 2016-03-23
+!! Updated: 2016-03-24
 
 program critical_current
   use mod_structure
@@ -24,8 +24,7 @@ program critical_current
 
   ! Declare program control parameters
   integer,  parameter             :: iterations = 51
-  real(wp), parameter             :: tolerance  = 1e-6
-  logical                         :: loop       = .true.
+  real(wp), parameter             :: tolerance  = 1e-6_wp
 
   ! Declare variables used by the program
   character(len=132)              :: filename   = ''
@@ -64,7 +63,7 @@ program critical_current
   !--------------------------------------------------------------------------------!
 
   ! Calculate which phase differences to check
-  call linspace(phase, 1d-6, 1-1d-6)
+  call linspace(phase, 1e-6_wp, 1-1e-6_wp)
 
   ! Calculate the charge current as a function of phase difference
   do n=1,iterations
@@ -79,24 +78,22 @@ program critical_current
 
     ! Update the state
     call stack % update
-    if (loop) then
-      do while (stack % difference() > tolerance)
-        ! Status information
-        call status_head('UPDATING STATE')
-        call status_body('Phase difference', phase(n))
-        call status_body('State difference', stack % difference())
-        call status_foot
+    do while (stack % difference() > tolerance)
+      ! Status information
+      call status_head('UPDATING STATE')
+      call status_body('Phase difference', phase(n))
+      call status_body('State difference', stack % difference())
+      call status_foot
 
-        ! Update the state
-        call stack % update
-      end do
-    end if
+      ! Update the state
+      call stack % update
+    end do
 
     ! Write all currents to file
     write(filename,'(a,f5.3,a)') 'current.', phase(n), '.dat'
     call stack % write_current(filename)
 
-    ! Save the charge current
+    ! Save the charge current to array
     current(n) = stack % a % current(0,1)
   end do
 
