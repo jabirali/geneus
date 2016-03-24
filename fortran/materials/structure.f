@@ -339,6 +339,11 @@ contains
     ! Initialize variables
     b = 0
 
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Energy            ', &
+                                '  Density of states '
+
     ! Traverse all materials
     call this % map(write_density)
 
@@ -359,11 +364,11 @@ contains
         x = a + (b-a) * ptr % location(m)
         do n=size(ptr % energy),1,-1
           ! Negative energies
-          write(unit,*) x, -ptr % energy(n), ptr % density(n,m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, -ptr % energy(n), ptr % density(n,m)
         end do
         do n=1,size(ptr % energy),+1
           ! Positive energies
-          write(unit,*) x, +ptr % energy(n), ptr % density(n,m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, +ptr % energy(n), ptr % density(n,m)
         end do
       end do
     end subroutine
@@ -386,6 +391,13 @@ contains
     ! Initialize variables
     b = 0
 
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Charge current    ', &
+                                '  Spin-x current    ', &
+                                '  Spin-y current    ', &
+                                '  Spin-z current    '
+
     ! Traverse all materials
     call this % map(write_current)
 
@@ -404,7 +416,7 @@ contains
       ! Write out the currents in this layer
       do m=1,size(ptr % location)
         x = a + (b-a) * ptr % location(m)
-        write(unit,*) x, ptr % current(:,m)
+        write(unit,'(*(es20.12e3,:,"	"))') x, ptr % current(:,m)
       end do
     end subroutine
   end subroutine
@@ -426,6 +438,10 @@ contains
     ! Initialize variables
     b = 0
 
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Gap magnitude     ', &
+                                '  Gap phase         '
     ! Traverse all materials
     call this % map(write_gap)
 
@@ -446,9 +462,9 @@ contains
         x = a + (b-a) * ptr % location(m)
         select type (ptr)
           class is (superconductor)
-            write(unit,*) x, abs(ptr%gap(m)), atan2(im(ptr%gap(m)),re(ptr%gap(m)))/pi
+            write(unit,'(*(es20.12e3,:,"	"))') x, abs(ptr%gap(m)), atan2(im(ptr%gap(m)),re(ptr%gap(m)))/pi
           class default
-            write(unit,*) x, 0.0_wp, 0.0_wp
+            write(unit,'(*(es20.12e3,:,"	"))') x, 0.0_wp, 0.0_wp
         end select
       end do
     end subroutine

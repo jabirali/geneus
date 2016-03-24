@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ -n "$1" ]; then
-  filename="$1"
-else
-  filename="density.dat"
-fi
-
-cat ${filename} | gnuplot $(dirname $0)/plot_sfi.plt

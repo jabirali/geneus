@@ -1,20 +1,21 @@
 #!/bin/sh
 
-if [ -n "$1" ]; then
-  cmdname="$1"
+# Make sure that the file exists
+if [ -e "$1" ]; then
+  filename="$1"
 else
-  echo 'Usage: babaplot <command> [filename]'
+  echo 'Usage: babaplot <filename.dat>'
   exit
 fi
 
-if [ -n "$2" ]; then
-  filename="$2"
-else
-  filename="${cmdname}.dat"
-fi
-
-if [ "$cmdname" == "density" ]; then
-  cat ${filename} | awk -f $(dirname $0)/addblanks.awk | gnuplot "$(dirname $0)/${cmdname}.plt"
-else
-  cat ${filename} | gnuplot -e "filename='$filename';" "$(dirname $0)/${cmdname}.plt"
-fi
+# Plot the file based on the header line
+case "$(head -1 $filename)" in
+  '# Position          	  Gap magnitude     	  Gap phase         '                                               )
+    gnuplot -e "filename='${filename}'" "$(dirname $0)/position-gap.plt"                                         ;;
+  '# Position          	  Charge current    	  Spin-x current    	  Spin-y current    	  Spin-z current    '   )
+    gnuplot -e "filename='${filename}'" "$(dirname $0)/position-current.plt"                                     ;;
+  '# Position          	  Energy            	  Density of states '                                               )
+    cat ${filename} | awk -f "$(dirname $0)/addblanks.awk" | gnuplot "$(dirname $0)/position-energy-density.plt" ;;
+                                                                                                                 *)
+  echo 'Unrecognized data file...'                                                                               ;;
+esac

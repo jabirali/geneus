@@ -24,7 +24,7 @@ set format y '%3.0f'
 # Configure the heatmap
 set pm3d map
 
-# Plot a file provided from stdin to interactive terminal
+# Plot the density of states
 set terminal wxt enhanced font 'Gillius ADF,12'
 splot '/dev/stdin' using 2:1:3 notitle
 

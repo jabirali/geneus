@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ -n "$1" ]; then
-  filename="$1"
-else
-  filename="density.dat"
-fi
-
-cat ${filename} | awk -f $(dirname $0)/addblanks.awk | gnuplot $(dirname $0)/plot_density.plt

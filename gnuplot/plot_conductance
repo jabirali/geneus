@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ -n "$1" ]; then
-  filename="$1"
-else
-  filename="result.conduct.dat"
-fi
-
-cat ${filename} | gnuplot $(dirname $0)/plot_conductance.plt
