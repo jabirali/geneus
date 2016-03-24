@@ -53,7 +53,8 @@ program critical_current
   do
     ! Status information
     call status_head('INITIALIZING')
-    call status_body('Temperature', 0.0)
+    call status_body('Temperature',      0.0)
+    call status_body('State difference', stack % difference())
     call status_foot
 
     ! Update materials
@@ -104,8 +105,8 @@ program critical_current
   end do
 
   ! Status information
-  call status_head('COMPLETE')
-  call status_body('Critical temperature', critical)
+  call status_head('CRITICAL TEMPERATURE')
+  call status_body('Result', critical)
   call status_foot
 
   ! Write the critical temperature to file
