@@ -461,6 +461,18 @@ contains
 
           call this % init( gap = gap * exp( (0.0,1.0)*pi*phase ) )
         end block
+      ! TODO: This code requires testing.
+      !case ('phase')
+      !  block
+      !    real(wp) :: phase(size(this%location))
+      !    integer  :: n
+
+      !    call evaluate(val, phase)
+      !    do n = 1,size(this%location)
+      !      this%propagator(:,n)%g  = this%propagator(:,n)%g  * exp((0,+1) * pi * phase(n))
+      !      this%propagator(:,n)%gt = this%propagator(:,n)%gt * exp((0,-1) * pi * phase(n))
+      !    end do
+      !  end block
       case default
         call material_conf(this, key, val)
     end select
