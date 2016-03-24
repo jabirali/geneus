@@ -107,7 +107,7 @@ contains
 
     ! Initialize locations
     allocate(this%location(150))
-    call linspace(this%location, 0.0_wp, 1.0_wp)
+    call linspace(this%location, 0 + 1e-10_wp, 1 - 1e-10_wp)
 
     ! Initialize energies
     allocate(this%energy(600))
