@@ -27,6 +27,7 @@ module mod_structure
     procedure :: push            => structure_push
     procedure :: conf            => structure_conf
     procedure :: map             => structure_map
+    procedure :: gap             => structure_gap
     procedure :: init            => structure_init
     procedure :: save            => structure_save
     procedure :: load            => structure_load
@@ -204,6 +205,35 @@ contains
       end do
     end subroutine
   end subroutine
+
+  impure function structure_gap(this) result(gap)
+    !! Obtains the mean gap in the unlocked superconductor. If there are multiple such
+    !! superconductors in the junction, then it returns the minimum of the mean gaps.
+    class(structure), target :: this
+    real(wp)                 :: gap
+    logical                  :: found
+
+    ! Initialize variables
+    gap   = huge(real(wp))
+    found = .false.
+
+    ! Check the gaps
+    call this % map(find)
+
+    ! If no superconductor was found, raise an error
+    if (.not. found) then
+      call error('No unlocked superconductors in the junction!')
+    end if
+  contains
+    subroutine find(m)
+      class(material) :: m
+      select type(m)
+        class is (superconductor)
+          gap = min(gap, sum(abs(m%gap))/max(1,size(m%gap)))
+          found = .true.
+      end select
+    end subroutine
+  end function
 
   impure subroutine structure_init(this, gap)
     !! Initializes the state of the entire multilayer stack.

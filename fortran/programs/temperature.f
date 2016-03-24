@@ -1,11 +1,16 @@
-! This program calculates the critical temperature in a multilayer structure.
-!
-! Written by Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2016-03-09
-! Updated: 2016-03-23
+!! This program calculates the critical temperature of an arbitrary superconducting hybrid structure
+!! for a given set of physical parameters. In order to obtain the critical temperature as a function
+!! of these parameters, the program has to be invoked multiple times with different input parameters.
+!! The structure is constructed based on the configuration file 'materials.conf', which the program
+!! expects to find in the runtime directory, and the results are written to the file 'critical.dat'.
+!!
+!! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
+!! Created: 2016-03-24
+!! Updated: 2016-03-24
 
-program critical_temperature
+program critical_current
   use mod_structure
+  use mod_stdio
   use mod_math
   implicit none
 
@@ -14,39 +19,56 @@ program critical_temperature
   !--------------------------------------------------------------------------------!
 
   ! Declare the superconducting structure
-  type(structure) :: stack
+  type(structure)                 :: stack
 
   ! Declare program control parameters
-  integer         :: information  = 0
-  integer         :: bisections   = 12
-  integer         :: iterations   = 6
-  real(wp)        :: initgap      = 1e-5_wp
-  real(wp)        :: minimum      = 0.00_wp
-  real(wp)        :: maximum      = 1.00_wp
+  character(*), parameter         :: filename   = 'critical.dat'
+  integer,      parameter         :: bisections = 12
+  integer,      parameter         :: iterations = 6
+  real(wp),     parameter         :: tolerance  = 1e-7_wp
+  real(wp),     parameter         :: initgap    = 1e-5_wp
 
   ! Declare variables used by the program
-  real(wp)        :: temperature
-  integer         :: n
+  character(len=132)              :: argument   = ''
+  real(wp)                        :: minimum    = 0.00_wp
+  real(wp)                        :: maximum    = 1.00_wp
+  real(wp)                        :: critical   = 0.50_wp
+  integer                         :: unit       = 0
+  integer                         :: iostat     = 0
+  integer                         :: n, m
 
 
 
   !--------------------------------------------------------------------------------!
-  !                          INITIALIZATION PROCEDURE                              !
+  !                           INITIALIZATION PROCEDURE                             !
   !--------------------------------------------------------------------------------!
 
-  ! Construct the multilayer stack based on a config file
+  ! Construct the material stack
   stack = structure('materials.conf')
 
   ! Initialize the stack to a barely superconducting state
   call stack % init(cx(initgap,0.0_wp))
 
-  ! Bootstrap the materials at zero temperature
-  do while(stack % difference() > 1e-7)
+  ! Bootstrap the material states at zero temperature
+  do
+    ! Status information
+    call status_head('INITIALIZING')
+    call status_body('Temperature', 0.0)
+    call status_foot
+
+    ! Update materials
     call stack % update(freeze = .true.)
+
+    ! Check for convergence
+    if (stack % difference() < tolerance) then
+      exit
+    end if
   end do
 
   ! Save the current state of the materials
   call stack % save
+
+
 
   !--------------------------------------------------------------------------------!
   !                           BINARY SEARCH PROCEDURE                              !
@@ -56,72 +78,45 @@ program critical_temperature
     ! Load the saved material states
     call stack % load
 
-    ! Set the temperature
-    temperature = (minimum+maximum)/2
-    call stack % temperature(temperature)
-    write(*,*) temperature
+    ! Set the temperature of the materials
+    call stack % temperature(critical)
 
-    ! Update the stack
-    call stack % update
+    ! Update the material states
+    do m = 1,iterations
+      ! Status information
+      call status_head('UPDATING STATE')
+      call status_body('Temperature', critical)
+      call status_body('Bisection',   n)
+      call status_body('Iteration',   m)
+      call status_foot
 
-    minimum = temperature
+      ! Update the stack
+      call stack % update
+    end do
+
+    ! Update the critical temperature estimate
+    if (stack % gap() >= initgap) then
+      minimum = critical
+    else
+      maximum = critical
+    end if
+    critical = (minimum + maximum)/2
   end do
 
-  ! Set the system temperature to the midpoint of the search space
-  !s(1) % temperature = (minimum + maximum)/2.0_wp
+  ! Status information
+  call status_head('COMPLETE')
+  call status_body('Critical temperature', critical)
+  call status_foot
 
-  !! Perform the binary search
-  !do n = 1,bisections
-  !  ! Status information
-  !  call print_status('           CONVERGENCE', bisection=n, iteration=0, temperature = s(1)%temperature)
-
-  !  ! Load the states from backup
-  !  if (size(f) > 0) then
-  !    call s(1) % load
-  !    do m = 1,size(f)
-  !      call f(m) % load
-  !    end do
-  !  else
-  !    call s(1) % init( gap = cmplx(initgap,0,kind=wp) )
-  !  end if
-
-  !  ! Update the superconductor once
-  !  call s(1) % update
-
-  !  ! Perform any additional iterations over the structure
-  !  if (size(f) > 0) then
-  !    do m = 1,iterations
-  !      ! Status information
-  !      call print_status('           CONVERGENCE', bisection=n, iteration=m, temperature = s(1)%temperature)
-
-  !      ! Update the ferromagnets right-to-left (including edges)
-  !      do k=size(f),1,-1
-  !        call f(k) % update
-  !      end do
-
-  !      ! Update the ferromagnets left-to-right (excluding edges)
-  !      if (size(f) > 1) then
-  !        do k=2,size(f)-1
-  !          call f(k) % update
-  !        end do
-  !      end if
-
-  !      ! Update the superconductor
-  !      call s(1) % update
-  !    end do
-  !  end if
-
-  !  ! Check whether the gap has increased or not, and update the search space accordingly
-  !  if (abs(s(1)%get_gap_mean()/initgap) >= 1.0_wp) then
-  !    minimum = s(1) % temperature
-  !  else
-  !    maximum = s(1) % temperature
-  !  end if
-
-  !  ! Set the system temperature to the miwpoint of the updated search space
-  !  s(1) % temperature = (maximum + minimum)/2.0_wp
-  !end do
-
-  !! Print the final results
-  !call print_status('            CONVERGED', temperature=s(1)%temperature)
+  ! Write the critical temperature to file
+  open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
+  if (iostat /= 0) then
+    call error('Failed to open output file "' // filename // '"!')
+  end if
+  do n=1,command_argument_count()
+    call get_command_argument(n, argument)
+    write(unit,'(a,"	")',advance='no') trim(argument)
+  end do
+  write(unit,'(es20.12e3)') critical
+  close(unit = unit)
 end program
