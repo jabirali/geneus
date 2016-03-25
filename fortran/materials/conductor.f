@@ -431,8 +431,8 @@ contains
           allocate(this % spinorbit(3))
           this % spinorbit = spin(0)
         end if
-        this % spinorbit(1) = this % spinorbit(1) + (+tmp)*pauli2
-        this % spinorbit(2) = this % spinorbit(2) + (-tmp)*pauli1
+        this % spinorbit(1) = this % spinorbit(1) + (-tmp)*pauli2
+        this % spinorbit(2) = this % spinorbit(2) + (+tmp)*pauli1
       case ('dresselhaus')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
