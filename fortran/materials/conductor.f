@@ -407,6 +407,12 @@ contains
         call evaluate(val, this % conductance_a)
       case ('conductance_b')
         call evaluate(val, this % conductance_b)
+      case ('resistance_a')
+        call evaluate(val, tmp)
+        this % conductance_a = 1/tmp
+      case ('resistance_b')
+        call evaluate(val, tmp)
+        this % conductance_b = 1/tmp
       case ('spinmixing_a')
         call evaluate(val, this % spinmixing_a)
       case ('spinmixing_b')
