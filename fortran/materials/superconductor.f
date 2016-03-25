@@ -217,32 +217,14 @@ contains
     class(superconductor), intent(inout) :: this
     character(*),          intent(in   ) :: key
     character(*),          intent(in   ) :: val
+    real(wp)                             :: tmp
 
     select case(key)
       case("coupling")
         call evaluate(val, this%coupling)
       case ('gap')
-        ! @TODO: Split this into two parts, namely 'gap' and 'phase'.
-        !        * Constructor should initialize to (1,0).
-        !        * Gap as a function of z, should change the magnitude:
-        !            gap(n) -> gap(n)*(gap/abs(gap(n)))
-        !        * Phase as a function of z, should change the phase:
-        !            gap(n) -> abs(gap(n)) * exp((0,pi)*phase(n))
-        !        * So gap and phase should become two distinct parameters.
-        block
-          real(wp) :: gap
-          real(wp) :: phase
-          integer  :: iostat
-
-          iostat = 0
-          read(val,*,iostat=iostat) gap, phase
-          if ( iostat /= 0 ) then
-            read(val,*) gap
-            phase = 0
-          end if
-
-          call this % init( gap = gap * exp( (0.0,1.0)*pi*phase ) )
-        end block
+        call evaluate(val, tmp)
+        call this % init( gap = cx(tmp) )
       case default
         call this%conductor%conf(key, val)
     end select

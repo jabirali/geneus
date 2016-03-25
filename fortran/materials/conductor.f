@@ -450,42 +450,8 @@ contains
       case ('depairing')
         call evaluate(val, this % depairing)
       case ('gap')
-        ! @TODO: Split this into two options 'gap' and 'phase'. Note that in mod_green, the phase option can actually be decoupled
-        !        as g -> g * exp(i*pi*phase) and gt -> gt * exp(-i*pi*phase), so it would be possible to have a phase option that
-        !        is applied separately from the gap option! Note that this is even easier for a superconductor than a conductor.
-        !
-        ! @TODO: Alternate solution: move superconductor%gap(:) from type(superconductor) to type(conductor). That way, we can
-        !        let conf('phase','φ(z)') and conf('gap','Δ(z)') modify the gap array from [1,1,1,...] to [(Δ+eps)*exp(iπ*φ)] by
-        !        setting either the gap or phase at a time. We may then rework init() to read the gap from this array instead of
-        !        a subroutine argument. We may therefore avoid the need for having init() methods in e.g. type(superconductor).
-        !        This may be the cleanest solution — it lets the gap and phase be fully configurable by conf() also in e.g.
-        !        programs like current.f. The only downside is that it erodes the differences between the material types...
-        block
-          real(wp) :: gap
-          real(wp) :: phase
-          integer  :: iostat
-
-          iostat = 0
-          read(val,*,iostat=iostat) gap, phase
-          if ( iostat /= 0 ) then
-            read(val,*) gap
-            phase = 0
-          end if
-
-          call this % init( gap = gap * exp( (0.0,1.0)*pi*phase ) )
-        end block
-      ! TODO: This code requires testing.
-      !case ('phase')
-      !  block
-      !    real(wp) :: phase(size(this%location))
-      !    integer  :: n
-
-      !    call evaluate(val, phase)
-      !    do n = 1,size(this%location)
-      !      this%propagator(:,n)%g  = this%propagator(:,n)%g  * exp((0,+1) * pi * phase(n))
-      !      this%propagator(:,n)%gt = this%propagator(:,n)%gt * exp((0,-1) * pi * phase(n))
-      !    end do
-      !  end block
+        call evaluate(val, tmp)
+        call this % init( gap = cx(tmp) )
       case default
         call material_conf(this, key, val)
     end select

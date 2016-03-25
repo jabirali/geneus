@@ -72,11 +72,15 @@ contains
 
   pure elemental function cx(x,y) result(z)
     ! Returns the complex number z=x+iy.
-    real(wp), intent(in) :: x
-    real(wp), intent(in) :: y
-    complex(wp)          :: z
+    real(wp),           intent(in) :: x
+    real(wp), optional, intent(in) :: y
+    complex(wp)                    :: z
 
-    z = cmplx(x,y,kind=wp)
+    if (present(y)) then
+      z = cmplx(x,y,kind=wp)
+    else
+      z = cmplx(x,0,kind=wp)
+    end if
   end function
 
   !---------------------------------------------------------------------------!
