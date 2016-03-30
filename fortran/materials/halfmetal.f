@@ -21,12 +21,12 @@ module mod_halfmetal
     type(spin), private :: P                                                      ! Polarization matrix
   contains
     procedure           :: init                 => halfmetal_init                 ! Initializes the propagators
+    procedure           :: conf                 => halfmetal_conf                 ! Configures the material parameters
     procedure           :: diffusion_equation   => halfmetal_diffusion_equation   ! Defines the Usadel diffusion equation
     procedure           :: interface_equation_a => halfmetal_interface_equation_a ! Boundary condition at the left  interface
     procedure           :: interface_equation_b => halfmetal_interface_equation_b ! Boundary condition at the right interface
     procedure           :: update_prehook       => halfmetal_update_prehook       ! Code to execute before calculating the propagators
     procedure           :: update_posthook      => halfmetal_update_posthook      ! Code to execute after  calculating the propagators
-    procedure           :: conf                 => halfmetal_conf                 ! Configures the material parameters
   end type
 
   ! Type constructors
@@ -76,7 +76,12 @@ contains
     type(spin),       intent(in   ) :: g, gt, dg, dgt
     type(spin)                      :: h, ht, dh, dht
     type(spin)                      :: N, Nt
-    type(spin)                      :: P
+
+    ! Ensure that the Riccati parameters are diagonal
+    h   = g   % matrix * pauli0 % matrix
+    ht  = gt  % matrix * pauli0 % matrix
+    dh  = dg  % matrix * pauli0 % matrix
+    dht = dgt % matrix * pauli0 % matrix
 
     ! Calculate the normalization matrices
     N   = spin_inv( pauli0 - h*ht )
@@ -153,8 +158,8 @@ contains
     this % P % matrix(2,2) = 2/(1 + eps - this%polarization)
 
     ! Update the left  interface parameters
-    this % polarization_a  = this % polarization
     this % magnetization_a = [0,0,1]
+    this % polarization_a  = this % polarization
 
     ! Update the right interface parameters
     this % magnetization_b = [0,0,1]
