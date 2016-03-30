@@ -3,7 +3,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2016-03-08
-! Updated: 2016-03-23
+! Updated: 2016-03-30
 
 module mod_halfmetal
   use mod_stdio
@@ -11,11 +11,12 @@ module mod_halfmetal
   use mod_spin
   use mod_green
   use mod_material
+  use mod_conductor
   implicit none
   private
 
   ! Type declarations
-  type, public, extends(material) :: halfmetal
+  type, public, extends(conductor) :: halfmetal
     ! These parameters control the physical characteristics of the material
     real(wp)                  :: polarization            =  0.99_wp                        ! Spin-polarization of the ferromagnet
   contains
@@ -41,28 +42,19 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function halfmetal_construct(cutoff) result(this)
+  pure function halfmetal_construct() result(this)
     ! Constructs a halfmetal object.
-    type(halfmetal)                :: this   ! Halfmetal object that will be constructed
-    real(wp), intent(in), optional :: cutoff ! Debye cutoff for the energy domain
+    type(halfmetal) :: this
 
-    ! Initialize locations
-    allocate(this%location(150))
-    call linspace(this%location, 0.0_wp, 1.0_wp)
+    ! Call the superclass constructor
+    this%conductor = conductor()
 
-    ! Initialize energies
-    allocate(this%energy(600))
-    call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
-    call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
-    call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
-
-    ! Initialize propagators
-    allocate(this%propagator(size(this%energy),size(this%location)))
-    call this%init( cx(1.0_wp,0.0_wp) )
+    ! Initialize the propagators
+    call this%init(cx(0.0_wp))
   end function
 
   pure subroutine halfmetal_init(this, gap)
-    ! Define the default initializer.
+    ! Initializes the propagators to a non-superconducting state.
     class(halfmetal), intent(inout) :: this
     complex(wp),      intent(in   ) :: gap
     integer                         :: n, m
@@ -146,6 +138,17 @@ contains
     ! Code to execute before running the update method of a class(halfmetal) object.
     class(halfmetal), intent(inout) :: this
 
+    ! Update the left  interface parameters
+    this % magnetization_a = [0,0,1] * sign(1.0_wp, this % polarization)
+    this % polarization_a  = abs(this % polarization)
+
+    ! Update the right interface parameters
+    this % magnetization_b = [0,0,1] * sign(1.0_wp, this % polarization)
+    this % polarization_b  = abs(this % polarization)
+
+    ! Call the superclass prehook
+    call this%conductor%update_posthook
+
     ! Modify the type string
     this%type_string = color_purple // 'HALFMETAL' // color_none
   end subroutine
@@ -154,11 +157,8 @@ contains
     ! Code to execute after running the update method of a class(halfmetal) object.
     class(halfmetal), intent(inout) :: this
 
-    ! Calculate the density of states
-    call this%update_density
-
-    ! Calculate the charge and spin currents
-    call this%update_current
+    ! Call the superclass posthook
+    call this%conductor%update_posthook
   end subroutine
 
   !--------------------------------------------------------------------------------!
