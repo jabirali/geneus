@@ -137,11 +137,7 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
   R(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
 
   ! Calculate the spin-active terms in the interface current
-  I = GC * (matmul(R,matmul(M,matmul(L,M)))    &
-           -matmul(M,matmul(L,matmul(M,R))))   &
-    + GF * (matmul(R,matmul(L,M)+matmul(M,L))  &
-           -matmul(matmul(L,M)+matmul(M,L),R)) &
-    + GM * (matmul(R,M) - matmul(M,R))
+  I = commutator(R, GC * matmul(M,matmul(L,M)) + GF * anticommutator(L,M) + GM * M)
 
   ! Calculate the deviation from the boundary condition
   r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -195,11 +191,7 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   R(3:4,3:4) = (-1.0_wp) * Nt3 * (pauli0 + gt3*g3)
 
   ! Calculate the spin-active terms in the interface current
-  I = GC * (matmul(L,matmul(M,matmul(R,M)))    &
-           -matmul(M,matmul(R,matmul(M,L))))   &
-    + GF * (matmul(L,matmul(R,M)+matmul(M,R))  &
-           -matmul(matmul(R,M)+matmul(M,R),L)) &
-    + GM * (matmul(L,M) - matmul(M,L))
+  I = commutator(L, GC * matmul(M,matmul(R,M)) + GF * anticommutator(R,M) + GM * M)
 
   ! Calculate the deviation from the boundary condition
   r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
