@@ -250,6 +250,24 @@ contains
     B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
   end function
 
+  pure function commutator(A, B) result(C)
+    ! Calculate the commutator between two complex square matrices of the same dimension.
+    complex(wp), intent(in)  :: A(:,:)
+    complex(wp), intent(in)  :: B(:,:)
+    complex(wp), allocatable :: C(:,:)
+
+    C = matmul(A,B) - matmul(B,A)
+  end function
+
+  pure function anticommutator(A, B) result(C)
+    ! Calculate the anticommutator between two complex square matrices of the same dimension.
+    complex(wp), intent(in)  :: A(:,:)
+    complex(wp), intent(in)  :: B(:,:)
+    complex(wp), allocatable :: C(:,:)
+
+    C = matmul(A,B) + matmul(B,A)
+  end function
+
   !---------------------------------------------------------------------------!
   !                       ELEMENTARY CALCULUS PROCEDURES                      !
   !---------------------------------------------------------------------------!
