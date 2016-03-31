@@ -250,6 +250,10 @@ contains
     B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
   end function
 
+  !---------------------------------------------------------------------------!
+  !                        ADVANCED MATRIX PROCEDURES                         !
+  !---------------------------------------------------------------------------!
+
   pure function commutator(A, B) result(C)
     ! Calculate the commutator between two complex square matrices of the same dimension.
     complex(wp), intent(in)  :: A(:,:)
@@ -266,6 +270,30 @@ contains
     complex(wp), allocatable :: C(:,:)
 
     C = matmul(A,B) + matmul(B,A)
+  end function
+
+  pure function trace(A) result(r)
+    ! Calculate the trace of a complex matrix.
+    complex(wp), intent(in)  :: A(:,:)
+    complex(wp)              :: r
+    integer                  :: n
+
+    r = 0
+    do n = 1,min(size(A,1),size(A,2))
+      r = r + A(n,n)
+    end do
+  end function
+
+  pure function diag(A) result(r)
+    ! Extract the diagonal of a complex matrix.
+    complex(wp), intent(in)  :: A(:,:)
+    complex(wp), allocatable :: r(:)
+    integer                  :: n
+
+    allocate(r(min(size(A,1),size(A,2))))
+    do n = 1,size(r)
+      r(n) = A(n,n)
+    end do
   end function
 
   !---------------------------------------------------------------------------!
