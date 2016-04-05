@@ -66,7 +66,6 @@ module mod_material
     procedure                                 :: conf            => material_conf           ! Configures material parameters
     procedure                                 :: save            => material_save           ! Saves the state of the material
     procedure                                 :: load            => material_load           ! Loads the state of the material
-    procedure                                 :: write_dos       => material_write_dos      ! Writes the density of states to a given output unit
   end type
 
   ! Interface declarations
@@ -413,38 +412,5 @@ contains
 
     ! Reenable status messages
     this%information = info
-  end subroutine
-
-  impure subroutine material_write_dos(this, unit, a, b)
-    !! Writes the density of states as a function of position and energy to a given output unit.
-    !! @TODO: This function is staged for removal, since it has been implemented in type(structure).
-    class(material), intent(in) :: this      ! Material that the density of states will be calculated from
-    integer,         intent(in) :: unit      ! Output unit that determines where the information will be written
-    real(wp),        intent(in) :: a, b      ! Left and right end points of the material
-    real(wp)                    :: x         ! Current location
-    integer                     :: n, m      ! Temporary loop variables
-
-    if (allocated(this%density)) then
-      if (minval(this%energy) < -eps) then
-        ! If we have data for both positive and negative energies, simply write out the data
-        do m=1,size(this%location)
-          x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
-          do n=1,size(this%energy)
-            write(unit,*) x, this%energy(n), this%density(n,m)
-          end do
-        end do
-      else
-        ! If we only have data for positive energies, assume that the negative region is symmetric
-        do m=1,size(this%location)
-          x = a+sqrt(eps) + ((b-sqrt(eps))-(a+sqrt(eps))) * this%location(m)
-          do n=size(this%energy),1,-1
-            write(unit,*) x, -this%energy(n), this%density(n,m)
-          end do
-          do n=1,size(this%energy),+1
-            write(unit,*) x, +this%energy(n), this%density(n,m)
-          end do
-        end do
-      end if
-    end if
   end subroutine
 end module
