@@ -506,7 +506,7 @@ contains
     character(*), intent(in) :: file
     integer                  :: unit
     integer                  :: iostat
-    character(len=132)       :: str, arg
+    character(len=2048)      :: str, arg
     integer                  :: line, i, j, k
 
     ! Initialize variables
