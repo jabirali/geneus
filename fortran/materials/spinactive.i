@@ -2,95 +2,28 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-10-01
-! Updated: 2015-10-04
+! Updated: 2016-04-06
+
+! @TODO: Double-check what to do at vacuum interfaces with spinmixing.
 
 pure subroutine spinactive_update_prehook(this)
   ! Updates the internal variables associated with spin-active interfaces.
   class(conductor), intent(inout) :: this 
-  real(wp)                        :: Pr
 
   if (allocated(this % magnetization_a) .and. .not. this % reflecting_a) then
-    if (norm2(this % magnetization_a) < sqrt(eps)) then
-      ! Deallocate negligible magnetizations
-      deallocate(this % magnetization_a)
-    else
-      ! Rescale the magnetization to a unit vector
-      if (abs(norm2(this % magnetization_a) - 1) > sqrt(eps)) then
-        this % magnetization_a = this % magnetization_a/(norm2(this % magnetization_a) + eps)
-      end if
-
-      ! Rename the relevant variables
-      associate(G0 => this % conductance_a,   &
-                GC => this % GC_a,            &
-                GF => this % GF_a,            &
-                GM => this % GM_a,            &
-                H  => this % magnetization_a, & 
-                P  => this % polarization_a,  &
-                Q  => this % spinmixing_a,    &
-                M  => this % M_a)
-
-      ! Calculate the elements of the magnetization matrix diag(h·σ,h·σ*)
+    ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
+    associate(H => this % magnetization_a, M => this % M_a)
       M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
       M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
-
-      ! Calculate the conductances associated with the spin-active interface
-      if (associated(this % material_a)) then
-        ! Tunneling interfaces: everything is normalized to the tunneling conductance
-        Pr = sqrt(1 - P**2 + eps)
-        GF = 0.25 * G0 * P/(1 + Pr)
-        GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
-        GM = 0.25 * G0 * ((0,-2)*Q)/(1 + Pr)
-      else
-        ! Vacuum interfaces: spin-mixing term is normalized to the normal conductance
-        GF = 0.00
-        GC = 0.00
-        GM = (0.00,-0.50) * Q
-      end if
-
-      end associate
-    end if
+    end associate
   end if
 
   if (allocated(this % magnetization_b) .and. .not. this % reflecting_b) then
-    if (norm2(this % magnetization_b) < sqrt(eps)) then
-      ! Deallocate negligible magnetizations
-      deallocate(this % magnetization_b)
-    else
-      ! Rescale the magnetization to a unit vector
-      if (abs(norm2(this % magnetization_b) - 1) > sqrt(eps)) then
-        this % magnetization_b = this % magnetization_b/(norm2(this % magnetization_b) + eps)
-      end if
-
-      ! Rename the relevant variables
-      associate(G0 => this % conductance_b,   &
-                GC => this % GC_b,            &
-                GF => this % GF_b,            &
-                GM => this % GM_b,            &
-                H  => this % magnetization_b, & 
-                P  => this % polarization_b,  &
-                Q  => this % spinmixing_b,    &
-                M  => this % M_b)
-
-      ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
+    ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
+    associate(H => this % magnetization_b, M => this % M_b)
       M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
       M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
-
-      ! Calculate the conductances associated with the spin-active interface
-      if (associated(this % material_b)) then
-        ! Tunneling interfaces: everything is normalized to the tunneling conductance
-        Pr = sqrt(1 - P**2 + eps)
-        GF = 0.25 * G0 * P/(1 + Pr)
-        GC = 0.25 * G0 * (1 - Pr)/(1 + Pr)
-        GM = 0.25 * G0 * ((0,-2)*Q)/(1 + Pr)
-      else
-        ! Vacuum interfaces: spin-mixing term is normalized to the normal conductance
-        GF = 0.00
-        GC = 0.00
-        GM = (0.00,-0.50) * Q
-      end if
-
-      end associate
-    end if
+    end associate
   end if
 end subroutine
 
@@ -100,17 +33,12 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
   type(green),              intent(in   ) :: a
   type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
   type(spin),               intent(inout) :: r1, rt1
-  type(spin)                              :: N0, Nt0
-  type(spin)                              :: N1, Nt1
-  complex(wp)                             :: L(4,4)
-  complex(wp)                             :: R(4,4)
   complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
-  associate(GC => this % GC_a,&
-            GF => this % GF_a,&
-            GM => this % GM_a,&
-            M  => this % M_a)
+  associate(M  => this % M_a,            &
+            P  => this % polarization_a, &
+            Q  => this % spinmixing_a    )
 
   ! Rename the Riccati parameters in the material to the left
   associate(g0   => a % g, &
@@ -118,26 +46,8 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
             dg0  => a % dg,&
             dgt0 => a % dgt)
 
-  ! Calculate the normalization matrices
-  N0  = spin_inv( pauli0 - g0*gt0 )
-  Nt0 = spin_inv( pauli0 - gt0*g0 )
-  N1  = spin_inv( pauli0 - g1*gt1 )
-  Nt1 = spin_inv( pauli0 - gt1*g1 )
-
-  ! Calculate the 4×4 Green's function in the left material
-  L(1:2,1:2) = (+1.0_wp) * N0  * (pauli0 + g0*gt0)
-  L(1:2,3:4) = (+2.0_wp) * N0  * g0
-  L(3:4,1:2) = (-2.0_wp) * Nt0 * gt0
-  L(3:4,3:4) = (-1.0_wp) * Nt0 * (pauli0 + gt0*g0)
-
-  ! Calculate the 4×4 Green's function in the right material
-  R(1:2,1:2) = (+1.0_wp) * N1  * (pauli0 + g1*gt1)
-  R(1:2,3:4) = (+2.0_wp) * N1  * g1
-  R(3:4,1:2) = (-2.0_wp) * Nt1 * gt1
-  R(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
-
   ! Calculate the spin-active terms in the interface current
-  I = commutator(R, GC * matmul(M,matmul(L,M)) + GF * anticommutator(L,M) + GM * M)
+  I = 0.25 * this%conductance_a * spinactive_current(g1, gt1, dg1, dgt1, g0, gt0, dg0, dgt0, M, P, Q)
 
   ! Calculate the deviation from the boundary condition
   r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -161,10 +71,9 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
-  associate(GC => this % GC_b,&
-            GF => this % GF_b,&
-            GM => this % GM_b,&
-            M  => this % M_b)
+  associate(M => this % M_b,            &
+            P => this % polarization_b, &
+            Q => this % spinmixing_b    )
 
   ! Rename the Riccati parameters in the material to the right
   associate(g3   => b % g, &
@@ -172,26 +81,8 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
             dg3  => b % dg,&
             dgt3 => b % dgt)
 
-  ! Calculate the normalization matrices
-  N2  = spin_inv( pauli0 - g2*gt2 )
-  Nt2 = spin_inv( pauli0 - gt2*g2 )
-  N3  = spin_inv( pauli0 - g3*gt3 )
-  Nt3 = spin_inv( pauli0 - gt3*g3 )
-
-  ! Calculate the 4×4 Green's function in the left material
-  L(1:2,1:2) = (+1.0_wp) * N2  * (pauli0 + g2*gt2)
-  L(1:2,3:4) = (+2.0_wp) * N2  * g2
-  L(3:4,1:2) = (-2.0_wp) * Nt2 * gt2
-  L(3:4,3:4) = (-1.0_wp) * Nt2 * (pauli0 + gt2*g2)
-
-  ! Calculate the 4×4 Green's function in the right material
-  R(1:2,1:2) = (+1.0_wp) * N3  * (pauli0 + g3*gt3)
-  R(1:2,3:4) = (+2.0_wp) * N3  * g3
-  R(3:4,1:2) = (-2.0_wp) * Nt3 * gt3
-  R(3:4,3:4) = (-1.0_wp) * Nt3 * (pauli0 + gt3*g3)
-
   ! Calculate the spin-active terms in the interface current
-  I = commutator(L, GC * matmul(M,matmul(R,M)) + GF * anticommutator(R,M) + GM * M)
+  I = 0.25 * this%conductance_b * spinactive_current(g2, gt2, dg2, dgt2, g3, gt3, dg3, dgt3, M, P, Q)
 
   ! Calculate the deviation from the boundary condition
   r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
@@ -200,3 +91,83 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   end associate
   end associate
 end subroutine
+
+pure function spinactive_current(g0, gt0, dg0, dgt0, g1, gt1, dg1, dgt1, M, P, Q) result(I)
+  ! Calculate the matrix current at a spin-active interface.
+  type(spin),  intent(in) :: g0, gt0, dg0, dgt0
+  type(spin),  intent(in) :: g1, gt1, dg1, dgt1
+  real(wp),    intent(in) :: P, Q
+  complex(wp), intent(in) :: M(4,4)
+  complex(wp)             :: I(4,4)
+
+  type(spin)             :: N0, Nt0
+  type(spin)             :: N1, Nt1
+  complex(wp)            :: GM0(4,4)
+  complex(wp)            :: GM1(4,4)
+
+  ! Calculate the normalization matrices
+  N0  = spin_inv( pauli0 - g0*gt0 )
+  Nt0 = spin_inv( pauli0 - gt0*g0 )
+  N1  = spin_inv( pauli0 - g1*gt1 )
+  Nt1 = spin_inv( pauli0 - gt1*g1 )
+
+  ! Calculate the 4×4 Green's function in the left material
+  GM0(1:2,1:2) = (+1.0_wp) * N0  * (pauli0 + g0*gt0)
+  GM0(1:2,3:4) = (+2.0_wp) * N0  * g0
+  GM0(3:4,1:2) = (-2.0_wp) * Nt0 * gt0
+  GM0(3:4,3:4) = (-1.0_wp) * Nt0 * (pauli0 + gt0*g0)
+
+  ! Calculate the 4×4 Green's function in the right material
+  GM1(1:2,1:2) = (+1.0_wp) * N1  * (pauli0 + g1*gt1)
+  GM1(1:2,3:4) = (+2.0_wp) * N1  * g1
+  GM1(3:4,1:2) = (-2.0_wp) * Nt1 * gt1
+  GM1(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
+
+  ! Calculate the spin-active terms in the interface current
+  I = spinactive_current1(GM0, GM1, M, P, Q)
+
+contains
+  pure function spinactive_current1(G0, G1, M, P, Q) result(I)
+    ! Calculate the first-order matrix current. Note that we subtract the Kupriyanov-Lukichev term,
+    ! so that this function can be called after the spin-inactive boundary condition without problems.
+    complex(wp), intent(in) :: G0(4,4)
+    complex(wp), intent(in) :: G1(4,4)
+    complex(wp), intent(in) :: M(4,4)
+    real(wp),    intent(in) :: P
+    real(wp),    intent(in) :: Q
+    complex(wp)             :: I(4,4)
+
+    I = commutator(G0, spinactive_current1_polarization(M, G1, P) &
+                     + spinactive_current1_spinmixing(M, P, Q) - G1)
+  end function
+
+  pure function spinactive_current1_polarization(M, G, P) result(F)
+    ! Calculate the first-order polarization terms in the matrix current commutator.
+    real(wp),    intent(in) :: P
+    complex(wp), intent(in) :: G(4,4)
+    complex(wp), intent(in) :: M(4,4)
+    complex(wp)             :: F(4,4)
+
+    real(wp)                :: Pr, Pp, Pm
+
+    Pr = sqrt(1 - P**2 + eps)
+    Pp = 1 + Pr
+    Pm = 1 - Pr
+
+    F  = G + (P/Pp) * anticommutator(M,G) + (Pm/Pp) * matmul(M,matmul(G,M))
+  end function
+
+  pure function spinactive_current1_spinmixing(M, P, Q) result(F)
+    ! Calculate the first-order spin-mixing terms in the matrix current commutator.
+    real(wp),    intent(in) :: P
+    real(wp),    intent(in) :: Q
+    complex(wp), intent(in) :: M(4,4)
+    complex(wp)             :: F(4,4)
+
+    real(wp)                :: Pp
+
+    Pp = 1 + sqrt(1 - P**2 + eps)
+
+    F = ((0,-2)*Q/Pp) * M
+  end function
+end function

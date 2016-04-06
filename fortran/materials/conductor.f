@@ -4,7 +4,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2016-03-23
+! Updated: 2016-04-06
 
 module mod_conductor
   use mod_stdio
@@ -41,9 +41,6 @@ module mod_conductor
     ! These variables are used by internal subroutines to handle spin-active interfaces
     complex(wp),      private :: M_a(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space
     complex(wp),      private :: M_b(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space
-    complex(wp),      private :: GM_a, GM_b                                                   ! Normalized spin-mixing G_ϕ /G_T0 at the interfaces
-    real(wp),         private :: GF_a, GF_b                                                   ! Normalized spin-filter G_MR/G_T0 at the interfaces
-    real(wp),         private :: GC_a, GC_b                                                   ! Normalized correction  G_T1/G_T0 at the interfaces
     complex(wp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
     complex(wp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
  
@@ -356,6 +353,16 @@ contains
     ! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
 
+    ! Usually, we normalize the spin-mixing conductance and other interface parameters to the tunneling conductance. But in
+    ! the case of a vacuum interface, we wish to normalize them to the normal-state conductance instead. Since the tunneling
+    ! conductance is normalized to the normal conductance, we can achieve this by defining the tunneling conductance to one.
+    if (.not. associated(this % material_a)) then
+      this % conductance_a = 1.0
+    end if
+    if (.not. associated(this % material_b)) then
+      this % conductance_b = 1.0
+    end if
+
     ! Prepare variables associated with spin-orbit coupling
     call spinorbit_update_prehook(this)
 
@@ -426,11 +433,21 @@ contains
           allocate(this % magnetization_a(3))
         end if
         call evaluate(val, this % magnetization_a)
+        if (norm2(this % magnetization_a) > sqrt(eps)) then
+          this % magnetization_a = unitvector(this % magnetization_a)
+        else
+          deallocate(this % magnetization_a)
+        end if
       case ('magnetization_b')
         if (.not. allocated(this % magnetization_b)) then
           allocate(this % magnetization_b(3))
         end if
         call evaluate(val, this % magnetization_b)
+        if (norm2(this % magnetization_b) > sqrt(eps)) then
+          this % magnetization_b = unitvector(this % magnetization_b)
+        else
+          deallocate(this % magnetization_b)
+        end if
       case ('rashba')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then

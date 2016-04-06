@@ -5,7 +5,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-09-23
-! Updated: 2016-03-04
+! Updated: 2016-04-06
 
 module mod_math
   use :: iso_fortran_env
@@ -84,7 +84,7 @@ contains
   end function
 
   !---------------------------------------------------------------------------!
-  !                       ELEMENTARY MATRIX PROCEDURES                        !
+  !                       ELEMENTARY VECTOR PROCEDURES                        !
   !---------------------------------------------------------------------------!
 
   pure subroutine linspace(array, first, last)
@@ -97,6 +97,19 @@ contains
       array(n) = first + ((last-first)*(n-1))/(size(array)-1)
     end do
   end subroutine
+
+  pure function unitvector(v) result(r)
+    ! Rescales a vector to a unit vector. If the input vector has zero length,
+    ! then the output vector will be a zero vector instead of a unit vector.
+    real(wp), intent(in) :: v(3)
+    real(wp)             :: r(3)
+
+    r = v/(norm2(v)+eps)
+  end function
+
+  !---------------------------------------------------------------------------!
+  !                       ELEMENTARY MATRIX PROCEDURES                        !
+  !---------------------------------------------------------------------------!
 
   pure function mateye(n) result(A)
     ! Constructs an n×n identity matrix.
