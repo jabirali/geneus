@@ -356,11 +356,14 @@ contains
     ! Usually, we normalize the spin-mixing conductance and other interface parameters to the tunneling conductance. But in
     ! the case of a vacuum interface, we wish to normalize them to the normal-state conductance instead. Since the tunneling
     ! conductance is normalized to the normal conductance, we can achieve this by defining the tunneling conductance to one.
+    ! Setting the polarization to zero also disables all but the spin-mixing terms in the spin-active boundary condition.
     if (.not. associated(this % material_a)) then
-      this % conductance_a = 1.0
+      this % conductance_a  = 1.0
+      this % polarization_a = 0.0
     end if
     if (.not. associated(this % material_b)) then
-      this % conductance_b = 1.0
+      this % conductance_b  = 1.0
+      this % polarization_b = 0.0
     end if
 
     ! Prepare variables associated with spin-orbit coupling
