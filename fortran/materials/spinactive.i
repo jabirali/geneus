@@ -138,7 +138,7 @@ contains
     complex(wp)             :: I(4,4)
 
     I = commutator(G0, spinactive_current1_polarization(M, G1, P) &
-                     + spinactive_current1_spinmixing(M, P, Q) - G1)
+                     + spinactive_current1_spinmixing(M, Q) - G1)
   end function
 
   pure function spinactive_current1_polarization(M, G, P) result(F)
@@ -157,17 +157,12 @@ contains
     F  = G + (P/Pp) * anticommutator(M,G) + (Pm/Pp) * matmul(M,matmul(G,M))
   end function
 
-  pure function spinactive_current1_spinmixing(M, P, Q) result(F)
+  pure function spinactive_current1_spinmixing(M, Q) result(F)
     ! Calculate the first-order spin-mixing terms in the matrix current commutator.
-    real(wp),    intent(in) :: P
     real(wp),    intent(in) :: Q
     complex(wp), intent(in) :: M(4,4)
     complex(wp)             :: F(4,4)
 
-    real(wp)                :: Pp
-
-    Pp = 1 + sqrt(1 - P**2 + eps)
-
-    F = ((0,-2)*Q/Pp) * M
+    F = ((0,-1)*Q) * M
   end function
 end function
