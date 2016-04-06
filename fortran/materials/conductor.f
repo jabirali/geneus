@@ -455,6 +455,26 @@ contains
         else
           deallocate(this % magnetization_b)
         end if
+      case ('misalignment_a')
+        if (.not. allocated(this % misalignment_a)) then
+          allocate(this % misalignment_a(3))
+        end if
+        call evaluate(val, this % misalignment_a)
+        if (norm2(this % misalignment_a) > sqrt(eps)) then
+          this % misalignment_a = unitvector(this % misalignment_a)
+        else
+          deallocate(this % misalignment_a)
+        end if
+      case ('misalignment_b')
+        if (.not. allocated(this % misalignment_b)) then
+          allocate(this % misalignment_b(3))
+        end if
+        call evaluate(val, this % misalignment_b)
+        if (norm2(this % misalignment_b) > sqrt(eps)) then
+          this % misalignment_b = unitvector(this % misalignment_b)
+        else
+          deallocate(this % misalignment_b)
+        end if
       case ('rashba')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then

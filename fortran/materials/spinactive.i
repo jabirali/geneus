@@ -177,7 +177,7 @@ contains
 
     real(wp)                :: Pr, Pp, Pm
 
-    Pr = sqrt(1 - P**2 + eps)
+    Pr = sqrt(1 - P**2)
     Pp = 1 + Pr
     Pm = 1 - Pr
 
