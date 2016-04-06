@@ -35,12 +35,16 @@ module mod_conductor
     ! These parameters represent the physical fields in the material
     real(wp)                  :: depairing               =  0.00_wp                           ! Magnetic orbital depairing
     type(spin),   allocatable :: spinorbit(:)                                                 ! Spin-orbit coupling field (spin vector)
-    real(wp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left  interface (unit vector)
-    real(wp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector)
+    real(wp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left  interface (unit vector) (used for transmissions)
+    real(wp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector) (used for transmissions)
+    real(wp),     allocatable :: misalignment_a(:)                                            ! Magnetization of the left  interface (unit vector) (used for reflections)
+    real(wp),     allocatable :: misalignment_b(:)                                            ! Magnetization of the right interface (unit vector) (used for reflections)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(wp),      private :: M_a(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space
-    complex(wp),      private :: M_b(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space
+    complex(wp),      private :: M_a(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space (used for transmissions)
+    complex(wp),      private :: M_b(4,4)                =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space (used for transmissions)
+    complex(wp),      private :: M0_a(4,4)               =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space (used for reflections)
+    complex(wp),      private :: M0_b(4,4)               =  0.00_wp                           ! Interface magnetization matrix in Spin-Nambu space (used for reflections)
     complex(wp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
     complex(wp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
  

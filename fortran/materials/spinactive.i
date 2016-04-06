@@ -4,25 +4,49 @@
 ! Created: 2015-10-01
 ! Updated: 2016-04-06
 
-! @TODO: Double-check what to do at vacuum interfaces with spinmixing.
-
 pure subroutine spinactive_update_prehook(this)
   ! Updates the internal variables associated with spin-active interfaces.
   class(conductor), intent(inout) :: this 
 
+  ! Process the left interface (transmission properties)
   if (allocated(this % magnetization_a) .and. .not. this % reflecting_a) then
-    ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
-    associate(H => this % magnetization_a, M => this % M_a)
+    associate(H => this % magnetization_a, M => this % M_a, M0 => this % M0_a)
+      ! Calculate the magnetization matrix used for transmissions
       M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
       M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
+
+      ! Also use this as a default magnetization for reflections
+      M0 = M
     end associate
   end if
 
+  ! Process the left interface (reflection properties)
+  if (allocated(this % misalignment_a) .and. .not. this % reflecting_a) then
+    associate(H0 => this % misalignment_a, M0 => this % M0_a)
+      ! Calculate the magnetization matrix used for reflections
+      M0(1:2,1:2) = H0(1) * pauli1 + H0(2) * pauli2 + H0(3) * pauli3
+      M0(3:4,3:4) = H0(1) * pauli1 - H0(2) * pauli2 + H0(3) * pauli3
+    end associate
+  end if
+
+  ! Process the right interface (transmission properties)
   if (allocated(this % magnetization_b) .and. .not. this % reflecting_b) then
-    ! Calculate the elements of the magnetization matrix diag(m·σ,m·σ*)
-    associate(H => this % magnetization_b, M => this % M_b)
+    associate(H => this % magnetization_b, M => this % M_b, M0 => this % M0_b)
+      ! Calculate the magnetization matrix used for transmissions
       M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
       M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
+
+      ! Also use this as a default magnetization for reflections
+      M0 = M
+    end associate
+  end if
+
+  ! Process the right interface (reflection properties)
+  if (allocated(this % misalignment_b) .and. .not. this % reflecting_b) then
+    associate(H0 => this % misalignment_b, M0 => this % M0_b)
+      ! Calculate the magnetization matrix used for reflections
+      M0(1:2,1:2) = H0(1) * pauli1 + H0(2) * pauli2 + H0(3) * pauli3
+      M0(3:4,3:4) = H0(1) * pauli1 - H0(2) * pauli2 + H0(3) * pauli3
     end associate
   end if
 end subroutine
@@ -37,6 +61,7 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
 
   ! Rename the parameters that describe the spin-active properties
   associate(M  => this % M_a,            &
+            M0 => this % M0_a,           &
             P  => this % polarization_a, &
             Q  => this % spinmixing_a    )
 
@@ -47,7 +72,7 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
             dgt0 => a % dgt)
 
   ! Calculate the spin-active terms in the interface current
-  I = 0.25 * this%conductance_a * spinactive_current(g1, gt1, dg1, dgt1, g0, gt0, dg0, dgt0, M, P, Q)
+  I = 0.25 * this%conductance_a * spinactive_current(g1, gt1, dg1, dgt1, g0, gt0, dg0, dgt0, M, M0, P, Q)
 
   ! Calculate the deviation from the boundary condition
   r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -71,9 +96,10 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
-  associate(M => this % M_b,            &
-            P => this % polarization_b, &
-            Q => this % spinmixing_b    )
+  associate(M  => this % M_b,            &
+            M0 => this % M0_b,           &
+            P  => this % polarization_b, &
+            Q  => this % spinmixing_b    )
 
   ! Rename the Riccati parameters in the material to the right
   associate(g3   => b % g, &
@@ -82,7 +108,7 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
             dgt3 => b % dgt)
 
   ! Calculate the spin-active terms in the interface current
-  I = 0.25 * this%conductance_b * spinactive_current(g2, gt2, dg2, dgt2, g3, gt3, dg3, dgt3, M, P, Q)
+  I = 0.25 * this%conductance_b * spinactive_current(g2, gt2, dg2, dgt2, g3, gt3, dg3, dgt3, M, M0, P, Q)
 
   ! Calculate the deviation from the boundary condition
   r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
@@ -92,12 +118,13 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   end associate
 end subroutine
 
-pure function spinactive_current(g0, gt0, dg0, dgt0, g1, gt1, dg1, dgt1, M, P, Q) result(I)
+pure function spinactive_current(g0, gt0, dg0, dgt0, g1, gt1, dg1, dgt1, M, M0, P, Q) result(I)
   ! Calculate the matrix current at a spin-active interface.
   type(spin),  intent(in) :: g0, gt0, dg0, dgt0
   type(spin),  intent(in) :: g1, gt1, dg1, dgt1
   real(wp),    intent(in) :: P, Q
   complex(wp), intent(in) :: M(4,4)
+  complex(wp), intent(in) :: M0(4,4)
   complex(wp)             :: I(4,4)
 
   type(spin)             :: N0, Nt0
@@ -124,21 +151,21 @@ pure function spinactive_current(g0, gt0, dg0, dgt0, g1, gt1, dg1, dgt1, M, P, Q
   GM1(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
 
   ! Calculate the spin-active terms in the interface current
-  I = spinactive_current1(GM0, GM1, M, P, Q)
-
+  I = spinactive_current1(GM0, GM1, M, M0, P, Q)
 contains
-  pure function spinactive_current1(G0, G1, M, P, Q) result(I)
+  pure function spinactive_current1(G0, G1, M, M0, P, Q) result(I)
     ! Calculate the first-order matrix current. Note that we subtract the Kupriyanov-Lukichev term,
     ! so that this function can be called after the spin-inactive boundary condition without problems.
     complex(wp), intent(in) :: G0(4,4)
     complex(wp), intent(in) :: G1(4,4)
     complex(wp), intent(in) :: M(4,4)
+    complex(wp), intent(in) :: M0(4,4)
     real(wp),    intent(in) :: P
     real(wp),    intent(in) :: Q
     complex(wp)             :: I(4,4)
 
-    I = commutator(G0, spinactive_current1_polarization(M, G1, P) &
-                     + spinactive_current1_spinmixing(M, Q) - G1)
+    I = commutator(G0, spinactive_current1_polarization(M, G1, P)&
+                     + spinactive_current1_spinmixing(M0, Q) - G1)
   end function
 
   pure function spinactive_current1_polarization(M, G, P) result(F)
