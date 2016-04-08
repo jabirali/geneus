@@ -48,6 +48,10 @@ module mod_math
                      evaluate_vector_value, evaluate_vector_field, &
                      evaluate_logical_value
   end interface
+
+  interface random
+    module procedure random_re, random_cx
+  end interface
 contains
 
   !---------------------------------------------------------------------------!
@@ -123,37 +127,6 @@ contains
         A(j,i) = (i/j)*(j/i)
       end do
     end do
-  end function
-
-  impure function matrnd(n) result(C)
-    ! Constructs an n×n random matrix.
-    integer, allocatable :: seed(:)
-    integer              :: n, m, u
-    complex(wp)          :: C(n,n)
-    real(wp)             :: B(n,n)
-    real(wp)             :: A(n,n)
-
-    ! Check the size of a random seed
-    call random_seed(size = m)
-
-    ! Allocate memory for the random seed
-    allocate(seed(m))
-
-    ! Initialize the seed using random numbers from the operating system
-    open(newunit=u, file="/dev/urandom", access="stream", form="unformatted", action="read", status="old")
-    read(unit=u) seed
-    close(unit=u)
-
-    ! Initialize the random number generator
-    call random_seed(put = seed)
-
-    ! Construct a random complex matrix
-    call random_number(A)
-    call random_number(B)
-    C = cx(A,B)
-
-    ! Deallocate dynamic memory
-    deallocate(seed)
   end function
 
   pure function matinv2(A) result(B)
@@ -613,5 +586,63 @@ contains
       value(2,n) = evalf(2, [pi, domain(n)])
       value(3,n) = evalf(3, [pi, domain(n)])
     end do
+  end subroutine
+
+
+
+  !---------------------------------------------------------------------------!
+  !                         MISCELLANEOUS PROCEDURES                          !
+  !---------------------------------------------------------------------------!
+
+  impure elemental subroutine random_re(dest)
+    !! Initializes an arbitrarily shaped array of real random numbers.
+    !! @NOTE: The pseudorandom number generator is seeded using entropy from the
+    !!        operating system the first time the subroutine is called, and this
+    !!        seeding method assumes that we use a Linux/Unix-compatible system.
+    real(wp), intent(out) :: dest
+    logical,  save        :: init = .false.
+
+    ! Initialize the random number generator if necessary
+    if (.not. init) then
+      call random_init()
+      init = .true.
+    end if
+
+    ! Generate a random number at the given destination
+    call random_number(dest)
+  contains
+    impure subroutine random_init()
+      integer, allocatable :: seed(:)
+      integer              :: s, u
+
+      ! Check the size of a random seed
+      call random_seed(size = s)
+
+      ! Allocate memory for the random seed
+      allocate(seed(s))
+
+      ! Initialize the seed with system entropy
+      open(newunit=u, file="/dev/urandom", access="stream", form="unformatted", action="read", status="old")
+      read(unit=u) seed
+      close(unit=u)
+
+      ! Initialize the random number generator
+      call random_seed(put = seed)
+
+      ! Deallocate the memory for the seed
+      deallocate(seed)
+    end subroutine
+  end subroutine
+
+  impure elemental subroutine random_cx(dest)
+    !! Initializes an arbitrarily shaped array of complex random numbers. 
+    complex(wp), intent(out) :: dest
+    real(wp)                 :: x(2)
+
+    ! Generate two random real numbers
+    call random(x)
+
+    ! Combine them to one complex number
+    dest = cx(x(1),x(2))
   end subroutine
 end module
