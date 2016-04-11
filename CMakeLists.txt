@@ -71,7 +71,7 @@ if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
   endif()
 elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
   # Compiler flags that apply to all files
-  set(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -ftrapuv")
   set(CMAKE_Fortran_FLAGS_RELEASE "-ipo -fast")
   set(CMAKE_EXE_LINKER_FLAGS      "-ipo")
 

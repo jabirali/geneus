@@ -44,6 +44,14 @@ module mod_structure
   interface structure
     module procedure structure_construct
   end interface
+
+  ! Interface for external routines that can be mapped onto class(material) objects
+  abstract interface
+    subroutine mappable(ptr)
+      use :: mod_material
+      class(material), pointer, intent(in) :: ptr
+    end subroutine
+  end interface
 contains
   impure subroutine structure_push(this, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
@@ -118,7 +126,7 @@ contains
     !! Maps a subroutine onto each element of the multilayer stack.
     class(structure), target  :: this
     class(material),  pointer :: ptr
-    external                  :: routine
+    procedure(mappable)       :: routine
     logical, optional         :: loop
     logical                   :: loop_
     integer                   :: n
@@ -226,7 +234,7 @@ contains
     end if
   contains
     subroutine find(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       select type(m)
         class is (superconductor)
           gap = min(gap, sum(abs(m%gap))/max(1,size(m%gap)))
@@ -244,7 +252,7 @@ contains
     call this % map(init)
   contains
     subroutine init(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       call m % init(gap)
     end subroutine
   end subroutine
@@ -257,7 +265,7 @@ contains
     call this % map(save)
   contains
     subroutine save(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       call m % save
     end subroutine
   end subroutine
@@ -270,7 +278,7 @@ contains
     call this % map(load)
   contains
     subroutine load(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       call m % load
     end subroutine
   end subroutine
@@ -284,7 +292,7 @@ contains
     call this % map(update, loop = .true.)
   contains
     subroutine update(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       call m % update(freeze)
     end subroutine 
   end subroutine
@@ -300,7 +308,8 @@ contains
     ! Count the number of materials
     call this % map(count)
   contains
-    subroutine count
+    subroutine count(ptr)
+      class(material), pointer, intent(in) :: ptr
       num = num + 1
     end subroutine
   end function
@@ -325,7 +334,7 @@ contains
     end if
   contains
     subroutine check(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       ! Count the material types
       select type (m)
         class is (superconductor)
@@ -347,7 +356,7 @@ contains
     call this % map(set)
   contains
     subroutine set(m)
-      class(material) :: m
+      class(material), pointer, intent(in) :: m
       m % temperature = temperature
     end subroutine
   end subroutine
@@ -381,9 +390,9 @@ contains
     close(unit = unit)
   contains
     subroutine write_density(ptr)
-      class(material) :: ptr
-      real(wp)        :: x
-      integer         :: n, m
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: n, m
 
       ! Calculate the endpoints of this layer
       a = b
@@ -435,9 +444,9 @@ contains
     close(unit = unit)
   contains
     subroutine write_current(ptr)
-      class(material) :: ptr
-      real(wp)        :: x
-      integer         :: m
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: m
 
       ! Calculate the endpoints of this layer
       a = b
@@ -479,9 +488,9 @@ contains
     close(unit = unit)
   contains
     subroutine write_gap(ptr)
-      class(material) :: ptr
-      real(wp)        :: x
-      integer         :: m
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: m
 
       ! Calculate the endpoints of this layer
       a = b
