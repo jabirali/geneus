@@ -39,7 +39,7 @@ case "$1" in
     echo " $0 --win64            # Build in RELEASE mode using mingw32"
     echo " $0 --gfortran-debug   # Build in DEBUG mode using gfortran"
     echo " $0 --ifort-debug      # Build in DEBUG mode using ifort"
-    exit 1 ;;
+    exit 0 ;;
 esac
 
 echo

@@ -80,14 +80,10 @@ elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
   set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-free")
 
   # Compiler flags that apply to internal files (produced as part of this project)
-  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-free")
-  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-free")
-  endif()
-else(Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-free")
+else()
   message(WARNING "Other compilers than gfortran and ifort have not been tested...")
-endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
+endif()
 
 # Print the results
 message(STATUS "Using Fortran compiler: " ${CMAKE_Fortran_COMPILER})
