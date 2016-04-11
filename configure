@@ -1,35 +1,47 @@
 #!/bin/bash
 
 if [ -e build ]; then
-	echo "Removing the existing build directory."
-	rm -r build
+  echo "Removing the existing build directory."
+  rm -r build
 fi
 
-if [ "$1" == "" -o "$1" == "--release" ]; then
-	echo "Preparing for a compilation in RELEASE mode."
-	echo
-	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -H. -Bbuild
-elif [ "$1" == "--debug" ]; then
-	echo "Preparing for a compilation in DEBUG mode." 
-	echo
-	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug   -H. -Bbuild
-elif [ "$1" == "--fallback" ]; then
-	echo "Preparing for a compilation in FALLBACK mode."
-	echo
-	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/gfortran-5 -DCMAKE_AR:PATH=/usr/bin/gcc-ar-5 -DCMAKE_RANLIB:PATH=/usr/bin/gcc-ranlib-5 -H. -Bbuild
-elif [ "$1" == "--windows" ]; then
-	echo "Preparing for a compilation in WINDOWS mode."
-	echo
-	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild
-else
-  echo
-  echo "Usage:"
-  echo " $0             # Build in RELEASE mode"
-  echo " $0 --release   # Build in RELEASE mode"
-  echo " $0 --windows   # Build in WINDOWS mode"
-  echo " $0 --debug     # Build in  DEBUG  mode"
-  exit 1
-fi
+case "$1" in
+  "--release-gfortran")
+    echo "Preparing for a compilation in RELEASE mode with GFORTRAN."
+    echo
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
+
+  "--release-ifort")
+    echo "Preparing for a compilation in RELEASE mode with IFORT."
+    echo
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild    || exit 1 ;;
+
+  "--debug-gfortran")
+    echo "Preparing for a compilation in DEBUG mode with GFORTRAN." 
+    echo
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild   || exit 1 ;;
+
+  "--debug-ifort")
+    echo "Preparing for a compilation in DEBUG mode with IFORT." 
+    echo
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild      || exit 1 ;;
+
+  "--release-win64")
+    echo "Preparing for a compilation in WINDOWS mode."
+    echo
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
+
+  *)
+    echo
+    echo "Usage:"
+    echo " $0                     # Build in RELEASE mode"
+    echo " $0 --release-ifort     # Build in RELEASE mode (using ifort)"
+    echo " $0 --release-gfortran  # Build in RELEASE mode (using gfortran)"
+    echo " $0 --debug-ifort       # Build in  DEBUG  mode (using ifort)"
+    echo " $0 --debug-gfortran    # Build in  DEBUG  mode (using gfortran)"
+    echo " $0 --win64             # Build in  WIN64  mode (using mingw32)"
+    exit 1 ;;
+esac
 
 echo
 echo "Make has been initialized for compilation in the subdirectory 'build'."

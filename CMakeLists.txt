@@ -50,21 +50,44 @@ else()
   message(STATUS "Using custom build type: '" ${CMAKE_BUILD_TYPE} "'.")
 endif()
 
-# Compiler flags that apply to all files
-set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace -fno-underscoring")
-set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -fno-underscoring -s")
-set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program")
+# Check which compiler we use
+get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
-# Compiler flags that apply to external files (imported from other projects)
-set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
-set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
+if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # Compiler flags that apply to all files
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-march=native -Og -g -pg -fbacktrace -fno-underscoring")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-march=native -Ofast -flto -fno-stack-arrays -fno-underscoring -s")
+  set(CMAKE_EXE_LINKER_FLAGS      "-march=native -flto -fwhole-program")
 
-# Compiler flags that apply to internal files (produced as part of this project)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-  set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
-endif()
+  # Compiler flags that apply to external files (imported from other projects)
+  set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
+  set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
+
+  # Compiler flags that apply to internal files (produced as part of this project)
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form -fimplicit-none -fcheck=all -Wconversion -pedantic")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008 -ffree-form")
+  endif()
+elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
+  # Compiler flags that apply to all files
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-ipo -fast")
+  set(CMAKE_EXE_LINKER_FLAGS      "-ipo")
+
+  # Compiler flags that apply to external files (imported from other projects)
+  set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-fixed")
+  set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-free")
+
+  # Compiler flags that apply to internal files (produced as part of this project)
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-free")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_source_files_properties(${src_mod} ${src_exe} PROPERTIES COMPILE_FLAGS "-free")
+  endif()
+else(Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  message(WARNING "Other compilers than gfortran and ifort have not been tested...")
+endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 # Print the results
 message(STATUS "Using Fortran compiler: " ${CMAKE_Fortran_COMPILER})
