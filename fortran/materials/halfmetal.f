@@ -42,7 +42,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function halfmetal_construct() result(this)
+  function halfmetal_construct() result(this)
     ! Constructs a halfmetal object.
     type(halfmetal) :: this
 
@@ -61,7 +61,7 @@ contains
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%propagator(n,m) = green0
+        this%propagator(n,m) = green()
       end do
     end do
   end subroutine

@@ -45,7 +45,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function superconductor_construct() result(this)
+  function superconductor_construct() result(this)
     ! Constructs a superconducting material that is initialized to a superconducting state.
     type(superconductor) :: this
 

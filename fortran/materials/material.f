@@ -184,13 +184,13 @@ contains
         if (associated(this%material_a)) then
           a = this%material_a%propagator(n,ubound(this%material_a%propagator,2))
         else
-          a = green0
+          a = green()
         end if
 
         if (associated(this%material_b)) then
           b = this%material_b%propagator(n,lbound(this%material_b%propagator,2))
         else
-          b = green0
+          b = green()
         end if
 
         ! Initialize bvp_solver

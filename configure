@@ -6,27 +6,27 @@ if [ -e build ]; then
 fi
 
 case "$1" in
-  "--release-gfortran")
+  "--gfortran")
     echo "Preparing for a compilation in RELEASE mode with GFORTRAN."
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
 
-  "--release-ifort")
+  "--ifort")
     echo "Preparing for a compilation in RELEASE mode with IFORT."
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild    || exit 1 ;;
 
-  "--debug-gfortran")
+  "--gfortran-debug")
     echo "Preparing for a compilation in DEBUG mode with GFORTRAN." 
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild   || exit 1 ;;
 
-  "--debug-ifort")
+  "--ifort-debug")
     echo "Preparing for a compilation in DEBUG mode with IFORT." 
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild      || exit 1 ;;
 
-  "--release-win64")
+  "--win64")
     echo "Preparing for a compilation in WINDOWS mode."
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
@@ -34,12 +34,11 @@ case "$1" in
   *)
     echo
     echo "Usage:"
-    echo " $0                     # Build in RELEASE mode"
-    echo " $0 --release-ifort     # Build in RELEASE mode (using ifort)"
-    echo " $0 --release-gfortran  # Build in RELEASE mode (using gfortran)"
-    echo " $0 --debug-ifort       # Build in  DEBUG  mode (using ifort)"
-    echo " $0 --debug-gfortran    # Build in  DEBUG  mode (using gfortran)"
-    echo " $0 --win64             # Build in  WIN64  mode (using mingw32)"
+    echo " $0 --gfortran         # Build in RELEASE mode using gfortran"
+    echo " $0 --ifort            # Build in RELEASE mode using ifort"
+    echo " $0 --win64            # Build in RELEASE mode using mingw32"
+    echo " $0 --gfortran-debug   # Build in DEBUG mode using gfortran"
+    echo " $0 --ifort-debug      # Build in DEBUG mode using ifort"
     exit 1 ;;
 esac
 

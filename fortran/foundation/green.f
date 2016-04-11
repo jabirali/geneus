@@ -15,7 +15,7 @@ module mod_green
   private
 
   ! Public interface
-  public green, green0, assignment(=)
+  public green, assignment(=)
 
   ! Type declaration
   type green
@@ -42,17 +42,24 @@ module mod_green
 
   ! Type constructor
   interface green
-    module procedure green_construct_bcs
+    module procedure green_construct_zero, green_construct_bcs
   end interface
 
   ! Assignment operator
   interface assignment(=)
     module procedure green_import_rvector, green_export_rvector
   end interface
-
-  ! Exported constants
-  type(green), parameter :: green0 = green(spin(0),spin(0),spin(0),spin(0))
 contains
+  pure function green_construct_zero() result(this)
+    ! Constructs a state corresponding to a normal metal, which has all the Riccati parameters set to zero.
+    type(green) :: this
+
+    this % g   = spin(0)
+    this % gt  = spin(0)
+    this % dg  = spin(0)
+    this % dgt = spin(0)
+  end function
+
   pure function green_construct_bcs(energy, gap) result(this)
     ! Constructs a state corresponding to a BCS superconductor at some given energy, which may have an imaginary
     ! term representing inelastic scattering. The second argument 'gap' is the superconducting order parameter Δ.
@@ -60,15 +67,20 @@ contains
     complex(wp), intent(in) :: energy    ! Quasiparticle energy (including inelastic scattering contribution)
     complex(wp), intent(in) :: gap       ! Superconducting order parameter (including superconducting phase)
 
-    ! Calculate the θ-parameter (t), superconducting phase (p), and scalar Riccati parameters (a,b)
-    complex(wp)             :: t
     real(wp)                :: p
+    complex(wp)             :: t, u
     complex(wp)             :: a, b
 
-    t = atanh(abs(gap)/energy)
-    p = atan(im(gap)/re(gap))
-    a =  sinh(t)/(1+cosh(t)) * exp( (0,+1) * p )
-    b = -sinh(t)/(1+cosh(t)) * exp( (0,-1) * p )
+    ! Calculate the superconducting gap and phase
+    u = abs(gap)/energy
+    p = atan2(im(gap), re(gap))
+
+    ! Calculate the θ-parameter
+    t = (log(1+u)-log(1-u))/2
+
+    ! Calculate the scalar Riccati parameters a and b
+    a =  (exp(+t)-exp(-t))/(2+exp(+t)+exp(-t)) * exp( (0,+1) * p )
+    b = -(exp(+t)-exp(-t))/(2+exp(+t)+exp(-t)) * exp( (0,-1) * p )
 
     ! Calculate the matrix Riccati parameters γ and γ~
     this%g  = [(0.0_wp,0.0_wp), a, -a, (0.0_wp,0.0_wp)]

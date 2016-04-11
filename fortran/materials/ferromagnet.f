@@ -40,7 +40,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function ferromagnet_construct() result(this)
+  function ferromagnet_construct() result(this)
     ! Constructs a ferromagnetic material that is initialized as a weak superconductor.
     type(ferromagnet) :: this
 

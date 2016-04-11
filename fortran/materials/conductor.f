@@ -102,7 +102,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure function conductor_construct() result(this)
+  function conductor_construct() result(this)
     ! Constructs a conductor object initialized to a superconducting state.
     type(conductor) :: this
 
