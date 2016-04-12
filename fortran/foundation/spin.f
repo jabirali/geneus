@@ -7,8 +7,8 @@
 ! Created: 2015-07-10
 ! Updated: 2015-03-01
 
-module mod_spin
-  use mod_math
+module spin_m
+  use math_m
   implicit none
   private
 

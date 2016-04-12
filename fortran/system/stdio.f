@@ -4,7 +4,7 @@
 ! Created: 2015-07-10
 ! Updated: 2016-03-23
 
-module mod_stdio
+module stdio_m
   use iso_fortran_env
   implicit none
   public

@@ -7,27 +7,27 @@
 ! Created: 2015-09-23
 ! Updated: 2016-04-06
 
-module mod_math
+module math_m
   use :: iso_fortran_env
-  use :: mod_stdio
+  use :: stdio_m
   implicit none
   public
 
   ! Declare floating-point precisions
-  integer,     parameter :: sp  = REAL32              ! Single precision
-  integer,     parameter :: dp  = REAL64              ! Double precision
-  integer,     parameter :: qp  = REAL128             ! Quadruple precision
-  integer,     parameter :: wp  = dp                  ! Working precision
+  integer,     parameter :: sp  = REAL32              !! Single precision
+  integer,     parameter :: dp  = REAL64              !! Double precision
+  integer,     parameter :: qp  = REAL128             !! Quadruple precision
+  integer,     parameter :: wp  = dp                  !! Working precision
 
   ! Define common mathematical constants
-  real(wp),    parameter :: inf = huge(1.0_wp)        ! Numerical infinity
-  real(wp),    parameter :: eps = epsilon(1.0_wp)     ! Numerical infinitesimal
-  real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp ! Circle constant
+  real(wp),    parameter :: inf = huge(1.0_wp)        !! Numerical infinity
+  real(wp),    parameter :: eps = epsilon(1.0_wp)     !! Numerical infinitesimal
+  real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp !! Circle constant
 
   ! Define common identity matrices
-  real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])
-  real(wp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])
-  real(wp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4])
+  real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
+  real(wp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])               !! 3×3 identity matrix
+  real(wp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4]) !! 4×4 identity matrix
 
   ! Interfaces for math routines
   interface differentiate

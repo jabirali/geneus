@@ -1,15 +1,15 @@
 ! This module defines the data type 'ferromagnet', which models the physical state of a ferromagnet. The type is a
-! member of class(conductor), and thus inherits the internal structure and generic methods defined in mod_conductor.
+! member of class(conductor), and thus inherits the internal structure and generic methods defined in conductor_m.
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-20
 ! Updated: 2016-03-23
 
-module mod_ferromagnet
-  use mod_stdio
-  use mod_math
-  use mod_spin
-  use mod_conductor
+module ferromagnet_m
+  use stdio_m
+  use math_m
+  use spin_m
+  use conductor_m
   implicit none
   private
 

@@ -4,10 +4,10 @@
 ! Created: 2015-07-13
 ! Updated: 2015-10-04
 
-module mod_assert
-  use mod_stdio, only: color_none, color_red, color_green
-  use mod_math,  only: eps, wp
-  use mod_spin,  only: spin
+module assert_m
+  use stdio_m, only: color_none, color_red, color_green
+  use math_m,  only: eps, wp
+  use spin_m,  only: spin
   implicit none
   private
 

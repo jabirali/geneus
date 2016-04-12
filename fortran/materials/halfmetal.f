@@ -8,13 +8,13 @@
 ! Created: 2016-03-08
 ! Updated: 2016-03-30
 
-module mod_halfmetal
-  use mod_stdio
-  use mod_math
-  use mod_spin
-  use mod_green
-  use mod_material
-  use mod_conductor
+module halfmetal_m
+  use stdio_m
+  use math_m
+  use spin_m
+  use green_m
+  use material_m
+  use conductor_m
   implicit none
   private
 

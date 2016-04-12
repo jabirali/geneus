@@ -9,9 +9,9 @@
 !! Updated: 2016-03-24
 
 program critical_current
-  use mod_structure
-  use mod_stdio
-  use mod_math
+  use structure_m
+  use stdio_m
+  use math_m
   implicit none
 
   !--------------------------------------------------------------------------------!

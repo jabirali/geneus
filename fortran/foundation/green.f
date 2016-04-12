@@ -8,9 +8,9 @@
 ! Created: 2015-07-11
 ! Updated: 2015-10-04
 
-module mod_green
-  use mod_math
-  use mod_spin
+module green_m
+  use math_m
+  use spin_m
   implicit none
   private
 

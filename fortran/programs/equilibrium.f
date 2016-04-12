@@ -8,8 +8,8 @@
 !! Updated: 2016-03-23
 
 program equilibrium
-  use mod_structure
-  use mod_stdio
+  use structure_m
+  use stdio_m
   implicit none
 
   ! Create the superconducting structure

@@ -7,11 +7,11 @@
 ! Created: 2015-07-29
 ! Updated: 2016-03-23
 
-module mod_material
-  use mod_stdio
-  use mod_math
-  use mod_spin
-  use mod_green
+module material_m
+  use stdio_m
+  use math_m
+  use spin_m
+  use green_m
   implicit none
   private
 

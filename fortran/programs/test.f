@@ -5,10 +5,10 @@
 ! Updated: 2015-08-09
 
 program test_core
-  use mod_assert
-  use mod_math
-  use mod_spin
-  use mod_green
+  use assert_m
+  use math_m
+  use spin_m
+  use green_m
 
   real(wp)    :: rs, rv(8), rw(32)
   complex(wp) :: cs, cv(4), cm(2,2)

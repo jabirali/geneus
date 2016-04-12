@@ -5,14 +5,14 @@
 !! Created: 2016-03-08
 !! Updated: 2016-03-23
 
-module mod_structure
-  use mod_math
-  use mod_stdio
-  use mod_material
-  use mod_conductor
-  use mod_superconductor
-  use mod_ferromagnet
-  use mod_halfmetal
+module structure_m
+  use math_m
+  use stdio_m
+  use material_m
+  use conductor_m
+  use superconductor_m
+  use ferromagnet_m
+  use halfmetal_m
   implicit none
   private
 
@@ -48,7 +48,7 @@ module mod_structure
   ! Interface for external routines that can be mapped onto class(material) objects
   abstract interface
     subroutine mappable(ptr)
-      use :: mod_material
+      use :: material_m
       class(material), pointer, intent(in) :: ptr
     end subroutine
   end interface

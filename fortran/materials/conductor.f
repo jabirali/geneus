@@ -6,12 +6,12 @@
 ! Created: 2015-07-11
 ! Updated: 2016-04-06
 
-module mod_conductor
-  use mod_stdio
-  use mod_math
-  use mod_spin
-  use mod_green
-  use mod_material
+module conductor_m
+  use stdio_m
+  use math_m
+  use spin_m
+  use green_m
+  use material_m
   implicit none
   private
 
