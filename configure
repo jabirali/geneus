@@ -1,35 +1,62 @@
 #!/bin/bash
 
-if [ -e build ]; then
-  echo "Removing the existing build directory."
-  rm -r build
-fi
-
 case "$1" in
   "--gfortran")
     echo "Preparing for a compilation in RELEASE mode with GFORTRAN."
+    if [ -e build ]; then
+      echo "Removing the existing build directory."
+      rm -r build
+    fi
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
 
   "--ifort")
     echo "Preparing for a compilation in RELEASE mode with IFORT."
+    if [ -e build ]; then
+      echo "Removing the existing build directory."
+      rm -r build
+    fi
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild    || exit 1 ;;
 
   "--gfortran-debug")
     echo "Preparing for a compilation in DEBUG mode with GFORTRAN." 
+    if [ -e build ]; then
+      echo "Removing the existing build directory."
+      rm -r build
+    fi
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild   || exit 1 ;;
 
   "--ifort-debug")
     echo "Preparing for a compilation in DEBUG mode with IFORT." 
+    if [ -e build ]; then
+      echo "Removing the existing build directory."
+      rm -r build
+    fi
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild      || exit 1 ;;
 
   "--win64")
-    echo "Preparing for a compilation in WINDOWS mode."
+    echo "Preparing for a compilation in RELEASE mode with MINGW32."
+    if [ -e build ]; then
+      echo "Removing the existing build directory."
+      rm -r build
+    fi
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
+
+  "--doc")
+    echo "Preparing for generation of DOCUMENTATION with FORD."
+    if [ -e documentation ]; then
+      echo "Removing the existing documentation."
+      rm -r documentation
+    fi
+    echo
+    ford readme.md || exit 1
+    echo "Documentation has been generated in the subdirectory 'documentation'."
+    echo "You can now open 'documentation/index.html' in a sensible web browser."
+    exit 0 ;;
 
   *)
     echo
@@ -39,6 +66,7 @@ case "$1" in
     echo " $0 --win64            # Build in RELEASE mode using mingw32"
     echo " $0 --gfortran-debug   # Build in DEBUG mode using gfortran"
     echo " $0 --ifort-debug      # Build in DEBUG mode using ifort"
+    echo " $0 --doc              # Build documentation using ford"
     exit 0 ;;
 esac
 
