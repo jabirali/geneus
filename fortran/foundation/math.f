@@ -442,8 +442,15 @@ contains
 
   impure subroutine evaluate_logical_value(expression, value)
     !! This subroutine takes a scalar logical expression as input, and returns the value.
-    character(*), intent(in)  :: expression
-    logical,      intent(out) :: value
+    !!
+    !! Usage:
+    !! 
+    !!     call evaluate_logical_value('F', output)
+    !!     call evaluate_logical_value('T', output)
+    !!
+
+    character(*), intent(in)  :: expression !! Either the character 'T' or 'F'
+    logical,      intent(out) :: value      !! Result of parsing the expression
 
     select case(expression)
       case ('T', 't')
@@ -456,11 +463,17 @@ contains
   end subroutine
 
   impure subroutine evaluate_scalar_value(expression, value)
-    !! This subroutine takes a scalar math expression as input, and returns the value.
-    use fparser
+    !! This subroutine takes a scalar mathematical expression as input, and returns the value.
+    !!
+    !! Usage:
+    !! 
+    !!     call evaluate_scalar_value('0',                    output)
+    !!     call evaluate_scalar_value('sin(0.3*pi)*exp(-pi)', output)
+    !!
+    use :: fparser
 
-    character(*), intent(in)  :: expression
-    real(wp),     intent(out) :: value
+    character(*), intent(in)  :: expression  !! Scalar-valued mathematical expression
+    real(wp),     intent(out) :: value       !! Result of parsing the expression
 
     ! Make sure the expression is non-empty
     if (scan(expression, '0123456789pi') <= 0) then
@@ -476,14 +489,20 @@ contains
   end subroutine
 
   impure subroutine evaluate_scalar_field(expression, domain, value)
-    !! This function takes a mathematical function of a variable 'z' and
-    !! array defining the discretized domain, and evaluates the function
-    !! at each position in the domain to form a discretized scalar field.
-    use fparser
+    !! This subroutine takes a scalar mathematical function of some variable 'z' as input,  along 
+    !! with an array with discrete values for that variable 'z'.  It parses the provided function,
+    !! evaluates it at each 'z'-value in the array, and then returns the discretized scalar field.
+    !!
+    !! Usage:
+    !! 
+    !!     call evaluate_scalar_value('0',                    input(1:n), output(1:n))
+    !!     call evaluate_scalar_value('sin(pi*z)*exp(-pi*z)', input(1:n), output(1:n))
+    !!
+    use :: fparser
 
-    character(*), intent(in) :: expression
-    real(wp),     intent(in) :: domain(:)
-    real(wp),    allocatable :: value(:)
+    character(*), intent(in) :: expression   !! Scalar-valued function of position 'z'
+    real(wp),     intent(in) :: domain(:)    !! Domain of the independent variable 'z'
+    real(wp),    allocatable :: value(:)     !! Result of evaluating the field at each point of the domain
     integer                  :: n
 
     ! Make sure the expression is non-empty
@@ -505,11 +524,17 @@ contains
   end subroutine
 
   impure subroutine evaluate_vector_value(expression, value)
-    !! This function takes a vector math expression as input, and returns the value.
-    use fparser
+    !! This subroutine takes a vector mathematical expression as input, and returns the value.
+    !!
+    !! Usage:
+    !! 
+    !!     call evaluate_scalar_value('[0,0,0]',                     output(1:3))
+    !!     call evaluate_scalar_value('[sin(0.3*pi),0,cos(0,3*pi)]', output(1:3))
+    !!
+    use :: fparser
 
-    character(*), intent(in)  :: expression
-    real(wp),     intent(out) :: value(3)
+    character(*), intent(in)  :: expression  !! Vector-valued mathematical expression
+    real(wp),     intent(out) :: value(3)    !! Result of parsing the expression
     integer                   :: sep(4)
 
     ! Find the vector delimiters
@@ -541,14 +566,20 @@ contains
   end subroutine
 
   impure subroutine evaluate_vector_field(expression, domain, value)
-    !! This function takes a mathematical function of a variable 'z' and
-    !! array defining the discretized domain, and evaluates the function
-    !! at each position in the domain to form a discretized vector field.
-    use fparser
+    !! This subroutine takes a vector mathematical function of some variable 'z' as input,  along 
+    !! with an array with discrete values for that variable 'z'.  It parses the provided function,
+    !! evaluates it at each 'z'-value in the array, and then returns the discretized scalar field.
+    !!
+    !! Usage:
+    !! 
+    !!     call evaluate_scalar_value('[0,0,0]',                     input(1:n), output(1:3,1:n))
+    !!     call evaluate_scalar_value('[sin(pi*z/2),0,cos(pi*z/2)]', input(1:n), output(1:3,1:n))
+    !!
+    use :: fparser
 
-    character(*), intent(in) :: expression
-    real(wp),     intent(in) :: domain(:)
-    real(wp),    allocatable :: value(:,:)
+    character(*), intent(in) :: expression   !! Vector-valued function of position 'z'
+    real(wp),     intent(in) :: domain(:)    !! Domain of the independent variable 'z'
+    real(wp),    allocatable :: value(:,:)   !! Result of evaluating the field at each point of the domain
     integer                  :: n, sep(4)
 
     ! Allocate memory for the output
