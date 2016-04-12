@@ -43,8 +43,8 @@ module mod_material
     integer                                   :: order           =  4                       ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                                   :: control         =  2                       ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                                   :: information     =  0                       ! How much information that should be written to standard out (range: [-1,2])
-    real(wp)                                  :: tolerance       =  1e-8_wp                 ! Error tolerance (determines the maximum allowed defect or global error)
-    real(wp)                                  :: difference      =  1e+8_wp                 ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
+    real(wp)                                  :: tolerance       =  1e-10_wp                ! Error tolerance (determines the maximum allowed defect or global error)
+    real(wp)                                  :: difference      =  1e+10_wp                ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
     character(len=128)                        :: type_string     =  'MATERIAL'              ! The type string should describe the specific class(material) subtype
@@ -331,6 +331,12 @@ contains
       this%current(1,n) = integrate(this%energy, current(:,1), 1e-6_wp, this%energy(ubound(this%energy,1)))
       this%current(2,n) = integrate(this%energy, current(:,2), 1e-6_wp, this%energy(ubound(this%energy,1)))
       this%current(3,n) = integrate(this%energy, current(:,3), 1e-6_wp, this%energy(ubound(this%energy,1)))
+
+      ! Switch to a normalization that is independent of the material length. This is done by multiplying
+      ! by the square-root of the Thouless energy.  Since we use units where the superconducting gap Δ is 
+      ! the unit of energy, this is equivalent to just multiplying by ξ/L, where ξ is the superconducting
+      ! coherence length and L the material length. This gives N₀DAΔ/4ξ and N₀DAΔ/8ξ as the current units.
+      this % current = this % current * sqrt(this % thouless)
     end do
 
     ! Deallocate workspace memory

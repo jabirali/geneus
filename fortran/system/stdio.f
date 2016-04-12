@@ -85,11 +85,11 @@ contains
     ! Print out the title and value
     select type(value)
       type is (integer)
-        write(*,'(a,3x,a,i9  ,3x,a)') '│', title_, value, '│'
+        write(*,'(a,3x,a,i10  ,2x,a)') '│', title_, value, '│'
       type is (real)
-        write(*,'(a,3x,a,f9.7,3x,a)') '│', title_, value, '│'
+        write(*,'(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
       type is (double precision)
-        write(*,'(a,3x,a,f9.7,3x,a)') '│', title_, value, '│'
+        write(*,'(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
     end select
   end subroutine
 

@@ -8,7 +8,7 @@
 !! Created: 2016-03-24
 !! Updated: 2016-03-24
 
-program critical_current
+program critical_temperature
   use mod_structure
   use mod_stdio
   use mod_math
@@ -25,7 +25,7 @@ program critical_current
   character(*), parameter         :: filename   = 'critical.dat'
   integer,      parameter         :: bisections = 12
   integer,      parameter         :: iterations = 6
-  real(wp),     parameter         :: tolerance  = 1e-7_wp
+  real(wp),     parameter         :: tolerance  = 1e-8_wp
   real(wp),     parameter         :: initgap    = 1e-5_wp
 
   ! Declare variables used by the program
