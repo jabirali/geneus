@@ -56,10 +56,14 @@ program critical_temperature
 
   ! Bootstrap the material states at zero temperature
   do
+    ! Update counter
+    n = n+1
+
     ! Status information
     call status_head('INITIALIZING')
-    call status_body('Temperature',      0.0)
+    call status_body('Temperature', 0.0)
     call status_body('State difference', stack % difference())
+    call status_body('Iteration', n)
     call status_foot
 
     ! Update materials
@@ -71,7 +75,6 @@ program critical_temperature
     end if
 
     ! If we have multiple layers, check the iteration number
-    n = n+1
     if (n >= bootstraps) then
       ! Check for convergence
       if (stack % difference() < tolerance) then
