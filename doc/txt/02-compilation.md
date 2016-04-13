@@ -5,10 +5,10 @@ date:   2016-04-13
 
 
 @NOTE
-  These instructions should work for POSIX compliant operating systems with all 
-  the above dependencies installed. This should include Linux/Unix/Mac systems,
-  and possibly also Windows if you have Cygwin installed. If you use any other 
-  platforms or compilers than this, you may have to compile the project manually.
+  These instructions should work for Unix-like operating systems with all the [recommended
+  dependencies](01-dependencies.html) installed. This should include Linux/Unix/Mac systems,
+  and possibly also Windows if you have [Cygwin](https://www.cygwin.com/) installed. If you
+  use other platforms or compilers than this, you may have to compile the project manually.
 
 After you have obtained and unpacked the source code, open a terminal, and change
 directory to the top directory of the project. This should be the directory with
@@ -27,7 +27,7 @@ run-time. To compile the project in debug mode, run one of these commands instea
     ./configure --gfortran-debug
     ./configure --ifort-debug
 
-After configuration, change to the subdirectory 'build', and run 'make' to compile:
+After configuration, change to the subdirectory `build`, and run `make` to compile:
 
     cd build
     make
