@@ -1,9 +1,0 @@
-- Finish the INI file parser
-- Possible idea: let the constructors of superconductor and ferromagnet take an additional 'unit' argument, so that it can construct its properties based on an input file. Furthermore, endow the constructors with a 'save' argument 'number', such that every time a new object is constructed, it takes its arguments from the next appropriate section in the config file.
-- Introduce a 'bootstrap' parameter which can be set in the range (0,1) to gradually turn on spin-orbit coupling, ferromagnetism, etc.
-- Extend mod_spin with spin(3) vector methods, such as spin3_exp_integer and spin3_add_spin3, to simplify the ferromagnet_usadel_equation and spinorbit_usadel_equation implementations
-- Extend energy_range to include the possibility of negative energies
-- Extend the ferromagnet constructor to allow exchange field initialization from a function
-- Find a sensible way to append results to a file from critical temp calculations.
-- Improve output routines (inspired by CMake — red headers, yellow warnings, green status info, calculate percentage complete)
-- Create a module for reading config files, and migrate from the current option-hack to a modularized superconductor/ferromagnet initialization
