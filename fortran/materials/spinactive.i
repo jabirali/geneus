@@ -122,11 +122,6 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   type(green),              intent(in   ) :: b
   type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2
-
-  type(spin)                              :: N2, Nt2
-  type(spin)                              :: N3, Nt3
-  complex(wp)                             :: L(4,4)
-  complex(wp)                             :: R(4,4)
   complex(wp)                             :: I(4,4)
 
   ! Rename the parameters that describe the spin-active properties
@@ -161,28 +156,12 @@ pure function spinactive_current(g0, gt0, dg0, dgt0, g1, gt1, dg1, dgt1, M, M0, 
   complex(wp), intent(in) :: M0(4,4)
   complex(wp)             :: I(4,4)
 
-  type(spin)             :: N0, Nt0
-  type(spin)             :: N1, Nt1
-  complex(wp)            :: GM0(4,4)
-  complex(wp)            :: GM1(4,4)
-
-  ! Calculate the normalization matrices
-  N0  = spin_inv( pauli0 - g0*gt0 )
-  Nt0 = spin_inv( pauli0 - gt0*g0 )
-  N1  = spin_inv( pauli0 - g1*gt1 )
-  Nt1 = spin_inv( pauli0 - gt1*g1 )
+  complex(wp)             :: GM0(4,4)
+  complex(wp)             :: GM1(4,4)
 
   ! Calculate the 4×4 Green's function in the left material
-  GM0(1:2,1:2) = (+1.0_wp) * N0  * (pauli0 + g0*gt0)
-  GM0(1:2,3:4) = (+2.0_wp) * N0  * g0
-  GM0(3:4,1:2) = (-2.0_wp) * Nt0 * gt0
-  GM0(3:4,3:4) = (-1.0_wp) * Nt0 * (pauli0 + gt0*g0)
-
-  ! Calculate the 4×4 Green's function in the right material
-  GM1(1:2,1:2) = (+1.0_wp) * N1  * (pauli0 + g1*gt1)
-  GM1(1:2,3:4) = (+2.0_wp) * N1  * g1
-  GM1(3:4,1:2) = (-2.0_wp) * Nt1 * gt1
-  GM1(3:4,3:4) = (-1.0_wp) * Nt1 * (pauli0 + gt1*g1)
+  GM0 = green(g0, gt0, dg0, dgt0)
+  GM1 = green(g1, gt1, dg1, dgt1)
 
   ! Calculate the spin-active terms in the interface current
   I = spinactive_current1(GM0, GM1, M, M0, P, Q)

@@ -6,7 +6,7 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-07-11
-! Updated: 2015-10-04
+! Updated: 2015-04-13
 
 module green_m
   use math_m
@@ -24,6 +24,7 @@ module green_m
     type(spin) :: dg                           ! Derivative dγ /dz
     type(spin) :: dgt                          ! Derivative dγ~/dz
   contains
+    procedure  :: matrix    => green_matrix    ! Matrix representation of the entire Green's function
     procedure  :: get_g     => green_get_g     ! Normal Green's function g
     procedure  :: get_gt    => green_get_gt    ! Normal Green's function g~
     procedure  :: get_f     => green_get_f     ! Anomal Green's function f
@@ -42,22 +43,42 @@ module green_m
 
   ! Type constructor
   interface green
-    module procedure green_construct_zero, green_construct_bcs
+    module procedure green_construct_zero, green_construct_riccati, green_construct_bcs
   end interface
 
   ! Assignment operator
   interface assignment(=)
-    module procedure green_import_rvector, green_export_rvector
+    module procedure green_import_rvector, green_export_rvector, green_export_cmatrix
   end interface
 contains
   pure function green_construct_zero() result(this)
     ! Constructs a state corresponding to a normal metal, which has all the Riccati parameters set to zero.
     type(green) :: this
 
-    this % g   = spin(0)
-    this % gt  = spin(0)
-    this % dg  = spin(0)
-    this % dgt = spin(0)
+    ! There is no need to explicitly set the Riccati parameters to zero, 
+    ! as the type(spin) constructors will do it automatically by default
+    continue
+  end function
+
+  pure function green_construct_riccati(g, gt, dg, dgt) result(this)
+    !! Construct an arbitrary state by explicitly providing the Riccati parameters.
+    type(spin), intent(in)           :: g    !! Riccati parameter
+    type(spin), intent(in)           :: gt   !! Riccati parameter (tilde conjugated)
+    type(spin), intent(in), optional :: dg   !! Derivative of the Riccati parameter
+    type(spin), intent(in), optional :: dgt  !! Derivative of the Riccati parameter (tilde conjugated)
+    type(green)                      :: this !! Constructed object
+
+    ! Copy Riccati parameters into the new object
+    this % g  = g
+    this % gt = gt
+
+    ! Copy the derivatives if available
+    if (present(dg)) then
+      this % dg = dg
+    end if
+    if (present(dgt)) then
+      this % dgt = dgt
+    end if
   end function
 
   pure function green_construct_bcs(energy, gap) result(this)
@@ -83,9 +104,36 @@ contains
     b = -(exp(+t)-exp(-t))/(2+exp(+t)+exp(-t)) * exp( (0,-1) * p )
 
     ! Calculate the matrix Riccati parameters γ and γ~
-    this%g  = [(0.0_wp,0.0_wp), a, -a, (0.0_wp,0.0_wp)]
-    this%gt = [(0.0_wp,0.0_wp), b, -b, (0.0_wp,0.0_wp)]
+    this % g  = [(0.0_wp,0.0_wp), a, -a, (0.0_wp,0.0_wp)]
+    this % gt = [(0.0_wp,0.0_wp), b, -b, (0.0_wp,0.0_wp)]
   end function
+
+  pure function green_matrix(this) result(matrix)
+    !! Calculates the 4×4 Green's function matrix from the Riccati parameters of the Green's function object.
+    class(green), intent(in) :: this        !! Green's function object
+    complex(wp)              :: matrix(4,4) !! Green's function matrix
+    type(spin)               :: N, Nt
+
+    associate(g => this % g, gt => this % gt, I => pauli0, M => matrix)
+      ! Calculate the normalization matrices
+      N  = spin_inv( I - g*gt )
+      Nt = spin_inv( I - gt*g )
+
+      ! Calculate the 4×4 Green's function
+      M(1:2,1:2) = (+2.0_wp) * N  - I
+      M(1:2,3:4) = (+2.0_wp) * N  * g
+      M(3:4,1:2) = (-2.0_wp) * Nt * gt
+      M(3:4,3:4) = (-2.0_wp) * Nt + I
+    end associate
+  end function
+
+  pure subroutine green_export_cmatrix(a, b)
+    ! Defines assignment from a green object to a complex matrix.
+    complex(wp), intent(out) :: a(4,4)
+    type(green), intent(in)  :: b
+
+    a = b % matrix()
+  end subroutine
 
   pure subroutine green_export_rvector(a, b)
     ! Defines assignment from a green object to a real vector.
