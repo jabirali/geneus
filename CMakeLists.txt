@@ -40,7 +40,7 @@ endforeach()
 ###############################################################################
 
 # Set the target directory
-set(EXECUTABLE_OUTPUT_PATH "../programs")
+set(EXECUTABLE_OUTPUT_PATH "../bin/")
 
 # Set the build type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

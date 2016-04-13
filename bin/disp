@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Make sure that the file exists
+if [ -e "$1" ]; then
+  filename="$1"
+else
+  echo "Usage: $(basename ${0}) <filename.dat>"
+  exit
+fi
+
+# Plot the file based on the header line
+case "$(head -1 $filename)" in
+  '# Position          	  Gap magnitude     	  Gap phase         '                                                          )
+    gnuplot -e "filename='${filename}'" "$(dirname $0)/../gnuplot/position-gap.plt"                                         ;;
+  '# Position          	  Charge current    	  Spin-x current    	  Spin-y current    	  Spin-z current    '              )
+    gnuplot -e "filename='${filename}'" "$(dirname $0)/../gnuplot/position-current.plt"                                     ;;
+  '# Phase             	  Charge current    '                                                                                )
+    gnuplot -e "filename='${filename}'" "$(dirname $0)/../gnuplot/phase-current.plt"                                        ;;
+  '# Position          	  Energy            	  Density of states '                                                          )
+    cat ${filename} | awk -f "$(dirname $0)/addblanks.awk" | gnuplot "$(dirname $0)/../gnuplot/position-energy-density.plt" ;;
+                                                                                                                            *)
+  echo 'Unrecognized data file...'                                                                                          ;;
+esac
