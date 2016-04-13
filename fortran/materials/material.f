@@ -1,11 +1,11 @@
-! This module defines the data type 'material',  which models the state of a physical material for a discretized range of
-! positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
-! intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
-! type defines the essential data structures and program structure, while the derived subtypes will define actual physics.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-07-29
-! Updated: 2016-03-23
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-07-29
+!> Category: Materials
+!>
+!> This module defines the data type 'material',  which models the state of a physical material for a discretized range of
+!> positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
+!> intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
+!> type defines the essential data structures and program structure, while the derived subtypes will define actual physics.
 
 module material_m
   use stdio_m

@@ -1,11 +1,11 @@
-! This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
-! floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
-! the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
-! As for module procedures, this library defines common utility functions for working with complex numbers and matrices.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-09-23
-! Updated: 2016-04-13
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-09-23
+!> Category: Foundation
+!>
+!> This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
+!> floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
+!> the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
+!> As for module procedures, this library defines common utility functions for working with complex numbers and matrices.
 
 module math_m
   use :: iso_fortran_env

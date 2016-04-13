@@ -1,12 +1,16 @@
-! This module defines the data type 'halfmetal', which models the physical state of a strong or halfmetallic ferromagnet.
-! The type is a member of class(conductor), and inherits the internal structure and generic methods defined there.
-! @TODO: Add an update_posthook to rescale density(:) and current(:) with the dependence of the diffusion constant matrix
-!        on the polarization. Remember to check how the polarization dependence varies with the number of dimensions.
-! @TODO: Check if a non-linear dependence of the polarization matrix on the polarization is more sensible?
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2016-03-08
-! Updated: 2016-03-30
+!> Author:   Jabir Ali Ouassou
+!> Date:     2016-03-08
+!> Category: Materials
+!>
+!> This module defines the data type 'halfmetal', which models the physical state of a strong or halfmetallic ferromagnet.
+!> The type is a member of class(conductor), and inherits the internal structure and generic methods defined there.
+!>
+!> @TODO 
+!>   Add an update_posthook to rescale density(:) and current(:) with the dependence of the diffusion constant matrix
+!>   on the polarization. Remember to check how the polarization dependence varies with the number of dimensions.
+!>
+!> @TODO
+!>   Check if a non-linear dependence of the polarization matrix on the polarization is more sensible?
 
 module halfmetal_m
   use stdio_m

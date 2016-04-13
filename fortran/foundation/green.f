@@ -1,12 +1,12 @@
-! This module defines the data type 'green', which represents the Green's function at a given position and energy. This
-! is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dz and dγ~/dz. These are
-! sufficient to reconstruct the normal Green's function g and anomalous Green's function f, and derived quantities like
-! the density of states.  To make it easier to interact with differential equation solvers, which often operate on real
-! state vectors, the assignment operator is overloaded so objects can be easily imported/exported to a real vector(32).
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-07-11
-! Updated: 2015-04-13
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-07-11
+!> Category: Foundation
+!>
+!> This module defines the data type 'green', which represents the Green's function at a given position and energy. This
+!> is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dz and dγ~/dz. These are
+!> sufficient to reconstruct the normal Green's function g and anomalous Green's function f, and derived quantities like
+!> the density of states.  To make it easier to interact with differential equation solvers, which often operate on real
+!> state vectors, the assignment operator is overloaded so objects can be easily imported/exported to a real vector(32).
 
 module green_m
   use math_m

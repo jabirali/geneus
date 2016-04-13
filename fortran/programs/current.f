@@ -1,12 +1,12 @@
-!! This program calculates the charge and spin currents in a Josephson junction as a function of the
-!! phase difference between the two surrounding superconductors. In particular, the critical current
-!! of the junction is also calculated. The heterostructure is constructed based on the configuration
-!! file 'materials.conf', which the program expects to find in the runtime directory. The results are
-!! then written to various output files that will be created in the runtime directory.
-!!
-!! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-!! Created: 2016-03-22
-!! Updated: 2016-03-24
+!> Author:   Jabir Ali Ouassou
+!> Date:     2016-03-22
+!> Category: Programs
+!>
+!> This program calculates the charge and spin currents in a Josephson junction as a function of the
+!> phase difference between the two surrounding superconductors. In particular, the critical current
+!> of the junction is also calculated. The heterostructure is constructed based on the configuration
+!> file 'materials.conf', which the program expects to find in the runtime directory. The results are
+!> then written to various output files that will be created in the runtime directory.
 
 program critical_current
   use structure_m

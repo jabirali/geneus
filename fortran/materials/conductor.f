@@ -1,10 +1,10 @@
-! This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
-! of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
-! such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-07-11
-! Updated: 2016-04-06
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-07-11
+!> Category: Materials
+!>
+!> This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
+!> of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
+!> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
 
 module conductor_m
   use stdio_m

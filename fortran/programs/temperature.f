@@ -1,12 +1,12 @@
-!! This program calculates the critical temperature of an arbitrary superconducting hybrid structure
-!! for a given set of physical parameters. In order to obtain the critical temperature as a function
-!! of these parameters, the program has to be invoked multiple times with different input parameters.
-!! The structure is constructed based on the configuration file 'materials.conf', which the program
-!! expects to find in the runtime directory, and the results are written to the file 'critical.dat'.
-!!
-!! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-!! Created: 2016-03-24
-!! Updated: 2016-03-24
+!> Author:   Jabir Ali Ouassou
+!> Date:     2016-03-24
+!> Category: Programs
+!>
+!> This program calculates the critical temperature of an arbitrary superconducting hybrid structure
+!> for a given set of physical parameters. In order to obtain the critical temperature as a function
+!> of these parameters, the program has to be invoked multiple times with different input parameters.
+!> The structure is constructed based on the configuration file 'materials.conf', which the program
+!> expects to find in the runtime directory, and the results are written to the file 'critical.dat'.
 
 program critical_temperature
   use structure_m

@@ -1,8 +1,8 @@
-! This program is used to test the fundamental data structures and procedures.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-07-13
-! Updated: 2015-08-09
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-07-13
+!> Category: Programs
+!>
+!> This program is used to test the fundamental data structures and procedures.
 
 program test_core
   use assert_m

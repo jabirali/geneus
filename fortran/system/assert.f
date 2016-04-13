@@ -1,8 +1,8 @@
-! This module defines the interfaces 'check' and 'assert', which are used for unit testing of other modules.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-07-13
-! Updated: 2015-10-04
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-07-13
+!> Category: System
+!>
+!> This module defines the interfaces 'check' and 'assert', which are used for unit testing of other modules.
 
 module assert_m
   use stdio_m, only: color_none, color_red, color_green

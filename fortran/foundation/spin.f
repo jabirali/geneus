@@ -1,11 +1,11 @@
-! This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads
-! common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
-! To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
-! the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-07-10
-! Updated: 2015-03-01
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-07-10
+!> Category: Foundation
+!>
+!> This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads
+!> common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
+!> To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
+!> the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).
 
 module spin_m
   use math_m
