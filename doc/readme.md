@@ -10,6 +10,7 @@ project_dir: ../fortran/system
              ../fortran/programs
 extensions:  f
              i
+display:     public
 graph:       false
 
 
