@@ -5,45 +5,53 @@
 !
 ! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
 ! Created: 2015-09-23
-! Updated: 2016-04-06
+! Updated: 2016-04-13
 
 module math_m
   use :: iso_fortran_env
   use :: stdio_m
   implicit none
-  public
+  private
+
+  ! Declare which routines to export
+  public :: differentiate, integrate, interpolate, evaluate, linspace, unitvector, re, im, cx, diag, &
+            trace, mateye, matdivl2, matdivr2, matinv2, matinv3, matinv4, commutator, anticommutator
 
   ! Declare floating-point precisions
-  integer,     parameter :: sp  = REAL32              !! Single precision
-  integer,     parameter :: dp  = REAL64              !! Double precision
-  integer,     parameter :: qp  = REAL128             !! Quadruple precision
-  integer,     parameter :: wp  = dp                  !! Working precision
+  integer,  parameter, public :: sp  = REAL32              !! Single precision
+  integer,  parameter, public :: dp  = REAL64              !! Double precision
+  integer,  parameter, public :: qp  = REAL128             !! Quadruple precision
+  integer,  parameter, public :: wp  = dp                  !! Working precision
 
   ! Define common mathematical constants
-  real(wp),    parameter :: inf = huge(1.0_wp)        !! Numerical infinity
-  real(wp),    parameter :: eps = epsilon(1.0_wp)     !! Numerical infinitesimal
-  real(wp),    parameter :: pi  = atan(1.0_wp)*4.0_wp !! Circle constant
+  real(wp), parameter, public :: inf = huge(1.0_wp)        !! Numerical infinity
+  real(wp), parameter, public :: eps = epsilon(1.0_wp)     !! Numerical infinitesimal
+  real(wp), parameter, public :: pi  = atan(1.0_wp)*4.0_wp !! Circle constant
 
   ! Define common identity matrices
-  real(wp),    parameter :: mateye2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
-  real(wp),    parameter :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])               !! 3×3 identity matrix
-  real(wp),    parameter :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4]) !! 4×4 identity matrix
+  real(wp), parameter, public :: mateye2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
+  real(wp), parameter, public :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])               !! 3×3 identity matrix
+  real(wp), parameter, public :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4]) !! 4×4 identity matrix
 
-  ! Interfaces for math routines
+  ! Public interface for routines
   interface differentiate
+    !! Public interface for various differentiation routines
     module procedure differentiate_linear, differentiate_linear_cx
   end interface
 
   interface integrate
+    !! Public interface for various integration routines
     module procedure integrate_linear, integrate_linear_cx, &
                      integrate_pchip,  integrate_pchip_cx
   end interface
 
   interface interpolate
+    !! Public interface for various interpolation routines
     module procedure interpolate_pchip, interpolate_pchip_cx
   end interface
 
   interface evaluate
+    !! Public interface for various routines that evaluate mathematical expressions
     module procedure evaluate_scalar_value, evaluate_scalar_field, &
                      evaluate_vector_value, evaluate_vector_field, &
                      evaluate_logical_value

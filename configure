@@ -48,10 +48,6 @@ case "$1" in
 
   "--doc")
     echo "Preparing for generation of DOCUMENTATION with FORD."
-    if [ -e documentation ]; then
-      echo "Removing the existing documentation."
-      rm -r documentation
-    fi
     echo
     ford readme.md || exit 1
     echo "Documentation has been generated in the subdirectory 'documentation'."
