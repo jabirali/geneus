@@ -23,6 +23,7 @@ program critical_temperature
 
   ! Declare program control parameters
   character(*), parameter         :: filename   = 'critical.dat'
+  integer,      parameter         :: bootstraps = 12
   integer,      parameter         :: bisections = 12
   integer,      parameter         :: iterations = 6
   real(wp),     parameter         :: tolerance  = 1e-8_wp
@@ -35,7 +36,8 @@ program critical_temperature
   real(wp)                        :: critical   = 0.50_wp
   integer                         :: unit       = 0
   integer                         :: iostat     = 0
-  integer                         :: n, m
+  integer                         :: n          = 0
+  integer                         :: m          = 0
 
 
 
@@ -49,6 +51,9 @@ program critical_temperature
   ! Initialize the stack to a barely superconducting state
   call stack % init(cx(initgap,0.0_wp))
 
+  ! Check the number of materials in the stack
+  m = stack % count()
+
   ! Bootstrap the material states at zero temperature
   do
     ! Status information
@@ -60,9 +65,18 @@ program critical_temperature
     ! Update materials
     call stack % update(freeze = .true.)
 
-    ! Check for convergence
-    if (stack % difference() < tolerance) then
+    ! If we only have one layer, then one update is sufficient
+    if (m <= 1) then
       exit
+    end if
+
+    ! If we have multiple layers, check the iteration number
+    n = n+1
+    if (n >= bootstraps) then
+      ! Check for convergence
+      if (stack % difference() < tolerance) then
+        exit
+      end if
     end if
   end do
 
