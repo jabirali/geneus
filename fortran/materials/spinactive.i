@@ -93,6 +93,8 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
   type(spin),               intent(inout) :: r1, rt1
   complex(wp)                             :: I(4,4)
 
+  complex(wp) :: GM0(4,4), GM1(4,4)
+
   ! Rename the parameters that describe the spin-active properties
   associate(M  => this % M_a,            &
             M0 => this % M0_a,           &
@@ -101,12 +103,14 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
 
   ! Rename the Riccati parameters in the material to the left
   associate(g0   => a % g, &
-            gt0  => a % gt,&
-            dg0  => a % dg,&
-            dgt0 => a % dgt)
+            gt0  => a % gt )
+
+  ! Calculate the 4×4 Green's functions
+  GM0 = green(g0, gt0)
+  GM1 = green(g1, gt1)
 
   ! Calculate the spin-active terms in the interface current
-  I = 0.25 * this%conductance_a * spinactive_current(g1, gt1, dg1, dgt1, g0, gt0, dg0, dgt0, M, M0, P, Q)
+  I = 0.25 * this%conductance_a * spinactive_current(GM1, GM0, M, M0, P, Q)
 
   ! Calculate the deviation from the boundary condition
   r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -124,6 +128,8 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   type(spin),               intent(inout) :: r2, rt2
   complex(wp)                             :: I(4,4)
 
+  complex(wp) :: GM2(4,4), GM3(4,4)
+
   ! Rename the parameters that describe the spin-active properties
   associate(M  => this % M_b,            &
             M0 => this % M0_b,           &
@@ -132,12 +138,14 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
 
   ! Rename the Riccati parameters in the material to the right
   associate(g3   => b % g, &
-            gt3  => b % gt,&
-            dg3  => b % dg,&
-            dgt3 => b % dgt)
+            gt3  => b % gt )
+
+  ! Calculate the 4×4 Green's functions
+  GM2 = green(g2, gt2)
+  GM3 = green(g3, gt3)
 
   ! Calculate the spin-active terms in the interface current
-  I = 0.25 * this%conductance_b * spinactive_current(g2, gt2, dg2, dgt2, g3, gt3, dg3, dgt3, M, M0, P, Q)
+  I = 0.25 * this%conductance_b * spinactive_current(GM2, GM3, M, M0, P, Q)
 
   ! Calculate the deviation from the boundary condition
   r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
@@ -147,24 +155,17 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   end associate
 end subroutine
 
-pure function spinactive_current(g0, gt0, dg0, dgt0, g1, gt1, dg1, dgt1, M, M0, P, Q) result(I)
+pure function spinactive_current(G0, G1, M, M0, P, Q) result(I)
   ! Calculate the matrix current at a spin-active interface.
-  type(spin),  intent(in) :: g0, gt0, dg0, dgt0
-  type(spin),  intent(in) :: g1, gt1, dg1, dgt1
-  real(wp),    intent(in) :: P, Q
-  complex(wp), intent(in) :: M(4,4)
-  complex(wp), intent(in) :: M0(4,4)
-  complex(wp)             :: I(4,4)
-
-  complex(wp)             :: GM0(4,4)
-  complex(wp)             :: GM1(4,4)
-
-  ! Calculate the 4×4 Green's function in the left material
-  GM0 = green(g0, gt0, dg0, dgt0)
-  GM1 = green(g1, gt1, dg1, dgt1)
+  real(wp),                    intent(in) :: P, Q
+  complex(wp), dimension(4,4), intent(in) :: G0
+  complex(wp), dimension(4,4), intent(in) :: G1
+  complex(wp), dimension(4,4), intent(in) :: M
+  complex(wp), dimension(4,4), intent(in) :: M0
+  complex(wp), dimension(4,4)             :: I
 
   ! Calculate the spin-active terms in the interface current
-  I = spinactive_current1(GM0, GM1, M, M0, P, Q)
+  I = spinactive_current1(G0, G1, M, M0, P, Q)
 contains
   pure function spinactive_current1(G0, G1, M, M0, P, Q) result(I)
     ! Calculate the first-order matrix current. Note that we subtract the Kupriyanov-Lukichev term,
