@@ -16,7 +16,7 @@ module halfmetal_m
   use stdio_m
   use math_m
   use spin_m
-  use green_m
+  use propagator_m
   use material_m
   use conductor_m
   implicit none
@@ -65,7 +65,7 @@ contains
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%propagator(n,m) = green()
+        this%propagator(n,m) = propagator()
       end do
     end do
   end subroutine
@@ -103,10 +103,10 @@ contains
 
   pure subroutine halfmetal_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
     ! Calculate residuals from the boundary conditions at the left interface.
-    class(halfmetal),          intent(in   ) :: this
-    type(green),               intent(in   ) :: a
-    type(spin),                intent(in   ) :: g, gt, dg, dgt
-    type(spin),                intent(inout) :: r, rt
+    class(halfmetal), intent(in   ) :: this
+    type(propagator), intent(in   ) :: a
+    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use spin-active boundary conditions
     if (associated(this%material_a)) then
@@ -127,10 +127,10 @@ contains
 
   pure subroutine halfmetal_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
     ! Calculate residuals from the boundary conditions at the right interface.
-    class(halfmetal),          intent(in   ) :: this
-    type(green),               intent(in   ) :: b
-    type(spin),                intent(in   ) :: g, gt, dg, dgt
-    type(spin),                intent(inout) :: r, rt
+    class(halfmetal), intent(in   ) :: this
+    type(propagator), intent(in   ) :: b
+    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use spin-active boundary conditions
     if (associated(this%material_b)) then

@@ -11,7 +11,7 @@ module material_m
   use stdio_m
   use math_m
   use spin_m
-  use green_m
+  use propagator_m
   implicit none
   private
 
@@ -28,8 +28,8 @@ module material_m
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
     real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
-    type(green),                  allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
-    type(green),                  allocatable :: backup(:,:)                                ! Backup values for the propagator
+    type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
+    type(propagator),             allocatable :: backup(:,:)                                ! Backup values for the propagator
     real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
     real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
 
@@ -104,10 +104,10 @@ module material_m
   abstract interface
     pure subroutine interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
       ! This interface is used for the deferred procedure interface_equation_a.
-      import material, green, spin, wp
+      import material, propagator, spin, wp
 
       class(material),          intent(in   ) :: this
-      type(green),              intent(in   ) :: a
+      type(propagator),         intent(in   ) :: a
       type(spin),               intent(in   ) :: g, gt, dg, dgt
       type(spin),               intent(inout) :: r, rt
     end subroutine
@@ -116,10 +116,10 @@ module material_m
   abstract interface
     pure subroutine interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
       ! This interface is used for the deferred procedure interface_equation_b.
-      import material, green, spin, wp
+      import material, propagator, spin, wp
 
       class(material),          intent(in   ) :: this
-      type(green),              intent(in   ) :: b
+      type(propagator),         intent(in   ) :: b
       type(spin),               intent(in   ) :: g, gt, dg, dgt
       type(spin),               intent(inout) :: r, rt
     end subroutine
@@ -137,8 +137,8 @@ contains
     class(material),   intent(inout) :: this                       ! Material that will be updated
     logical, optional, intent(in   ) :: freeze                     ! This flag prevents update posthooks
     type(bvp_sol)                    :: sol                        ! Workspace for the bvp_solver procedures
-    type(green)                      :: a                          ! State at this energy at the left  interface
-    type(green)                      :: b                          ! State at this energy at the right interface
+    type(propagator)                 :: a                          ! State at this energy at the left  interface
+    type(propagator)                 :: b                          ! State at this energy at the right interface
     complex(wp)                      :: e                          ! Complex energy relative to the Thouless energy
     real(wp)                         :: u(32,size(this%location))  ! Representation of the retarded propagators
     real(wp)                         :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
@@ -184,13 +184,13 @@ contains
         if (associated(this%material_a)) then
           a = this%material_a%propagator(n,ubound(this%material_a%propagator,2))
         else
-          a = green()
+          a = propagator()
         end if
 
         if (associated(this%material_b)) then
           b = this%material_b%propagator(n,lbound(this%material_b%propagator,2))
         else
-          b = green()
+          b = propagator()
         end if
 
         ! Initialize bvp_solver

@@ -88,7 +88,7 @@ end subroutine
 pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
   ! Calculate the spin-active terms in the left boundary condition, and update the residuals.
   class(conductor), target, intent(in   ) :: this
-  type(green),              intent(in   ) :: a
+  type(propagator),         intent(in   ) :: a
   type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
   type(spin),               intent(inout) :: r1, rt1
   complex(wp)                             :: I(4,4)
@@ -97,8 +97,8 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
 
   ! Calculate the 4×4 Green's functions
   associate(g0 => a % g, gt0 => a % gt)
-    GM0 = green(g0, gt0)
-    GM1 = green(g1, gt1)
+    GM0 = propagator(g0, gt0)
+    GM1 = propagator(g1, gt1)
   end associate
 
   ! Calculate the spin-active terms in the interface current
@@ -120,7 +120,7 @@ end subroutine
 pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
   ! Calculate the spin-active terms in the right boundary condition, and update the residuals.
   class(conductor), target, intent(in   ) :: this
-  type(green),              intent(in   ) :: b
+  type(propagator),         intent(in   ) :: b
   type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2
   complex(wp)                             :: I(4,4)
@@ -129,8 +129,8 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
 
   ! Calculate the 4×4 Green's functions
   associate(g3 => b % g, gt3 => b % gt)
-    GM2 = green(g2, gt2)
-    GM3 = green(g3, gt3)
+    GM2 = propagator(g2, gt2)
+    GM3 = propagator(g3, gt3)
   end associate
 
   ! Calculate the spin-active terms in the interface current

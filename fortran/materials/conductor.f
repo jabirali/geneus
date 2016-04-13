@@ -10,7 +10,7 @@ module conductor_m
   use stdio_m
   use math_m
   use spin_m
-  use green_m
+  use propagator_m
   use material_m
   implicit none
   private
@@ -131,7 +131,7 @@ contains
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%propagator(n,m) = green( cx(this%energy(n),this%scattering), gap )
+        this%propagator(n,m) = propagator( cx(this%energy(n),this%scattering), gap )
       end do
     end do
   end subroutine
@@ -172,7 +172,7 @@ contains
   pure subroutine conductor_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
       ! Calculate residuals from the boundary conditions at the left interface.
       class(conductor),          intent(in   ) :: this
-      type(green),               intent(in   ) :: a
+      type(propagator),          intent(in   ) :: a
       type(spin),                intent(in   ) :: g, gt, dg, dgt
       type(spin),                intent(inout) :: r, rt
 
@@ -212,7 +212,7 @@ contains
   pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
     ! Calculate residuals from the boundary conditions at the right interface.
     class(conductor),          intent(in   ) :: this
-    type(green),               intent(in   ) :: b
+    type(propagator),          intent(in   ) :: b
     type(spin),                intent(in   ) :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
@@ -272,7 +272,7 @@ contains
   pure subroutine conductor_interface_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a transparent boundary condition for the left interface.
     class(conductor), intent(in   ) :: this
-    type(green),      intent(in   ) :: a
+    type(propagator), intent(in   ) :: a
     type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
     type(spin),       intent(inout) :: r1, rt1
 
@@ -290,7 +290,7 @@ contains
   pure subroutine conductor_interface_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a transparent boundary condition for the right interface.
     class(conductor),          intent(in   ) :: this
-    type(green),               intent(in   ) :: b
+    type(propagator),          intent(in   ) :: b
     type(spin),                intent(in   ) :: g2, gt2, dg2, dgt2
     type(spin),                intent(inout) :: r2, rt2
 
@@ -308,7 +308,7 @@ contains
   pure subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a tunneling boundary condition for the left interface.
     class(conductor),          intent(in   ) :: this
-    type(green),               intent(in   ) :: a
+    type(propagator),          intent(in   ) :: a
     type(spin),                intent(inout) :: r1, rt1
     type(spin),                intent(in   ) :: g1, gt1, dg1, dgt1
     type(spin)                               :: N0, Nt0
@@ -333,7 +333,7 @@ contains
   pure subroutine conductor_interface_tunnel_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a tunneling boundary condition for the right interface.
     class(conductor),          intent(in   ) :: this
-    type(green),               intent(in   ) :: b
+    type(propagator),          intent(in   ) :: b
     type(spin),                intent(inout) :: r2, rt2
     type(spin),                intent(in   ) :: g2, gt2, dg2, dgt2
     type(spin)                               :: N3, Nt3
