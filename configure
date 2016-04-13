@@ -49,6 +49,7 @@ case "$1" in
   "--doc")
     echo "Preparing for generation of DOCUMENTATION with FORD."
     echo
+    cd doc
     ford readme.md || exit 1
     echo "Documentation has been generated in the subdirectory 'documentation'."
     echo "You can now open 'documentation/index.html' in a sensible web browser."
