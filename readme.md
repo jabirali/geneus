@@ -7,7 +7,8 @@ project_dir: ./fortran/system
              ./fortran/programs
 extensions:  f
              i
-summary:     s4tran — Superconducting Spintronics Simulation Suite in Fortran
+project:     S4TRAN
+summary:     S4TRAN — Superconducting Spintronics Simulation Suite in Fortran
 graph:       false
 
 
