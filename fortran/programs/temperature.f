@@ -9,9 +9,9 @@
 !> expects to find in the runtime directory, and the results are written to the file 'critical.dat'. 
 
 program critical_temperature
-  use structure_m
-  use stdio_m
-  use math_m
+  use :: structure_m
+  use :: stdio_m
+  use :: math_m
   implicit none
 
   !--------------------------------------------------------------------------------!

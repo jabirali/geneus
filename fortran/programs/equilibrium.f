@@ -8,8 +8,8 @@
 !> expected to be in the runtime directory. The output is written to files in the same directory.
 
 program equilibrium
-  use structure_m
-  use stdio_m
+  use :: structure_m
+  use :: stdio_m
   implicit none
 
   ! Create the superconducting structure
@@ -19,7 +19,7 @@ program equilibrium
   ! Main loop
   do
     ! Status information
-    call status_head('UPDATING STATE')
+    call status_head('SELFCONSISTENT UPDATE')
     call status_body('State difference', stack % difference())
     call status_foot
 
