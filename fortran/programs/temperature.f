@@ -6,7 +6,7 @@
 !> for a given set of physical parameters. In order to obtain the critical temperature as a function
 !> of these parameters, the program has to be invoked multiple times with different input parameters.
 !> The structure is constructed based on the configuration file 'materials.conf', which the program
-!> expects to find in the runtime directory, and the results are written to the file 'critical.dat'.
+!> expects to find in the runtime directory, and the results are written to the file 'critical.dat'. 
 
 program critical_temperature
   use structure_m
