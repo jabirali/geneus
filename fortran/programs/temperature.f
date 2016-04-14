@@ -25,7 +25,7 @@ program critical_temperature
   character(*), parameter         :: filename   = 'critical.dat'
   integer,      parameter         :: bootstraps = 12
   integer,      parameter         :: bisections = 12
-  integer,      parameter         :: iterations = 6
+  integer,      parameter         :: iterations = 06
   real(wp),     parameter         :: tolerance  = 1e-8_wp
   real(wp),     parameter         :: initgap    = 1e-5_wp
 
@@ -93,11 +93,11 @@ program critical_temperature
   !--------------------------------------------------------------------------------!
 
   do n = 1,bisections
-    ! Load the saved material states
-    call stack % load
-
     ! Set the temperature of the materials
     call stack % temperature(critical)
+
+    ! Load the saved material states
+    call stack % load
 
     ! Update the material states
     do m = 1,iterations
