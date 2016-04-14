@@ -349,10 +349,10 @@ contains
     !! discrete numerical data, and subsequently evaluates the integral of the interpolation in the
     !! range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), external    :: dpchqa
-    real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(size(x))
     real(wp), intent(in)  :: a
     real(wp), intent(in)  :: b
+    real(wp), intent(in)  :: x(:)
+    real(wp), intent(in)  :: y(size(x))
     real(wp)              :: d(size(x))
     real(wp)              :: r
     integer               :: err
@@ -366,10 +366,10 @@ contains
 
   function integrate_pchip_cx(x, y, a, b) result(r)
     !! Wrapper for integrate_pchip that accepts complex arguments.
-    real(wp),    intent(in)  :: x(:)
-    complex(wp), intent(in)  :: y(size(x))
     real(wp),    intent(in)  :: a
     real(wp),    intent(in)  :: b
+    real(wp),    intent(in)  :: x(:)
+    complex(wp), intent(in)  :: y(size(x))
     complex(wp)              :: r
 
     ! Integrate the real and imaginary parts separately
@@ -383,8 +383,8 @@ contains
     real(wp), intent(in)  :: x(:)
     real(wp), intent(in)  :: p(:)
     real(wp), intent(in)  :: y(size(x))
-    real(wp)              :: r(size(p))
     real(wp)              :: d(size(x))
+    real(wp)              :: r(size(p))
     integer               :: err
 
     ! Create a PCHIP interpolation of the input data
