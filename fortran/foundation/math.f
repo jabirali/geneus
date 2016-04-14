@@ -18,9 +18,9 @@ module math_m
             trace, mateye, matdivl2, matdivr2, matinv2, matinv3, matinv4, commutator, anticommutator
 
   ! Declare floating-point precisions
-  integer,  parameter, public :: sp  = REAL32              !! Single precision
-  integer,  parameter, public :: dp  = REAL64              !! Double precision
-  integer,  parameter, public :: qp  = REAL128             !! Quadruple precision
+  integer,  parameter, public :: sp  = real32              !! Single precision
+  integer,  parameter, public :: dp  = real64              !! Double precision
+  integer,  parameter, public :: qp  = real128             !! Quadruple precision
   integer,  parameter, public :: wp  = dp                  !! Working precision
 
   ! Define common mathematical constants
@@ -35,23 +35,23 @@ module math_m
 
   ! Public interface for routines
   interface differentiate
-    !! Public interface for various differentiation routines
+    !! Public interface for various differentiation routines.
     module procedure differentiate_linear, differentiate_linear_cx
   end interface
 
   interface integrate
-    !! Public interface for various integration routines
+    !! Public interface for various integration routines.
     module procedure integrate_linear, integrate_linear_cx, &
                      integrate_pchip,  integrate_pchip_cx
   end interface
 
   interface interpolate
-    !! Public interface for various interpolation routines
+    !! Public interface for various interpolation routines.
     module procedure interpolate_pchip, interpolate_pchip_cx
   end interface
 
   interface evaluate
-    !! Public interface for various routines that evaluate mathematical expressions
+    !! Public interface for various routines that evaluate mathematical expressions.
     module procedure evaluate_scalar_value, evaluate_scalar_field, &
                      evaluate_vector_value, evaluate_vector_field, &
                      evaluate_logical_value
@@ -64,25 +64,25 @@ contains
 
   pure elemental function re(z) result(x)
     !! Returns the real part of a complex number z=x+iy.
-    complex(wp), intent(in) :: z      !! Complex number
-    real(wp)                :: x      !! Real part
+    complex(wp), intent(in) :: z   !! Complex number
+    real(wp)                :: x   !! Real part
 
     x = real(z,kind=wp)
   end function
 
   pure elemental function im(z) result(y)
     !! Returns the imaginary part of a complex number z=x+iy.
-    complex(wp), intent(in) :: z      !! Complex number
-    real(wp)                :: y      !! Imaginary part
+    complex(wp), intent(in) :: z   !! Complex number
+    real(wp)                :: y   !! Imaginary part
 
     y = aimag(z)
   end function
 
   pure elemental function cx(x,y) result(z)
     !! Returns the complex number z=x+iy.
-    real(wp),           intent(in) :: x  !! Real part
-    real(wp), optional, intent(in) :: y  !! Imaginary part
-    complex(wp)                    :: z  !! Complex number
+    real(wp), intent(in)           :: x   !! Real part
+    real(wp), intent(in), optional :: y   !! Imaginary part
+    complex(wp)                    :: z   !! Complex number
 
     if (present(y)) then
       z = cmplx(x,y,kind=wp)
@@ -96,10 +96,11 @@ contains
   !---------------------------------------------------------------------------!
 
   pure subroutine linspace(array, first, last)
-    !! Populates an array with elements from 'first' to 'last', inclusive.
-    real(wp), intent(inout) :: array(:)
-    real(wp), intent(in)    :: first, last
-    integer                 :: n
+    !! Populates an array with elements from `first` to `last`, inclusive.
+    real(wp), intent(out) :: array(:)   !! Output array to populate
+    real(wp), intent(in)  :: first      !! Value of first element
+    real(wp), intent(in)  :: last       !! Value of last  element
+    integer               :: n
 
     do n=1,size(array)
       array(n) = first + ((last-first)*(n-1))/(size(array)-1)
@@ -107,10 +108,10 @@ contains
   end subroutine
 
   pure function unitvector(v) result(r)
-    !! Rescales a vector to a unit vector. If the input vector has zero length,
-    !! then the output vector will be a zero vector instead of a unit vector.
-    real(wp), intent(in) :: v(3)
-    real(wp)             :: r(3)
+    !! If the argument has a finite norm, then it will be rescaled to a unit
+    !! vector. If that norm is zero, then a zero vector is returned instead.
+    real(wp), intent(in) :: v(3)   !! Vector
+    real(wp)             :: r(3)   !! Unit vector
 
     r = v/(norm2(v)+eps)
   end function
@@ -120,10 +121,10 @@ contains
   !---------------------------------------------------------------------------!
 
   pure function mateye(n) result(A)
-    !! Constructs an n×n identity matrix.
-    integer, intent(in) :: n
+    !! Constructs an N×N identity matrix.
+    integer, intent(in) :: n        !! Matrix dimension
+    real(wp)            :: A(n,n)   !! Identity matrix
     integer             :: i, j
-    real(wp)            :: A(n,n)
 
     ! Initialize by exploiting integer arithmetic to avoid multiple passes
     do i=1,n
@@ -135,8 +136,8 @@ contains
 
   pure function matinv2(A) result(B)
     !! Performs a direct calculation of the inverse of a 2×2 matrix.
-    complex(wp), intent(in) :: A(2,2)
-    complex(wp)             :: B(2,2)
+    complex(wp), intent(in) :: A(2,2)   !! Matrix
+    complex(wp)             :: B(2,2)   !! Inverse matrix
     complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the matrix
@@ -151,9 +152,9 @@ contains
 
   pure function matdivl2(A,B) result(C)
     !! Performs a direct calculation of a 2×2 matrix left division.
-    complex(wp), intent(in) :: A(2,2)
-    complex(wp), intent(in) :: B(2,2)
-    complex(wp)             :: C(2,2)
+    complex(wp), intent(in) :: A(2,2)   !! Left matrix
+    complex(wp), intent(in) :: B(2,2)   !! Right matrix
+    complex(wp)             :: C(2,2)   !! Fraction A\B
     complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the left matrix
@@ -168,9 +169,9 @@ contains
 
   pure function matdivr2(A,B) result(C)
     !! Performs a direct calculation of a 2×2 matrix right division.
-    complex(wp), intent(in) :: A(2,2)
-    complex(wp), intent(in) :: B(2,2)
-    complex(wp)             :: C(2,2)
+    complex(wp), intent(in) :: A(2,2)   !! Left matrix
+    complex(wp), intent(in) :: B(2,2)   !! Right matrix
+    complex(wp)             :: C(2,2)   !! Fraction A/B
     complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the right matrix
@@ -186,8 +187,8 @@ contains
   pure function matinv3(A) result(B)
     !! Performs a direct calculation of the inverse of a 3×3 matrix.
     !! [Based on the subroutine M33INV by David G. Simpson, NASA.]
-    complex(wp), intent(in) :: A(3,3)
-    complex(wp)             :: B(3,3)
+    complex(wp), intent(in) :: A(3,3)   !! Matrix
+    complex(wp)             :: B(3,3)   !! Inverse matrix
     complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the matrix
@@ -210,8 +211,8 @@ contains
   pure function matinv4(A) result(B)
     !! Performs a direct calculation of the inverse of a 4×4 matrix.
     !! [Based on the subroutine M44INV by David G. Simpson, NASA.]
-    complex(wp), intent(in) :: A(4,4)
-    complex(wp)             :: B(4,4)
+    complex(wp), intent(in) :: A(4,4)   !! Matrix
+    complex(wp)             :: B(4,4)   !! Inverse matrix
     complex(wp)             :: detinv
 
     ! Calculate the inverse determinant of the matrix
@@ -246,26 +247,26 @@ contains
 
   pure function commutator(A, B) result(C)
     !! Calculate the commutator between two complex square matrices of the same dimension.
-    complex(wp), intent(in) :: A(:,:)
-    complex(wp), intent(in) :: B(size(A,1),size(A,1))
-    complex(wp)             :: C(size(A,1),size(A,1))
+    complex(wp), intent(in) :: A(:,:)                   !! Left  matrix
+    complex(wp), intent(in) :: B(size(A,1),size(A,1))   !! Right matrix
+    complex(wp)             :: C(size(A,1),size(A,1))   !! Commutator [A,B]
 
     C = matmul(A,B) - matmul(B,A)
   end function
 
   pure function anticommutator(A, B) result(C)
     !! Calculate the anticommutator between two complex square matrices of the same dimension.
-    complex(wp), intent(in)  :: A(:,:)
-    complex(wp), intent(in)  :: B(size(A,1),size(A,1))
-    complex(wp)              :: C(size(A,1),size(A,1))
+    complex(wp), intent(in)  :: A(:,:)                   !! Left  matrix
+    complex(wp), intent(in)  :: B(size(A,1),size(A,1))   !! Right matrix
+    complex(wp)              :: C(size(A,1),size(A,1))   !! Anticommutator {A,B}
 
     C = matmul(A,B) + matmul(B,A)
   end function
 
   pure function diag(A) result(r)
     !! Extract the diagonal of a complex matrix.
-    complex(wp), intent(in)  :: A(:,:)
-    complex(wp)              :: r(min(size(A,1),size(A,2)))
+    complex(wp), intent(in)  :: A(:,:)                        !! Matrix
+    complex(wp)              :: r(min(size(A,1),size(A,2)))   !! Diag(A)
     integer                  :: n
 
     do n = 1,size(r)
@@ -275,8 +276,8 @@ contains
 
   pure function trace(A) result(r)
     !! Calculate the trace of a complex matrix.
-    complex(wp), intent(in)  :: A(:,:)
-    complex(wp)              :: r
+    complex(wp), intent(in)  :: A(:,:)   !! Matrix
+    complex(wp)              :: r        !! Tr(A)
     integer                  :: n
 
     r = 0
@@ -293,9 +294,9 @@ contains
     !! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation
     !! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     !! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(size(x))
-    real(wp)              :: r(size(x))
+    real(wp), intent(in)  :: x(:)         !! Variable x
+    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp)              :: r(size(x))   !! Derivative dy/dx
 
     ! Differentiate using finite differences
     associate(n => size(x))
@@ -307,9 +308,9 @@ contains
 
   pure function differentiate_linear_cx(x, y) result(r)
     !! Complex version of differentiate_linear.
-    real(wp),    intent(in)  :: x(:)
-    complex(wp), intent(in)  :: y(size(x))
-    complex(wp)              :: r(size(x))
+    real(wp),    intent(in)  :: x(:)         !! Variable x
+    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    complex(wp)              :: r(size(x))   !! Derivative dy/dx
 
     ! Differentiate using finite differences
     associate(n => size(x))
@@ -322,9 +323,9 @@ contains
   pure function integrate_linear(x, y) result(r)
     !! This function calculates the integral of an array y with respect to x using a trapezoid
     !! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(size(x))
-    real(wp)              :: r
+    real(wp), intent(in)  :: x(:)         !! Variable x
+    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp)              :: r            !! Integral ∫y(x)·dx
 
     ! Integrate using the trapezoidal rule
     associate(n => size(x))
@@ -334,9 +335,9 @@ contains
 
   pure function integrate_linear_cx(x, y) result(r)
     !! Complex version of integrate_linear.
-    real(wp),    intent(in) :: x(:)
-    complex(wp), intent(in) :: y(size(x))
-    complex(wp)             :: r
+    real(wp),    intent(in) :: x(:)         !! Variable x
+    complex(wp), intent(in) :: y(size(x))   !! Function y(x)
+    complex(wp)             :: r            !! Integral ∫y(x)·dx
 
     ! Integrate using the trapezoidal rule
     associate(n => size(x))
@@ -348,13 +349,14 @@ contains
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on
     !! discrete numerical data, and subsequently evaluates the integral of the interpolation in the
     !! range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.
+    real(wp), intent(in)  :: x(:)        !! Variable x
+    real(wp), intent(in)  :: y(size(x))  !! Function y(x)
+    real(wp), intent(in)  :: a           !! Left endpoint
+    real(wp), intent(in)  :: b           !! Right endpoint
+    real(wp)              :: r           !! Integral ∫y(x)·dx
+
     real(wp), external    :: dpchqa
-    real(wp), intent(in)  :: a
-    real(wp), intent(in)  :: b
-    real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(size(x))
     real(wp)              :: d(size(x))
-    real(wp)              :: r
     integer               :: err
 
     ! Create a PCHIP interpolation of the input data
@@ -366,11 +368,11 @@ contains
 
   function integrate_pchip_cx(x, y, a, b) result(r)
     !! Wrapper for integrate_pchip that accepts complex arguments.
-    real(wp),    intent(in)  :: a
-    real(wp),    intent(in)  :: b
-    real(wp),    intent(in)  :: x(:)
-    complex(wp), intent(in)  :: y(size(x))
-    complex(wp)              :: r
+    real(wp),    intent(in)  :: x(:)         !! Variable x
+    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp),    intent(in)  :: a            !! Left endpoint
+    real(wp),    intent(in)  :: b            !! Right endpoint
+    complex(wp)              :: r            !! Integral ∫y(x)·dx
 
     ! Integrate the real and imaginary parts separately
     r = cx( integrate_pchip(x, re(y), a, b),&
@@ -380,11 +382,12 @@ contains
   function interpolate_pchip(x, y, p) result(r)
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
     !! and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: p(:)
-    real(wp), intent(in)  :: y(size(x))
+    real(wp), intent(in)  :: x(:)         !! Variable x
+    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp), intent(in)  :: p(:)         !! Interpolation domain p
+    real(wp)              :: r(size(p))   !! Interpolation result y(p)
+
     real(wp)              :: d(size(x))
-    real(wp)              :: r(size(p))
     integer               :: err
 
     ! Create a PCHIP interpolation of the input data
@@ -396,10 +399,10 @@ contains
 
   function interpolate_pchip_cx(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts complex arguments.
-    real(wp),    intent(in)  :: x(:)
-    real(wp),    intent(in)  :: p(:)
-    complex(wp), intent(in)  :: y(size(x))
-    complex(wp)              :: r(size(p))
+    real(wp),    intent(in)  :: x(:)         !! Variable x
+    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp),    intent(in)  :: p(:)         !! Interpolation domain p
+    complex(wp)              :: r(size(p))   !! Interpolation result y(p)
 
     ! Interpolate the real and imaginary parts separately
     r = cx( interpolate_pchip(x, re(y), p),&
