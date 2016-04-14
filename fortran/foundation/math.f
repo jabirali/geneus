@@ -64,25 +64,25 @@ contains
 
   pure elemental function re(z) result(x)
     !! Returns the real part of a complex number z=x+iy.
-    complex(wp), intent(in) :: z
-    real(wp)                :: x
+    complex(wp), intent(in) :: z      !! Complex number
+    real(wp)                :: x      !! Real part
 
     x = real(z,kind=wp)
   end function
 
   pure elemental function im(z) result(y)
     !! Returns the imaginary part of a complex number z=x+iy.
-    complex(wp), intent(in) :: z
-    real(wp)                :: y
+    complex(wp), intent(in) :: z      !! Complex number
+    real(wp)                :: y      !! Imaginary part
 
     y = aimag(z)
   end function
 
   pure elemental function cx(x,y) result(z)
     !! Returns the complex number z=x+iy.
-    real(wp),           intent(in) :: x
-    real(wp), optional, intent(in) :: y
-    complex(wp)                    :: z
+    real(wp),           intent(in) :: x  !! Real part
+    real(wp), optional, intent(in) :: y  !! Imaginary part
+    complex(wp)                    :: z  !! Complex number
 
     if (present(y)) then
       z = cmplx(x,y,kind=wp)
@@ -98,7 +98,7 @@ contains
   pure subroutine linspace(array, first, last)
     !! Populates an array with elements from 'first' to 'last', inclusive.
     real(wp), intent(inout) :: array(:)
-    real(wp), intent(in   ) :: first, last
+    real(wp), intent(in)    :: first, last
     integer                 :: n
 
     do n=1,size(array)
@@ -246,9 +246,9 @@ contains
 
   pure function commutator(A, B) result(C)
     !! Calculate the commutator between two complex square matrices of the same dimension.
-    complex(wp), intent(in)  :: A(:,:)
-    complex(wp), intent(in)  :: B(:,:)
-    complex(wp), allocatable :: C(:,:)
+    complex(wp), intent(in) :: A(:,:)
+    complex(wp), intent(in) :: B(size(A,1),size(A,1))
+    complex(wp)             :: C(size(A,1),size(A,1))
 
     C = matmul(A,B) - matmul(B,A)
   end function
@@ -256,10 +256,21 @@ contains
   pure function anticommutator(A, B) result(C)
     !! Calculate the anticommutator between two complex square matrices of the same dimension.
     complex(wp), intent(in)  :: A(:,:)
-    complex(wp), intent(in)  :: B(:,:)
-    complex(wp), allocatable :: C(:,:)
+    complex(wp), intent(in)  :: B(size(A,1),size(A,1))
+    complex(wp)              :: C(size(A,1),size(A,1))
 
     C = matmul(A,B) + matmul(B,A)
+  end function
+
+  pure function diag(A) result(r)
+    !! Extract the diagonal of a complex matrix.
+    complex(wp), intent(in)  :: A(:,:)
+    complex(wp)              :: r(min(size(A,1),size(A,2)))
+    integer                  :: n
+
+    do n = 1,size(r)
+      r(n) = A(n,n)
+    end do
   end function
 
   pure function trace(A) result(r)
@@ -274,18 +285,6 @@ contains
     end do
   end function
 
-  pure function diag(A) result(r)
-    !! Extract the diagonal of a complex matrix.
-    complex(wp), intent(in)  :: A(:,:)
-    complex(wp), allocatable :: r(:)
-    integer                  :: n
-
-    allocate(r(min(size(A,1),size(A,2))))
-    do n = 1,size(r)
-      r(n) = A(n,n)
-    end do
-  end function
-
   !---------------------------------------------------------------------------!
   !                       ELEMENTARY CALCULUS PROCEDURES                      !
   !---------------------------------------------------------------------------!
@@ -295,68 +294,54 @@ contains
     !! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     !! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(:)
-    real(wp), allocatable :: r(:)
-    integer               :: n
-
-    ! Check the size of input arrays
-    n = min(size(x), size(y))
-
-    ! Allocate memory for the results
-    allocate(r(n))
+    real(wp), intent(in)  :: y(size(x))
+    real(wp)              :: r(size(x))
 
     ! Differentiate using finite differences
-    r(   1   ) = (y( 1+1 ) - y(  1  ))/(x( 1+1 ) - x(  1  ))
-    r(1+1:n-1) = (y(1+2:n) - y(1:n-2))/(x(1+2:n) - x(1:n-2))
-    r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
+    associate(n => size(x))
+      r(   1   ) = (y( 1+1 ) - y(  1  ))/(x( 1+1 ) - x(  1  ))
+      r(1+1:n-1) = (y(1+2:n) - y(1:n-2))/(x(1+2:n) - x(1:n-2))
+      r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
+    end associate
   end function
 
   pure function differentiate_linear_cx(x, y) result(r)
     !! Complex version of differentiate_linear.
     real(wp),    intent(in)  :: x(:)
-    complex(wp), intent(in)  :: y(:)
-    complex(wp), allocatable :: r(:)
-    integer                  :: n
-
-    ! Check the size of input arrays
-    n = min(size(x), size(y))
-
-    ! Allocate memory for the results
-    allocate(r(n))
+    complex(wp), intent(in)  :: y(size(x))
+    complex(wp)              :: r(size(x))
 
     ! Differentiate using finite differences
-    r(   1   ) = (y( 1+1 ) - y(  1  ))/(x( 1+1 ) - x(  1  ))
-    r(1+1:n-1) = (y(1+2:n) - y(1:n-2))/(x(1+2:n) - x(1:n-2))
-    r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
+    associate(n => size(x))
+      r(   1   ) = (y( 1+1 ) - y(  1  ))/(x( 1+1 ) - x(  1  ))
+      r(1+1:n-1) = (y(1+2:n) - y(1:n-2))/(x(1+2:n) - x(1:n-2))
+      r(   n   ) = (y(  n  ) - y( n-1 ))/(x(  n  ) - x( n-1 ))
+    end associate
   end function
 
   pure function integrate_linear(x, y) result(r)
     !! This function calculates the integral of an array y with respect to x using a trapezoid
     !! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(:)
+    real(wp), intent(in)  :: y(size(x))
     real(wp)              :: r
-    integer               :: n
-
-    ! Check the size of input arrays
-    n = min(size(x), size(y))
 
     ! Integrate using the trapezoidal rule
-    r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
+    associate(n => size(x))
+      r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
+    end associate
   end function
 
   pure function integrate_linear_cx(x, y) result(r)
     !! Complex version of integrate_linear.
     real(wp),    intent(in) :: x(:)
-    complex(wp), intent(in) :: y(:)
+    complex(wp), intent(in) :: y(size(x))
     complex(wp)             :: r
-    integer                 :: n
-
-    ! Check the size of input arrays
-    n = min(size(x), size(y))
 
     ! Integrate using the trapezoidal rule
-    r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
+    associate(n => size(x))
+      r = sum((y(1+1:n-0) + y(1+0:n-1))*(x(1+1:n-0) - x(1+0:n-1)))/2
+    end associate
   end function
 
   function integrate_pchip(x, y, a, b) result(r)
@@ -365,34 +350,24 @@ contains
     !! range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), external    :: dpchqa
     real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(:)
-    real(wp), allocatable :: d(:)
+    real(wp), intent(in)  :: y(size(x))
     real(wp), intent(in)  :: a
     real(wp), intent(in)  :: b
+    real(wp)              :: d(size(x))
     real(wp)              :: r
     integer               :: err
-    integer               :: n
-
-    ! Check the size of input arrays
-    n = min(size(x), size(y))
-
-    ! Allocate memory for the derivatives
-    allocate(d(n))
 
     ! Create a PCHIP interpolation of the input data
-    call dpchez(n, x, y, d, .false., 0, 0, err)
+    call dpchez(size(x), x, y, d, .false., 0, 0, err)
 
     ! Integrate the interpolation in the provided range
-    r = dpchqa(n, x, y, d, a, b, err)
-
-    ! Clean up workspace memory
-    deallocate(d)
+    r = dpchqa(size(x), x, y, d, a, b, err)
   end function
 
   function integrate_pchip_cx(x, y, a, b) result(r)
     !! Wrapper for integrate_pchip that accepts complex arguments.
     real(wp),    intent(in)  :: x(:)
-    complex(wp), intent(in)  :: y(:)
+    complex(wp), intent(in)  :: y(size(x))
     real(wp),    intent(in)  :: a
     real(wp),    intent(in)  :: b
     complex(wp)              :: r
@@ -406,38 +381,25 @@ contains
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
     !! and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), intent(in)  :: x(:)
-    real(wp), intent(in)  :: y(:)
     real(wp), intent(in)  :: p(:)
-    real(wp), allocatable :: r(:)
-    real(wp), allocatable :: d(:)
+    real(wp), intent(in)  :: y(size(x))
+    real(wp)              :: r(size(p))
+    real(wp)              :: d(size(x))
     integer               :: err
-    integer               :: n
-    integer               :: m
-
-    ! Check the size of input arrays
-    n = min(size(x), size(y))
-    m = size(p)
-
-    ! Allocate memory for the derivatives and results
-    allocate(d(n))
-    allocate(r(m))
 
     ! Create a PCHIP interpolation of the input data
-    call dpchez(n, x, y, d, .false., 0, 0, err)
+    call dpchez(size(x), x, y, d, .false., 0, 0, err)
 
     ! Extract the interpolated data at provided points
-    call dpchfe(n, x, y, d, 1, .false., m, p, r, err)
-
-    ! Clean up workspace memory
-    deallocate(d)
+    call dpchfe(size(x), x, y, d, 1, .false., size(p), p, r, err)
   end function
 
   function interpolate_pchip_cx(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts complex arguments.
     real(wp),    intent(in)  :: x(:)
     real(wp),    intent(in)  :: p(:)
-    complex(wp), intent(in)  :: y(:)
-    complex(wp), allocatable :: r(:)
+    complex(wp), intent(in)  :: y(size(x))
+    complex(wp)              :: r(size(p))
 
     ! Interpolate the real and imaginary parts separately
     r = cx( interpolate_pchip(x, re(y), p),&
