@@ -9,7 +9,6 @@ project_dir: ../fortran/system
              ../fortran/materials
              ../fortran/programs
 extensions:  f
-             i
 display:     public
 graph:       false
 
