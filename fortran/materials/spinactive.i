@@ -8,81 +8,54 @@ pure subroutine spinactive_update_prehook(this)
   !! Updates the internal variables associated with spin-active interfaces.
   class(conductor), intent(inout) :: this 
 
-  ! Process the left interface (transmission properties)
-  if (allocated(this % magnetization_a) .and. .not. this % reflecting_a) then
-    associate(H => this % magnetization_a, M => this % M_a, M0 => this % M0_a, M1 => this % M1_a)
-      ! Calculate the magnetization matrix used for transmissions
-      M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
-      M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
+  ! Process transmission properties (both sides of interfaces)
+  call update_magnetization(this % M_a, this % magnetization_a)
+  call update_magnetization(this % M_b, this % magnetization_b)
 
-      ! Also use this as a default magnetization for reflections
-      M0 = M
-      M1 = M
-    end associate
-  end if
+  ! Default reflection properties match transmission properties
+  this % M0_a = this % M_a
+  this % M0_b = this % M_b
+  this % M1_a = this % M_a
+  this % M1_b = this % M_b
 
-  ! Process the left interface (reflection properties on this side)
-  if (allocated(this % misalignment_a) .and. .not. this % reflecting_a) then
-    associate(H0 => this % misalignment_a, M0 => this % M0_a)
-      ! Calculate the magnetization matrix used for reflections
-      M0(1:2,1:2) = H0(1) * pauli1 + H0(2) * pauli2 + H0(3) * pauli3
-      M0(3:4,3:4) = H0(1) * pauli1 - H0(2) * pauli2 + H0(3) * pauli3
-    end associate
-  end if
+  ! Process reflection properties (this side of interfaces)
+  call update_magnetization(this % M0_a, this % misalignment_a)
+  call update_magnetization(this % M0_b, this % misalignment_b)
 
-  ! Process the left interface (reflection properties on the other side)
+  ! Process reflection properties (other side of interfaces)
   if (associated(this % material_a)) then
-    associate (other => this % material_a)
+    associate(other => this % material_a)
       select type (other)
         class is (conductor)
-          if (allocated(other % misalignment_b)) then
-            associate(H1 => other % misalignment_b, M1 => this % M1_a)
-              ! Calculate the magnetization matrix used for reflections
-              M1(1:2,1:2) = H1(1) * pauli1 + H1(2) * pauli2 + H1(3) * pauli3
-              M1(3:4,3:4) = H1(1) * pauli1 - H1(2) * pauli2 + H1(3) * pauli3
-            end associate
-          end if
+          call update_magnetization(this % M1_a, other % misalignment_b)
       end select
     end associate
   end if
 
-  ! Process the right interface (transmission properties)
-  if (allocated(this % magnetization_b) .and. .not. this % reflecting_b) then
-    associate(H => this % magnetization_b, M => this % M_b, M0 => this % M0_b, M1 => this % M1_b)
-      ! Calculate the magnetization matrix used for transmissions
-      M(1:2,1:2) = H(1) * pauli1 + H(2) * pauli2 + H(3) * pauli3
-      M(3:4,3:4) = H(1) * pauli1 - H(2) * pauli2 + H(3) * pauli3
-
-      ! Also use this as a default magnetization for reflections
-      M0 = M
-      M1 = M
-    end associate
-  end if
-
-  ! Process the right interface (reflection properties on this side)
-  if (allocated(this % misalignment_b) .and. .not. this % reflecting_b) then
-    associate(H0 => this % misalignment_b, M0 => this % M0_b)
-      ! Calculate the magnetization matrix used for reflections
-      M0(1:2,1:2) = H0(1) * pauli1 + H0(2) * pauli2 + H0(3) * pauli3
-      M0(3:4,3:4) = H0(1) * pauli1 - H0(2) * pauli2 + H0(3) * pauli3
-    end associate
-  end if
-
-  ! Process the right interface (reflection properties on the other side)
   if (associated(this % material_b)) then
-    associate (other => this % material_b)
+    associate(other => this % material_b)
       select type (other)
         class is (conductor)
-          if (allocated(other % misalignment_a)) then
-            associate(H1 => other % misalignment_a, M1 => this % M1_b)
-              ! Calculate the magnetization matrix used for reflections
-              M1(1:2,1:2) = H1(1) * pauli1 + H1(2) * pauli2 + H1(3) * pauli3
-              M1(3:4,3:4) = H1(1) * pauli1 - H1(2) * pauli2 + H1(3) * pauli3
-            end associate
-          end if
+          call update_magnetization(this % M1_b, other % misalignment_a)
       end select
     end associate
   end if
+contains
+  pure subroutine update_magnetization(matrix, vector)
+    !! Updates a magnetization matrix based on the content of an allocatable magnetization vector. 
+    !! If the magnetization vector is not allocated, then the magnetization matrix is not updated.
+    !!
+    !! @NOTE
+    !!   The off-diagonal blocks are not set, and should never become non-zero in the first place.
+    !!
+    real(wp),    intent(in),   allocatable :: vector(:)
+    complex(wp), intent(inout)             :: matrix(4,4)
+
+    if (allocated(vector)) then
+      matrix(1:2,1:2) = vector(1) * pauli1 + vector(2) * pauli2 + vector(3) * pauli3
+      matrix(3:4,3:4) = vector(1) * pauli1 - vector(2) * pauli2 + vector(3) * pauli3
+    end if
+  end subroutine
 end subroutine
 
 pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
