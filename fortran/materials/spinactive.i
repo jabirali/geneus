@@ -44,12 +44,8 @@ contains
   pure subroutine update_magnetization(matrix, vector)
     !! Updates a magnetization matrix based on the content of an allocatable magnetization vector. 
     !! If the magnetization vector is not allocated, then the magnetization matrix is not updated.
-    !!
-    !! @NOTE
-    !!   The off-diagonal blocks are not set, and should never become non-zero in the first place.
-    !!
-    real(wp),    intent(in),   allocatable :: vector(:)
-    complex(wp), intent(inout)             :: matrix(4,4)
+    real(wp), allocatable, intent(in)    :: vector(:)
+    complex(wp),           intent(inout) :: matrix(4,4)
 
     if (allocated(vector)) then
       matrix(1:2,1:2) = vector(1) * pauli1 + vector(2) * pauli2 + vector(3) * pauli3
@@ -60,30 +56,21 @@ end subroutine
 
 pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
   !! Calculate the spin-active terms in the left boundary condition, and update the residuals.
-  class(conductor), target, intent(in)    :: this
-  type(propagator),         intent(in)    :: a
-  type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
-  type(spin),               intent(inout) :: r1, rt1
-  complex(wp)                             :: I(4,4)
+  class(conductor), target,   intent(in)    :: this
+  type(propagator),           intent(in)    :: a
+  type(spin),                 intent(in)    :: g1, gt1, dg1, dgt1
+  type(spin),                 intent(inout) :: r1, rt1
+  complex(wp), dimension(4,4)               :: GM0, GM1, I
 
-  complex(wp) :: GM0(4,4), GM1(4,4)
-
-  ! Calculate the 4×4 Green's functions
+  ! Calculate the 4×4 matrix propagators
   associate(g0 => a % g, gt0 => a % gt)
     GM0 = propagator(g0, gt0)
     GM1 = propagator(g1, gt1)
   end associate
 
-  ! Calculate the spin-active terms in the interface current
-  associate(G0 => GM0,                   &
-            G1 => GM1,                   &
-            M  => this % M_a,            &
-            M0 => this % M0_a,           &
-            P  => this % polarization_a, &
-            Q  => this % spinmixing_a    )
-
-    I = 0.25 * this%conductance_a * spinactive_current(G1, G0, M, M0, P, Q)
-  end associate
+  ! Calculate the 4×4 matrix current
+  I = 0.25 * this%conductance_a &
+    * spinactive_current(GM1, GM0, this%M_a, this%M0_a, this%M1_a, this%polarization_a, this%spinmixing_a, this%secondorder_a)
 
   ! Calculate the deviation from the boundary condition
   r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -92,72 +79,72 @@ end subroutine
 
 pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
   !! Calculate the spin-active terms in the right boundary condition, and update the residuals.
-  class(conductor), target, intent(in)    :: this
-  type(propagator),         intent(in)    :: b
-  type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
-  type(spin),               intent(inout) :: r2, rt2
-  complex(wp)                             :: I(4,4)
+  class(conductor), target,   intent(in)    :: this
+  type(propagator),           intent(in)    :: b
+  type(spin),                 intent(in)    :: g2, gt2, dg2, dgt2
+  type(spin),                 intent(inout) :: r2, rt2
+  complex(wp), dimension(4,4)               :: GM2, GM3, I
 
-  complex(wp) :: GM2(4,4), GM3(4,4)
-
-  ! Calculate the 4×4 Green's functions
+  ! Calculate the 4×4 matrix propagators
   associate(g3 => b % g, gt3 => b % gt)
     GM2 = propagator(g2, gt2)
     GM3 = propagator(g3, gt3)
   end associate
 
-  ! Calculate the spin-active terms in the interface current
-  associate(G2 => GM2,                   &
-            G3 => GM3,                   &
-            M  => this % M_b,            &
-            M0 => this % M0_b,           &
-            P  => this % polarization_b, &
-            Q  => this % spinmixing_b    )
-
-    I = 0.25 * this%conductance_b * spinactive_current(GM2, GM3, M, M0, P, Q)
-  end associate
+  ! Calculate the 4×4 matrix current
+  I = 0.25 * this%conductance_b &
+    * spinactive_current(GM2, GM3, this%M_b, this%M0_b, this%M1_b, this%polarization_b, this%spinmixing_b, this%secondorder_b)
 
   ! Calculate the deviation from the boundary condition
   r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
   rt2 = rt2 - (pauli0 - gt2*g2) * (I(3:4,1:2) - I(3:4,3:4)*gt2)
 end subroutine
 
-pure function spinactive_current(G0, G1, M, M0, P, Q) result(I)
-  !! Calculate the matrix current at a spin-active interface.
-  real(wp),                    intent(in) :: P, Q
-  complex(wp), dimension(4,4), intent(in) :: G0
-  complex(wp), dimension(4,4), intent(in) :: G1
-  complex(wp), dimension(4,4), intent(in) :: M
-  complex(wp), dimension(4,4), intent(in) :: M0
-  complex(wp), dimension(4,4)             :: I
+pure function spinactive_current(G0, G1, M, M0, M1, P, Q, R) result(I)
+  !! Calculate the matrix current at an interface with spin-active properties. The equations
+  !! implemented here should be valid for an arbitrary interface polarization, and up to 2nd
+  !! order in the transmission probabilities and spin-mixing angles of the interface. 
+  complex(wp), dimension(4,4), intent(in) :: G0, G1      !! Propagator matrices
+  complex(wp), dimension(4,4), intent(in) :: M0, M1, M   !! Magnetization matrices 
+  real(wp),                    intent(in) :: P,  Q,  R   !! Interface parameters
+  complex(wp), dimension(4,4)             :: S0, S1      !! Matrix expressions
+  complex(wp), dimension(4,4)             :: I           !! Matrix current
 
-  ! Calculate the spin-active terms in the interface current
-  I = spinactive_current1(G0, G1, M, M0, P, Q)
+  ! Calculate the 1st-order contributions to the matrix current.  Note that we manually
+  ! subtract the Kupriyanov-Lukichev term from the result, so that this function can be
+  ! called after the spin-inactive boundary conditions without double-counting terms.
+
+  ! Evaluate the 1st-order matrix functions
+  S0 = spinactive_current1_transmission(G1)
+  S1 = spinactive_current1_reflection()
+
+  ! Evaluate the 1st-order matrix current
+  I  = commutator(G0, S0 + S1 - G1)
+
+  ! Calculate the 2nd-order contributions to the matrix current. Note that we make a
+  ! number of simplifications in this implementation. In particular, we assume that 
+  ! all interface parameters except the magnetization directions are equal on both
+  ! sides of the interface. We also assume that the spin-mixing angles and tunneling
+  ! probabilities of different channels have standard deviations that are much smaller
+  ! than their mean values, which reduces the number of new fitting parameters to one.
+
+  if (abs(R) > 0) then
+    ! Evaluate the 1st-order matrix functions
+    S1 = spinactive_current1_transmission(matmul(G1,matmul(M1,G1)) - M1) 
+
+    ! Evaluate the 2nd-order matrix current
+    I = I                                     &
+      + spinactive_current2_transmission()    &
+      + spinactive_current2_crossterms()      &
+      + spinactive_current2_reflection()
+  end if
 contains
-  pure function spinactive_current1(G0, G1, M, M0, P, Q) result(I)
-    ! Calculate the first-order matrix current. Note that we subtract the Kupriyanov-Lukichev term,
-    ! so that this function can be called after the spin-inactive boundary condition without problems.
-    complex(wp), intent(in) :: G0(4,4)
-    complex(wp), intent(in) :: G1(4,4)
-    complex(wp), intent(in) :: M(4,4)
-    complex(wp), intent(in) :: M0(4,4)
-    real(wp),    intent(in) :: P
-    real(wp),    intent(in) :: Q
-    complex(wp)             :: I(4,4)
+  pure function spinactive_current1_transmission(G) result(F)
+    !! Calculate the 1st-order transmission terms in the matrix current commutator.
+    complex(wp), dimension(4,4), intent(in) :: G
+    complex(wp), dimension(4,4)             :: F
 
-    I = commutator(G0, spinactive_current1_transmission(M, G1, P)&
-                     + spinactive_current1_reflection(M0, Q) - G1)
-  end function
-
-  pure function spinactive_current1_transmission(M, G, P) result(F)
-    ! Calculate the first-order transmission terms in the matrix current commutator.
-    real(wp),    intent(in) :: P
-    complex(wp), intent(in) :: G(4,4)
-    complex(wp), intent(in) :: M(4,4)
-    complex(wp)             :: F(4,4)
-
-    real(wp)                :: Pr, Pp, Pm
-
+    real(wp) :: Pr, Pp, Pm
     Pr = sqrt(1 - P**2)
     Pp = 1 + Pr
     Pm = 1 - Pr
@@ -165,54 +152,31 @@ contains
     F  = G + (P/Pp) * anticommutator(M,G) + (Pm/Pp) * matmul(M,matmul(G,M))
   end function
 
-  pure function spinactive_current1_reflection(M, Q) result(F)
-    ! Calculate the first-order spin-mixing terms in the matrix current commutator.
-    real(wp),    intent(in) :: Q
-    complex(wp), intent(in) :: M(4,4)
-    complex(wp)             :: F(4,4)
+  pure function spinactive_current1_reflection() result(F)
+    !! Calculate the 1st-order spin-mixing terms in the matrix current commutator.
+    complex(wp), dimension(4,4) :: F
 
-    F = ((0,-1)*Q) * M
+    F = ((0,-1)*Q) * M0
   end function
 
-  pure function spinactive_current2_transmission(M, G, P, Q1, Q2) result(F)
-    ! Calculate the second-order transmission terms in the matrix current.
-    ! WARNING: spinactive_current2_* are currently untested!
-    real(wp),    intent(in) :: P
-    real(wp),    intent(in) :: Q1
-    real(wp),    intent(in) :: Q2
-    complex(wp), intent(in) :: G(4,4)
-    complex(wp), intent(in) :: M(4,4)
-    complex(wp)             :: F(4,4)
-    complex(wp)             :: S(4,4)
+  pure function spinactive_current2_transmission() result(I)
+    !! Calculate the 2nd-order transmission terms in the matrix current.
+    complex(wp), dimension(4,4) :: I
 
-    S = spinactive_current1_transmission(M, G, P)
-    F = ((-0.50*Q2)/(Q1+eps))*matmul(S,matmul(G,S))
+    I = (0.50*R/Q) * matmul(S0,matmul(G0,S0))
   end function
 
-  pure function spinactive_current2_reflection(M, G, Q1, Q2) result(F)
-    ! Calculate the second-order spin-mixing terms in the matrix current commutator.
-    ! WARNING: spinactive_current2_* are currently untested!
-    real(wp),    intent(in) :: Q1       ! 1st-order spin-mixing coefficient
-    real(wp),    intent(in) :: Q2       ! 2nd-order spin-mixing coefficient
-    complex(wp), intent(in) :: M(4,4)   ! Interfacial magnetization matrix
-    complex(wp), intent(in) :: G(4,4)   ! Green's function on this side
-    complex(wp)             :: F(4,4)   ! Contribution to the commutator
+  pure function spinactive_current2_reflection() result(I)
+    !! Calculate the 2nd-order spin-mixing terms in the matrix current.
+    complex(wp), dimension(4,4) :: I
 
-    F = (0.25*Q1*Q2) * matmul(M,matmul(G,M))
+    I = (0.25*R*Q) * commutator(G0, matmul(M0,matmul(G0,M0)))
   end function
 
-  pure function spinactive_current2_crossterms(M, G, F0, F1, Q0, Q1) result(F)
-    ! Calculate the second-order cross-terms in the matrix current.
-    ! WARNING: spinactive_current2_* are currently untested!
-    complex(wp), intent(in) :: M(4,4)   ! Interfacial magnetization matrix
-    complex(wp), intent(in) :: G(4,4)   ! Green's function on this side
-    complex(wp), intent(in) :: F0(4,4)  ! First-order contribution from this  side of the interface
-    complex(wp), intent(in) :: F1(4,4)  ! First-order contribution from other side of the interface
-    real(wp),    intent(in) :: Q0       ! Conductance on this  side
-    real(wp),    intent(in) :: Q1       ! Conductance on other side
-    complex(wp)             :: F(4,4)   ! Contribution to the commutator
+  pure function spinactive_current2_crossterms() result(I)
+    !! Calculate the 2nd-order cross-terms in the matrix current.
+    complex(wp), dimension(4,4) :: I
 
-    F = ((0.00,0.25)*Q0) * (matmul(F0,matmul(G,M)) + matmul(M,matmul(G,F0))) &
-      + ((0.00,0.25)*Q1) *  matmul(F1,matmul(G,F1))
+    I = ((0.00,0.25)*R) * commutator(G0, matmul(S0,matmul(G0,M0)) + matmul(M0,matmul(G0,S0)) + S1)
   end function
 end function

@@ -31,6 +31,8 @@ module conductor_m
     real(wp)                  :: spinmixing_b            =  0.00_wp                           ! Normalized spin-mixing at the right interface
     real(wp)                  :: polarization_a          =  0.00_wp                           ! Spin-polarization at the left  interface
     real(wp)                  :: polarization_b          =  0.00_wp                           ! Spin-polarization at the right interface
+    real(wp)                  :: secondorder_a           =  0.00_wp                           ! Second-order spin-mixing at the left  interface
+    real(wp)                  :: secondorder_b           =  0.00_wp                           ! Second-order spin-mixing at the right interface
 
     ! These parameters represent the physical fields in the material
     real(wp)                  :: depairing               =  0.00_wp                           ! Magnetic orbital depairing
@@ -433,6 +435,10 @@ contains
         call evaluate(val, this % spinmixing_a)
       case ('spinmixing_b')
         call evaluate(val, this % spinmixing_b)
+      case ('secondorder_a')
+        call evaluate(val, this % secondorder_a)
+      case ('secondorder_b')
+        call evaluate(val, this % secondorder_b)
       case ('polarization_a')
         call evaluate(val, this % polarization_a)
       case ('polarization_b')
