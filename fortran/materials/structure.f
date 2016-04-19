@@ -56,7 +56,7 @@ contains
   impure subroutine structure_push(this, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
     class(structure), intent(inout) :: this
-    character(*),     intent(in   ) :: string
+    character(*),     intent(in)    :: string
 
     if (.not. associated(this % b)) then
       ! This is the first layer in the structure
@@ -74,7 +74,7 @@ contains
     impure subroutine material_allocate(ptr, str)
       !! Allocates memory for a new material layer.
       class(material), pointer, intent(inout) :: ptr
-      character(*),             intent(in   ) :: str
+      character(*),             intent(in)    :: str
 
       select case(str)
         case('halfmetal')
@@ -112,8 +112,8 @@ contains
   impure subroutine structure_conf(this, key, val)
     !! Configures the last material pushed to the multilayer stack.
     class(structure), intent(inout) :: this
-    character(*),     intent(in   ) :: key
-    character(*),     intent(in   ) :: val
+    character(*),     intent(in)    :: key
+    character(*),     intent(in)    :: val
 
     if (associated(this % b)) then
       call this % b % conf(key, val)

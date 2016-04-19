@@ -60,7 +60,7 @@ contains
   pure subroutine halfmetal_init(this, gap)
     ! Initializes the propagators to a non-superconducting state.
     class(halfmetal), intent(inout) :: this
-    complex(wp),      intent(in   ) :: gap
+    complex(wp),      intent(in)    :: gap
     integer                         :: n, m
 
     do m = 1,size(this%location)
@@ -76,11 +76,11 @@ contains
 
   pure subroutine halfmetal_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
-    class(halfmetal), intent(in   ) :: this
-    complex(wp),      intent(in   ) :: e
-    real(wp),         intent(in   ) :: z
+    class(halfmetal), intent(in)    :: this
+    complex(wp),      intent(in)    :: e
+    real(wp),         intent(in)    :: z
     type(spin),       intent(inout) :: d2g, d2gt
-    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin)                      :: h, ht, dh, dht
     type(spin)                      :: N, Nt
 
@@ -103,9 +103,9 @@ contains
 
   pure subroutine halfmetal_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
     ! Calculate residuals from the boundary conditions at the left interface.
-    class(halfmetal), intent(in   ) :: this
-    type(propagator), intent(in   ) :: a
-    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    class(halfmetal), intent(in)    :: this
+    type(propagator), intent(in)    :: a
+    type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use spin-active boundary conditions
@@ -127,9 +127,9 @@ contains
 
   pure subroutine halfmetal_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
     ! Calculate residuals from the boundary conditions at the right interface.
-    class(halfmetal), intent(in   ) :: this
-    type(propagator), intent(in   ) :: b
-    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    class(halfmetal), intent(in)    :: this
+    type(propagator), intent(in)    :: b
+    type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use spin-active boundary conditions
@@ -214,8 +214,8 @@ contains
   impure subroutine halfmetal_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     class(halfmetal), intent(inout) :: this
-    character(*),     intent(in   ) :: key
-    character(*),     intent(in   ) :: val
+    character(*),     intent(in)    :: key
+    character(*),     intent(in)    :: val
     real(wp)                        :: tmp
 
     select case(key)

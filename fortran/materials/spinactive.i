@@ -87,9 +87,9 @@ end subroutine
 
 pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
   ! Calculate the spin-active terms in the left boundary condition, and update the residuals.
-  class(conductor), target, intent(in   ) :: this
-  type(propagator),         intent(in   ) :: a
-  type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
+  class(conductor), target, intent(in)    :: this
+  type(propagator),         intent(in)    :: a
+  type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
   type(spin),               intent(inout) :: r1, rt1
   complex(wp)                             :: I(4,4)
 
@@ -119,9 +119,9 @@ end subroutine
 
 pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
   ! Calculate the spin-active terms in the right boundary condition, and update the residuals.
-  class(conductor), target, intent(in   ) :: this
-  type(propagator),         intent(in   ) :: b
-  type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
+  class(conductor), target, intent(in)    :: this
+  type(propagator),         intent(in)    :: b
+  type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2
   complex(wp)                             :: I(4,4)
 

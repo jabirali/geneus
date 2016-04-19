@@ -75,7 +75,7 @@ module material_m
       import material, wp
 
       class(material), intent(inout) :: this
-      complex(wp),     intent(in   ) :: gap
+      complex(wp),     intent(in)    :: gap
     end subroutine
   end interface
 
@@ -93,11 +93,11 @@ module material_m
       ! This interface is used for the deferred procedure diffusion_equation.
       import material, spin, wp
 
-      class(material), intent(in   ) :: this
-      type(spin),      intent(in   ) :: g, gt, dg, dgt
+      class(material), intent(in)    :: this
+      type(spin),      intent(in)    :: g, gt, dg, dgt
       type(spin),      intent(inout) :: d2g, d2gt
-      complex(wp),     intent(in   ) :: e
-      real(wp),        intent(in   ) :: z
+      complex(wp),     intent(in)    :: e
+      real(wp),        intent(in)    :: z
     end subroutine
   end interface
 
@@ -106,9 +106,9 @@ module material_m
       ! This interface is used for the deferred procedure interface_equation_a.
       import material, propagator, spin, wp
 
-      class(material),          intent(in   ) :: this
-      type(propagator),         intent(in   ) :: a
-      type(spin),               intent(in   ) :: g, gt, dg, dgt
+      class(material),          intent(in)    :: this
+      type(propagator),         intent(in)    :: a
+      type(spin),               intent(in)    :: g, gt, dg, dgt
       type(spin),               intent(inout) :: r, rt
     end subroutine
   end interface
@@ -118,9 +118,9 @@ module material_m
       ! This interface is used for the deferred procedure interface_equation_b.
       import material, propagator, spin, wp
 
-      class(material),          intent(in   ) :: this
-      type(propagator),         intent(in   ) :: b
-      type(spin),               intent(in   ) :: g, gt, dg, dgt
+      class(material),          intent(in)    :: this
+      type(propagator),         intent(in)    :: b
+      type(spin),               intent(in)    :: g, gt, dg, dgt
       type(spin),               intent(inout) :: r, rt
     end subroutine
   end interface
@@ -135,7 +135,7 @@ contains
     use bvp_m
 
     class(material),   intent(inout) :: this                       ! Material that will be updated
-    logical, optional, intent(in   ) :: freeze                     ! This flag prevents update posthooks
+    logical, optional, intent(in)    :: freeze                     ! This flag prevents update posthooks
     type(bvp_sol)                    :: sol                        ! Workspace for the bvp_solver procedures
     type(propagator)                 :: a                          ! State at this energy at the left  interface
     type(propagator)                 :: b                          ! State at this energy at the right interface
@@ -368,8 +368,8 @@ contains
   impure subroutine material_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     class(material), intent(inout) :: this
-    character(*),    intent(in   ) :: key
-    character(*),    intent(in   ) :: val
+    character(*),    intent(in)    :: key
+    character(*),    intent(in)    :: val
     real(wp)                       :: tmp
 
     select case(key)

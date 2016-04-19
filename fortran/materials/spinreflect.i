@@ -68,8 +68,8 @@ pure subroutine spinreflect_update_prehook(this)
 end subroutine
 
 pure subroutine spinreflect_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-  class(conductor), target, intent(in   ) :: this
-  type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
+  class(conductor), target, intent(in)    :: this
+  type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
   type(spin),               intent(inout) :: r1, rt1
 
   type(spin)                              :: N1, Nt1
@@ -114,8 +114,8 @@ end subroutine
 
 pure subroutine spinreflect_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
   ! Calculate the reflecting spin-mixing terms in the right boundary condition, and update the residuals.
-  class(conductor), target, intent(in   ) :: this
-  type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
+  class(conductor), target, intent(in)    :: this
+  type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2
 
   type(spin)                              :: N2, Nt2

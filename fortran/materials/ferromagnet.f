@@ -54,10 +54,10 @@ contains
 
   pure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
-    class(ferromagnet), intent(in   ) :: this
-    complex(wp),        intent(in   ) :: e
-    real(wp),           intent(in   ) :: z
-    type(spin),         intent(in   ) :: g, gt, dg, dgt
+    class(ferromagnet), intent(in)    :: this
+    complex(wp),        intent(in)    :: e
+    real(wp),           intent(in)    :: z
+    type(spin),         intent(in)    :: g, gt, dg, dgt
     type(spin),         intent(inout) :: d2g, d2gt
     type(spin)                        :: h, ht
     real(wp)                          :: d
@@ -145,7 +145,7 @@ contains
   pure subroutine ferromagnet_set_exchange(this, exchange)
     ! Updates the ferromagnetic order parameter from a vector.
     class(ferromagnet), intent(inout) :: this
-    real(wp),           intent(in   ) :: exchange(3)
+    real(wp),           intent(in)    :: exchange(3)
     integer                           :: n
 
     ! Allocate the exchange field array if necessary
@@ -166,8 +166,8 @@ contains
   impure subroutine ferromagnet_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     class(ferromagnet), intent(inout) :: this
-    character(*),       intent(in   ) :: key
-    character(*),       intent(in   ) :: val
+    character(*),       intent(in)    :: key
+    character(*),       intent(in)    :: val
 
     select case(key)
       case ('magnetization')

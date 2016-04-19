@@ -65,7 +65,7 @@ contains
   pure subroutine superconductor_init(this, gap)
     ! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
-    complex(wp),           intent(in   ) :: gap
+    complex(wp),           intent(in)    :: gap
 
     ! Call the superclass initializer
     call this%conductor%init(gap)
@@ -174,7 +174,7 @@ contains
   pure subroutine superconductor_set_gap(this, gap)
     ! Updates the superconducting order parameter from a scalar.
     class(superconductor), intent(inout) :: this
-    complex(wp),           intent(in   ) :: gap
+    complex(wp),           intent(in)    :: gap
     integer                              :: n
 
     do n = 1,size(this%gap)
@@ -215,8 +215,8 @@ contains
   impure subroutine superconductor_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     class(superconductor), intent(inout) :: this
-    character(*),          intent(in   ) :: key
-    character(*),          intent(in   ) :: val
+    character(*),          intent(in)    :: key
+    character(*),          intent(in)    :: val
     real(wp)                             :: tmp
 
     select case(key)

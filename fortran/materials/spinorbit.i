@@ -30,8 +30,8 @@ end subroutine
 
 pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
   ! Calculate the spin-orbit coupling terms in the diffusion equation, and update the second derivatives of the Riccati parameters.
-  class(conductor), intent(in   ) :: this
-  type(spin),       intent(in   ) :: g, gt, dg, dgt
+  class(conductor), intent(in)    :: this
+  type(spin),       intent(in)    :: g, gt, dg, dgt
   type(spin),       intent(inout) :: d2g, d2gt
   type(spin)                      :: N,  Nt
 
@@ -65,8 +65,8 @@ end subroutine
 
 pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
   ! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
-  class(conductor), target, intent(in   ) :: this
-  type(spin),               intent(in   ) :: g1, gt1, dg1, dgt1
+  class(conductor), target, intent(in)    :: this
+  type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
   type(spin),               intent(inout) :: r1, rt1
 
   ! Rename the spin-orbit coupling matrices
@@ -82,8 +82,8 @@ end subroutine
 
 pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
   ! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
-  class(conductor), target, intent(in   ) :: this
-  type(spin),               intent(in   ) :: g2, gt2, dg2, dgt2
+  class(conductor), target, intent(in)    :: this
+  type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2
 
   ! Rename the spin-orbit coupling matrices

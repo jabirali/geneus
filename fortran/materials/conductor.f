@@ -126,7 +126,7 @@ contains
   pure subroutine conductor_init(this, gap)
     ! Define the default initializer.
     class(conductor), intent(inout) :: this
-    complex(wp),      intent(in   ) :: gap
+    complex(wp),      intent(in)    :: gap
     integer                         :: n, m
 
     do m = 1,size(this%location)
@@ -142,10 +142,10 @@ contains
 
   pure subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
-    class(conductor), intent(in   ) :: this
-    complex(wp),      intent(in   ) :: e
-    real(wp),         intent(in   ) :: z
-    type(spin),       intent(in   ) :: g, gt, dg, dgt
+    class(conductor), intent(in)    :: this
+    complex(wp),      intent(in)    :: e
+    real(wp),         intent(in)    :: z
+    type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: d2g, d2gt
     type(spin)                      :: N, Nt
 
@@ -171,9 +171,9 @@ contains
 
   pure subroutine conductor_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
       ! Calculate residuals from the boundary conditions at the left interface.
-      class(conductor),          intent(in   ) :: this
-      type(propagator),          intent(in   ) :: a
-      type(spin),                intent(in   ) :: g, gt, dg, dgt
+      class(conductor),          intent(in)    :: this
+      type(propagator),          intent(in)    :: a
+      type(spin),                intent(in)    :: g, gt, dg, dgt
       type(spin),                intent(inout) :: r, rt
 
       if (associated(this%material_a)) then
@@ -211,9 +211,9 @@ contains
 
   pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
     ! Calculate residuals from the boundary conditions at the right interface.
-    class(conductor),          intent(in   ) :: this
-    type(propagator),          intent(in   ) :: b
-    type(spin),                intent(in   ) :: g, gt, dg, dgt
+    class(conductor),          intent(in)    :: this
+    type(propagator),          intent(in)    :: b
+    type(spin),                intent(in)    :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
     if (associated(this%material_b)) then
@@ -251,8 +251,8 @@ contains
 
   pure subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a vacuum boundary condition for the left interface.
-    class(conductor), intent(in   ) :: this
-    type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
+    class(conductor), intent(in)    :: this
+    type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
     type(spin),       intent(inout) :: r1, rt1
 
     r1  = dg1
@@ -261,8 +261,8 @@ contains
 
   pure subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a vacuum boundary condition for the right interface.
-    class(conductor), intent(in   ) :: this
-    type(spin),       intent(in   ) :: g2, gt2, dg2, dgt2
+    class(conductor), intent(in)    :: this
+    type(spin),       intent(in)    :: g2, gt2, dg2, dgt2
     type(spin),       intent(inout) :: r2, rt2
 
     r2  = dg2
@@ -271,9 +271,9 @@ contains
 
   pure subroutine conductor_interface_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a transparent boundary condition for the left interface.
-    class(conductor), intent(in   ) :: this
-    type(propagator), intent(in   ) :: a
-    type(spin),       intent(in   ) :: g1, gt1, dg1, dgt1
+    class(conductor), intent(in)    :: this
+    type(propagator), intent(in)    :: a
+    type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
     type(spin),       intent(inout) :: r1, rt1
 
     ! Rename the Riccati parameters in the material to the left
@@ -289,9 +289,9 @@ contains
 
   pure subroutine conductor_interface_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a transparent boundary condition for the right interface.
-    class(conductor),          intent(in   ) :: this
-    type(propagator),          intent(in   ) :: b
-    type(spin),                intent(in   ) :: g2, gt2, dg2, dgt2
+    class(conductor),          intent(in)    :: this
+    type(propagator),          intent(in)    :: b
+    type(spin),                intent(in)    :: g2, gt2, dg2, dgt2
     type(spin),                intent(inout) :: r2, rt2
 
     ! Rename the Riccati parameters in the material to the right
@@ -307,10 +307,10 @@ contains
 
   pure subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
     ! Defines a tunneling boundary condition for the left interface.
-    class(conductor),          intent(in   ) :: this
-    type(propagator),          intent(in   ) :: a
+    class(conductor),          intent(in)    :: this
+    type(propagator),          intent(in)    :: a
     type(spin),                intent(inout) :: r1, rt1
-    type(spin),                intent(in   ) :: g1, gt1, dg1, dgt1
+    type(spin),                intent(in)    :: g1, gt1, dg1, dgt1
     type(spin)                               :: N0, Nt0
 
     ! Rename the Riccati parameters in the material to the left
@@ -332,10 +332,10 @@ contains
 
   pure subroutine conductor_interface_tunnel_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
     ! Defines a tunneling boundary condition for the right interface.
-    class(conductor),          intent(in   ) :: this
-    type(propagator),          intent(in   ) :: b
+    class(conductor),          intent(in)    :: this
+    type(propagator),          intent(in)    :: b
     type(spin),                intent(inout) :: r2, rt2
-    type(spin),                intent(in   ) :: g2, gt2, dg2, dgt2
+    type(spin),                intent(in)    :: g2, gt2, dg2, dgt2
     type(spin)                               :: N3, Nt3
 
     ! Rename the Riccati parameters in the material to the right
@@ -406,8 +406,8 @@ contains
   impure subroutine conductor_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     class(conductor), intent(inout) :: this
-    character(*),     intent(in   ) :: key
-    character(*),     intent(in   ) :: val
+    character(*),     intent(in)    :: key
+    character(*),     intent(in)    :: val
     real(wp)                        :: tmp
 
     select case(key)
