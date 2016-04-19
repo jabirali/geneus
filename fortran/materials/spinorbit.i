@@ -1,11 +1,11 @@
-! This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-10-01
-! Updated: 2015-10-04
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-10-01
+!> Category: Materials
+!>
+!> This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.
 
 pure subroutine spinorbit_update_prehook(this)
-  ! Updates the internal variables associated with spin-orbit coupling.
+  !! Updates the internal variables associated with spin-orbit coupling.
   class(conductor), intent(inout) :: this 
 
   if (allocated(this%spinorbit)) then
@@ -29,7 +29,7 @@ pure subroutine spinorbit_update_prehook(this)
 end subroutine
 
 pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
-  ! Calculate the spin-orbit coupling terms in the diffusion equation, and update the second derivatives of the Riccati parameters.
+  !! Calculate the spin-orbit coupling terms in the diffusion equation, and update the second derivatives of the Riccati parameters.
   class(conductor), intent(in)    :: this
   type(spin),       intent(in)    :: g, gt, dg, dgt
   type(spin),       intent(inout) :: d2g, d2gt
@@ -64,7 +64,7 @@ pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
 end subroutine
 
 pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-  ! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
+  !! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
   class(conductor), target, intent(in)    :: this
   type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
   type(spin),               intent(inout) :: r1, rt1
@@ -81,7 +81,7 @@ pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1
 end subroutine
 
 pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-  ! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
+  !! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
   class(conductor), target, intent(in)    :: this
   type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
   type(spin),               intent(inout) :: r2, rt2

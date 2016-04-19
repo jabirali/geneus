@@ -1,11 +1,11 @@
-! This submodule is included by conductor.f, and contains the equations which model spin-active tunneling and vacuum interfaces.
-!
-! Author:  Jabir Ali Ouassou <jabirali@switzerlandmail.ch>
-! Created: 2015-10-01
-! Updated: 2016-04-06
+!> Author:   Jabir Ali Ouassou
+!> Date:     2015-10-01
+!> Category: Materials
+!>
+!> This submodule is included by conductor.f, and contains the equations which model spin-active tunneling and vacuum interfaces.
 
 pure subroutine spinactive_update_prehook(this)
-  ! Updates the internal variables associated with spin-active interfaces.
+  !! Updates the internal variables associated with spin-active interfaces.
   class(conductor), intent(inout) :: this 
 
   ! Process the left interface (transmission properties)
@@ -86,7 +86,7 @@ pure subroutine spinactive_update_prehook(this)
 end subroutine
 
 pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
-  ! Calculate the spin-active terms in the left boundary condition, and update the residuals.
+  !! Calculate the spin-active terms in the left boundary condition, and update the residuals.
   class(conductor), target, intent(in)    :: this
   type(propagator),         intent(in)    :: a
   type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
@@ -118,7 +118,7 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
 end subroutine
 
 pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
-  ! Calculate the spin-active terms in the right boundary condition, and update the residuals.
+  !! Calculate the spin-active terms in the right boundary condition, and update the residuals.
   class(conductor), target, intent(in)    :: this
   type(propagator),         intent(in)    :: b
   type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
@@ -150,7 +150,7 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
 end subroutine
 
 pure function spinactive_current(G0, G1, M, M0, P, Q) result(I)
-  ! Calculate the matrix current at a spin-active interface.
+  !! Calculate the matrix current at a spin-active interface.
   real(wp),                    intent(in) :: P, Q
   complex(wp), dimension(4,4), intent(in) :: G0
   complex(wp), dimension(4,4), intent(in) :: G1
