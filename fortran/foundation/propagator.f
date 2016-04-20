@@ -287,11 +287,15 @@ contains
     ! Calculates the local density of states.
     real(wp)                      :: ldos
     class(propagator), intent(in) :: this
+    type(spin)                    :: N
 
-    type(spin)               :: g
-    g = this%get_g()
+    ! Calculate the normalization matrix
+    associate(g => this % g, gt => this % gt, I => pauli0)
+      N = spin_inv( I - g*gt )
+    end associate
 
-    ldos = 0.5_wp*re(g%trace())
+    ! Calculate the density of states
+    ldos = spin_trace(N) - 1
   end function
 
   impure subroutine propagator_print(this)
