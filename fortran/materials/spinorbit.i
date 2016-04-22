@@ -9,7 +9,7 @@ pure subroutine spinorbit_update_prehook(this)
   class(conductor), intent(inout) :: this 
 
   if (allocated(this%spinorbit)) then
-    if (sum(this%spinorbit%norm()) < sqrt(eps)) then
+    if (sum(norm2(this%spinorbit)) < sqrt(eps)) then
       ! Negligible spin-orbit coupling
       deallocate(this%spinorbit)
     else

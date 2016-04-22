@@ -15,7 +15,7 @@ module spin_m
   ! Public interface
   public spin
   public assignment(=), operator(+), operator(-), operator(*), operator(/), operator(**), operator(.divl.), operator(.divr.)
-  public spin_inv, spin_trace, spin_norm, spin_min, spin_max, spin_print, spin_conjg, conjg
+  public spin_inv, spin_trace, spin_print, conjg, norm2
   public pauli, pauli0, pauli1, pauli2, pauli3
 
   ! Type declaration
@@ -24,10 +24,6 @@ module spin_m
   contains
     procedure   :: inv              => spin_inv      ! Matrix inverse
     procedure   :: trace            => spin_trace    ! Matrix trace
-    procedure   :: norm             => spin_norm     ! Frobenius norm
-    procedure   :: conjg            => spin_conjg    ! Complex conjugate
-    procedure   :: min              => spin_min      ! Size of the smallest element
-    procedure   :: max              => spin_max      ! Size of the largest element
     procedure   :: print            => spin_print    ! Prints the matrix to standard out
   end type
 
@@ -86,6 +82,11 @@ module spin_m
   ! Complex conjugation
   interface conjg
     module procedure spin_conjg
+  end interface
+
+  ! Matrix norm
+  interface norm2
+    module procedure spin_norm
   end interface
 
   ! Matrix division operator (left)
@@ -484,22 +485,6 @@ contains
     type(spin)               :: r
 
     r%matrix = conjg(this%matrix)
-  end function
-
-  pure function spin_min(this) result(r)
-    ! Calculates the size of the smallest element in the spin matrix
-    real(wp)                :: r
-    class(spin), intent(in) :: this
-
-    r = minval(abs(this%matrix))
-  end function
-
-  pure function spin_max(this) result(r)
-    ! Calculates the size of the largest element in the spin matrix
-    real(wp)                :: r
-    class(spin), intent(in) :: this
-
-    r = maxval(abs(this%matrix))
   end function
 
   impure subroutine spin_print(this, title)
