@@ -24,21 +24,17 @@ pure subroutine spinactive_update_prehook(this)
 
   ! Process reflection properties (other side of interfaces)
   if (associated(this % material_a)) then
-    associate(other => this % material_a)
-      select type (other)
-        class is (conductor)
-          call update_magnetization(this % M1_a, other % misalignment_b)
-      end select
-    end associate
+    select type (other => this % material_a)
+      class is (conductor)
+        call update_magnetization(this % M1_a, other % misalignment_b)
+    end select
   end if
 
   if (associated(this % material_b)) then
-    associate(other => this % material_b)
-      select type (other)
-        class is (conductor)
-          call update_magnetization(this % M1_b, other % misalignment_a)
-      end select
-    end associate
+    select type (other => this % material_b)
+      class is (conductor)
+        call update_magnetization(this % M1_b, other % misalignment_a)
+    end select
   end if
 contains
   pure subroutine update_magnetization(matrix, vector)
