@@ -356,7 +356,7 @@ contains
     ! Calculate the density of states at each position and energy
     do m=1,size(this%location)
       do n=1,size(this%energy)
-        this%density(n,m) = this%propagator(n,m)%get_dos()
+        this % density(n,m) = this % propagator(n,m) % density()
       end do
     end do
   end subroutine

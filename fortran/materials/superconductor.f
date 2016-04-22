@@ -143,7 +143,7 @@ contains
       do n = 1,size(this%location)
         do m = 1,size(this%energy)
           ! Calculate the singlet components of the anomalous propagators
-          singlet = ( this%propagator(m,n)%get_f_s() - conjg(this%propagator(m,n)%get_ft_s()) )/2.0_wp
+          singlet = ( this%propagator(m,n)%singlet() - conjg(this%propagator(m,n)%singlett()) )/2.0_wp
 
           ! Calculate the gap equation integrand and store it in an array
           gap(m)  = singlet * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)

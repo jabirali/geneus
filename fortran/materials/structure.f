@@ -625,8 +625,8 @@ contains
 
     ! Calculate the density of states at the interface
     do n = 1,size(material_a%energy)
-      dos_a(n) = material_a % propagator(n,ubound(material_a%location,1)) % get_dos()
-      dos_b(n) = material_b % propagator(n,lbound(material_b%location,1)) % get_dos()
+      dos_a(n) = material_a % propagator(n,ubound(material_a%location,1)) % density()
+      dos_b(n) = material_b % propagator(n,lbound(material_b%location,1)) % density()
     end do
 
     ! Interpolate the density of states in the left material
