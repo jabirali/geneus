@@ -19,23 +19,25 @@ module propagator_m
 
   ! Type declaration
   type propagator
-    type(spin) :: g                                 ! Riccati parameter γ
-    type(spin) :: gt                                ! Riccati parameter γ~
-    type(spin) :: dg                                ! Derivative dγ /dz
-    type(spin) :: dgt                               ! Derivative dγ~/dz
-    type(spin) :: N                                 ! Normalization N  = inv(I - γγ~)
-    type(spin) :: Nt                                ! Normalization Nt = inv(I - γ~γ)
+    type(spin) :: g                                 !! Riccati parameter γ
+    type(spin) :: gt                                !! Riccati parameter γ~
+    type(spin) :: dg                                !! Derivative dγ /dz
+    type(spin) :: dgt                               !! Derivative dγ~/dz
+    type(spin) :: N                                 !! Normalization N  = inv(I - γγ~)
+    type(spin) :: Nt                                !! Normalization Nt = inv(I - γ~γ)
   contains
     ! Accessors for propagator components
-    procedure  :: matrix    => propagator_matrix    ! 4×4 matrix representation of the propagator
-    procedure  :: singlet   => propagator_singlet   ! Singlet component of the anomalous propagator f_s
-    procedure  :: singlett  => propagator_singlett  ! Singlet component of the anomalous propagator f_s~
+    procedure  :: matrix    => propagator_matrix    !! 4×4 matrix representation of the propagator
+    procedure  :: singlet   => propagator_singlet   !! Singlet component of the anomalous propagator
+    procedure  :: singlett  => propagator_singlett  !! Singlet component of the anomalous propagator (tilde-conjugated)
+    procedure  :: triplet   => propagator_triplet   !! Triplet component of the anomalous propagator
+    procedure  :: triplett  => propagator_triplett  !! Triplet component of the anomalous propagator (tilde-conjugated)
 
     ! Accessors for derived physical quantities
-    procedure  :: density   => propagator_density   ! Density of states at this position and energy
+    procedure  :: density   => propagator_density   !! Density of states at this position and energy
 
     ! Miscellaneous procedures
-    procedure  :: print     => propagator_print     ! Prints the propagator object to standard out
+    procedure  :: print     => propagator_print     !! Prints the propagator object to standard out
   end type
 
   ! Type constructor
@@ -172,6 +174,33 @@ contains
     ft = this % Nt * this % gt
     r  = ft % matrix(1,2) - ft % matrix(2,1)
   end function
+
+  pure function propagator_triplet(this) result(r)
+    ! Calculates the triplet component of the anomalous Green's function f.
+    class(propagator), intent(in) :: this
+    complex(wp)                   :: r(3)
+    type(spin)                    :: f
+
+    f = this % N * this % g
+
+    r = [ (f%matrix(2,2) - f%matrix(1,1))*(1.0_wp, 0.0_wp), &
+          (f%matrix(1,1) + f%matrix(2,2))*(0.0_wp,-1.0_wp), &
+          (f%matrix(1,2) + f%matrix(2,1))*(1.0_wp, 0.0_wp)  ];
+  end function
+
+  pure function propagator_triplett(this) result(r)
+    ! Calculates the triplet component of the tilde-conjugated anomalous Green's function f~.
+    class(propagator), intent(in) :: this
+    complex(wp)                   :: r(3)
+    type(spin)                    :: ft
+
+    ft = this % Nt * this % gt
+
+    r = [ (ft%matrix(2,2) - ft%matrix(1,1))*(1.0_wp, 0.0_wp), &
+          (ft%matrix(1,1) + ft%matrix(2,2))*(0.0_wp,-1.0_wp), &
+          (ft%matrix(1,2) + ft%matrix(2,1))*(1.0_wp, 0.0_wp)  ];
+  end function
+
 
   pure function propagator_density(this) result(r)
     ! Calculates the local density of states.
