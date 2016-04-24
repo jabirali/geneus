@@ -208,7 +208,7 @@ contains
     real(wp)                      :: r
 
     ! Calculate the density of states
-    r = spin_trace(this % N) - 1
+    r = re(spin_trace(this % N)) - 1
   end function
 
   impure subroutine propagator_print(this)
