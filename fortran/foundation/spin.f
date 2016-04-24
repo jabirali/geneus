@@ -10,6 +10,13 @@
 !> @TODO
 !>   Replace the remaining methods with generics. In particular, spin_inv and spin_trace should be specific realizations
 !>   of a generic function inv and trace from math_m, and spin_print should be replaced by write(formatted) at some point.
+!>
+!> @TODO
+!>   Replace the explicit interface blocks with generic wrappers. The way to do this successfully, seems to be to:
+!>    o Define polymorphic procedures, i.e. switch to class(spin),intent(inout) instead of type(spin),intent(in);
+!>    o Make these procedures into private type(spin) methods, i.e. import_cscalar => spin_import_cscalar and so on;
+!>    o Make public generic interfaces to these procedures, i.e. generic, public :: assignment(=) => import_cscalar, etc.
+!>   This approach should work for both the builtin operators, the interfaces conjg etc, and custom ones like trace etc.
 
 module spin_m
   use math_m
