@@ -10,7 +10,6 @@
 !> @TODO
 !>   Replace the remaining methods with generics. In particular, spin_inv and spin_trace should be specific realizations
 !>   of a generic function inv and trace from math_m, and spin_print should be replaced by write(formatted) at some point.
-!>   Other mathematical intrinsics such as `sum` should also be overloaded at some point, so `sum(pauli*k)` can be valid.
 
 module spin_m
   use math_m
@@ -20,7 +19,7 @@ module spin_m
   ! Public interface
   public spin
   public assignment(=), operator(+), operator(-), operator(*), operator(/), operator(**), operator(.divl.), operator(.divr.)
-  public spin_inv, spin_trace, spin_print, conjg, norm2
+  public spin_inv, spin_trace, spin_print, conjg, norm2, sum
   public pauli, pauli0, pauli1, pauli2, pauli3
 
   ! Type declaration
@@ -80,6 +79,11 @@ module spin_m
                      spin_subl_cscalar, spin_subr_cscalar, &
                      spin_subl_cmatrix, spin_subr_cmatrix, &
                      spin_sub_spin
+  end interface
+
+  ! Matrix sums
+  interface sum
+    module procedure spin_sum
   end interface
 
   ! Complex conjugation
@@ -456,6 +460,17 @@ contains
 
     w = this
     r = norm2(w)
+  end function
+
+  pure function spin_sum(this) result(r)
+    ! Calculates the sum of an array of spin matrices.
+    class(spin), intent(in) :: this(:)
+    type(spin)              :: r
+    integer                 :: n
+
+    do n=1,size(this)
+      r % matrix = r % matrix + this(n) % matrix
+    end do
   end function
 
   elemental pure function spin_conjg(this) result(r)
