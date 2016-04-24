@@ -101,8 +101,8 @@ contains
     b = -(exp(+t)-exp(-t))/(2+exp(+t)+exp(-t)) * exp( (0,-1) * p )
 
     ! Calculate the matrix Riccati parameters γ and γ~
-    this % g  = [(0.0_wp,0.0_wp), a, -a, (0.0_wp,0.0_wp)]
-    this % gt = [(0.0_wp,0.0_wp), b, -b, (0.0_wp,0.0_wp)]
+    this % g  = a * ((0.0_wp,1.0_wp) * pauli2)
+    this % gt = b * ((0.0_wp,1.0_wp) * pauli2)
 
     ! Update normalization matrices
     this % N  = spin_inv( pauli0 - this%g  * this%gt )
@@ -216,14 +216,12 @@ contains
     !! where element 0 is the charge current, and elements 1:3 are the spin currents.
     class(propagator), intent(in) :: this
     real(wp)                      :: r(0:3)
-    type(spin)                    :: p(0:3)
     type(spin)                    :: k
 
     associate(g  => this % g,  dg  => this % dg,  N =>  this % N, &
               gt => this % gt, dgt => this % dgt, Nt => this % Nt )
-      p = 8.0_wp * [pauli0, pauli1, pauli2, pauli3]
       k = N*(dg*gt-g*dgt)*N - conjg(Nt*(dgt*g-gt*dg)*Nt)
-      r = re(spin_trace(p*k))
+      r = 8 * re(spin_trace(pauli * k))
     end associate
   end function
 

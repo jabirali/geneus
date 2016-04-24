@@ -10,6 +10,7 @@
 !> @TODO
 !>   Replace the remaining methods with generics. In particular, spin_inv and spin_trace should be specific realizations
 !>   of a generic function inv and trace from math_m, and spin_print should be replaced by write(formatted) at some point.
+!>   Other mathematical intrinsics such as `sum` should also be overloaded at some point, so `sum(pauli*k)` can be valid.
 
 module spin_m
   use math_m
@@ -36,7 +37,6 @@ module spin_m
     module procedure spin_construct_rscalar, &
                      spin_construct_cscalar, &
                      spin_construct_cmatrix, &
-                     spin_construct_cvector, &
                      spin_construct_rvector, &
                      spin_construct_spin
   end interface
@@ -45,7 +45,6 @@ module spin_m
   interface assignment(=)
     module procedure spin_import_rscalar, spin_import_cscalar, &
                      spin_import_cmatrix, spin_export_cmatrix, &
-                     spin_import_cvector, spin_export_cvector, &
                      spin_import_rvector, spin_export_rvector 
   end interface
 
@@ -104,11 +103,11 @@ module spin_m
   end interface
 
   ! Exported constants
-  type(spin), parameter :: pauli0   = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli1   = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli2   = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli3   = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli(3) = [pauli1, pauli2, pauli3]
+  type(spin), parameter :: pauli0     = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli1     = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli2     = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli3     = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter :: pauli(0:3) = [pauli0, pauli1, pauli2, pauli3]
 contains
   pure function spin_construct_rscalar(scalar) result(this)
     ! This function constructs a spin object from a real scalar
@@ -132,14 +131,6 @@ contains
     complex(wp), intent(in) :: matrix(2,2)
 
     this%matrix = matrix
-  end function
-
-  pure function spin_construct_cvector(vector) result(this)
-    ! This function constructs a spin object from a 4×1 complex vector
-    type(spin)              :: this
-    complex(wp), intent(in) :: vector(4)
-
-    this%matrix = reshape(vector,[2,2],order=[2,1])
   end function
 
   pure function spin_construct_rvector(vector) result(this)
@@ -183,14 +174,6 @@ contains
     this%matrix = matrix
   end subroutine
 
-  pure subroutine spin_import_cvector(this, vector)
-    ! This function assigns a spin object data from a complex vector
-    type(spin),  intent(out) :: this
-    complex(wp), intent(in)  :: vector(4)
-
-    this%matrix = reshape(vector,[2,2],order=[2,1])
-  end subroutine
-
   pure subroutine spin_import_rvector(this, vector)
     ! This function assigns a spin object data from a real vector
     type(spin), intent(out) :: this
@@ -206,14 +189,6 @@ contains
     type(spin),  intent(in)  :: this
 
     matrix = this%matrix 
-  end subroutine
-
-  pure subroutine spin_export_cvector(vector, this)
-    ! This function assigns a complex vector from a spin object
-    complex(wp), intent(out) :: vector(4)
-    type(spin),  intent(in)  :: this
-
-    vector = [ this%matrix(1,:), this%matrix(2,:) ]
   end subroutine
 
   pure subroutine spin_export_rvector(vector, this)
