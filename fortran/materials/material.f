@@ -23,7 +23,7 @@ module material_m
     ! These parameters determine the basic physical behaviour of a diffusive material
     real(wp)                                  :: thouless        =  1.00_wp                 ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(wp)                                  :: scattering      =  0.01_wp                 ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    real(wp)                                  :: temperature     =  sqrt(eps)               ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(wp)                                  :: temperature     =  0.01_wp                 ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
@@ -294,7 +294,6 @@ contains
     class(material), intent(inout) :: this
     real(wp),        allocatable   :: current(:,:)
     real(wp)                       :: prefactor
-    type(spin)                     :: kernel
     integer                        :: n, m
 
     ! Allocate memory if necessary
@@ -308,19 +307,14 @@ contains
     ! Iterate over the stored propagators
     do n = 1,size(this%location)
       do m = 1,size(this%energy)
-        ! Calculate the kernel matrix at this position and energy
-        associate(g  => this%propagator(m,n)%g , dg  => this%propagator(m,n)%dg,  N  => this%propagator(m,n)%N, &
-                  gt => this%propagator(m,n)%gt, dgt => this%propagator(m,n)%dgt, Nt => this%propagator(m,n)%Nt )
+        ! This prefactor contains two parts. The first factor, `sqrt(thouless)`, is equal to the ratio ξ/L between the
+        ! superconducting coherence length ξ and material length L in our units. This rescaling is necessary to obtain
+        ! units that are independent of the material lengths. The second factor depends on the energy spectrum and the
+        ! temperature of the material, and will convert from a zero-temperature to finite-temperature spectral current.
+        prefactor = sqrt(this % thouless) * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
-          kernel = (N*(dg*gt - g*dgt)*N) - conjg(Nt*(dgt*g - gt*dg)*Nt)
-        end associate
-
-        ! Calculate the current equation integrands and store them in arrays
-        prefactor = 8 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
-        current(m,0) = prefactor * re(spin_trace(pauli0*kernel))
-        current(m,1) = prefactor * re(spin_trace(pauli1*kernel))
-        current(m,2) = prefactor * re(spin_trace(pauli2*kernel))
-        current(m,3) = prefactor * re(spin_trace(pauli3*kernel))
+        ! Calculate the contribution to the spectral currents at this position in the material
+        current(m,:) = prefactor * this % propagator(m,n) % current()
       end do
 
       ! Interpolate and integrate the results, and update the superconducting order parameter
@@ -328,12 +322,6 @@ contains
       this%current(1,n) = integrate(this%energy, current(:,1), 1e-6_wp, this%energy(ubound(this%energy,1)))
       this%current(2,n) = integrate(this%energy, current(:,2), 1e-6_wp, this%energy(ubound(this%energy,1)))
       this%current(3,n) = integrate(this%energy, current(:,3), 1e-6_wp, this%energy(ubound(this%energy,1)))
-
-      ! Switch to a normalization that is independent of the material length. This is done by multiplying
-      ! by the square-root of the Thouless energy.  Since we use units where the superconducting gap Δ is 
-      ! the unit of energy, this is equivalent to just multiplying by ξ/L, where ξ is the superconducting
-      ! coherence length and L the material length. This gives N₀DAΔ/4ξ and N₀DAΔ/8ξ as the current units.
-      this % current = this % current * sqrt(this % thouless)
     end do
 
     ! Deallocate workspace memory

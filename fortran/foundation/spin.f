@@ -466,7 +466,7 @@ contains
     r%matrix = matinv2(this%matrix)
   end function
 
-  pure function spin_trace(this) result(r)
+  elemental pure function spin_trace(this) result(r)
     ! Calculates the trace of the spin matrix
     complex(wp)             :: r
     class(spin), intent(in) :: this

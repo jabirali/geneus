@@ -35,6 +35,7 @@ module propagator_m
 
     ! Accessors for derived physical quantities
     procedure  :: density   => propagator_density   !! Density of states at this position and energy
+    procedure  :: current   => propagator_current   !! Spectral current  at this position and energy
 
     ! Miscellaneous procedures
     procedure  :: print     => propagator_print     !! Prints the propagator object to standard out
@@ -207,8 +208,23 @@ contains
     class(propagator), intent(in) :: this
     real(wp)                      :: r
 
-    ! Calculate the density of states
     r = re(spin_trace(this % N)) - 1
+  end function
+
+  pure function propagator_current(this) result(r)
+    !! Calculates the spectral current at zero temperature. The result is a 4-vector,
+    !! where element 0 is the charge current, and elements 1:3 are the spin currents.
+    class(propagator), intent(in) :: this
+    real(wp)                      :: r(0:3)
+    type(spin)                    :: p(0:3)
+    type(spin)                    :: k
+
+    associate(g  => this % g,  dg  => this % dg,  N =>  this % N, &
+              gt => this % gt, dgt => this % dgt, Nt => this % Nt )
+      p = 8.0_wp * [pauli0, pauli1, pauli2, pauli3]
+      k = N*(dg*gt-g*dgt)*N - conjg(Nt*(dgt*g-gt*dg)*Nt)
+      r = re(spin_trace(p*k))
+    end associate
   end function
 
   impure subroutine propagator_print(this)
