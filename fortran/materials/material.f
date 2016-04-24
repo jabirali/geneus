@@ -309,13 +309,10 @@ contains
     do n = 1,size(this%location)
       do m = 1,size(this%energy)
         ! Calculate the kernel matrix at this position and energy
-        associate(g   => this%propagator(m,n)%g ,&
-                  gt  => this%propagator(m,n)%gt,&
-                  dg  => this%propagator(m,n)%dg,&
-                  dgt => this%propagator(m,n)%dgt)
+        associate(g  => this%propagator(m,n)%g , dg  => this%propagator(m,n)%dg,  N  => this%propagator(m,n)%N, &
+                  gt => this%propagator(m,n)%gt, dgt => this%propagator(m,n)%dgt, Nt => this%propagator(m,n)%Nt )
 
-          kernel =      ( ( pauli0 - g*gt ) .divl. ( dg*gt - g*dgt ) .divr. ( pauli0 - g*gt ) ) &
-                 - conjg( ( pauli0 - gt*g ) .divl. ( dgt*g - gt*dg ) .divr. ( pauli0 - gt*g ) )
+          kernel = (N*(dg*gt - g*dgt)*N) - conjg(Nt*(dgt*g - gt*dg)*Nt)
         end associate
 
         ! Calculate the current equation integrands and store them in arrays
