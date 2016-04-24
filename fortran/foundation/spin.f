@@ -6,6 +6,10 @@
 !> common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
 !> To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
 !> the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).
+!>
+!> @TODO
+!>   Replace the remaining methods with generics. In particular, spin_inv and spin_trace should be specific realizations
+!>   of a generic function inv and trace from math_m, and spin_print should be replaced by write(formatted) at some point.
 
 module spin_m
   use math_m
