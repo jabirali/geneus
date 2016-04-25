@@ -10,7 +10,6 @@
 program equilibrium
   use :: structure_m
   use :: stdio_m
-  implicit none
 
   ! Create the superconducting structure
   type(structure) :: stack

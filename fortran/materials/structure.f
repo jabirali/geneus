@@ -6,14 +6,13 @@
 !> also exports the type definitions and constructors for all class(material) types, although these should rarely be needed.
 
 module structure_m
-  use math_m
-  use stdio_m
-  use material_m
-  use conductor_m
-  use superconductor_m
-  use ferromagnet_m
-  use halfmetal_m
-  implicit none
+  use :: math_m
+  use :: stdio_m
+  use :: material_m
+  use :: conductor_m
+  use :: superconductor_m
+  use :: ferromagnet_m
+  use :: halfmetal_m
   private
 
   ! Export class(material) types

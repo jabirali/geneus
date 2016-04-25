@@ -7,12 +7,11 @@
 !> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
 
 module conductor_m
-  use stdio_m
-  use math_m
-  use spin_m
-  use propagator_m
-  use material_m
-  implicit none
+  use :: stdio_m
+  use :: math_m
+  use :: spin_m
+  use :: propagator_m
+  use :: material_m
   private
 
   ! Public interface

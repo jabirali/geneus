@@ -13,13 +13,12 @@
 !>   Check if a non-linear dependence of the polarization matrix on the polarization is more sensible?
 
 module halfmetal_m
-  use stdio_m
-  use math_m
-  use spin_m
-  use propagator_m
-  use material_m
-  use conductor_m
-  implicit none
+  use :: stdio_m
+  use :: math_m
+  use :: spin_m
+  use :: propagator_m
+  use :: material_m
+  use :: conductor_m
   private
 
   ! Type declarations

@@ -9,9 +9,8 @@
 !> state vectors, the assignment operator is overloaded so that objects can be transformed to 32-element real arrays.
 
 module propagator_m
-  use math_m
-  use spin_m
-  implicit none
+  use :: math_m
+  use :: spin_m
   private
 
   ! Public interface

@@ -5,10 +5,9 @@
 !> This module defines the interfaces 'check' and 'assert', which are used for unit testing of other modules.
 
 module assert_m
-  use stdio_m, only: color_none, color_red, color_green
-  use math_m,  only: eps, wp
-  use spin_m,  only: spin
-  implicit none
+  use :: stdio_m, only: color_none, color_red, color_green
+  use :: math_m,  only: eps, wp
+  use :: spin_m,  only: spin
   private
 
   ! Public interface for unit testing

@@ -10,7 +10,6 @@
 module math_m
   use :: iso_fortran_env
   use :: stdio_m
-  implicit none
   private
 
   ! Declare which routines to export

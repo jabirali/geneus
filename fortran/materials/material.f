@@ -8,11 +8,10 @@
 !> type defines the essential data structures and program structure, while the derived subtypes will define actual physics.
 
 module material_m
-  use stdio_m
-  use math_m
-  use spin_m
-  use propagator_m
-  implicit none
+  use :: stdio_m
+  use :: math_m
+  use :: spin_m
+  use :: propagator_m
   private
 
   ! Public declarations

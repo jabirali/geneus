@@ -9,7 +9,6 @@
 
 module spin_m
   use :: math_m
-  implicit none
   private
 
   ! Public interface

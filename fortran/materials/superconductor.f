@@ -6,11 +6,10 @@
 !> a member of class(conductor), and thus inherits the internal structure and generic methods defined in conductor_m.
 
 module superconductor_m
-  use stdio_m
-  use math_m
-  use spin_m
-  use conductor_m
-  implicit none
+  use :: stdio_m
+  use :: math_m
+  use :: spin_m
+  use :: conductor_m
   private
 
   ! Type declaration

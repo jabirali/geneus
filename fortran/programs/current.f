@@ -12,7 +12,6 @@ program critical_current
   use :: structure_m
   use :: stdio_m
   use :: math_m
-  implicit none
 
   !--------------------------------------------------------------------------------!
   !                                GLOBAL VARIABLES                                !

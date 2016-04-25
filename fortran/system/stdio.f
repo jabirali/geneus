@@ -5,8 +5,7 @@
 !> This file renames the ISO input/output units to the standard UNIX names, and defines the ANSI escape codes for colored output.
 
 module stdio_m
-  use iso_fortran_env
-  implicit none
+  use, intrinsic :: iso_fortran_env
   public
 
   ! Declare standard input/output units
