@@ -91,8 +91,8 @@ contains
     dht = dgt % matrix * pauli0 % matrix
 
     ! Calculate the normalization matrices
-    N   = spin_inv( pauli0 - h*ht )
-    Nt  = spin_inv( pauli0 - ht*h )
+    N   = inv( pauli0 - h*ht )
+    Nt  = inv( pauli0 - ht*h )
 
     ! Calculate the second-derivatives of the Riccati parameters
     associate(P => this % P)

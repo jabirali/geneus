@@ -42,8 +42,8 @@ pure subroutine spinorbit_diffusion_equation(this, g, gt, dg, dgt, d2g, d2gt)
             A2 => this % A2, A2t => this % A2t)
 
   ! Calculate the normalization matrices
-  N   = spin_inv( pauli0 - g*gt )
-  Nt  = spin_inv( pauli0 - gt*g )
+  N   = inv( pauli0 - g*gt )
+  Nt  = inv( pauli0 - gt*g )
 
   ! Update the second derivatives of the Riccati parameters
   d2g  = d2g             + (A2 * g - g * A2t)                             &

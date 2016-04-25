@@ -21,40 +21,40 @@ module conductor_m
   ! Type declarations
   type, extends(material) :: conductor
     ! These parameters control the physical characteristics of the material
-    logical                   :: transparent_a           =  .false.                           ! Whether the left  interface is completely transparent
-    logical                   :: transparent_b           =  .false.                           ! Whether the right interface is completely transparent
-    logical                   :: reflecting_a            =  .false.                           ! Whether the left  interface is completely reflecting
-    logical                   :: reflecting_b            =  .false.                           ! Whether the right interface is completely reflecting
-    real(wp)                  :: conductance_a           =  0.30_wp                           ! Normalized conductance at the left  interface
-    real(wp)                  :: conductance_b           =  0.30_wp                           ! Normalized conductance at the right interface
-    real(wp)                  :: spinmixing_a            =  0.00_wp                           ! Normalized spin-mixing at the left  interface
-    real(wp)                  :: spinmixing_b            =  0.00_wp                           ! Normalized spin-mixing at the right interface
-    real(wp)                  :: polarization_a          =  0.00_wp                           ! Spin-polarization at the left  interface
-    real(wp)                  :: polarization_b          =  0.00_wp                           ! Spin-polarization at the right interface
-    real(wp)                  :: secondorder_a           =  0.00_wp                           ! Second-order spin-mixing at the left  interface
-    real(wp)                  :: secondorder_b           =  0.00_wp                           ! Second-order spin-mixing at the right interface
+    logical                          :: transparent_a           =  .false.                    ! Whether the left  interface is completely transparent
+    logical                          :: transparent_b           =  .false.                    ! Whether the right interface is completely transparent
+    logical                          :: reflecting_a            =  .false.                    ! Whether the left  interface is completely reflecting
+    logical                          :: reflecting_b            =  .false.                    ! Whether the right interface is completely reflecting
+    real(wp)                         :: conductance_a           =  0.30_wp                    ! Normalized conductance at the left  interface
+    real(wp)                         :: conductance_b           =  0.30_wp                    ! Normalized conductance at the right interface
+    real(wp)                         :: spinmixing_a            =  0.00_wp                    ! Normalized spin-mixing at the left  interface
+    real(wp)                         :: spinmixing_b            =  0.00_wp                    ! Normalized spin-mixing at the right interface
+    real(wp)                         :: polarization_a          =  0.00_wp                    ! Spin-polarization at the left  interface
+    real(wp)                         :: polarization_b          =  0.00_wp                    ! Spin-polarization at the right interface
+    real(wp)                         :: secondorder_a           =  0.00_wp                    ! Second-order spin-mixing at the left  interface
+    real(wp)                         :: secondorder_b           =  0.00_wp                    ! Second-order spin-mixing at the right interface
 
     ! These parameters represent the physical fields in the material
-    real(wp)                  :: depairing               =  0.00_wp                           ! Magnetic orbital depairing
-    type(spin),   allocatable :: spinorbit(:)                                                 ! Spin-orbit coupling field (spin vector)
-    real(wp),     allocatable :: magnetization_a(:)                                           ! Magnetization of the left  interface (unit vector) (used for transmissions)
-    real(wp),     allocatable :: magnetization_b(:)                                           ! Magnetization of the right interface (unit vector) (used for transmissions)
-    real(wp),     allocatable :: misalignment_a(:)                                            ! Magnetization of the left  interface (unit vector) (used for reflections)
-    real(wp),     allocatable :: misalignment_b(:)                                            ! Magnetization of the right interface (unit vector) (used for reflections)
+    real(wp)                         :: depairing               =  0.00_wp                    ! Magnetic orbital depairing
+    type(spin),          allocatable :: spinorbit(:)                                          ! Spin-orbit coupling field (spin vector)
+    real(wp),            allocatable :: magnetization_a(:)                                    ! Magnetization of the left  interface (unit vector) (used for transmissions)
+    real(wp),            allocatable :: magnetization_b(:)                                    ! Magnetization of the right interface (unit vector) (used for transmissions)
+    real(wp),            allocatable :: misalignment_a(:)                                     ! Magnetization of the left  interface (unit vector) (used for reflections)
+    real(wp),            allocatable :: misalignment_b(:)                                     ! Magnetization of the right interface (unit vector) (used for reflections)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(wp),      private :: M_a(4,4)                =  0.00_wp                           ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
-    complex(wp),      private :: M_b(4,4)                =  0.00_wp                           ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
-    complex(wp),      private :: M0_a(4,4)               =  0.00_wp                           ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
-    complex(wp),      private :: M0_b(4,4)               =  0.00_wp                           ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
-    complex(wp),      private :: M1_a(4,4)               =  0.00_wp                           ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
-    complex(wp),      private :: M1_b(4,4)               =  0.00_wp                           ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
-    complex(wp),      private :: S1_a, S1_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ)
-    complex(wp),      private :: S2_a, S2_b                                                   ! Spin-mixing prefactor proportional to sin(ϕ/2)²
+    complex(wp),             private :: M_a(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
+    complex(wp),             private :: M_b(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
+    complex(wp),             private :: M0_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
+    complex(wp),             private :: M0_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
+    complex(wp),             private :: M1_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
+    complex(wp),             private :: M1_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
+    complex(wp),             private :: S1_a, S1_b                                            ! Spin-mixing prefactor proportional to sin(ϕ)
+    complex(wp),             private :: S2_a, S2_b                                            ! Spin-mixing prefactor proportional to sin(ϕ/2)²
  
     ! These variables are used by internal subroutines to handle spin-orbit coupling
-    type(spin),       private :: Ax,  Ay,  Az,  A2                                            ! Spin-orbit coupling matrices (the components and square)
-    type(spin),       private :: Axt, Ayt, Azt, A2t                                           ! Spin-orbit coupling matrices (tilde-conjugated versions)
+    type(spin), allocatable, private :: Ax,  Ay,  Az,  A2                                     ! Spin-orbit coupling matrices (the components and square)
+    type(spin), allocatable, private :: Axt, Ayt, Azt, A2t                                    ! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    ! Initializes the propagators
@@ -152,8 +152,8 @@ contains
     type(spin)                      :: N, Nt
 
     ! Calculate the normalization matrices
-    N   = spin_inv( pauli0 - g*gt )
-    Nt  = spin_inv( pauli0 - gt*g )
+    N   = inv( pauli0 - g*gt )
+    Nt  = inv( pauli0 - gt*g )
 
     ! Calculate the second-derivatives of the Riccati parameters
     d2g  = (-2.0_wp,0.0_wp)*dg*Nt*gt*dg - (0.0_wp,2.0_wp)*e*g
@@ -322,8 +322,8 @@ contains
               dgt0 => a%dgt)
 
     ! Calculate the normalization matrices
-    N0  = spin_inv( pauli0 - g0*gt0 )
-    Nt0 = spin_inv( pauli0 - gt0*g0 )
+    N0  = inv( pauli0 - g0*gt0 )
+    Nt0 = inv( pauli0 - gt0*g0 )
 
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r1  = dg1  - this%conductance_a*( pauli0 - g1*gt0 )*N0*(  g1  - g0  )
@@ -347,8 +347,8 @@ contains
               dgt3 => b%dgt)
 
     ! Calculate the normalization matrices
-    N3  = spin_inv( pauli0 - g3*gt3 )
-    Nt3 = spin_inv( pauli0 - gt3*g3 )
+    N3  = inv( pauli0 - g3*gt3 )
+    Nt3 = inv( pauli0 - gt3*g3 )
 
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r2  = dg2  - this%conductance_b*( pauli0 - g2*gt3 )*N3*(  g3  - g2  )

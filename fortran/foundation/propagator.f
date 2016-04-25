@@ -36,9 +36,6 @@ module propagator_m
     ! Accessors for derived physical quantities
     procedure  :: density   => propagator_density   !! Density of states at this position and energy
     procedure  :: current   => propagator_current   !! Spectral current  at this position and energy
-
-    ! Miscellaneous procedures
-    procedure  :: print     => propagator_print     !! Prints the propagator object to standard out
   end type
 
   ! Type constructor
@@ -74,8 +71,8 @@ contains
     this % gt = gt
 
     ! Update normalization matrices
-    this % N  = spin_inv( pauli0 - g*gt )
-    this % Nt = spin_inv( pauli0 - gt*g )
+    this % N  = inv( pauli0 - g*gt )
+    this % Nt = inv( pauli0 - gt*g )
   end function
 
   pure function propagator_construct_bcs(energy, gap) result(this)
@@ -105,8 +102,8 @@ contains
     this % gt = b * ((0.0_wp,1.0_wp) * pauli2)
 
     ! Update normalization matrices
-    this % N  = spin_inv( pauli0 - this%g  * this%gt )
-    this % Nt = spin_inv( pauli0 - this%gt * this%g  )
+    this % N  = inv( pauli0 - this%g  * this%gt )
+    this % Nt = inv( pauli0 - this%gt * this%g  )
   end function
 
   pure function propagator_matrix(this) result(matrix)
@@ -133,8 +130,8 @@ contains
     a%dgt = b(25:32) 
 
     ! Update normalization matrices
-    a % N  = spin_inv( pauli0 - a%g  * a%gt )
-    a % Nt = spin_inv( pauli0 - a%gt * a%g  )
+    a % N  = inv( pauli0 - a%g  * a%gt )
+    a % Nt = inv( pauli0 - a%gt * a%g  )
   end subroutine
 
   pure subroutine propagator_export_cmatrix(a, b)
@@ -224,15 +221,4 @@ contains
       r = 8 * re(trace(pauli * k))
     end associate
   end function
-
-  impure subroutine propagator_print(this)
-    ! Prints the propagator object to stdout.
-    class(propagator), intent(in) :: this 
-
-    ! Print the matrix elements
-    call this % g   % print('Riccati parameter γ ')
-    call this % gt  % print('Riccati parameter γ~')
-    call this % dg  % print('Derivative dγ / dz')
-    call this % dgt % print('Derivative dγ~/ dz')
-  end subroutine
 end module
