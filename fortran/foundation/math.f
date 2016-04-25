@@ -56,6 +56,11 @@ module math_m
                      evaluate_vector_value, evaluate_vector_field, &
                      evaluate_logical_value
   end interface
+
+  interface trace
+    !! Public interface for functions that calculate a matrix trace.
+    module procedure trace
+  end interface
 contains
 
   !---------------------------------------------------------------------------!

@@ -26,7 +26,7 @@ module spin_m
   ! Public interface
   public spin
   public assignment(=), operator(+), operator(-), operator(*), operator(/), operator(**), operator(.divl.), operator(.divr.)
-  public spin_inv, spin_trace, spin_print, conjg, norm2, sum
+  public spin_inv, trace, spin_print, conjg, norm2, sum
   public pauli, pauli0, pauli1, pauli2, pauli3
 
   ! Type declaration
@@ -34,7 +34,6 @@ module spin_m
     complex(wp) :: matrix(2,2)      =  0.0_wp        ! Spin matrix
   contains
     procedure   :: inv              => spin_inv      ! Matrix inverse
-    procedure   :: trace            => spin_trace    ! Matrix trace
     procedure   :: print            => spin_print    ! Prints the matrix to standard out
   end type
 
@@ -86,6 +85,11 @@ module spin_m
                      spin_subl_cscalar, spin_subr_cscalar, &
                      spin_subl_cmatrix, spin_subr_cmatrix, &
                      spin_sub_spin
+  end interface
+
+  ! Matrix trace
+  interface trace
+    module procedure spin_trace
   end interface
 
   ! Matrix sums

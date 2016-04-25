@@ -208,7 +208,7 @@ contains
     class(propagator), intent(in) :: this
     real(wp)                      :: r
 
-    r = re(spin_trace(this % N)) - 1
+    r = re(trace(this % N)) - 1
   end function
 
   pure function propagator_current(this) result(r)
@@ -218,10 +218,10 @@ contains
     real(wp)                      :: r(0:3)
     type(spin)                    :: k
 
-    associate(g  => this % g,  dg  => this % dg,  N =>  this % N, &
+    associate(g  => this % g,  dg  => this % dg,  N  => this % N, &
               gt => this % gt, dgt => this % dgt, Nt => this % Nt )
       k = N*(dg*gt-g*dgt)*N - conjg(Nt*(dgt*g-gt*dg)*Nt)
-      r = 8 * re(spin_trace(pauli * k))
+      r = 8 * re(trace(pauli * k))
     end associate
   end function
 
