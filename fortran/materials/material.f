@@ -308,11 +308,8 @@ contains
     ! Iterate over the stored propagators
     do n = 1,size(this%location)
       do m = 1,size(this%energy)
-        ! This prefactor contains two parts. The first factor, `sqrt(thouless)`, is equal to the ratio ξ/L between the
-        ! superconducting coherence length ξ and material length L in our units. This rescaling is necessary to obtain
-        ! units that are independent of the material lengths. The second factor depends on the energy spectrum and the
-        ! temperature of the material, and will convert from a zero-temperature to finite-temperature spectral current.
-        prefactor = sqrt(this % thouless) * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+        ! This factor converts from a zero-temperature to finite-temperature spectral current
+        prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
         ! Calculate the contribution to the spectral currents at this position in the material
         current(m,:) = prefactor * this % propagator(m,n) % current()
