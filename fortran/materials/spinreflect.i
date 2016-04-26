@@ -54,7 +54,7 @@ pure subroutine spinreflect_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, r
   D = S2 * matmul(M,A)
 
   ! Calculate the spin-active terms in the interface current
-  I = matmul(matinv4(mateye4+B+C), matmul(2*matmul(R,B)+D-C, matinv4(mateye4+B+D)))/G0
+  I = matmul(inverse(identity4+B+C), matmul(2*matmul(R,B)+D-C, inverse(identity4+B+D)))/G0
 
   ! Calculate the deviation from the boundary condition
   r1  = r1  - (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -93,7 +93,7 @@ pure subroutine spinreflect_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, r
   D = S2 * matmul(M,A)
 
   ! Calculate the spin-active terms in the interface current
-  I = matmul(matinv4(mateye4+B+C), matmul(2*matmul(L,B)+D-C, matinv4(mateye4+B+D)))/G0
+  I = matmul(inverse(identity4+B+C), matmul(2*matmul(L,B)+D-C, inverse(identity4+B+D)))/G0
 
   ! Calculate the deviation from the boundary condition
   r2  = r2  + (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)

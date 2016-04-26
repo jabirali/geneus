@@ -151,8 +151,8 @@ contains
     type(spin)                      :: N, Nt
 
     ! Calculate the normalization matrices
-    N   = inv( pauli0 - g*gt )
-    Nt  = inv( pauli0 - gt*g )
+    N   = inverse( pauli0 - g*gt )
+    Nt  = inverse( pauli0 - gt*g )
 
     ! Calculate the second-derivatives of the Riccati parameters
     d2g  = (-2.0_wp,0.0_wp)*dg*Nt*gt*dg - (0.0_wp,2.0_wp)*e*g
@@ -321,8 +321,8 @@ contains
               dgt0 => a%dgt)
 
     ! Calculate the normalization matrices
-    N0  = inv( pauli0 - g0*gt0 )
-    Nt0 = inv( pauli0 - gt0*g0 )
+    N0  = inverse( pauli0 - g0*gt0 )
+    Nt0 = inverse( pauli0 - gt0*g0 )
 
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r1  = dg1  - this%conductance_a*( pauli0 - g1*gt0 )*N0*(  g1  - g0  )
@@ -346,8 +346,8 @@ contains
               dgt3 => b%dgt)
 
     ! Calculate the normalization matrices
-    N3  = inv( pauli0 - g3*gt3 )
-    Nt3 = inv( pauli0 - gt3*g3 )
+    N3  = inverse( pauli0 - g3*gt3 )
+    Nt3 = inverse( pauli0 - gt3*g3 )
 
     ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
     r2  = dg2  - this%conductance_b*( pauli0 - g2*gt3 )*N3*(  g3  - g2  )

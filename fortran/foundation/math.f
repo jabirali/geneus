@@ -6,6 +6,11 @@
 !> floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
 !> the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
 !> As for module procedures, this library defines common utility functions for working with complex numbers and matrices.
+!>
+!> @TODO
+!>   * Split differentiate, integrate, interpolate, and linspace into a separate module `calculus_m`;
+!>   * Split identity, inverse, diag, trace, commutator, anticommutator into a separate module `matrix_m`;
+!>   * Keep re, im, cx in a very basic math module together with the kinds sp,dp,qp,wp and consts inf,eps,pi.
 
 module math_m
   use :: iso_fortran_env
@@ -14,7 +19,7 @@ module math_m
 
   ! Declare which routines to export
   public :: differentiate, integrate, interpolate, evaluate, linspace, unitvector, re, im, cx, diag, &
-            trace, mateye, matdivl2, matdivr2, matinv2, matinv3, matinv4, commutator, anticommutator
+            trace, inverse, identity, commutator, anticommutator
 
   ! Declare floating-point precisions
   integer,  parameter, public :: sp  = real32              !! Single precision
@@ -28,9 +33,9 @@ module math_m
   real(wp), parameter, public :: pi  = atan(1.0_wp)*4.0_wp !! Circle constant
 
   ! Define common identity matrices
-  real(wp), parameter, public :: mateye2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
-  real(wp), parameter, public :: mateye3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])               !! 3×3 identity matrix
-  real(wp), parameter, public :: mateye4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4]) !! 4×4 identity matrix
+  real(wp), parameter, public :: identity2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
+  real(wp), parameter, public :: identity3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])               !! 3×3 identity matrix
+  real(wp), parameter, public :: identity4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4]) !! 4×4 identity matrix
 
   ! Public interface for routines
   interface differentiate
@@ -58,7 +63,12 @@ module math_m
 
   interface trace
     !! Public interface for functions that calculate a matrix trace.
-    module procedure trace
+    module procedure matrix_trace
+  end interface
+
+  interface inverse
+    !! Public interface for functions that calculate a matrix inverse.
+    module procedure matrix_inverse
   end interface
 contains
 
@@ -124,7 +134,7 @@ contains
   !                       ELEMENTARY MATRIX PROCEDURES                        !
   !---------------------------------------------------------------------------!
 
-  pure function mateye(n) result(A)
+  pure function identity(n) result(A)
     !! Constructs an N×N identity matrix.
     integer, intent(in) :: n        !! Matrix dimension
     real(wp)            :: A(n,n)   !! Identity matrix
@@ -138,7 +148,24 @@ contains
     end do
   end function
 
-  pure function matinv2(A) result(B)
+  pure function matrix_inverse(A) result(B)
+    !! Performs a direct calculation of the inverse of an N×N matrix, where N≤4.
+    complex(wp), intent(in) :: A(:,:)                   !! Matrix
+    complex(wp)             :: B(size(A,1),size(A,2))   !! Inverse matrix
+
+    select case(size(A))
+      case(2**2)
+        B = matrix_inverse2(A)
+      case(3**2)
+        B = matrix_inverse3(A)
+      case(4**2)
+        B = matrix_inverse4(A)
+      case default
+        B = 0.0_wp
+    end select
+  end function
+
+  pure function matrix_inverse2(A) result(B)
     !! Performs a direct calculation of the inverse of a 2×2 matrix.
     complex(wp), intent(in) :: A(2,2)   !! Matrix
     complex(wp)             :: B(2,2)   !! Inverse matrix
@@ -154,41 +181,7 @@ contains
     B(2,2) = +detinv * A(1,1)
   end function
 
-  pure function matdivl2(A,B) result(C)
-    !! Performs a direct calculation of a 2×2 matrix left division.
-    complex(wp), intent(in) :: A(2,2)   !! Left matrix
-    complex(wp), intent(in) :: B(2,2)   !! Right matrix
-    complex(wp)             :: C(2,2)   !! Fraction A\B
-    complex(wp)             :: detinv
-
-    ! Calculate the inverse determinant of the left matrix
-    detinv = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
-
-    ! Calculate the elements of the resulting matrix
-    C(1,1) = detinv * (A(2,2)*B(1,1) - A(1,2)*B(2,1))
-    C(2,1) = detinv * (A(1,1)*B(2,1) - A(2,1)*B(1,1))
-    C(1,2) = detinv * (A(2,2)*B(1,2) - A(1,2)*B(2,2))
-    C(2,2) = detinv * (A(1,1)*B(2,2) - A(2,1)*B(1,2))
-  end function
-
-  pure function matdivr2(A,B) result(C)
-    !! Performs a direct calculation of a 2×2 matrix right division.
-    complex(wp), intent(in) :: A(2,2)   !! Left matrix
-    complex(wp), intent(in) :: B(2,2)   !! Right matrix
-    complex(wp)             :: C(2,2)   !! Fraction A/B
-    complex(wp)             :: detinv
-
-    ! Calculate the inverse determinant of the right matrix
-    detinv = 1/(B(1,1)*B(2,2) - B(1,2)*B(2,1))
-
-    ! Calculate the elements of the resulting matrix
-    C(1,1) = detinv * (A(1,1)*B(2,2) - A(1,2)*B(2,1))
-    C(2,1) = detinv * (A(2,1)*B(2,2) - A(2,2)*B(2,1))
-    C(1,2) = detinv * (A(1,2)*B(1,1) - A(1,1)*B(1,2))
-    C(2,2) = detinv * (A(2,2)*B(1,1) - A(2,1)*B(1,2))
-  end function
-
-  pure function matinv3(A) result(B)
+  pure function matrix_inverse3(A) result(B)
     !! Performs a direct calculation of the inverse of a 3×3 matrix.
     !! [Based on the subroutine M33INV by David G. Simpson, NASA.]
     complex(wp), intent(in) :: A(3,3)   !! Matrix
@@ -212,7 +205,7 @@ contains
     B(3,3) = +detinv * (A(1,1)*A(2,2) - A(1,2)*A(2,1))
   end function
 
-  pure function matinv4(A) result(B)
+  pure function matrix_inverse4(A) result(B)
     !! Performs a direct calculation of the inverse of a 4×4 matrix.
     !! [Based on the subroutine M44INV by David G. Simpson, NASA.]
     complex(wp), intent(in) :: A(4,4)   !! Matrix
@@ -278,7 +271,7 @@ contains
     end do
   end function
 
-  pure function trace(A) result(r)
+  pure function matrix_trace(A) result(r)
     !! Calculate the trace of a complex matrix.
     complex(wp), intent(in)  :: A(:,:)   !! Matrix
     complex(wp)              :: r        !! Tr(A)

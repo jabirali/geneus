@@ -90,8 +90,8 @@ contains
     dht = dgt % matrix * pauli0 % matrix
 
     ! Calculate the normalization matrices
-    N   = inv( pauli0 - h*ht )
-    Nt  = inv( pauli0 - ht*h )
+    N   = inverse( pauli0 - h*ht )
+    Nt  = inverse( pauli0 - ht*h )
 
     ! Calculate the second-derivatives of the Riccati parameters
     associate(P => this % P)

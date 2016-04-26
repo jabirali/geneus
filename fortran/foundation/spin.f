@@ -19,7 +19,7 @@ module spin_m
 
   ! Public interface
   public spin
-  public inv, trace, conjg, norm2, sum
+  public inverse, trace, conjg, norm2, sum
   public pauli, pauli0, pauli1, pauli2, pauli3
 
   ! Type declaration
@@ -87,7 +87,7 @@ module spin_m
   end type
 
   ! Matrix inverse
-  interface inv
+  interface inverse
     module procedure spin_inv
   end interface
 
@@ -511,7 +511,7 @@ contains
     class(spin), intent(in) :: this
     type(spin)              :: r
 
-    r%matrix = matinv2(this%matrix)
+    r%matrix = inverse(this%matrix)
   end function
 
   pure function spin_sum(this) result(r)

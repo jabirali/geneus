@@ -22,8 +22,8 @@ module propagator_m
     type(spin) :: gt                                !! Riccati parameter γ~
     type(spin) :: dg                                !! Derivative dγ /dz
     type(spin) :: dgt                               !! Derivative dγ~/dz
-    type(spin) :: N                                 !! Normalization N  = inv(I - γγ~)
-    type(spin) :: Nt                                !! Normalization Nt = inv(I - γ~γ)
+    type(spin) :: N                                 !! Normalization N  = (I - γγ~)^-1
+    type(spin) :: Nt                                !! Normalization Nt = (I - γ~γ)^-1
   contains
     ! Accessors for propagator components
     procedure  :: matrix    => propagator_matrix    !! 4×4 matrix representation of the propagator
@@ -70,8 +70,8 @@ contains
     this % gt = gt
 
     ! Update normalization matrices
-    this % N  = inv( pauli0 - g*gt )
-    this % Nt = inv( pauli0 - gt*g )
+    this % N  = inverse( pauli0 - g*gt )
+    this % Nt = inverse( pauli0 - gt*g )
   end function
 
   pure function propagator_construct_bcs(energy, gap) result(this)
@@ -101,8 +101,8 @@ contains
     this % gt = b * ((0.0_wp,1.0_wp) * pauli2)
 
     ! Update normalization matrices
-    this % N  = inv( pauli0 - this%g  * this%gt )
-    this % Nt = inv( pauli0 - this%gt * this%g  )
+    this % N  = inverse( pauli0 - this%g  * this%gt )
+    this % Nt = inverse( pauli0 - this%gt * this%g  )
   end function
 
   pure function propagator_matrix(this) result(matrix)
@@ -129,8 +129,8 @@ contains
     a%dgt = b(25:32) 
 
     ! Update normalization matrices
-    a % N  = inv( pauli0 - a%g  * a%gt )
-    a % Nt = inv( pauli0 - a%gt * a%g  )
+    a % N  = inverse( pauli0 - a%g  * a%gt )
+    a % Nt = inverse( pauli0 - a%gt * a%g  )
   end subroutine
 
   pure subroutine propagator_export_cmatrix(a, b)
