@@ -164,6 +164,8 @@ contains
 
   impure subroutine ferromagnet_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
+    use :: evaluate_m
+
     class(ferromagnet), intent(inout) :: this
     character(*),       intent(in)    :: key
     character(*),       intent(in)    :: val

@@ -290,6 +290,8 @@ contains
 
   impure subroutine material_update_current(this)
     ! Calculate the charge and spin currents in the material.
+    use :: calculus_m
+
     class(material), intent(inout) :: this
     real(wp),        allocatable   :: current(:,:)
     real(wp)                       :: prefactor
@@ -351,6 +353,8 @@ contains
 
   impure subroutine material_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
+    use :: evaluate_m
+
     class(material), intent(inout) :: this
     character(*),    intent(in)    :: key
     character(*),    intent(in)    :: val

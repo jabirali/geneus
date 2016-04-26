@@ -15,6 +15,7 @@
 
 module spin_m
   use :: math_m
+  use :: matrix_m
   private
 
   ! Public interface

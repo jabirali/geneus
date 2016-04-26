@@ -107,6 +107,8 @@ contains
 
   function conductor_construct() result(this)
     ! Constructs a conductor object initialized to a superconducting state.
+    use :: calculus_m
+
     type(conductor) :: this
 
     ! Initialize locations
@@ -406,6 +408,8 @@ contains
 
   impure subroutine conductor_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
+    use :: evaluate_m
+
     class(conductor), intent(inout) :: this
     character(*),     intent(in)    :: key
     character(*),     intent(in)    :: val

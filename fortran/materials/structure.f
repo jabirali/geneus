@@ -599,6 +599,8 @@ contains
 
   function differential_conductance(material_a, material_b, voltage, temperature) result(conductance)
     !! Numerically calculates the differential conductance at a tunneling interface.
+    use :: calculus_m
+
     class(material), intent(in) :: material_a
     class(material), intent(in) :: material_b
     real(wp),        intent(in) :: temperature

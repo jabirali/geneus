@@ -125,6 +125,8 @@ contains
 
   impure subroutine superconductor_update_gap(this)
     ! Update the superconducting gap if the BCS coupling constant is nonzero.
+    use :: calculus_m
+
     class(superconductor), intent(inout) :: this         ! Superconductor object that will be updated
     complex(wp),           allocatable   :: gap(:)       ! Used to calculate the superconducting order parameter
     complex(wp)                          :: diff         ! Change in the superconducting order parameter mean
@@ -213,6 +215,8 @@ contains
 
   impure subroutine superconductor_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
+    use :: evaluate_m
+
     class(superconductor), intent(inout) :: this
     character(*),          intent(in)    :: key
     character(*),          intent(in)    :: val

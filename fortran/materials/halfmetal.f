@@ -212,6 +212,8 @@ contains
 
   impure subroutine halfmetal_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
+    use :: evaluate_m
+
     class(halfmetal), intent(inout) :: this
     character(*),     intent(in)    :: key
     character(*),     intent(in)    :: val

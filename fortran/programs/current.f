@@ -12,6 +12,7 @@ program critical_current
   use :: structure_m
   use :: stdio_m
   use :: math_m
+  use :: calculus_m
 
   !--------------------------------------------------------------------------------!
   !                                GLOBAL VARIABLES                                !
