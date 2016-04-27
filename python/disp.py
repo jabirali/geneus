@@ -28,7 +28,7 @@ def plot_density(data):
     density  = data[:,2].reshape(len(position), len(energy))
 
     # Plot the density of states
-    plt.figure()
+    plt.figure(figsize = (10, 6), tight_layout = True)
     plt.gcf().canvas.set_window_title('Density of states')
     plt.pcolormesh(energy, position, density, vmin = 0.0, vmax = 2.0, cmap = palette['heatmap'])
     plt.colorbar(ticks = [0.0,0.5,1.0,1.5,2.0])
