@@ -5,6 +5,9 @@ import sys               as s
 import numpy             as n
 import matplotlib.pyplot as p
 
+# Define plot style
+p.style.use('ggplot')
+
 # Define color palette and colormap
 palette = {'heatmap' : 'viridis',
            'black'   : '#000000',
