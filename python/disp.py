@@ -3,10 +3,15 @@
 
 import sys
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # Define plot style
 plt.style.use('ggplot')
+mpl.rcParams['mathtext.fontset'] = 'stix'
+mpl.rcParams['font.family']      = 'STIXGeneral'
+mpl.rcParams['font.size']        = '16'
+mpl.rcParams['lines.linewidth']  = '2'
 
 # Define color palette and colormap
 palette = {'heatmap' : 'viridis',
@@ -14,10 +19,6 @@ palette = {'heatmap' : 'viridis',
            'blue'    : '#377eb8',
            'green'   : '#4daf4a',
            'red'     : '#e41a1c'}
-
-# Define font type and size
-fontset = {'fontname' : 'Sans',
-           'size'     : '16'  }
 
 def plot_density(data):
     """Function for plotting the density of states."""
@@ -33,8 +34,8 @@ def plot_density(data):
     plt.pcolormesh(energy, position, density, vmin = 0.0, vmax = 2.0, cmap = palette['heatmap'])
     plt.colorbar(ticks = [0.0,0.5,1.0,1.5,2.0])
     plt.axis([-2.0, +2.0, position.min(), position.max()])
-    plt.xlabel(r'Energy $\epsilon/\Delta$', **fontset)
-    plt.ylabel(r'Position $z/\xi$', **fontset)
+    plt.xlabel(r'Energy $\epsilon/\Delta$')
+    plt.ylabel(r'Position $z/\xi$')
     plt.show()
 
 def plot_current(data):
@@ -48,31 +49,30 @@ def plot_current(data):
     spin_z   = data[:,4]
 
     # Plot the charge current
-    plt.figure()
+    plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title('Charge current')
-    plt.plot(position, charge, palette['black'], linewidth = 2)
+    plt.plot(position, charge, palette['black'])
     plt.axis([position.min(), 
               position.max(), 
               min(0.0, charge.min()) * 1.05,
               max(0.0, charge.max()) * 1.05])
-    plt.ylabel(r'Charge current $I_{e}/I_{e0}$', **fontset)
-    plt.xlabel(r'Position $z/\xi$', **fontset)
+    plt.ylabel(r'Charge current $I_{e}/I_{e0}$')
+    plt.xlabel(r'Position $z/\xi$')
     plt.show()
 
     # Plot the spin current
-    plt.figure()
+    plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title('Spin current')
     plt.plot(position, spin_x, palette['blue'], 
              position, spin_y, palette['green'], 
-             position, spin_z, palette['red'], 
-             linewidth = 2)
+             position, spin_z, palette['red'])
     plt.axis([position.min(), 
               position.max(), 
               min(0.0, spin_x.min(), spin_y.min(), spin_z.min())*1.05, 
               max(0.0, spin_x.max(), spin_y.max(), spin_z.max())*1.05])
-    plt.ylabel(r'Spin current $I_{\sigma}/I_{\sigma 0}$', **fontset)
-    plt.xlabel(r'Position $z/\xi$', **fontset)
-    plt.legend(['Spin-$x$', 'Spin-$y$', 'Spin-$z$'])
+    plt.ylabel(r'Spin current $I_{\sigma}/I_{\sigma 0}$')
+    plt.xlabel(r'Position $z/\xi$')
+    plt.legend([r'Spin-$x$', r'Spin-$y$', r'Spin-$z$'])
     plt.show()
 
 def plot_gap(data):
@@ -84,27 +84,27 @@ def plot_gap(data):
     phase    = data[:,2]
 
     # Plot the superconducting gap
-    plt.figure()
+    plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title('Superconducting gap')
-    plt.plot(position, gap, palette['black'], linewidth = 2)
+    plt.plot(position, gap, palette['black'])
     plt.axis([position.min(), 
               position.max(), 
               min(-1e-6, gap.min()) * 1.05,
               max(+1e-6, gap.max()) * 1.05])
-    plt.ylabel(r'Superconducting gap $\Delta/\Delta_0$', **fontset)
-    plt.xlabel(r'Position $z/\xi$', **fontset)
+    plt.ylabel(r'Superconducting gap $\Delta/\Delta_0$')
+    plt.xlabel(r'Position $z/\xi$')
     plt.show()
 
     # Plot the superconducting phase
-    plt.figure()
+    plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title('Superconducting phase')
-    plt.plot(position, phase, palette['black'], linewidth = 2)
+    plt.plot(position, phase, palette['black'])
     plt.axis([position.min(), 
               position.max(), 
               min(-1e-6, phase.min()) * 1.05,
               max(+1e-6, phase.max()) * 1.05])
-    plt.ylabel(r'Superconducting phase $\varphi/\pi$', **fontset)
-    plt.xlabel(r'Position $z/\xi$', **fontset)
+    plt.ylabel(r'Superconducting phase $\varphi/\pi$')
+    plt.xlabel(r'Position $z/\xi$')
     plt.show()
 
 if __name__ == "__main__":
