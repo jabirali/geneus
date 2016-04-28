@@ -8,10 +8,25 @@ import matplotlib.pyplot as plt
 
 # Define plot style
 plt.style.use('ggplot')
+mpl.rcParams['figure.figsize']   = (10, 6)
 mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['font.family']      = 'STIXGeneral'
 mpl.rcParams['font.size']        = '16'
-mpl.rcParams['lines.linewidth']  = '2'
+plt.rcParams['axes.labelsize']    = plt.rcParams['font.size']
+plt.rcParams['axes.titlesize']    = plt.rcParams['font.size'] * 1.5
+plt.rcParams['legend.fontsize']   = plt.rcParams['font.size']
+plt.rcParams['xtick.labelsize']   = plt.rcParams['font.size']
+plt.rcParams['ytick.labelsize']   = plt.rcParams['font.size']
+plt.rcParams['savefig.dpi']       = 600
+plt.rcParams['xtick.major.size']  = 0
+plt.rcParams['xtick.minor.size']  = 0
+plt.rcParams['ytick.major.size']  = 0
+plt.rcParams['ytick.minor.size']  = 0
+plt.rcParams['legend.frameon']    = False
+plt.rcParams['legend.loc']        = 'upper center'
+plt.rcParams['legend.borderaxespad'] = -1.6
+plt.rcParams['axes.linewidth']    = 1
+mpl.rcParams['lines.linewidth']   = 2
 
 # Define color palette and colormap
 palette = {'heatmap' : 'viridis',
@@ -19,6 +34,14 @@ palette = {'heatmap' : 'viridis',
            'blue'    : '#377eb8',
            'green'   : '#4daf4a',
            'red'     : '#e41a1c'}
+
+def plot_window(title, ylabel, xlabel):
+    """Initializes a new plotting window."""
+
+    plt.figure(tight_layout = True)
+    plt.gcf().canvas.set_window_title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
 
 def plot_density(data):
     """Function for plotting the density of states."""
@@ -29,13 +52,10 @@ def plot_density(data):
     density  = data[:,2].reshape(len(position), len(energy))
 
     # Plot the density of states
-    plt.figure(figsize = (10, 6), tight_layout = True)
-    plt.gcf().canvas.set_window_title('Density of states')
+    plot_window('Density of states', r'Position $z/\xi$', r'Energy $\epsilon/\Delta$')
     plt.pcolormesh(energy, position, density, vmin = 0.0, vmax = 2.0, cmap = palette['heatmap'])
     plt.colorbar(ticks = [0.0,0.5,1.0,1.5,2.0])
     plt.axis([-2.0, +2.0, position.min(), position.max()])
-    plt.xlabel(r'Energy $\epsilon/\Delta$')
-    plt.ylabel(r'Position $z/\xi$')
     plt.show()
 
 def plot_current(data):
@@ -49,20 +69,16 @@ def plot_current(data):
     spin_z   = data[:,4]
 
     # Plot the charge current
-    plt.figure(tight_layout = True)
-    plt.gcf().canvas.set_window_title('Charge current')
+    plot_window('Charge current', r'Charge current $I_{e}/I_{e0}$', r'Position $z/\xi$')
     plt.plot(position, charge, palette['black'])
     plt.axis([position.min(), 
               position.max(), 
               min(0.0, charge.min()) * 1.05,
               max(0.0, charge.max()) * 1.05])
-    plt.ylabel(r'Charge current $I_{e}/I_{e0}$')
-    plt.xlabel(r'Position $z/\xi$')
     plt.show()
 
     # Plot the spin current
-    plt.figure(tight_layout = True)
-    plt.gcf().canvas.set_window_title('Spin current')
+    plot_window('Spin current', r'Spin current $I_{\sigma}/I_{\sigma 0}$', r'Position $z/\xi$')
     plt.plot(position, spin_x, palette['blue'], 
              position, spin_y, palette['green'], 
              position, spin_z, palette['red'])
@@ -70,9 +86,7 @@ def plot_current(data):
               position.max(), 
               min(0.0, spin_x.min(), spin_y.min(), spin_z.min())*1.05, 
               max(0.0, spin_x.max(), spin_y.max(), spin_z.max())*1.05])
-    plt.ylabel(r'Spin current $I_{\sigma}/I_{\sigma 0}$')
-    plt.xlabel(r'Position $z/\xi$')
-    plt.legend([r'Spin-$x$', r'Spin-$y$', r'Spin-$z$'])
+    plt.legend([r'Spin-$x$', r'Spin-$y$', r'Spin-$z$'], ncol = 3)
     plt.show()
 
 def plot_gap(data):
