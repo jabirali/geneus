@@ -7,41 +7,17 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # Define plot style
-plt.style.use('ggplot')
-mpl.rcParams['figure.figsize']   = (10, 6)
-mpl.rcParams['mathtext.fontset'] = 'stix'
-mpl.rcParams['font.family']      = 'STIXGeneral'
-mpl.rcParams['font.size']        = '16'
-plt.rcParams['axes.labelsize']    = plt.rcParams['font.size']
-plt.rcParams['axes.titlesize']    = plt.rcParams['font.size'] * 1.5
-plt.rcParams['legend.fontsize']   = plt.rcParams['font.size']
-plt.rcParams['xtick.labelsize']   = plt.rcParams['font.size']
-plt.rcParams['ytick.labelsize']   = plt.rcParams['font.size']
-plt.rcParams['savefig.dpi']       = 600
-plt.rcParams['xtick.major.size']  = 0
-plt.rcParams['xtick.minor.size']  = 0
-plt.rcParams['ytick.major.size']  = 0
-plt.rcParams['ytick.minor.size']  = 0
-plt.rcParams['legend.frameon']    = False
-plt.rcParams['legend.loc']        = 'upper center'
-plt.rcParams['legend.borderaxespad'] = -1.6
-plt.rcParams['axes.linewidth']    = 1
-mpl.rcParams['lines.linewidth']   = 2
+plt.style.use('babaplot.mplstyle')
 
-# Define color palette and colormap
-palette = {'heatmap' : 'viridis',
-           'black'   : '#000000',
-           'blue'    : '#377eb8',
-           'green'   : '#4daf4a',
-           'red'     : '#e41a1c'}
-
-def plot_window(title, ylabel, xlabel):
+def plot_window(xlabel, ylabel, title):
     """Initializes a new plotting window."""
 
     plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+
+    return plt.gca()
 
 def plot_density(data):
     """Function for plotting the density of states."""
@@ -52,8 +28,8 @@ def plot_density(data):
     density  = data[:,2].reshape(len(position), len(energy))
 
     # Plot the density of states
-    plot_window('Density of states', r'Position $z/\xi$', r'Energy $\epsilon/\Delta$')
-    plt.pcolormesh(energy, position, density, vmin = 0.0, vmax = 2.0, cmap = palette['heatmap'])
+    ax = plot_window(r'Energy $ε/Δ$', r'Position $z/ξ$', 'Density of states')
+    plt.pcolormesh(energy, position, density, vmin = 0.0, vmax = 2.0)
     plt.colorbar(ticks = [0.0,0.5,1.0,1.5,2.0])
     plt.axis([-2.0, +2.0, position.min(), position.max()])
     plt.show()
@@ -69,8 +45,8 @@ def plot_current(data):
     spin_z   = data[:,4]
 
     # Plot the charge current
-    plot_window('Charge current', r'Charge current $I_{e}/I_{e0}$', r'Position $z/\xi$')
-    plt.plot(position, charge, palette['black'])
+    ax = plot_window(r'Position $z/ξ$', r'Charge current $I_{e}/I_{e0}$', 'Charge current')
+    plt.plot(position, charge)
     plt.axis([position.min(), 
               position.max(), 
               min(0.0, charge.min()) * 1.05,
@@ -78,10 +54,10 @@ def plot_current(data):
     plt.show()
 
     # Plot the spin current
-    plot_window('Spin current', r'Spin current $I_{\sigma}/I_{\sigma 0}$', r'Position $z/\xi$')
-    plt.plot(position, spin_x, palette['blue'], 
-             position, spin_y, palette['green'], 
-             position, spin_z, palette['red'])
+    ax = plot_window(r'Position $z/ξ$', r'Spin current $I_{σ}/I_{σ0}$', 'Spin current')
+    plt.plot(position, spin_x, 
+             position, spin_y, 
+             position, spin_z)
     plt.axis([position.min(), 
               position.max(), 
               min(0.0, spin_x.min(), spin_y.min(), spin_z.min())*1.05, 
@@ -100,7 +76,7 @@ def plot_gap(data):
     # Plot the superconducting gap
     plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title('Superconducting gap')
-    plt.plot(position, gap, palette['black'])
+    plt.plot(position, gap)
     plt.axis([position.min(), 
               position.max(), 
               min(-1e-6, gap.min()) * 1.05,
@@ -112,7 +88,7 @@ def plot_gap(data):
     # Plot the superconducting phase
     plt.figure(tight_layout = True)
     plt.gcf().canvas.set_window_title('Superconducting phase')
-    plt.plot(position, phase, palette['black'])
+    plt.plot(position, phase)
     plt.axis([position.min(), 
               position.max(), 
               min(-1e-6, phase.min()) * 1.05,

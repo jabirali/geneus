@@ -1,0 +1,63 @@
+# This is a stylesheet for matplotlib. It modifies a number of default settings, such as e.g. placing the legend above the top spine,
+# surrounding plots with spines on all sides, using in-ticks instead of out-ticks for the axes, switching to the STIX fonts for both
+# text and math, setting the viridis colormap as default for heatmaps, and using the Set1 color palette for regular plots. The focus
+# of this stylesheet is to generate publication-ready plots, and it therefore removes some features like background colors and grids.
+#
+# Author: Jabir Ali Ouassou
+# Date:   2016-04-26
+
+
+# Layout
+axes.grid:                   False
+axes.axisbelow:              True
+axes.spines.bottom:          True
+axes.spines.left:            True
+axes.spines.right:           True
+axes.spines.top:             True
+xtick.direction:             in
+ytick.direction:             in
+legend.loc:                  upper center
+legend.frameon:              False
+legend.borderaxespad:        -1.6
+
+
+# Dimensions
+figure.figsize:              10, 6
+xtick.major.size:            3.0
+xtick.minor.size:            3.0
+ytick.major.size:            3.0
+ytick.minor.size:            3.0
+xtick.major.width:           1.0
+xtick.minor.width:           1.0
+ytick.major.width:           1.0
+ytick.minor.width:           1.0
+axes.linewidth:              1.0
+lines.linewidth:             2.0
+
+
+# Colors
+image.cmap:                  viridis
+axes.prop_cycle:             cycler('color', ['377eb8', '4daf4a', 'e41a1c', '984ea3', 'ff7f00'])
+figure.facecolor:            ffffff
+axes.facecolor:              ffffff
+axes.edgecolor:              555555
+xtick.color:                 555555
+ytick.color:                 555555
+axes.labelcolor:             555555
+
+
+# Fonts
+mathtext.fontset:            stix
+font.family:                 STIXGeneral
+axes.formatter.use_mathtext: True
+font.size:                   16
+axes.labelsize:              large
+axes.titlesize:              large
+legend.fontsize:             medium
+xtick.labelsize:             medium
+ytick.labelsize:             medium
+
+
+# Export
+savefig.dpi:                 600
+savefig.bbox:                tight
