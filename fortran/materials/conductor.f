@@ -5,6 +5,12 @@
 !> This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
 !> of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
 !> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
+!>
+!> @TODO
+!>   Move the spinorbit fields into a separate subobject type(spinorbit), and the spinactive fields into two separate
+!>   subobjects spinactive_a and spinactive_b of a type(spinactive). These types can be moved into modules spinorbit_m
+!>   and spinactive_m, together with the associated methods diffusion_spinorbit etc. We can then have separate modules
+!>   spinorbit_m and spinactive_m that the current module depends on, leading to greater encapsulation and separation.
 
 module conductor_m
   use :: stdio_m
