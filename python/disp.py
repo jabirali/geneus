@@ -72,51 +72,76 @@ def plot_gap(data):
     gap      = data[:,1]
     phase    = data[:,2]
 
-    # Plot the superconducting gap
-    plt.figure(tight_layout = True)
-    plt.gcf().canvas.set_window_title('Superconducting gap')
-    plt.plot(position, gap)
-    plt.axis([position.min(), 
-              position.max(), 
-              min(-1e-6, gap.min()) * 1.05,
-              max(+1e-6, gap.max()) * 1.05])
-    plt.ylabel(r'Superconducting gap $\Delta/\Delta_0$')
-    plt.xlabel(r'Position $z/\xi$')
+    fig = plt.figure(tight_layout = True)
+    fig.canvas.set_window_title('Superconducting gap')
 
-    # Plot the superconducting phase
-    plt.figure(tight_layout = True)
-    plt.gcf().canvas.set_window_title('Superconducting phase')
-    plt.plot(position, phase)
-    plt.axis([position.min(), 
-              position.max(), 
-              min(-1e-6, phase.min()) * 1.05,
-              max(+1e-6, phase.max()) * 1.05])
-    plt.ylabel(r'Superconducting phase $\varphi/\pi$')
-    plt.xlabel(r'Position $z/\xi$')
+    def plot_magnitude():
+        # Plot the superconducting gap
+        fig.clear()
+        plt.plot(position, gap)
+        plt.axis([position.min(), 
+                  position.max(), 
+                  min(-1e-6, gap.min()) * 1.05,
+                  max(+1e-6, gap.max()) * 1.05])
+        plt.ylabel(r'Superconducting gap $\Delta/\Delta_0$')
+        plt.xlabel(r'Position $z/\xi$')
+        fig.canvas.draw()
+
+    def plot_phase():
+        # Plot the superconducting phase
+        fig.clear()
+        plt.plot(position, phase)
+        plt.axis([position.min(), 
+                  position.max(), 
+                  min(-1e-6, phase.min()) * 1.05,
+                  max(+1e-6, phase.max()) * 1.05])
+        plt.ylabel(r'Superconducting phase $\varphi/\pi$')
+        plt.xlabel(r'Position $z/\xi$')
+        fig.canvas.draw()
+
+    def onclick(event):
+        try:
+            onclick.switch = not onclick.switch
+        except AttributeError:
+            onclick.switch = True
+        if onclick.switch:
+            plot_magnitude()
+        else:
+            plot_phase()
+
+    fig.canvas.mpl_connect('button_press_event', onclick)
+
+    plot_magnitude()
     plt.show()
+
 
 if __name__ == "__main__":
     # Check command line arguments
-    try:
-        filename = sys.argv[1]
-    except:
+    if len(sys.argv) == 1:
         print('Usage: {} <filename.dat>'.format(sys.argv[0]))
         sys.exit(0)
 
-    # Read data from file
-    with open(filename, 'r') as f:
-        desc = f.readline()   # File description
-        data = np.loadtxt(f)  # File contents
+    # Loop over input files
+    for filename in sys.argv[1:]:
+        # Read data from file
+        with open(filename, 'r') as f:
+            desc = f.readline()   # File description
+            data = np.loadtxt(f)  # File contents
 
-    # Split the file description into fields
-    field = [q.strip() for q in desc[2:].split('\t')]
+        if filename.endswith('.dat') or filename.endswith('.bak'):
+            # Split the file description into fields
+            field = [q.strip() for q in desc[2:].split('\t')]
 
-    # Call the appropriate plotting method
-    if field == ['Position', 'Energy', 'Density of states']:
-        plot_density(data)
-    elif field == ['Position', 'Charge current', 'Spin-x current', 'Spin-y current', 'Spin-z current']:
-        plot_current(data)
-    elif field == ['Position', 'Gap magnitude', 'Gap phase']:
-        plot_gap(data)
-    else:
-        print('Sorry, unrecognized data format...')
+            # Call the appropriate plotting method
+            if field == ['Position', 'Energy', 'Density of states']:
+                plot_density(data)
+            elif field == ['Position', 'Charge current', 'Spin-x current', 'Spin-y current', 'Spin-z current']:
+                plot_current(data)
+            elif field == ['Position', 'Gap magnitude', 'Gap phase']:
+                plot_gap(data)
+            else:
+                print('Sorry, unrecognized output file...')
+        elif filename.endswith('.conf'):
+            print('Sorry, conf parser not integrated yet...')
+        else:
+            print('Sorry, unrecognized data format...')
