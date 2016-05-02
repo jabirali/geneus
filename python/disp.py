@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import itertools
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -18,6 +19,24 @@ def plot_window(xlabel, ylabel, title):
     plt.ylabel(ylabel)
 
     return plt.gca()
+
+def multiplot(lst, title='Plot'):
+    '''Function for plotting multiple plots in the same window, specified as a list of funtions.'''
+
+    # Create a figure window
+    fig = plt.figure(tight_layout = True)
+    fig.canvas.set_window_title(title)
+
+    def onclick(event):
+        fig.clear()
+        next(onclick.lst)()
+        fig.canvas.draw()
+
+    onclick.lst = itertools.cycle(lst)
+    onclick(None)
+    fig.canvas.mpl_connect('button_press_event', onclick)
+
+    plt.show()
 
 def plot_density(data):
     """Function for plotting the density of states."""
@@ -72,12 +91,8 @@ def plot_gap(data):
     gap      = data[:,1]
     phase    = data[:,2]
 
-    fig = plt.figure(tight_layout = True)
-    fig.canvas.set_window_title('Superconducting gap')
-
     def plot_magnitude():
         # Plot the superconducting gap
-        fig.clear()
         plt.plot(position, gap)
         plt.axis([position.min(), 
                   position.max(), 
@@ -85,11 +100,9 @@ def plot_gap(data):
                   max(+1e-6, gap.max()) * 1.05])
         plt.ylabel(r'Superconducting gap $\Delta/\Delta_0$')
         plt.xlabel(r'Position $z/\xi$')
-        fig.canvas.draw()
 
     def plot_phase():
         # Plot the superconducting phase
-        fig.clear()
         plt.plot(position, phase)
         plt.axis([position.min(), 
                   position.max(), 
@@ -97,22 +110,9 @@ def plot_gap(data):
                   max(+1e-6, phase.max()) * 1.05])
         plt.ylabel(r'Superconducting phase $\varphi/\pi$')
         plt.xlabel(r'Position $z/\xi$')
-        fig.canvas.draw()
 
-    def onclick(event):
-        try:
-            onclick.switch = not onclick.switch
-        except AttributeError:
-            onclick.switch = True
-        if onclick.switch:
-            plot_magnitude()
-        else:
-            plot_phase()
+    multiplot([plot_magnitude, plot_phase], title = 'Superconducting gap')
 
-    fig.canvas.mpl_connect('button_press_event', onclick)
-
-    plot_magnitude()
-    plt.show()
 
 
 if __name__ == "__main__":
