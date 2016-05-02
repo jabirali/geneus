@@ -41,6 +41,8 @@ axes.prop_cycle:             cycler('color', ['377eb8', '4daf4a', 'e41a1c', '984
 figure.facecolor:            ffffff
 axes.facecolor:              ffffff
 axes.edgecolor:              555555
+legend.facecolor:            ffffff
+legend.edgecolor:            555555
 xtick.color:                 555555
 ytick.color:                 555555
 axes.labelcolor:             555555
