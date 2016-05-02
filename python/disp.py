@@ -51,7 +51,6 @@ def plot_current(data):
               position.max(), 
               min(0.0, charge.min()) * 1.05,
               max(0.0, charge.max()) * 1.05])
-    plt.show()
 
     # Plot the spin current
     ax = plot_window(r'Position $z/ξ$', r'Spin current $I_{σ}/I_{σ0}$', 'Spin current')
@@ -83,7 +82,6 @@ def plot_gap(data):
               max(+1e-6, gap.max()) * 1.05])
     plt.ylabel(r'Superconducting gap $\Delta/\Delta_0$')
     plt.xlabel(r'Position $z/\xi$')
-    plt.show()
 
     # Plot the superconducting phase
     plt.figure(tight_layout = True)
