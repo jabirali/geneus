@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import configparser
+import sys
+import configparser as cp
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ import matplotlib.pyplot as plt
 mpl.style.use('babaplot.mplstyle')
 
 # Read and parse a config file
-config = configparser.ConfigParser()
+config = cp.ConfigParser()
 config.read('plot.conf')
 
 files = {filename: columns.replace(' ','').split(',') for filename, columns in config['files'].items()}
