@@ -14,12 +14,14 @@ pure subroutine spinorbit_update_prehook(this)
       deallocate(this%spinorbit)
     else
       ! Spin-orbit coupling terms in the equations for the Riccati parameter γ
+      allocate(this % Ax, this % Ay, this % Az, this % A2)
       this%Ax  = this%spinorbit(1)/sqrt(this%thouless)
       this%Ay  = this%spinorbit(2)/sqrt(this%thouless)
       this%Az  = this%spinorbit(3)/sqrt(this%thouless)
       this%A2  = this%Ax**2 + this%Ay**2 + this%Az**2
 
       ! Spin-orbit coupling terms in the equations for the Riccati parameter γ~
+      allocate(this % Axt, this % Ayt, this % Azt, this % A2t)
       this%Axt = spin(conjg(this%Ax%matrix))
       this%Ayt = spin(conjg(this%Ay%matrix))
       this%Azt = spin(conjg(this%Az%matrix))
