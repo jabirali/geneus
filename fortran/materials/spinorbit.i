@@ -8,7 +8,7 @@ pure subroutine spinorbit_update_prehook(this)
   !! Updates the internal variables associated with spin-orbit coupling.
   class(conductor), intent(inout) :: this 
 
-  if (allocated(this%spinorbit)) then
+  if (allocated(this%spinorbit) .and. .not. allocated(this%A2)) then
     if (sum(norm2(this%spinorbit)) < sqrt(eps)) then
       ! Negligible spin-orbit coupling
       deallocate(this%spinorbit)
