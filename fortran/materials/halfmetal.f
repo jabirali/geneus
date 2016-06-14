@@ -233,7 +233,7 @@ contains
         call evaluate(val, tmp)
         this % conductance_b = 1/tmp
       case default
-        call material_conf(this, key, val)
+        call this % conductor % conf(key, val)
     end select
   end subroutine
 end module
