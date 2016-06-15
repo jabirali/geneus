@@ -40,12 +40,12 @@ image.cmap:                  viridis
 axes.prop_cycle:             cycler('color', ['377eb8', '4daf4a', 'e41a1c', '984ea3', 'ff7f00'])
 figure.facecolor:            ffffff
 axes.facecolor:              ffffff
-axes.edgecolor:              555555
+axes.edgecolor:              000000
 legend.facecolor:            ffffff
-legend.edgecolor:            555555
-xtick.color:                 555555
-ytick.color:                 555555
-axes.labelcolor:             555555
+legend.edgecolor:            000000
+xtick.color:                 000000
+ytick.color:                 000000
+axes.labelcolor:             000000
 
 
 # Fonts
@@ -61,5 +61,5 @@ ytick.labelsize:             medium
 
 
 # Export
-savefig.dpi:                 600
+savefig.dpi:                 1200
 savefig.bbox:                tight

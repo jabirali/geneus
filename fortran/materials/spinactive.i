@@ -161,7 +161,7 @@ contains
     !! Calculate the 2nd-order transmission terms in the matrix current.
     complex(wp), dimension(4,4) :: I
 
-    I = (0.50*R/Q) * matmul(S0,matmul(G0,S0))
+    I = (-0.50*R/Q) * matmul(S0,matmul(G0,S0))
   end function
 
   pure function spinactive_current2_reflection() result(I)
