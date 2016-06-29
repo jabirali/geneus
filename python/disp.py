@@ -8,7 +8,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # Define plot style
-plt.style.use('babaplot.mplstyle')
+plt.style.use('~/Code/python/babaplot.mplstyle')
 
 def plot_window(xlabel, ylabel, title):
     """Initializes a new plotting window."""
