@@ -33,6 +33,7 @@ module halfmetal_m
     procedure           :: interface_equation_b => halfmetal_interface_equation_b ! Boundary condition at the right interface
     procedure           :: update_prehook       => halfmetal_update_prehook       ! Code to execute before calculating the propagators
     procedure           :: update_posthook      => halfmetal_update_posthook      ! Code to execute after  calculating the propagators
+    procedure           :: update_density       => halfmetal_update_density       ! Calculates the density of states
   end type
 
   ! Type constructors
@@ -199,12 +200,43 @@ contains
       end do
     end do
 
+    ! Update density of states
+    call this%update_density
+
     ! Status information
     if (this%information >= 0 .and. .not. this % lock) then
       write(stdout,'(4x,a,f10.8,a)') 'Max error:  ',error,'                                        '
       flush(stdout)
     end if
   end subroutine
+
+  pure subroutine halfmetal_update_density(this)
+    ! Calculate the density of states in the halfmetal.
+    class(halfmetal), intent(inout) :: this
+    integer                         :: n, m
+
+    ! Allocate memory if necessary
+    if (.not. allocated(this%density)) then
+      allocate(this%density(size(this%energy),size(this%location)))
+    end if
+
+    ! Calculate the density of states at each position and energy
+    ! TODO: Generalize this to work for strong ferromagnets too.
+    if (this % polarization > 0) then
+      do m=1,size(this%location)
+        do n=1,size(this%energy)
+          this % density(n,m) = 2 * re(this % propagator(n,m) % N % matrix(1,1)) - 1
+        end do
+      end do
+    else 
+      do m=1,size(this%location)
+        do n=1,size(this%energy)
+          this % density(n,m) = 2 * re(this % propagator(n,m) % N % matrix(2,2)) - 1
+        end do
+      end do
+    end if
+  end subroutine
+
 
   !--------------------------------------------------------------------------------!
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
