@@ -25,7 +25,7 @@ module calculus_m
 
   interface interpolate
     !! Public interface for various interpolation routines.
-    module procedure interpolate_pchip, interpolate_pchip_cx
+    module procedure interpolate_pchip, interpolate_pchip_cx, interpolate_pchip_scalar, interpolate_pchip_cx_scalar
   end interface
 contains
   pure subroutine linspace(array, first, last)
@@ -157,5 +157,36 @@ contains
     ! Interpolate the real and imaginary parts separately
     r = cx( interpolate_pchip(x, re(y), p),&
             interpolate_pchip(x, im(y), p) )
+  end function
+
+  function interpolate_pchip_scalar(x, y, p) result(r)
+    !! Wrapper for interpolate_pchip that accepts scalar arguments.
+    real(wp), intent(in)  :: x(:)         !! Variable x
+    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp), intent(in)  :: p            !! Interpolation point p
+    real(wp)              :: r            !! Interpolation result y(p)
+    real(wp)              :: rs(1) 
+
+    ! Perform the interpolation
+    rs = interpolate_pchip(x, y, [p])
+
+    ! Extract the scalar result
+    r = rs(1)
+  end function
+
+  function interpolate_pchip_cx_scalar(x, y, p) result(r)
+    !! Wrapper for interpolate_pchip that accepts complex scalar arguments.
+    real(wp),    intent(in)  :: x(:)         !! Variable x
+    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
+    real(wp),    intent(in)  :: p            !! Interpolation point p
+    real(wp)                 :: r            !! Interpolation result y(p)
+    real(wp)                 :: rs(1) 
+
+    ! Perform the interpolation
+    rs = cx( interpolate_pchip(x, re(y), [p]),&
+             interpolate_pchip(x, im(y), [p]) )
+
+    ! Extract the scalar result
+    r = rs(1)
   end function
 end module

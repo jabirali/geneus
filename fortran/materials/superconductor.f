@@ -183,22 +183,29 @@ contains
     end do
   end subroutine
 
-  pure function superconductor_get_gap(this, location) result(gap)
+  function superconductor_get_gap(this, location) result(gap)
     ! Returns the superconducting order parameter at the given location.
+    use :: calculus_m
+
     class(superconductor), intent(in) :: this
     real(wp),              intent(in) :: location
     complex(wp)                       :: gap
     integer                           :: n
 
-    ! Calculate the index corresponding to the given location
-    n = floor(location*(size(this%location)-1) + 1)
+    ! Interpolate the superconducting order parameter at that point
+    gap = interpolate(this % location, this % gap, location)
 
-    ! Extract the superconducting order parameter at that point
-    if (n <= 1) then
-      gap = this%gap(1)
-    else
-      gap = this%gap(n-1) + (this%gap(n)-this%gap(n-1))*(location-this%location(n-1))/(this%location(n)-this%location(n-1))
-    end if
+    ! if (this % optimize) then
+    !   ! Calculate the index corresponding to the given location
+    !   n = floor(location*(size(this%location)-1) + 1)
+    !   
+    !   ! Extract the superconducting order parameter at that point
+    !   if (n <= 1) then
+    !     gap = this%gap(1)
+    !   else
+    !     gap = this%gap(n-1) + (this%gap(n)-this%gap(n-1))*(location-this%location(n-1))/(this%location(n)-this%location(n-1))
+    !   end if
+    ! end if
   end function
 
   pure function superconductor_get_gap_mean(this) result(gap)
