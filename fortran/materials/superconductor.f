@@ -77,7 +77,7 @@ contains
   !                   IMPLEMENTATION OF SUPERCONDUCTOR METHODS                     !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  impure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
     complex(wp),           intent(in)    :: e
@@ -190,7 +190,6 @@ contains
     class(superconductor), intent(in) :: this
     real(wp),              intent(in) :: location
     complex(wp)                       :: gap
-    integer                           :: n
 
     ! Interpolate the superconducting order parameter at that point
     gap = interpolate(this % location, this % gap, location)

@@ -179,8 +179,8 @@ contains
     real(wp),    intent(in)  :: x(:)         !! Variable x
     complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
     real(wp),    intent(in)  :: p            !! Interpolation point p
-    real(wp)                 :: r            !! Interpolation result y(p)
-    real(wp)                 :: rs(1) 
+    complex(wp)              :: r            !! Interpolation result y(p)
+    complex(wp)              :: rs(1) 
 
     ! Perform the interpolation
     rs = cx( interpolate_pchip(x, re(y), [p]),&

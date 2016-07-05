@@ -51,7 +51,7 @@ contains
   !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  impure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(ferromagnet), intent(in)    :: this
     complex(wp),        intent(in)    :: e

@@ -74,7 +74,7 @@ contains
   !                     IMPLEMENTATION OF HALFMETAL EQUATIONS                      !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine halfmetal_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  impure subroutine halfmetal_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(halfmetal), intent(in)    :: this
     complex(wp),      intent(in)    :: e
