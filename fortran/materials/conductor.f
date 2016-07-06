@@ -149,7 +149,7 @@ contains
   !                     IMPLEMENTATION OF CONDUCTOR EQUATIONS                      !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(conductor), intent(in)    :: this
     complex(wp),      intent(in)    :: e

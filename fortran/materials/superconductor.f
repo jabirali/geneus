@@ -15,7 +15,8 @@ module superconductor_m
   ! Type declaration
   type, public, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(wp), allocatable :: gap(:)             ! Superconducting order parameter as a function of position (relative to the zero-temperature gap of a bulk superconductor)
+    complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
+    real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     real(wp)                 :: coupling = 0.00_wp ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
   contains
     ! These methods contain the equations that describe superconductors
@@ -46,13 +47,16 @@ contains
 
   function superconductor_construct() result(this)
     ! Constructs a superconducting material that is initialized to a superconducting state.
+    use :: calculus_m
     type(superconductor) :: this
 
     ! Call the superclass constructor
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap(size(this%location)))
+    allocate(this%gap_location(4096 * size(this%location)))
+    allocate(this%gap_function(size(this%gap_location)))
+    call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
     call this%set_gap( (1.0_wp,0.0_wp) )
 
     ! Initialize the coupling constant
@@ -77,7 +81,7 @@ contains
   !                   IMPLEMENTATION OF SUPERCONDUCTOR METHODS                     !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
     ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
     complex(wp),           intent(in)    :: e
@@ -128,14 +132,16 @@ contains
     use :: calculus_m
 
     class(superconductor), intent(inout) :: this         ! Superconductor object that will be updated
-    complex(wp),           allocatable   :: gap(:)       ! Used to calculate the superconducting order parameter
+    complex(wp),           allocatable   :: gap_e(:)     ! Used to calculate the superconducting order parameter (as a function of energy)
+    complex(wp),           allocatable   :: gap_z(:)     ! Used to calculate the superconducting order parameter (as a function of position)
     complex(wp)                          :: diff         ! Change in the superconducting order parameter mean
     complex(wp)                          :: singlet      ! Singlet component of the anomalous propagators
     integer                              :: n, m         ! Loop variables
 
     if (abs(this%coupling) > eps) then
       ! Allocate workspace memory
-      allocate(gap(size(this%energy)))
+      allocate(gap_e(size(this%energy)))
+      allocate(gap_z(size(this%location)))
 
       ! Calculate the mean superconducting order parameter
       diff = this%get_gap_mean()
@@ -147,12 +153,15 @@ contains
           singlet = ( this%propagator(m,n)%singlet() - conjg(this%propagator(m,n)%singlett()) )/2.0_wp
 
           ! Calculate the gap equation integrand and store it in an array
-          gap(m)  = singlet * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+          gap_e(m)  = singlet * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
         end do
 
         ! Interpolate and integrate the results, and update the superconducting order parameter
-        this%gap(n) = integrate(this%energy, gap, 1e-6_wp, this%energy(ubound(this%energy,1)))
+        gap_z(n) = integrate(this%energy, gap_e, 1e-6_wp, this%energy(ubound(this%energy,1)))
       end do
+
+      ! Interpolate the gap as a function of position to a higher resolution
+      this % gap_function = interpolate(this % location, gap_z, this % gap_location)
 
       ! Calculate the difference in mean superconducting order parameter
       diff = this%get_gap_mean() - diff
@@ -164,7 +173,8 @@ contains
       end if
 
       ! Deallocate workspace memory
-      deallocate(gap)
+      deallocate(gap_e)
+      deallocate(gap_z)
     end if
   end subroutine
 
@@ -178,33 +188,27 @@ contains
     complex(wp),           intent(in)    :: gap
     integer                              :: n
 
-    do n = 1,size(this%gap)
-      this%gap(n) = gap
-    end do
+    this%gap_function = gap
   end subroutine
 
-  function superconductor_get_gap(this, location) result(gap)
+  pure function superconductor_get_gap(this, location) result(gap)
     ! Returns the superconducting order parameter at the given location.
-    use :: calculus_m
-
     class(superconductor), intent(in) :: this
     real(wp),              intent(in) :: location
     complex(wp)                       :: gap
+    integer                           :: n
 
-    ! Interpolate the superconducting order parameter at that point
-    gap = interpolate(this % location, this % gap, location)
+    associate(f => this%gap_function, fp => gap, z => this%gap_location, zp => location)
+      ! Calculate the index corresponding to the given location
+      n = floor(zp*(size(z)-1) + 1)
 
-    ! if (this % optimize) then
-    !   ! Calculate the index corresponding to the given location
-    !   n = floor(location*(size(this%location)-1) + 1)
-    !   
-    !   ! Extract the superconducting order parameter at that point
-    !   if (n <= 1) then
-    !     gap = this%gap(1)
-    !   else
-    !     gap = this%gap(n-1) + (this%gap(n)-this%gap(n-1))*(location-this%location(n-1))/(this%location(n)-this%location(n-1))
-    !   end if
-    ! end if
+      ! Interpolate the superconducting order parameter at that point
+      if (n <= 1) then
+        fp = f(1)
+      else
+        fp = f(n-1) + (f(n)-f(n-1))*(zp-z(n-1))/(z(n)-z(n-1))
+      end if
+    end associate
   end function
 
   pure function superconductor_get_gap_mean(this) result(gap)
@@ -212,7 +216,7 @@ contains
     class(superconductor), intent(in)  :: this
     complex(wp)                        :: gap
 
-    gap = sum(this%gap)/max(1,size(this%gap)) 
+    gap = sum(this%gap_function)/max(1,size(this%gap_function)) 
   end function
 
   !--------------------------------------------------------------------------------!

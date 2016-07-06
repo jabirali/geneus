@@ -236,7 +236,7 @@ contains
       class(material), pointer, intent(in) :: m
       select type(m)
         class is (superconductor)
-          gap = min(gap, sum(abs(m%gap))/max(1,size(m%gap)))
+          gap = min(gap, sum(abs(m%gap_function))/max(1,size(m%gap_function)))
           found = .true.
       end select
     end subroutine
@@ -489,6 +489,7 @@ contains
     subroutine write_gap(ptr)
       class(material), pointer, intent(in) :: ptr
       real(wp)                             :: x
+      real(wp)                             :: p
       integer                              :: m
 
       ! Calculate the endpoints of this layer
@@ -497,10 +498,11 @@ contains
 
       ! Write out the gap in this layer
       do m=1,size(ptr % location)
-        x = a + (b-a) * ptr % location(m)
+        p = ptr % location(m)
+        x = a + (b-a)*p
         select type (ptr)
           class is (superconductor)
-            write(unit,'(*(es20.12e3,:,"	"))') x, abs(ptr%gap(m)), atan2(im(ptr%gap(m)),re(ptr%gap(m)))/pi
+            write(unit,'(*(es20.12e3,:,"	"))') x, abs(ptr%get_gap(p)), atan2(im(ptr%get_gap(p)),re(ptr%get_gap(p)))/pi
           class default
             write(unit,'(*(es20.12e3,:,"	"))') x, 0.0_wp, 0.0_wp
         end select

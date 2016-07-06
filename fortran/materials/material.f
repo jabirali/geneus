@@ -88,7 +88,7 @@ module material_m
   end interface
 
   abstract interface
-    impure subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+    pure subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
       ! This interface is used for the deferred procedure diffusion_equation.
       import material, spin, wp
 
@@ -231,7 +231,7 @@ contains
     ! Call the posthook method
     call this%update_posthook
   contains
-    impure subroutine ode(z, u, f)
+    pure subroutine ode(z, u, f)
       ! Definition of the differential equation u'=f(z,u).
       real(wp), intent(in)  :: z
       real(wp), intent(in)  :: u(32)
