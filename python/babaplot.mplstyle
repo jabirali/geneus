@@ -61,5 +61,5 @@ ytick.labelsize:             medium
 
 
 # Export
-savefig.dpi:                 1200
+savefig.dpi:                 600
 savefig.bbox:                tight
