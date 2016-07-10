@@ -101,8 +101,8 @@ program critical_current
   critical = maxval(abs(current))
 
   ! Status information
-  call status_head('COMPLETE')
-  call status_body('Critical current', critical)
+  call status_head('CRITICAL CURRENT')
+  call status_body('Result', critical)
   call status_foot
 
   ! Write the current-phase relation to file

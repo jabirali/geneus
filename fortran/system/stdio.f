@@ -102,4 +102,20 @@ contains
     ! Flush the information to standard out
     flush(unit=stdout)
   end subroutine
+
+  impure subroutine status_box(title)
+    !! This subroutine is used to write boxed status messages to standard out.
+    character(len=*), intent(in) :: title
+    character(len=33)            :: title_
+
+    ! adjust the provided title
+    title_ = ''
+    title_((len(title_)-len(title)+1)/2:) = title
+
+    ! Write out the boxed message
+    write(*,*)
+    write(*,'(a)') '╒═══════════════════════════════════╕'
+    write(*,'(a)') '│ '         // title_ //          ' │'
+    write(*,'(a)') '╘═══════════════════════════════════╛'
+  end subroutine
 end module

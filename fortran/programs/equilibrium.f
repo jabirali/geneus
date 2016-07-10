@@ -18,7 +18,7 @@ program equilibrium
   ! Main loop
   do
     ! Status information
-    call status_head('SELFCONSISTENT UPDATE')
+    call status_head('UPDATING STATE')
     call status_body('State difference', stack % difference())
     call status_foot
 
@@ -37,7 +37,7 @@ program equilibrium
   end do
 
   ! Status information
-  call status_head('CONVERGED')
+  call status_head('EQUILIBRIUM')
   call status_body('State difference', stack % difference())
   call status_foot
 end program

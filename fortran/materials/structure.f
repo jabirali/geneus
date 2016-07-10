@@ -57,6 +57,7 @@ contains
     class(structure), intent(inout) :: this
     character(*),     intent(in)    :: string
 
+    ! Construct the material
     if (.not. associated(this % b)) then
       ! This is the first layer in the structure
       call material_allocate(this % b, string)
@@ -69,6 +70,10 @@ contains
       this % b % material_b % material_a => this % b
       this % b => this % b % material_b
     end if
+
+    ! Status information
+    write(*,*)
+    write(*,*) '[' // string // ']'
   contains
     impure subroutine material_allocate(ptr, str)
       !! Allocates memory for a new material layer.
@@ -113,12 +118,18 @@ contains
     class(structure), intent(inout) :: this
     character(*),     intent(in)    :: key
     character(*),     intent(in)    :: val
+    character(22)                   :: str
 
+    ! Configure the material
     if (associated(this % b)) then
       call this % b % conf(key, val)
     else
       call error('Attempted to configure a non-existant material!')
     end if
+
+    ! Status information
+    write(str,*) key // ':'
+    write(*,  *) str // val
   end subroutine
 
   impure subroutine structure_map(this, routine, loop)
@@ -512,6 +523,8 @@ contains
 
   impure function structure_construct(file) result(this)
     !! Constructs a multilayer stack from a configuration file.
+    use :: stdio_m
+
     type(structure)          :: this
     character(*), intent(in) :: file
     integer                  :: unit
@@ -529,6 +542,9 @@ contains
     if (iostat /= 0) then
       call error('Failed to open configuration file "' // file // '"!')
     end if
+
+    ! Status information
+    call status_box('CONFIGURATION')
 
     ! Read the config file
     do while (iostat == 0)
