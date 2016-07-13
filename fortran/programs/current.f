@@ -93,6 +93,10 @@ program critical_current
     write(filename,'(a,f5.3,a)') 'current.', phase(n), '.dat'
     call stack % write_current(filename)
 
+    ! Write the superconducting gap to file
+    write(filename,'(a,f5.3,a)') 'gap.', phase(n), '.dat'
+    call stack % write_gap(filename)
+
     ! Save the charge current to array
     current(n) = stack % a % current(0,1)
   end do
