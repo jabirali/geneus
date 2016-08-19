@@ -26,6 +26,11 @@ module matrix_m
     !! Public interface for functions that calculate a matrix inverse.
     module procedure matrix_inverse
   end interface
+  
+  interface diag
+    !! Public interface for functions that either extract a matrix diagonal, or construct a diagonal matrix
+    module procedure matrix_diag, vector_diag
+  end interface
 contains
   pure function identity(n) result(A)
     !! Constructs an N×N identity matrix.
@@ -161,7 +166,7 @@ contains
     C = matmul(A,B) + matmul(B,A)
   end function
 
-  pure function diag(A) result(r)
+  pure function vector_diag(A) result(r)
     !! Extract the diagonal of a complex matrix.
     complex(wp), intent(in)  :: A(:,:)                        !! Matrix
     complex(wp)              :: r(min(size(A,1),size(A,2)))   !! Diag(A)
@@ -170,5 +175,15 @@ contains
     do n = 1,size(r)
       r(n) = A(n,n)
     end do
+  end function
+
+  pure function matrix_diag(A,B) result(C)
+    !! Construct a block-diagonal matrix C from two matrices A and B.
+    complex(wp), intent(in) :: A(:,:), B(:,:)
+    complex(wp)             :: C(size(A,1)+size(B,1), size(A,2)+size(B,2))
+
+    C = 0.0_wp
+    C(:size(A,1), :size(A,2))     = A
+    C(size(A,1)+1:, size(A,2)+1:) = B
   end function
 end module
