@@ -18,6 +18,7 @@ module conductor_m
   use :: spin_m
   use :: propagator_m
   use :: material_m
+  use :: spinscattering_m
   private
 
   ! Public interface
@@ -40,12 +41,13 @@ module conductor_m
     real(wp)                         :: secondorder_b           =  0.00_wp                    ! Second-order spin-mixing at the right interface
 
     ! These parameters represent the physical fields in the material
-    real(wp)                         :: depairing               =  0.00_wp                    ! Magnetic orbital depairing
-    type(spin),          allocatable :: spinorbit(:)                                          ! Spin-orbit coupling field (spin vector)
-    real(wp),            allocatable :: magnetization_a(:)                                    ! Magnetization of the left  interface (unit vector) (used for transmissions)
-    real(wp),            allocatable :: magnetization_b(:)                                    ! Magnetization of the right interface (unit vector) (used for transmissions)
-    real(wp),            allocatable :: misalignment_a(:)                                     ! Magnetization of the left  interface (unit vector) (used for reflections)
-    real(wp),            allocatable :: misalignment_b(:)                                     ! Magnetization of the right interface (unit vector) (used for reflections)
+    real(wp)                          :: depairing              =  0.00_wp                    ! Magnetic orbital depairing
+    type(spinscattering), allocatable :: spinscattering                                       ! Spin-flip and spin-orbit scattering
+    type(spin),           allocatable :: spinorbit(:)                                         ! Spin-orbit coupling field (spin vector)
+    real(wp),             allocatable :: magnetization_a(:)                                   ! Magnetization of the left  interface (unit vector) (used for transmissions)
+    real(wp),             allocatable :: magnetization_b(:)                                   ! Magnetization of the right interface (unit vector) (used for transmissions)
+    real(wp),             allocatable :: misalignment_a(:)                                    ! Magnetization of the left  interface (unit vector) (used for reflections)
+    real(wp),             allocatable :: misalignment_b(:)                                    ! Magnetization of the right interface (unit vector) (used for reflections)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
     complex(wp),             private :: M_a(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
@@ -140,7 +142,7 @@ contains
 
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%propagator(n,m) = propagator( cx(this%energy(n),this%scattering), gap )
+        this%propagator(n,m) = propagator( cx(this%energy(n),this%scattering_inelastic), gap )
       end do
     end do
   end subroutine
@@ -169,6 +171,11 @@ contains
     ! Calculate the contribution from a spin-orbit coupling
     if (allocated(this%spinorbit)) then
       call this%diffusion_spinorbit(g, gt, dg, dgt, d2g, d2gt)
+    end if
+
+    ! Calculate the contribution from spin-dependent scattering
+    if (allocated(this%spinscattering)) then
+      call this%spinscattering%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
     end if
 
     ! Calculate the contribution from orbital magnetic depairing
@@ -513,6 +520,18 @@ contains
       case ('gap')
         call evaluate(val, tmp)
         call this % init( gap = cx(tmp) )
+      case ('scattering_spinflip')
+        if (.not. allocated(this % spinscattering)) then
+          allocate(this%spinscattering)
+          this % spinscattering = spinscattering(this)
+        end if
+        call evaluate(val, this % spinscattering % spinflip)
+      case ('scattering_spinorbit')
+        if (.not. allocated(this % spinscattering)) then
+          allocate(this%spinscattering)
+          this % spinscattering = spinscattering(this)
+        end if
+        call evaluate(val, this % spinscattering % spinorbit)
       case default
         call material_conf(this, key, val)
     end select

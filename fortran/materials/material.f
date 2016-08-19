@@ -20,9 +20,9 @@ module material_m
   ! Type declarations
   type, public, abstract :: material
     ! These parameters determine the basic physical behaviour of a diffusive material
-    real(wp)                                  :: thouless        =  1.00_wp                 ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(wp)                                  :: scattering      =  0.01_wp                 ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    real(wp)                                  :: temperature     =  0.01_wp                 ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(wp)                                  :: thouless              =  1.00_wp           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
+    real(wp)                                  :: temperature           =  0.01_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(wp)                                  :: scattering_inelastic  =  0.01_wp           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
@@ -177,7 +177,7 @@ contains
         end if
 
         ! Calculate the complex energy (relative to the Thouless energy)
-        e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
+        e = cx(this%energy(n)/this%thouless, this%scattering_inelastic/this%thouless)
 
         ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
@@ -361,8 +361,8 @@ contains
       case("length")
         call evaluate(val, tmp)
         this%thouless = 1/(eps+tmp**2)
-      case("scattering")
-        call evaluate(val, this%scattering)
+      case("scattering_inelastic")
+        call evaluate(val, this%scattering_inelastic)
       case("temperature")
         call evaluate(val, this%temperature)
       case("lock")
