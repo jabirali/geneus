@@ -1,5 +1,5 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-08-19
+!> Date:     2016-08-23
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-flip and spin-orbit scattering.
@@ -18,7 +18,7 @@ module spinscattering_m
 
   ! Type declarations
   type :: spinscattering
-    class(material), pointer    :: parent    => null()                   ! Pointer to the material modelled by this instance
+    class(material), pointer    :: material  => null()                   ! Pointer to the material modelled by this instance
     real(wp)                    :: spinflip  =  0.0_wp                   ! Spin-flip  scattering coefficient (definition: 1/8Δτ)
     real(wp)                    :: spinorbit =  0.0_wp                   ! Spin-orbit scattering coefficient (definition: 1/8Δτ)
     complex(wp), dimension(4,4) :: sigma1, sigma2, sigma3, tau3          ! Pauli matrices that are used internally in this object
@@ -44,8 +44,8 @@ contains
     p = propagator(g, gt)
 
     ! Calculate the spin-flip and spin-orbit coefficients
-    sf = this%spinflip  / (2 * this%parent%thouless)
-    so = this%spinorbit / (2 * this%parent%thouless)
+    sf = this%spinflip  / (2 * this%material%thouless)
+    so = this%spinorbit / (2 * this%material%thouless)
 
     ! Calculate the 4×4 diffusion equation contribution
     associate(s1 => this % sigma1, s2 => this % sigma2, s3 => this % sigma3, t3 => this % tau3)
@@ -64,7 +64,7 @@ contains
     class(material), target :: parent
 
     ! Save a pointer to the parent object
-    this % parent => parent
+    this % material => parent
 
     ! Define the necessary 4×4 basis matrices
     this % tau3   = diag(+pauli0%matrix, -pauli0%matrix)
