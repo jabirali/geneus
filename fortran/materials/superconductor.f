@@ -186,7 +186,6 @@ contains
     ! Updates the superconducting order parameter from a scalar.
     class(superconductor), intent(inout) :: this
     complex(wp),           intent(in)    :: gap
-    integer                              :: n
 
     this%gap_function = gap
   end subroutine
@@ -203,6 +202,9 @@ contains
       n = floor(zp*(size(z)-1) + 1)
 
       ! Interpolate the superconducting order parameter at that point
+      ! @TODO: Consider optimizing this in the same way as was done for ferromagnets,
+      !        i.e. remove the dependence on gap_location by analytically evaluating
+      !        what 1/(z(n)-z(n-1)) and z(n-1)/(z(n)-z(n-1)) are for a [0..1] array.
       if (n <= 1) then
         fp = f(1)
       else

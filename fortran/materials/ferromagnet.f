@@ -57,21 +57,26 @@ contains
     type(spin),         intent(inout) :: d2g, d2gt
     type(spin)                        :: h, ht
     real(wp)                          :: d
-    integer                           :: n
+    integer                           :: n, m
 
     ! Calculate the second derivatives of the Riccati parameters (conductor terms)
     call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
 
     if (allocated(this%exchange)) then
       ! Calculate the index corresponding to the given location
-      n = floor(z*(size(this%location)-1) + 1)
+      m = size(this%exchange,2) - 1 ! Number of array intervals
+      n = floor(z*m + 1)            ! Nearest position in array
 
       ! Extract the exchange field terms at that point
       if (n <= 1) then
+        ! Left edge of the material
         h  = this%h(1)
         ht = this%ht(1)
       else
-        d  = (z - this%location(n-1))/(this%location(n) - this%location(n-1))
+        ! Linear interpolation from known values. The relative displacement d is defined
+        ! as [z - location(n-1)]/[location(n) - location(n-1)], but assuming location(:)
+        ! is a uniform array of values in the range [0,1], the below will be equivalent.
+        d  = z*m - (n-2)
         h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
         ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
       end if
