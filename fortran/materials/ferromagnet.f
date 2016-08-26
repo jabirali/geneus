@@ -22,9 +22,6 @@ module ferromagnet_m
     procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the propagators
     procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the propagators
 
-    ! These methods are used to access and mutate the parameters
-    procedure                        :: set_exchange       => ferromagnet_set_exchange        ! Updates the ferromagnetic order parameter from a given vector
-
     ! These methods define miscellaneous utility functions
     procedure                        :: conf               => ferromagnet_conf                ! Configures material parameters
   end type
@@ -135,27 +132,6 @@ contains
 
     ! Call the superclass posthook
     call this%conductor%update_posthook
-  end subroutine
-
-  !--------------------------------------------------------------------------------!
-  !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
-  !--------------------------------------------------------------------------------!
-
-  pure subroutine ferromagnet_set_exchange(this, exchange)
-    ! Updates the ferromagnetic order parameter from a vector.
-    class(ferromagnet), intent(inout) :: this
-    real(wp),           intent(in)    :: exchange(3)
-    integer                           :: n
-
-    ! Allocate the exchange field array if necessary
-    if (.not. allocated(this%exchange)) then
-      allocate(this%exchange(3,size(this%location)))
-    end if
-
-    ! Copy data from input array
-    do n = 1,size(this%location)
-      this%exchange(:,n) = exchange
-    end do
   end subroutine
 
   !--------------------------------------------------------------------------------!
