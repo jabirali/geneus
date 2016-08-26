@@ -195,20 +195,18 @@ contains
     class(superconductor), intent(in) :: this
     real(wp),              intent(in) :: location
     complex(wp)                       :: gap
-    integer                           :: n
+    integer                           :: n, m
 
-    associate(f => this%gap_function, fp => gap, z => this%gap_location, zp => location)
+    associate(f => this%gap_function, fp => gap, p => location)
       ! Calculate the index corresponding to the given location
-      n = floor(zp*(size(z)-1) + 1)
+      m = size(f) - 1
+      n = floor(p*m + 1)
 
       ! Interpolate the superconducting order parameter at that point
-      ! @TODO: Consider optimizing this in the same way as was done for ferromagnets,
-      !        i.e. remove the dependence on gap_location by analytically evaluating
-      !        what 1/(z(n)-z(n-1)) and z(n-1)/(z(n)-z(n-1)) are for a [0..1] array.
       if (n <= 1) then
         fp = f(1)
       else
-        fp = f(n-1) + (f(n)-f(n-1))*(zp-z(n-1))/(z(n)-z(n-1))
+        fp = f(n-1) + (f(n)-f(n-1))*(p*m-(n-2))
       end if
     end associate
   end function
