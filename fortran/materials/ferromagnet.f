@@ -62,9 +62,9 @@ contains
     ! Calculate the second derivatives of the Riccati parameters (conductor terms)
     call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
 
-    if (allocated(this%exchange)) then
+    if (allocated(this%h)) then
       ! Calculate the index corresponding to the given location
-      m = size(this%exchange,2) - 1 ! Number of array intervals
+      m = size(this%h) - 1          ! Number of array intervals
       n = floor(z*m + 1)            ! Nearest position in array
 
       ! Extract the exchange field terms at that point
@@ -97,29 +97,19 @@ contains
 
     ! Rename the internal variables
     if (allocated(this%exchange)) then
-      if (norm2(this%exchange) < sqrt(eps)) then
-        ! Deallocate negligible fields
-        deallocate(this%exchange)
-      else
-        ! Allocate space for internal variables
-        if (.not. allocated(this%h)) then
-          allocate(this%h(size(this%location)))
-          allocate(this%ht(size(this%location)))
-        end if
+      ! Allocate space for internal variables
+      if (.not. allocated(this%h)) then
+        allocate(this%h (size(this%exchange,2)))
+        allocate(this%ht(size(this%exchange,2)))
+      end if
 
-        ! Rename the internal variables
-        associate(exchange => this % exchange, &
-                  h        => this % h,        &
-                  ht       => this % ht)
-
-        ! Update the internal variables
+      ! Update the internal variables
+      associate(exchange => this % exchange, h => this % h, ht => this % ht)
         do n = 1,size(exchange,2)
           h(n)  = ((0.0_wp,-1.0_wp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
           ht(n) = ((0.0_wp,+1.0_wp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
         end do
-
-        end associate
-      end if
+      end associate
     end if
 
     ! Modify the type string
@@ -145,16 +135,36 @@ contains
 
   impure subroutine ferromagnet_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
+    use :: calculus_m
     use :: evaluate_m
 
-    class(ferromagnet), intent(inout) :: this
-    character(*),       intent(in)    :: key
-    character(*),       intent(in)    :: val
+    class(ferromagnet), intent(inout)   :: this
+    character(*),       intent(in)      :: key
+    character(*),       intent(in)      :: val
 
     select case(key)
       case ('magnetization')
-        call evaluate(val, this % location, this % exchange)
+        block
+          ! Allocate memory for the location array
+          real(wp), allocatable, dimension(:) :: location
+          allocate(location(1024 * size(this%location)))
+
+          ! Discretize the locations in the material
+          call linspace(location, 0.0_wp, 1.0_wp)
+
+          ! Initialize the magnetic exchange field
+          call evaluate(val, location, this % exchange)
+
+          ! Deallocate the field if it is negligible
+          if (norm2(this % exchange) < sqrt(eps)) then
+            deallocate(this % exchange)
+          end if
+
+          ! Deallocate the location array
+          deallocate(location)
+        end block
       case default
+        ! Pass this option to the superclass
         call this % conductor % conf(key, val)
     end select
   end subroutine
