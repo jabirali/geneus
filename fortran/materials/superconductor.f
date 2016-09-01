@@ -238,6 +238,9 @@ contains
       case ('gap')
         call evaluate(val, tmp)
         call this % init( gap = cx(tmp) )
+      case ('phase')
+        call evaluate(val, tmp)
+        call this % init( gap = exp((0.0,1.0)*pi*tmp) )
       case default
         call this%conductor%conf(key, val)
     end select
