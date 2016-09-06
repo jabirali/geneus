@@ -118,7 +118,7 @@ contains
     class(structure), intent(inout) :: this
     character(*),     intent(in)    :: key
     character(*),     intent(in)    :: val
-    character(22)                   :: str
+    character(24)                   :: str
 
     ! Configure the material
     if (associated(this % b)) then
