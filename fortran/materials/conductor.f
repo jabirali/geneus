@@ -120,7 +120,7 @@ contains
     type(conductor) :: this
 
     ! Initialize locations
-    allocate(this%location(150))
+    allocate(this%location(151))
     call linspace(this%location, 0 + 1e-10_wp, 1 - 1e-10_wp)
 
     ! Initialize energies
