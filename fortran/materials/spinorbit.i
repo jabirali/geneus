@@ -94,7 +94,7 @@ pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2
 
   ! Update the residuals
   r2  = r2  - (0.0_wp,1.0_wp) * (Az  * g2  + g2  * Azt)
-  rt2 = rt2 + (0.0_wp,1.0_wp) * (Azt * gt2 + gt2 * Az )  
+  rt2 = rt2 + (0.0_wp,1.0_wp) * (Azt * gt2 + gt2 * Az )
 
   end associate
 end subroutine
