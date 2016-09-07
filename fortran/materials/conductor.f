@@ -411,8 +411,13 @@ contains
     ! Calculate the density of states
     call this%update_density
 
-    ! Calculate the charge and spin currents
+    ! Calculate the charge and spin currents [without any gauge fields]
     call this%update_current
+
+    ! Calculate the charge and spin currents [spin-orbit  gauge fields]
+    if (allocated(this%spinorbit)) then
+      call spinorbit_update_current(this)
+    end if
   end subroutine
 
   !--------------------------------------------------------------------------------!

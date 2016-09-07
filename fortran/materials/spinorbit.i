@@ -98,3 +98,57 @@ pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2
 
   end associate
 end subroutine
+
+impure subroutine spinorbit_update_current(this)
+  !! Calculate the spin-orbit coupling terms in the charge and spin currents, 
+  !! i.e. determine how the SU(2) gauge field affects the relevant currents.
+  use :: calculus_m
+  use :: matrix_m
+
+  class(conductor), intent(inout)  :: this
+  real(wp),         allocatable    :: current(:,:)
+  real(wp)                         :: prefactor
+  complex(wp),      dimension(4,4) :: G, A, P0, P1, P2, P3
+  integer                          :: n, m
+
+  ! Allocate workspace memory
+  allocate(current(size(this%energy),0:3))
+
+  ! Construct the 4×4 spin-orbit matrix
+  A = diag(+this%Az%matrix, -this%Azt%matrix)
+
+  ! Construct the 4×4 Pauli matrices (Pₙ = τ₃σₙ)
+  P0 = diag(+pauli0%matrix, -pauli0%matrix)
+  P1 = diag(+pauli1%matrix, -pauli1%matrix)
+  P2 = diag(+pauli2%matrix, +pauli2%matrix)
+  P3 = diag(+pauli3%matrix, -pauli3%matrix)
+
+  ! Iterate over the stored propagators
+  do n = 1,size(this%location)
+    do m = 1,size(this%energy)
+      ! This factor converts from a zero-temperature to finite-temperature spectral current
+      prefactor = 2 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+
+      ! Construct the 4×4 propagator matrix at this position and energy
+      G = this % propagator(m,n) % matrix()
+
+      ! Calculate the corresponding spin-orbit contribution to the 4×4 spectral matrix current
+      G = prefactor * im(matmul(G,matmul(A,G)))
+
+      ! Calculate the contribution to the spectral charge and spin currents at this position
+      current(m,0) = prefactor * trace(matmul(P0,G))
+      current(m,1) = prefactor * trace(matmul(P1,G))
+      current(m,2) = prefactor * trace(matmul(P2,G))
+      current(m,3) = prefactor * trace(matmul(P3,G))
+    end do
+
+    ! Interpolate and integrate the results, and update the current vector
+    this%current(0,n) = this%current(0,n) + integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+    this%current(1,n) = this%current(1,n) + integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+    this%current(2,n) = this%current(2,n) + integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+    this%current(3,n) = this%current(3,n) + integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
+  end do
+
+  ! Deallocate workspace memory
+  deallocate(current)
+end subroutine

@@ -315,11 +315,11 @@ contains
         current(m,:) = prefactor * this % propagator(m,n) % current()
       end do
 
-      ! Interpolate and integrate the results, and update the superconducting order parameter
-      this%current(0,n) = integrate(this%energy, current(:,0), 1e-6_wp, this%energy(ubound(this%energy,1)))
-      this%current(1,n) = integrate(this%energy, current(:,1), 1e-6_wp, this%energy(ubound(this%energy,1)))
-      this%current(2,n) = integrate(this%energy, current(:,2), 1e-6_wp, this%energy(ubound(this%energy,1)))
-      this%current(3,n) = integrate(this%energy, current(:,3), 1e-6_wp, this%energy(ubound(this%energy,1)))
+      ! Interpolate and integrate the results, and update the current vector
+      this%current(0,n) = integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+      this%current(1,n) = integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+      this%current(2,n) = integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+      this%current(3,n) = integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
     end do
 
     ! Deallocate workspace memory
