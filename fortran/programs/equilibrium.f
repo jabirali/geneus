@@ -28,6 +28,7 @@ program equilibrium
     ! Write the results to files
     call stack % write_density('density.dat')
     call stack % write_current('current.dat')
+    call stack % write_magnetization('magnetization.dat')
     call stack % write_gap('gap.dat')
 
     ! Stop if we have convergence

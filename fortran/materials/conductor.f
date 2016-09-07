@@ -411,6 +411,9 @@ contains
     ! Calculate the density of states
     call this%update_density
 
+    ! Calculate the induced magnetization
+    call this%update_magnetization
+
     ! Calculate the charge and spin currents [without any gauge fields]
     call this%update_current
 

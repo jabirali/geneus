@@ -23,20 +23,21 @@ module structure_m
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
   contains
-    procedure :: push            => structure_push
-    procedure :: conf            => structure_conf
-    procedure :: map             => structure_map
-    procedure :: gap             => structure_gap
-    procedure :: init            => structure_init
-    procedure :: save            => structure_save
-    procedure :: load            => structure_load
-    procedure :: update          => structure_update
-    procedure :: count           => structure_count
-    procedure :: difference      => structure_difference
-    procedure :: temperature     => structure_temperature
-    procedure :: write_density   => structure_write_density
-    procedure :: write_current   => structure_write_current
-    procedure :: write_gap       => structure_write_gap
+    procedure :: push                => structure_push
+    procedure :: conf                => structure_conf
+    procedure :: map                 => structure_map
+    procedure :: gap                 => structure_gap
+    procedure :: init                => structure_init
+    procedure :: save                => structure_save
+    procedure :: load                => structure_load
+    procedure :: update              => structure_update
+    procedure :: count               => structure_count
+    procedure :: difference          => structure_difference
+    procedure :: temperature         => structure_temperature
+    procedure :: write_density       => structure_write_density
+    procedure :: write_current       => structure_write_current
+    procedure :: write_magnetization => structure_write_magnetization
+    procedure :: write_gap           => structure_write_gap
   end type
 
   ! Type constructor
@@ -466,6 +467,52 @@ contains
       do m=1,size(ptr % location)
         x = a + (b-a) * ptr % location(m)
         write(unit,'(*(es20.12e3,:,"	"))') x, ptr % current(:,m)
+      end do
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_write_magnetization(this, file)
+    !! Writes the induced magnetization as a function of position to a given output file.
+    class(structure), target  :: this
+    character(*)              :: file
+    integer                   :: unit
+    integer                   :: iostat
+    real(wp)                  :: a, b
+
+    ! Open output file
+    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('Failed to open output file "' // file // '"!')
+    end if
+
+    ! Initialize variables
+    b = 0
+
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Mx magnetization  ', &
+                                '  My magnetization  ', &
+                                '  Mz magnetization  '
+
+    ! Traverse all materials
+    call this % map(write_magnetization)
+
+    ! Close output file
+    close(unit = unit)
+  contains
+    subroutine write_magnetization(ptr)
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: m
+
+      ! Calculate the endpoints of this layer
+      a = b
+      b = b + 1/sqrt(ptr % thouless)
+
+      ! Write out the magnetization in this layer
+      do m=1,size(ptr % location)
+        x = a + (b-a) * ptr % location(m)
+        write(unit,'(*(es20.12e3,:,"	"))') x, ptr % magnetization(:,m)
       end do
     end subroutine
   end subroutine
