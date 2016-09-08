@@ -108,14 +108,15 @@ impure subroutine spinorbit_update_current(this)
   class(conductor), intent(inout)  :: this
   real(wp),         allocatable    :: current(:,:)
   real(wp)                         :: prefactor
-  complex(wp),      dimension(4,4) :: G, A, P0, P1, P2, P3
+  complex(wp),      dimension(4,4) :: G, Gt, A, K
+  complex(wp),      dimension(4,4) :: P0, P1, P2, P3
   integer                          :: n, m
 
   ! Allocate workspace memory
   allocate(current(size(this%energy),0:3))
 
   ! Construct the 4×4 spin-orbit matrix
-  A = diag(+this%Az%matrix, -this%Azt%matrix)
+  A  = diag(+this%Az%matrix, -this%Azt%matrix)
 
   ! Construct the 4×4 Pauli matrices (Pₙ = τ₃σₙ)
   P0 = diag(+pauli0%matrix, -pauli0%matrix)
@@ -129,17 +130,18 @@ impure subroutine spinorbit_update_current(this)
       ! This factor converts from a zero-temperature to finite-temperature spectral current
       prefactor = 2 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
-      ! Construct the 4×4 propagator matrix at this position and energy
-      G = this % propagator(m,n) % matrix()
+      ! Construct the 4×4 propagator matrices at this position and energy
+      G  = this % propagator(m,n) % matrix()
+      Gt = conjg(this % propagator(m,n) % matrixt())
 
       ! Calculate the corresponding spin-orbit contribution to the 4×4 spectral matrix current
-      G = prefactor * matmul(G,matmul(A,G))
+      K = matmul(G,matmul(A,G)) - matmul(Gt,matmul(A,Gt))
 
       ! Calculate the contribution to the spectral charge and spin currents at this position
-      current(m,0) = prefactor * im(trace(matmul(P0,G)))
-      current(m,1) = prefactor * im(trace(matmul(P1,G)))
-      current(m,2) = prefactor * im(trace(matmul(P2,G)))
-      current(m,3) = prefactor * im(trace(matmul(P3,G)))
+      current(m,0) = prefactor * im(trace(matmul(P0,K)))
+      current(m,1) = prefactor * im(trace(matmul(P1,K)))
+      current(m,2) = prefactor * im(trace(matmul(P2,K)))
+      current(m,3) = prefactor * im(trace(matmul(P3,K)))
     end do
 
     ! Interpolate and integrate the results, and update the current vector
