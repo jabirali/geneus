@@ -18,6 +18,7 @@ module conductor_m
   use :: spin_m
   use :: propagator_m
   use :: material_m
+  use :: spinorbit_m
   use :: spinscattering_m
   private
 
@@ -42,8 +43,8 @@ module conductor_m
 
     ! These parameters represent the physical fields in the material
     real(wp)                          :: depairing              =  0.00_wp                    ! Magnetic orbital depairing
-    type(spinscattering), allocatable :: spinscattering                                       ! Spin-flip and spin-orbit scattering
-    type(spin),           allocatable :: spinorbit(:)                                         ! Spin-orbit coupling field (spin vector)
+    type(spinscattering), allocatable :: spinscattering                                       ! Spin-dependent scattering
+    type(spinorbit),      allocatable :: spinorbit                                            ! Spin-orbit coupling
     real(wp),             allocatable :: magnetization_a(:)                                   ! Magnetization of the left  interface (unit vector) (used for transmissions)
     real(wp),             allocatable :: magnetization_b(:)                                   ! Magnetization of the right interface (unit vector) (used for transmissions)
     real(wp),             allocatable :: misalignment_a(:)                                    ! Magnetization of the left  interface (unit vector) (used for reflections)
@@ -58,10 +59,6 @@ module conductor_m
     complex(wp),             private :: M1_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
     complex(wp),             private :: S1_a, S1_b                                            ! Spin-mixing prefactor proportional to sin(ϕ)
     complex(wp),             private :: S2_a, S2_b                                            ! Spin-mixing prefactor proportional to sin(ϕ/2)²
- 
-    ! These variables are used by internal subroutines to handle spin-orbit coupling
-    type(spin), allocatable, private :: Ax,  Ay,  Az,  A2                                     ! Spin-orbit coupling matrices (the components and square)
-    type(spin), allocatable, private :: Axt, Ayt, Azt, A2t                                    ! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    ! Initializes the propagators
@@ -78,11 +75,6 @@ module conductor_m
     procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      ! Defines the right boundary condition  (vacuum interface)
     procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      ! Defines the left  boundary condition  (tunnel interface)
     procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      ! Defines the right boundary condition  (tunnel interface)
-
-    ! These methods contain the equations that describe spin-orbit coupling
-    procedure                 :: diffusion_spinorbit     => spinorbit_diffusion_equation      ! Defines the Usadel diffusion equation (spin-orbit terms)
-    procedure                 :: interface_spinorbit_a   => spinorbit_interface_equation_a    ! Defines the left  boundary condition  (spin-orbit terms)
-    procedure                 :: interface_spinorbit_b   => spinorbit_interface_equation_b    ! Defines the right boundary condition  (spin-orbit terms)
 
     ! These methods contain the equations that describe spin-active tunneling  interfaces
     procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms)
@@ -105,7 +97,6 @@ contains
   !                      INCLUDE EXTERNAL MODULE PROCEDURES                        !
   !--------------------------------------------------------------------------------!
 
-  include 'spinorbit.i'
   include 'spinactive.i'
   include 'spinreflect.i'
 
@@ -170,7 +161,7 @@ contains
 
     ! Calculate the contribution from a spin-orbit coupling
     if (allocated(this%spinorbit)) then
-      call this%diffusion_spinorbit(g, gt, dg, dgt, d2g, d2gt)
+      call this%spinorbit%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
     end if
 
     ! Calculate the contribution from spin-dependent scattering
@@ -210,7 +201,7 @@ contains
 
       if (allocated(this%spinorbit)) then
         ! Interface has spin-orbit coupling
-        call this%interface_spinorbit_a(g, gt, dg, dgt, r, rt)
+        call this%spinorbit%interface_equation_a(g, gt, dg, dgt, r, rt)
       end if
 
       if (allocated(this%magnetization_a)) then
@@ -250,7 +241,7 @@ contains
 
     if (allocated(this%spinorbit)) then
       ! Interface has spin-orbit coupling
-      call this%interface_spinorbit_b(g, gt, dg, dgt, r, rt)
+      call this%spinorbit%interface_equation_b(g, gt, dg, dgt, r, rt)
     end if
 
     if (allocated(this%magnetization_b)) then
@@ -389,7 +380,9 @@ contains
     end if
 
     ! Prepare variables associated with spin-orbit coupling
-    call spinorbit_update_prehook(this)
+    if (allocated(this%spinorbit)) then
+      call this%spinorbit%update_prehook
+    end if
 
     ! Prepare variables associated with spin-active tunneling  interfaces
     call spinactive_update_prehook(this)
@@ -414,12 +407,12 @@ contains
     ! Calculate the induced magnetization
     call this%update_magnetization
 
-    ! Calculate the charge and spin currents [without any gauge fields]
+    ! Calculate the charge and spin currents
     call this%update_current
 
-    ! Calculate the charge and spin currents [spin-orbit  gauge fields]
+    ! Call the spinorbit posthook
     if (allocated(this%spinorbit)) then
-      call spinorbit_update_current(this)
+      call this%spinorbit%update_posthook
     end if
   end subroutine
 
@@ -510,26 +503,26 @@ contains
       case ('spinorbit_wire')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
-          allocate(this % spinorbit(3))
-          this % spinorbit = spin(0)
+          allocate(this % spinorbit)
+          this % spinorbit = spinorbit(this)
         end if
-        this % spinorbit(3) = this % spinorbit(3) + (-tmp)*pauli1
+        this % spinorbit % field(3) = this % spinorbit % field(3) + (-tmp)*pauli1
       case ('spinorbit_film')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
-          allocate(this % spinorbit(3))
-          this % spinorbit = spin(0)
+          allocate(this % spinorbit)
+          this % spinorbit = spinorbit(this)
         end if
-        this % spinorbit(1) = this % spinorbit(1) + (-tmp)*pauli2
-        this % spinorbit(2) = this % spinorbit(2) + (+tmp)*pauli1
+        this % spinorbit % field(1) = this % spinorbit % field(1) + (-tmp)*pauli2
+        this % spinorbit % field(2) = this % spinorbit % field(2) + (+tmp)*pauli1
       case ('spinorbit_bulk')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
-          allocate(this % spinorbit(3))
-          this % spinorbit = spin(0)
+          allocate(this % spinorbit)
+          this % spinorbit = spinorbit(this)
         end if
-        this % spinorbit(1) = this % spinorbit(1) + (+tmp)*pauli1
-        this % spinorbit(2) = this % spinorbit(2) + (-tmp)*pauli2
+        this % spinorbit % field(1) = this % spinorbit % field(1) + (+tmp)*pauli1
+        this % spinorbit % field(2) = this % spinorbit % field(2) + (-tmp)*pauli2
       case ('depairing')
         call evaluate(val, this % depairing)
       case ('gap')
