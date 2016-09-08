@@ -133,13 +133,13 @@ impure subroutine spinorbit_update_current(this)
       G = this % propagator(m,n) % matrix()
 
       ! Calculate the corresponding spin-orbit contribution to the 4×4 spectral matrix current
-      G = prefactor * im(matmul(G,matmul(A,G)))
+      G = prefactor * matmul(G,matmul(A,G))
 
       ! Calculate the contribution to the spectral charge and spin currents at this position
-      current(m,0) = prefactor * trace(matmul(P0,G))
-      current(m,1) = prefactor * trace(matmul(P1,G))
-      current(m,2) = prefactor * trace(matmul(P2,G))
-      current(m,3) = prefactor * trace(matmul(P3,G))
+      current(m,0) = prefactor * im(trace(matmul(P0,G)))
+      current(m,1) = prefactor * im(trace(matmul(P1,G)))
+      current(m,2) = prefactor * im(trace(matmul(P2,G)))
+      current(m,3) = prefactor * im(trace(matmul(P3,G)))
     end do
 
     ! Interpolate and integrate the results, and update the current vector
