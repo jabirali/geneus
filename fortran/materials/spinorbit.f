@@ -155,7 +155,7 @@ contains
     class(spinorbit), intent(inout)  :: this
     real(wp),         allocatable    :: spectral(:,:)
     real(wp)                         :: prefactor
-    complex(wp),      dimension(4,4) :: G, Gt, A, K
+    complex(wp),      dimension(4,4) :: G, A, K
     integer                          :: n, m
 
     associate(location    => this % material % location,    &
@@ -174,18 +174,17 @@ contains
       do n = 1,size(location)
         do m = 1,size(energy)
           ! This factor converts from a zero-temperature to finite-temperature spectral current
-          prefactor = 2 * tanh(0.8819384944310228_wp * energy(m)/temperature)
+          prefactor = 4 * tanh(0.8819384944310228_wp * energy(m)/temperature)
 
           ! Construct the 4×4 propagator matrices at this position and energy
           ! (The `block` prevents a segfault when compiling with IFort 16 and full 
           !  optimization; I have no idea why. It has no effect under GFortran 6.)
           block
             G  = propagators(m,n) % matrix()
-            Gt = conjg(propagators(m,n) % matrixt())
           end block
 
           ! Calculate the corresponding spin-orbit contribution to the 4×4 spectral matrix current
-          K = matmul(G,matmul(A,G)) - matmul(Gt,matmul(A,Gt))
+          K = matmul(G,matmul(A,G))
 
           ! Calculate the contribution to the spectral charge and spin currents at this position
           spectral(m,0) = prefactor * im(trace(matmul(this%sigma0,K)))
