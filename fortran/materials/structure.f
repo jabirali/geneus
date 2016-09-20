@@ -153,7 +153,7 @@ contains
 
     ! Determine where to start the traversation
     call top(ptr)
-    if (loop_) then
+    if (loop_ .and. .not. associated(ptr % material_a)) then
       call next(ptr)
       n = n + 1
     end if
