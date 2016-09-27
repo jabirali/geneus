@@ -23,10 +23,10 @@ legend.borderaxespad:        -1.6
 
 # Dimensions
 figure.figsize:              10, 6
-xtick.major.size:            3.0
-xtick.minor.size:            3.0
-ytick.major.size:            3.0
-ytick.minor.size:            3.0
+xtick.major.size:            2.0
+xtick.minor.size:            2.0
+ytick.major.size:            2.0
+ytick.minor.size:            2.0
 xtick.major.width:           1.0
 xtick.minor.width:           1.0
 ytick.major.width:           1.0

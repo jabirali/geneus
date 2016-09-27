@@ -236,11 +236,19 @@ contains
       case("coupling")
         call evaluate(val, this%coupling)
       case ('gap')
-        call evaluate(val, tmp)
-        call this % init( gap = cx(tmp) )
-      case ('phase')
-        call evaluate(val, tmp)
-        call this % init( gap = exp((0.0,1.0)*pi*tmp) )
+        block
+          integer  :: index
+          real(wp) :: gap, phase
+          index = scan(val,',')
+          if (index > 0) then
+            call evaluate(val(1:index-1), gap)
+            call evaluate(val(index+1: ), phase)
+          else
+            call evaluate(val, gap)
+            phase = 0
+          end if
+          call this % init( gap = gap*exp((0.0,1.0)*pi*phase) )
+        end block
       case default
         call this%conductor%conf(key, val)
     end select
