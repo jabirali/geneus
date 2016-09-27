@@ -53,6 +53,27 @@ def plot_density(data):
     plt.axis([-2.0, +2.0, position.min(), position.max()])
     plt.show()
 
+def plot_magnetization(data):
+    """Function for plotting the magnetization."""
+
+    # Extract and reshape data
+    position = np.unique(data[:,0])
+    mag_x   = data[:,1]
+    mag_y   = data[:,2]
+    mag_z   = data[:,3]
+
+    # Plot the data
+    ax = plot_window(r'Position $z/ξ$', r'Magnetization $M/M_0$', 'Magnetization')
+    plt.plot(position, mag_x, 
+             position, mag_y, 
+             position, mag_z)
+    plt.axis([position.min(), 
+              position.max(), 
+              min(0.0, mag_x.min(), mag_y.min(), mag_z.min())*1.05, 
+              max(0.0, mag_x.max(), mag_y.max(), mag_z.max())*1.05])
+    plt.legend([r'$M_x$', r'$M_y$', r'$M_z$'], ncol = 3)
+    plt.show()
+
 def plot_current(data):
     """Function for plotting the charge and spin currents."""
 
@@ -114,7 +135,6 @@ def plot_gap(data):
     multiplot([plot_magnitude, plot_phase], title = 'Superconducting gap')
 
 
-
 if __name__ == "__main__":
     # Check command line arguments
     if len(sys.argv) == 1:
@@ -139,8 +159,11 @@ if __name__ == "__main__":
                 plot_current(data)
             elif field == ['Position', 'Gap magnitude', 'Gap phase']:
                 plot_gap(data)
+            #elif field == ['Position', 'Mx magnetization', 'My magnetization', 'Mz magnetization']:
             else:
-                print('Sorry, unrecognized output file...')
+                plot_magnetization(data)
+            #else:
+            #    print('Sorry, unrecognized output file...')
         elif filename.endswith('.conf'):
             print('Sorry, conf parser not integrated yet...')
         else:
