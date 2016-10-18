@@ -23,7 +23,7 @@ module halfmetal_m
 
   ! Type declarations
   type, public, extends(conductor) :: halfmetal
-    real(wp)            :: polarization =  0.00_wp                                ! Spin-polarization of the ferromagnet
+    real(wp)            :: polarization = 0.0_wp                                  ! Spin-polarization of the ferromagnet
     type(spin), private :: P                                                      ! Polarization matrix
   contains
     procedure           :: init                 => halfmetal_init                 ! Initializes the propagators
@@ -46,7 +46,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  function halfmetal_construct() result(this)
+  impure function halfmetal_construct() result(this)
     ! Constructs a halfmetal object.
     type(halfmetal) :: this
 
@@ -204,8 +204,8 @@ contains
     call this%update_density
 
     ! Status information
-    if (this%information >= 0 .and. .not. this % lock) then
-      write(stdout,'(4x,a,f10.8,a)') 'Max error:  ',error,'                                        '
+    if (this%information >= 0 .and. this % order >= 0) then
+      write(stdout,'(6x,a,f10.8,a)') 'Max error:  ',error,'                                        '
       flush(stdout)
     end if
   end subroutine

@@ -15,9 +15,9 @@ module evaluate_m
   ! Declare public interfaces
   interface evaluate
     !! Public interface for various routines that evaluate mathematical expressions.
-    module procedure evaluate_scalar_value, evaluate_scalar_field, &
-                     evaluate_vector_value, evaluate_vector_field, &
-                     evaluate_logical_value
+    module procedure evaluate_scalar_value,  evaluate_scalar_field, &
+                     evaluate_vector_value,  evaluate_vector_field, &
+                     evaluate_logical_value, evaluate_integer_value
   end interface
 contains
   impure subroutine evaluate_logical_value(expression, value)
@@ -40,6 +40,25 @@ contains
       case default
         call error('Invalid logical expression: "' // trim(expression) // '"')
     end select
+  end subroutine
+
+  impure subroutine evaluate_integer_value(expression, value)
+    !! This subroutine takes a scalar integer expression as input, and returns the value.
+    !!
+    !! Usage:
+    !! 
+    !!     call evaluate_integer_value('10', output)
+    !!
+
+    character(*), intent(in)  :: expression !! String containing an integer
+    integer,      intent(out) :: value      !! Result of parsing the expression
+    integer                   :: iostat     !! Error status from the parsing
+
+    read(expression,*,iostat=iostat) value
+
+    if (iostat /= 0) then
+      call error('Invalid integer expression: "' // trim(expression) // '"')
+    end if
   end subroutine
 
   impure subroutine evaluate_scalar_value(expression, value)

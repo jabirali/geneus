@@ -23,6 +23,7 @@ module material_m
     real(wp)                                  :: thouless              =  1.00_wp           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(wp)                                  :: temperature           =  0.01_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
     real(wp)                                  :: scattering_inelastic  =  0.01_wp           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
+    integer                                   :: order                 =  0                 ! If this number is positive, it denotes which material in a multilayer structure is processed first
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
@@ -38,9 +39,8 @@ module material_m
     class(material),                  pointer :: material_b      => null()                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
-    logical                                   :: lock            =  .false.                 ! When this parameter is set to true, the material will not be updated
     integer                                   :: scaling         =  128                     ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
-    integer                                   :: order           =  4                       ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
+    integer                                   :: method          =  4                       ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
     integer                                   :: control         =  2                       ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
     integer                                   :: information     =  0                       ! How much information that should be written to standard out (range: [-1,2])
     real(wp)                                  :: tolerance       =  1e-10_wp                ! Error tolerance (determines the maximum allowed defect or global error)
@@ -149,11 +149,15 @@ contains
     ! Call the prehook method
     call this%update_prehook
 
-    ! Only update the material state if it is not locked down
-    if (.not. this % lock) then
+    ! Only update the material state if it has a non-negative order
+    if (this%order >= 0) then
       ! Status information
       if (this%information >= 0) then
-        write(stdout,'(a)') ' :: ' // trim(this%type_string) // '                                     '
+        block
+          character(len=10) :: str
+          write(str, '(2x,"[1m#",i0)') this%order
+          write(stdout,'(a,a,20x)') str, trim(this%type_string)
+        end block
       end if
 
       ! Reset the difference since last update to zero
@@ -163,7 +167,7 @@ contains
       do n=size(this%energy),1,-1
         ! Status information
         if (this%information >= 0) then
-          write(stdout,'(4x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
+          write(stdout,'(6x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
             '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
           flush(stdout)
         end if
@@ -198,7 +202,7 @@ contains
         sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
 
         ! Solve the differential equation
-        sol = bvp_solver(sol, ode, bc, method=this%order, error_control=this%control, tol=this%tolerance, trace=this%information)
+        sol = bvp_solver(sol, ode, bc, method=this%method, error_control=this%control, tol=this%tolerance, trace=this%information)
 
         ! Use the results to update the state
         call bvp_eval(sol, this%location, u)
@@ -218,7 +222,7 @@ contains
 
       ! Status information
       if (this%information >= 0) then
-        write(stdout,'(4x,a,f10.8,a)') 'Max change: ',this%difference,'                                        '
+        write(stdout,'(6x,a,f10.8,a)') 'Max change: ',this%difference,'                                        '
         flush(stdout)
       end if
     end if
@@ -404,8 +408,13 @@ contains
         call evaluate(val, this%scattering_inelastic)
       case("temperature")
         call evaluate(val, this%temperature)
-      case("lock")
-        call evaluate(val, this%lock)
+      case("order")
+        call evaluate(val, this%order)
+        if (this%order > 16) then
+          call error("The order of the material must be be maximum 16.")
+        else if (this%order < -1) then
+          call error("The order of the material must be be minimum -1.")
+        end if
       case default
         call warning("Unknown option '" // key // "' ignored.")
     end select

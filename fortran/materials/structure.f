@@ -133,32 +133,18 @@ contains
     write(*,  *) str // val
   end subroutine
 
-  impure subroutine structure_map(this, routine, loop)
+  impure subroutine structure_map(this, routine)
     !! Maps a subroutine onto each element of the multilayer stack.
     class(structure), target  :: this
     class(material),  pointer :: ptr
     procedure(mappable)       :: routine
-    logical, optional         :: loop
-    logical                   :: loop_
     integer                   :: n
 
-    ! Count the number of materials
+    ! Counter for the number of materials
     n = 0
 
-    ! Determine whether or not we need to loop
-    loop_ = .false.
-    if (present(loop)) then
-      loop_ = loop
-    end if
-
-    ! Determine where to start the traversation
-    call top(ptr)
-    if (loop_ .and. .not. associated(ptr % material_a)) then
-      call next(ptr)
-      n = n + 1
-    end if
-
     ! Traverse the structure from top to bottom
+    call top(ptr)
     do while (associated(ptr))
       call routine(ptr)
       call next(ptr)
@@ -166,16 +152,16 @@ contains
     end do
 
     ! Traverse the structure from bottom to top
-    if (loop_) then
-      call bottom(ptr)
-      if (n > 1) then
-        call prev(ptr)
-      end if
-      do while (associated(ptr))
-        call routine(ptr)
-        call prev(ptr)
-      end do
-    end if
+    !if (loop_) then
+    !  call bottom(ptr)
+    !  if (n > 1) then
+    !    call prev(ptr)
+    !  end if
+    !  do while (associated(ptr))
+    !    call routine(ptr)
+    !    call prev(ptr)
+    !  end do
+    !end if
   contains
     function check(ptr) result(skip)
       ! Check if a material layer should be skipped.
@@ -184,7 +170,7 @@ contains
       if (.not. associated(ptr)) then
         skip = .false.
       else
-        skip = ptr % lock
+        skip = ptr % order < 0
       end if
     end function
     subroutine top(ptr)
@@ -298,13 +284,23 @@ contains
     !! Updates the state of the entire multilayer stack.
     class(structure), target   :: this
     logical,          optional :: freeze
+    integer                    :: order
 
-    ! Update all materials in a loop-pattern
-    call this % map(update, loop = .true.)
+    ! Update materials with a declared order
+    do order = 1,16
+      call this % map(update)
+    end do
+
+    ! Update materials with no declared order
+    order = 0
+    call this % map(update)
   contains
     subroutine update(m)
       class(material), pointer, intent(in) :: m
-      call m % update(freeze)
+
+      if (m % order == order) then
+        call m % update(freeze)
+      end if
     end subroutine 
   end subroutine
  

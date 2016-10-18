@@ -49,8 +49,8 @@ program critical_current
   sb = superconductor()
 
   ! Lock the superconductors from updates
-  call sa % conf('lock','T')
-  call sb % conf('lock','T')
+  call sa % conf('order','-1')
+  call sb % conf('order','-1')
 
   ! Connect the superconductors to the stack
   stack % a % material_a => sa
