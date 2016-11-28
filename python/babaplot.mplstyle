@@ -22,21 +22,25 @@ legend.borderaxespad:        -1.6
 
 
 # Dimensions
-figure.figsize:              10, 6
-xtick.major.size:            2.0
-xtick.minor.size:            2.0
-ytick.major.size:            2.0
-ytick.minor.size:            2.0
+figure.figsize:              14, 8
+xtick.major.size:            0.0
+xtick.minor.size:            0.0
+ytick.major.size:            0.0
+ytick.minor.size:            0.0
 xtick.major.width:           1.0
 xtick.minor.width:           1.0
 ytick.major.width:           1.0
 ytick.minor.width:           1.0
-axes.linewidth:              1.0
-lines.linewidth:             2.0
+xtick.major.pad:             12.0
+ytick.major.pad:             12.0
+axes.labelpad:               12.0
+axes.linewidth:              2.0
+lines.linewidth:             3.0
 
 
 # Colors
 image.cmap:                  viridis
+#axes.prop_cycle:             cycler('color', ['377EB8', 'E41A1C', '000000', '984ea3', 'ff7f00'])
 axes.prop_cycle:             cycler('color', ['377eb8', '4daf4a', 'e41a1c', '984ea3', 'ff7f00'])
 figure.facecolor:            ffffff
 axes.facecolor:              ffffff
@@ -52,14 +56,21 @@ axes.labelcolor:             000000
 mathtext.fontset:            stix
 font.family:                 STIXGeneral
 axes.formatter.use_mathtext: True
-font.size:                   16
+font.size:                   22
 axes.labelsize:              large
 axes.titlesize:              large
-legend.fontsize:             medium
+legend.fontsize:             large
 xtick.labelsize:             medium
 ytick.labelsize:             medium
 
 
 # Export
-savefig.dpi:                 600
+savefig.dpi:                 1200
 savefig.bbox:                tight
+
+# TeX fonts
+#text.usetex:                 True
+#text.latex.unicode:          True
+#text.latex.preamble:         \usepackage[scale=1.07]{biolinum}\usepackage{/home/jabirali/Academic/Thesis/eulerpx/eulerpx}\sfmath
+
+

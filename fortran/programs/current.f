@@ -23,8 +23,9 @@ program critical_current
   type(superconductor), target    :: sa, sb
 
   ! Declare program control parameters
-  integer,  parameter             :: iterations = 51
-  real(wp), parameter             :: tolerance  = 1e-6_wp
+  integer,  parameter             :: iterations  = 51
+  real(wp), parameter             :: tolerance   = 1e-4_wp
+  real(wp), parameter             :: periodicity = 3.00_wp
 
   ! Declare variables used by the program
   character(len=132)              :: filename   = ''
@@ -63,7 +64,7 @@ program critical_current
   !--------------------------------------------------------------------------------!
 
   ! Calculate which phase differences to check
-  call linspace(phase, 1e-6_wp, 1-1e-6_wp)
+  call linspace(phase, 1e-6_wp, periodicity-1e-6_wp)
 
   ! Calculate the charge current as a function of phase difference
   do n=1,iterations
