@@ -50,7 +50,7 @@ program bootstrap
     call stack % write_gap('gap.dat')
 
     ! Stop if we have convergence
-    if (stack % difference() < 1e-9) then
+    if (stack % difference() < 1e-6) then
       exit
     end if
   end do
