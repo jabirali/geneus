@@ -24,7 +24,7 @@ program critical_temperature
   character(*), parameter         :: filename   = 'critical.dat'
   integer,      parameter         :: bootstraps = 12
   integer,      parameter         :: bisections = 12
-  integer,      parameter         :: iterations = 06
+  integer,      parameter         :: iterations = 12
   real(wp),     parameter         :: tolerance  = 1e-8_wp
   real(wp),     parameter         :: initgap    = 1e-5_wp
 
