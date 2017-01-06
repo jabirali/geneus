@@ -150,18 +150,6 @@ contains
       call next(ptr)
       n = n + 1
     end do
-
-    ! Traverse the structure from bottom to top
-    !if (loop_) then
-    !  call bottom(ptr)
-    !  if (n > 1) then
-    !    call prev(ptr)
-    !  end if
-    !  do while (associated(ptr))
-    !    call routine(ptr)
-    !    call prev(ptr)
-    !  end do
-    !end if
   contains
     function check(ptr) result(skip)
       ! Check if a material layer should be skipped.
@@ -190,24 +178,6 @@ contains
           ptr => ptr % material_b
         end do
       end if
-    end subroutine
-    subroutine prev(ptr)
-      ! Find the previous unlocked material in the stack.
-      class(material), pointer :: ptr
-      if (associated(ptr)) then
-        ptr => ptr % material_a
-        do while (check(ptr))
-          ptr => ptr % material_a
-        end do
-      end if
-    end subroutine
-    subroutine bottom(ptr)
-      ! Find the last unlocked material in the stack.
-      class(material), pointer :: ptr
-      ptr => this % b
-      do while (check(ptr))
-        ptr => ptr % material_a
-      end do
     end subroutine
   end subroutine
 
@@ -646,76 +616,5 @@ contains
     if (this % count() < 1) then
       call error('The material stack described by "' // file // '" has no unlocked layers!')
     end if
-  end function
-
-  !--------------------------------------------------------------------------------!
-  !        @TODO: PROCEDURES FOR CALCULATING MULTILAYER INTERACTIONS               !
-  !        This procedure was salvaged from my old hybrid module, and              !
-  !        should at some point be integrated into the new code above.             !
-  !--------------------------------------------------------------------------------!
-
-  function differential_conductance(material_a, material_b, voltage, temperature) result(conductance)
-    !! Numerically calculates the differential conductance at a tunneling interface.
-    use :: calculus_m
-
-    class(material), intent(in) :: material_a
-    class(material), intent(in) :: material_b
-    real(wp),        intent(in) :: temperature
-    real(wp),        intent(in) :: voltage(:)
-    real(wp),       allocatable :: conductance(:)
-    real(wp),       allocatable :: current(:)
-    real(wp),       allocatable :: energy(:)
-    real(wp),       allocatable :: dos_a(:), idos_a(:)
-    real(wp),       allocatable :: dos_b(:), idos_b(:)
-    integer                     :: n
-
-    ! Allocate memory
-    allocate(current(size(voltage)))
-    allocate(energy(2*size(voltage)))
-
-    allocate(dos_a(size(material_a%energy)))
-    allocate(dos_b(size(material_b%energy)))
-    allocate(idos_a(size(energy)))
-    allocate(idos_b(size(energy)))
-
-    ! Initialize the energy array
-    call linspace(energy, 1e-6_wp, 1.50_wp)
-
-    ! Calculate the density of states at the interface
-    do n = 1,size(material_a%energy)
-      dos_a(n) = material_a % propagator(n,ubound(material_a%location,1)) % density()
-      dos_b(n) = material_b % propagator(n,lbound(material_b%location,1)) % density()
-    end do
-
-    ! Interpolate the density of states in the left material
-    idos_a = interpolate(material_a%energy, dos_a, energy)
-
-    ! Calculate the current as a function of voltage by numerical integration
-    do n = 1,size(voltage)
-      ! Interpolate the voltage-shifted density of states in the right material
-      idos_b = interpolate(material_b%energy, dos_b, abs(energy-voltage(n)))
-
-      ! Calculate the current for this voltage
-      current(n) = integrate(energy, idos_a*idos_b*(fermi(energy-voltage(n))-fermi(energy)))
-    end do
-
-    ! Calculate the differential conductance by differentiation
-    conductance = differentiate(voltage, current)
-
-   ! Deallocate workspace memory
-   deallocate(current)
-   deallocate(energy)
-   deallocate(dos_a)
-   deallocate(dos_b)
-   deallocate(idos_a)
-   deallocate(idos_b)
-  contains
-    pure elemental function fermi(energy)
-      ! Evaluates the Fermi function at the given energy and current temperature.
-      real(wp), intent(in) :: energy
-      real(wp)             :: fermi
-
-      fermi = 1/(exp(energy/(temperature+1e-16))+1)
-    end function
   end function
 end module
