@@ -81,8 +81,8 @@ module conductor_m
     procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms)
 
     ! These methods contain the equations that describe spin-active reflecting interfaces
-    !procedure                 :: interface_spinreflect_a => spinreflect_interface_equation_a  ! Defines the left  boundary condition (spin-active terms)
-    !procedure                 :: interface_spinreflect_b => spinreflect_interface_equation_b  ! Defines the right boundary condition (spin-active terms)
+    procedure                 :: interface_spinreflect_a => spinreflect_interface_equation_a  ! Defines the left  boundary condition (spin-active terms)
+    procedure                 :: interface_spinreflect_b => spinreflect_interface_equation_b  ! Defines the right boundary condition (spin-active terms)
 
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    ! Configures material parameters
@@ -98,7 +98,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   include 'spinactive.i'
-  !include 'spinreflect.i'
+  include 'spinreflect.i'
 
   !--------------------------------------------------------------------------------!
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
@@ -208,7 +208,7 @@ contains
         ! Interface is spin-active
         if (this%reflecting_a) then
           ! Must be a reflecting interface
-          !call this%interface_spinreflect_a(g, gt, dg, dgt, r, rt)
+          call this%interface_spinreflect_a(g, gt, dg, dgt, r, rt)
         else
           ! May be a tunneling interface
           call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
@@ -248,7 +248,7 @@ contains
       ! Interface is spin-active
       if (this%reflecting_b) then
         ! Must be a reflecting interface
-        !call this%interface_spinreflect_b(g, gt, dg, dgt, r, rt)
+        call this%interface_spinreflect_b(g, gt, dg, dgt, r, rt)
       else
         ! May be a tunneling interface
         call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
@@ -388,7 +388,7 @@ contains
     call spinactive_update_prehook(this)
 
     ! Prepare variables associated with spin-active reflecting interfaces
-    !call spinreflect_update_prehook(this)
+    call spinreflect_update_prehook(this)
 
     ! Modify the type string
     this%type_string = color_yellow // 'CONDUCTOR' // color_none
