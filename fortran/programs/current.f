@@ -23,18 +23,16 @@ program critical_current
   type(superconductor), target    :: sa, sb
 
   ! Declare program control parameters
-  integer,  parameter             :: iterations  = 21
+  integer,  parameter             :: iterations  = 51
   real(wp), parameter             :: tolerance   = 1e-6_wp
-  real(wp), parameter             :: periodicity = 2.00_wp
 
   ! Declare variables used by the program
-  character(len=132)              :: filename   = ''
-  real(wp), dimension(iterations) :: phase      = 0
-  real(wp), dimension(iterations) :: current    = 0
-  real(wp)                        :: critical   = 0
-  integer                         :: unit       = 0
-  integer                         :: iostat     = 0
-  integer                         :: n          = 0
+  character(len=132)                  :: filename = ''
+  real(wp), dimension(:), allocatable :: phase
+  real(wp), dimension(:), allocatable :: current
+  real(wp)                            :: critical
+  integer                             :: n
+  integer                             :: m
 
 
 
@@ -57,17 +55,24 @@ program critical_current
   stack % a % material_a => sa
   stack % b % material_b => sb
 
+  ! Check the number of unlocked superconductors. This is used to determine the
+  ! maximum periodicity the current-phase relation can have, and therefore which
+  ! phase-differences we should check when solving the diffusion equations.
+  m = stack % superconductors()
+  allocate(phase((m+1)*(iterations-1)+1))
+  allocate(current(size(phase)))
+  call linspace(phase, 1e-6_wp, 2*(m+1) - 1e-6_wp)
+
+  ! Solve the selfconsistency equations
+  call stack % load()
 
 
   !--------------------------------------------------------------------------------!
   !                           LINEAR SEARCH PROCEDURE                              !
   !--------------------------------------------------------------------------------!
 
-  ! Calculate which phase differences to check
-  call linspace(phase, 1e-6_wp, periodicity-1e-6_wp)
-
   ! Calculate the charge current as a function of phase difference
-  do n=1,iterations
+  do n=1,size(phase)
     ! Status information
     call status_head('UPDATING PHASE')
     call status_body('Phase difference', phase(n))
@@ -102,6 +107,12 @@ program critical_current
     current(n) = stack % a % current(0,1)
   end do
 
+
+
+  !--------------------------------------------------------------------------------!
+  !                            FINALIZATION PROCEDURE                              !
+  !--------------------------------------------------------------------------------!
+
   ! Calculate the critical current
   critical = maxval(abs(current))
 
@@ -115,4 +126,7 @@ program critical_current
 
   ! Write the critical current to file
   call dump('critical.dat', critical)
+
+  ! Deallocate memory
+  deallocate(phase, current)
 end program

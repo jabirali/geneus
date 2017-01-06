@@ -21,7 +21,6 @@ program critical_temperature
   type(structure)                 :: stack
 
   ! Declare program control parameters
-  character(*), parameter         :: filename   = 'critical.dat'
   integer,      parameter         :: bootstraps = 12
   integer,      parameter         :: bisections = 12
   integer,      parameter         :: iterations = 12
@@ -29,12 +28,9 @@ program critical_temperature
   real(wp),     parameter         :: initgap    = 1e-5_wp
 
   ! Declare variables used by the program
-  character(len=132)              :: argument   = ''
   real(wp)                        :: minimum    = 0.00_wp
   real(wp)                        :: maximum    = 1.00_wp
   real(wp)                        :: critical   = 0.50_wp
-  integer                         :: unit       = 0
-  integer                         :: iostat     = 0
   integer                         :: n          = 0
   integer                         :: m          = 0
 
@@ -120,11 +116,17 @@ program critical_temperature
     critical = (minimum + maximum)/2
   end do
 
+
+
+  !--------------------------------------------------------------------------------!
+  !                            FINALIZATION PROCEDURE                              !
+  !--------------------------------------------------------------------------------!
+
   ! Status information
   call status_head('CRITICAL TEMPERATURE')
   call status_body('Result', critical)
   call status_foot
 
   ! Write the critical temperature to file
-  call dump(filename, critical)
+  call dump('critical.dat', critical)
 end program
