@@ -138,17 +138,12 @@ contains
     class(structure), target  :: this
     class(material),  pointer :: ptr
     procedure(mappable)       :: routine
-    integer                   :: n
-
-    ! Counter for the number of materials
-    n = 0
 
     ! Traverse the structure from top to bottom
     call top(ptr)
     do while (associated(ptr))
       call routine(ptr)
       call next(ptr)
-      n = n + 1
     end do
   contains
     function check(ptr) result(skip)
