@@ -23,7 +23,7 @@ module material_m
     real(wp)                                  :: thouless              =  1.00_wp           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(wp)                                  :: temperature           =  0.01_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
     real(wp)                                  :: scattering_inelastic  =  0.01_wp           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    integer                                   :: order                 =  0                 ! If this number is positive, it denotes which material in a multilayer structure is processed first
+    integer                                   :: order                 =  1                 ! If this number is positive, it denotes which material in a multilayer structure is processed first
 
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
@@ -149,8 +149,8 @@ contains
     ! Call the prehook method
     call this%update_prehook
 
-    ! Only update the material state if it has a non-negative order
-    if (this%order >= 0) then
+    ! Only update the material state if it has a positive order
+    if (this%order > 0) then
       ! Status information
       if (this%information >= 0) then
         block
@@ -412,8 +412,8 @@ contains
         call evaluate(val, this%order)
         if (this%order > 16) then
           call error("The order of the material must be be maximum 16.")
-        else if (this%order < -1) then
-          call error("The order of the material must be be minimum -1.")
+        else if (this%order < 0) then
+          call error("The order of the material must be be minimum 0.")
         end if
       case default
         call warning("Unknown option '" // key // "' ignored.")

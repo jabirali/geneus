@@ -170,7 +170,7 @@ contains
       if (.not. associated(ptr)) then
         skip = .false.
       else
-        skip = ptr % order < 0
+        skip = ptr % order <= 0
       end if
     end function
     subroutine top(ptr)
@@ -286,14 +286,10 @@ contains
     logical,          optional :: freeze
     integer                    :: order
 
-    ! Update materials with a declared order
+    ! Update materials in order
     do order = 1,16
       call this % map(update)
     end do
-
-    ! Update materials with no declared order
-    order = 0
-    call this % map(update)
   contains
     subroutine update(m)
       class(material), pointer, intent(in) :: m

@@ -204,7 +204,7 @@ contains
     call this%update_density
 
     ! Status information
-    if (this%information >= 0 .and. this % order >= 0) then
+    if (this%information >= 0 .and. this % order > 0) then
       write(stdout,'(6x,a,f10.8,a)') 'Max error:  ',error,'                                        '
       flush(stdout)
     end if
