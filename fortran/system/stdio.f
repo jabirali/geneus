@@ -22,6 +22,12 @@ module stdio_m
   character(*), parameter :: color_purple = '[35m'
   character(*), parameter :: color_cyan   = '[36m'
   character(*), parameter :: color_white  = '[37m'
+
+  ! Declare public interfaces
+  interface dump
+    !! Public interface for functions that dump results to files
+    module procedure dump_arrays, dump_scalar
+  end interface
 contains
   impure subroutine message(msg)
     ! This subroutine provides a way to report a status message.
@@ -117,5 +123,73 @@ contains
     write(*,'(a)') '╒═══════════════════════════════════╕'
     write(*,'(a)') '│ '         // title_ //          ' │'
     write(*,'(a)') '╘═══════════════════════════════════╛'
+  end subroutine
+
+  impure subroutine dump_arrays(filename, arrays, header)
+    !! This subroutine is used to dump numerical arrays to an output file.
+    use :: iso_fortran_env
+
+    character(len=*),               intent(in) :: filename
+    real(real64),     dimension(:), intent(in) :: arrays
+    character(len=*), dimension(:), intent(in) :: header
+
+    real(real64), dimension(size(arrays)/size(header),size(header)) :: matrix
+
+    integer :: unit
+    integer :: iostat
+    integer :: n
+
+    ! Reshape the data
+    matrix = reshape(arrays, shape(matrix))
+
+    ! Open the output file
+    open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('Failed to open output file "' // filename // '"!')
+    end if
+
+    ! Write the header line
+    write(unit,'(*(a20,:,"	"))') '# ' // header(1), header(2:)
+
+    ! Loop over the matrix rows
+    do n=1,size(matrix,1)
+      ! Write the matrix column to file
+      write(unit,'(*(es20.12e3,:,"	"))') matrix(n,:)
+    end do
+
+    ! Close the output file
+    close(unit = unit)
+  end subroutine
+
+  impure subroutine dump_scalar(filename, scalar)
+    !! This subroutine is used to dump a numerical result to an output file.
+    use :: iso_fortran_env
+
+    character(len=*), intent(in) :: filename
+    real(real64),     intent(in) :: scalar
+
+    character(len=2048) :: str
+
+    integer :: unit
+    integer :: iostat
+    integer :: n
+
+    ! Open the output file
+    open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('Failed to open output file "' // filename // '"!')
+    end if
+
+    ! Write out command-line arguments
+    do n=1,command_argument_count()
+      call get_command_argument(n, str)
+      write(unit,'(a,"	")',advance='no') trim(str)
+    end do
+
+    ! Write the scalar value to file
+    write(unit,'(*(es20.12e3,:,"	"))') scalar
+
+    ! Close the output file
+    close(unit = unit)
   end subroutine
 end module

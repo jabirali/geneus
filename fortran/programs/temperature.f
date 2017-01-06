@@ -126,14 +126,5 @@ program critical_temperature
   call status_foot
 
   ! Write the critical temperature to file
-  open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
-  if (iostat /= 0) then
-    call error('Failed to open output file "' // filename // '"!')
-  end if
-  do n=1,command_argument_count()
-    call get_command_argument(n, argument)
-    write(unit,'(a,"	")',advance='no') trim(argument)
-  end do
-  write(unit,'(es20.12e3)') critical
-  close(unit = unit)
+  call dump(filename, critical)
 end program

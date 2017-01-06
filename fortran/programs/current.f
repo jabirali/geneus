@@ -111,27 +111,8 @@ program critical_current
   call status_foot
 
   ! Write the current-phase relation to file
-  filename = 'current.dat'
-  open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
-  if (iostat /= 0) then
-    call error('Failed to open output file "' // filename // '"!')
-  end if
-  write(unit,'(*(a,:,"	"))') '# Phase             ', '  Charge current    '
-  do n=1,size(phase)
-    write(unit,'(*(es20.12e3,:,"	"))') phase(n), current(n)
-  end do
-  close(unit = unit)
+  call dump('current.dat', [phase, current], ['Phase             ', 'Charge current    '])
 
   ! Write the critical current to file
-  filename = 'critical.dat'
-  open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
-  if (iostat /= 0) then
-    call error('Failed to open output file "' // filename // '"!')
-  end if
-  do n=1,command_argument_count()
-    call get_command_argument(n, filename)
-    write(unit,'(a,"	")',advance='no') trim(filename)
-  end do
-  write(unit,'(es20.12e3)') critical
-  close(unit = unit)
+  call dump('critical.dat', critical)
 end program
