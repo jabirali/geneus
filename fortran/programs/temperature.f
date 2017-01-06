@@ -51,7 +51,7 @@ program critical_temperature
   call stack % init(cx(initgap,0.0_wp))
 
   ! Check the number of materials in the stack
-  m = stack % count()
+  m = stack % materials()
 
   ! Bootstrap the material states at zero temperature
   do

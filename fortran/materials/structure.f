@@ -31,7 +31,8 @@ module structure_m
     procedure :: save                => structure_save
     procedure :: load                => structure_load
     procedure :: update              => structure_update
-    procedure :: count               => structure_count
+    procedure :: materials           => structure_materials
+    procedure :: superconductors     => structure_superconductors
     procedure :: difference          => structure_difference
     procedure :: temperature         => structure_temperature
     procedure :: write_density       => structure_write_density
@@ -265,7 +266,7 @@ contains
     end subroutine 
   end subroutine
  
-  impure function structure_count(this) result(num)
+  impure function structure_materials(this) result(num)
     !! Checks the number of unlocked materials in the multilayer stack.
     class(structure), target :: this
     integer                  :: num
@@ -281,6 +282,27 @@ contains
       num = num + 1
     end subroutine
   end function
+
+  impure function structure_superconductors(this) result(num)
+    !! Checks the number of unlocked superconductors in the multilayer stack.
+    class(structure), target :: this
+    integer                  :: num
+
+    ! Initialize variables
+    num = 0
+
+    ! Count the number of superconductors
+    call this % map(count)
+  contains
+    subroutine count(ptr)
+      class(material), pointer, intent(in) :: ptr
+      select type (ptr)
+        class is (superconductor)
+          num = num + 1
+      end select
+    end subroutine
+  end function
+
 
   impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
@@ -608,7 +630,7 @@ contains
     close(unit = unit)
 
     ! Confirm that there is at least one material layer
-    if (this % count() < 1) then
+    if (this % materials() < 1) then
       call error('The material stack described by "' // file // '" has no unlocked layers!')
     end if
   end function
