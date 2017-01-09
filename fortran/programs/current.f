@@ -23,16 +23,20 @@ program critical_current
   type(superconductor), target    :: sa, sb
 
   ! Declare program control parameters
+  real(wp), parameter             :: threshold   = 1e-2
+  real(wp), parameter             :: tolerance   = 1e-6
   integer,  parameter             :: iterations  = 51
-  real(wp), parameter             :: tolerance   = 1e-6_wp
 
   ! Declare variables used by the program
   character(len=132)                  :: filename = ''
   real(wp), dimension(:), allocatable :: phase
   real(wp), dimension(:), allocatable :: current
   real(wp)                            :: critical
+  integer                             :: materials
+  integer                             :: superconductors
+  logical                             :: bootstrap
+  logical                             :: shortcircuit
   integer                             :: n
-  integer                             :: m
 
 
 
@@ -55,16 +59,59 @@ program critical_current
   stack % a % material_a => sa
   stack % b % material_b => sb
 
-  ! Check the number of unlocked superconductors. This is used to determine the
-  ! maximum periodicity the current-phase relation can have, and therefore which
-  ! phase-differences we should check when solving the diffusion equations.
-  m = stack % superconductors()
-  allocate(phase((m+1)*(iterations-1)+1))
-  allocate(current(size(phase)))
-  call linspace(phase, 1e-6_wp, 2*(m+1) - 1e-6_wp)
+  ! Count the number of materials
+  materials       = stack % materials()
+  superconductors = stack % superconductors()
 
-  ! Solve the selfconsistency equations
+  ! If we try to solve the diffusion and selfconsistency equations simultaneously,
+  ! using bad initial guesses for the order parameters, the numerics can become 
+  ! unstable and converge slower. This is especially problematic in systems with
+  ! multiple superconductors, where this may result in the numerics diverging.
+  ! It can therefore be useful to start with a bootstrap procedure, where we
+  ! solve the diffusion equation for fixed superconducting gaps, before doing
+  ! a fully selfconsistent calculation. Here, we check if that is necessary.
+  bootstrap = (superconductors > 0)
+
+  ! If we have an unlocked superconductor in the system, then multiple iterations
+  ! are required to find a simultaneous solution of the diffusion equation and the
+  ! selfconsistency equation. If we have at least two materials in the system, then
+  ! multiple iterations are required to make the diffusion equation solutions in
+  ! each material consistent with each other. Here, we check if that's unnecessary.
+  shortcircuit = (materials == 1) .and. (superconductors == 0)
+
+  ! Depending on the number of superconductors in the junction, we might get a
+  ! 2πn-periodicity instead of a 2π-periodicity, and should account for that.
+  allocate(phase((superconductors+1)*(iterations-1)+1))
+  allocate(current(size(phase)))
+  call linspace(phase, 1e-6_wp, 2*(superconductors+1) - 1e-6_wp)
+
+
+
+  !--------------------------------------------------------------------------------!
+  !                              BOOTSTRAP PROCEDURE                               !
+  !--------------------------------------------------------------------------------!
+
+  ! Solve the diffusion equations
+  if (bootstrap) then
+    do
+      ! Status information
+      call status_head('BOOTSTRAPPING')
+      call status_body('State difference', stack % difference())
+      call status_foot
+
+      ! Update the material state (non-selfconsistently)
+      call stack % update(freeze = .true.)
+
+      ! Stop if all materials have converged within the threshold
+      if (stack % difference() < threshold) then
+        exit
+      end if
+    end do
+  end if
+
+  ! Solve the selfconsistency equations (if necessary)
   call stack % load()
+
 
 
   !--------------------------------------------------------------------------------!
@@ -83,8 +130,7 @@ program critical_current
     call sb % init( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
 
     ! Update the state
-    call stack % update
-    do while (stack % difference() > tolerance)
+    do
       ! Status information
       call status_head('UPDATING STATE')
       call status_body('Phase difference', phase(n))
@@ -93,6 +139,11 @@ program critical_current
 
       ! Update the state
       call stack % update
+
+      ! Stop if all materials have converged within the tolerance
+      if (shortcircuit .or. stack % difference() < tolerance) then
+        exit
+      end if
     end do
 
     ! Write all currents to file
