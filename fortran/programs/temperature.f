@@ -24,7 +24,7 @@ program critical_temperature
   integer,      parameter         :: bootstraps = 12
   integer,      parameter         :: bisections = 12
   integer,      parameter         :: iterations = 12
-  real(wp),     parameter         :: tolerance  = 1e-8_wp
+  real(wp),     parameter         :: threshold  = 1e-8_wp
   real(wp),     parameter         :: initgap    = 1e-5_wp
 
   ! Declare variables used by the program
@@ -32,7 +32,6 @@ program critical_temperature
   real(wp)                        :: maximum    = 1.00_wp
   real(wp)                        :: critical   = 0.50_wp
   integer                         :: n          = 0
-  integer                         :: m          = 0
 
 
 
@@ -46,37 +45,8 @@ program critical_temperature
   ! Initialize the stack to a barely superconducting state
   call stack % init(cx(initgap,0.0_wp))
 
-  ! Check the number of materials in the stack
-  m = stack % materials()
-
   ! Bootstrap the material states at zero temperature
-  do
-    ! Update counter
-    n = n+1
-
-    ! Status information
-    call status_head('INITIALIZING')
-    call status_body('Temperature', 0.0)
-    call status_body('State difference', stack % difference())
-    call status_body('Iteration', n)
-    call status_foot
-
-    ! Update materials
-    call stack % update(freeze = .true.)
-
-    ! If we only have one layer, then one update is sufficient
-    if (m <= 1) then
-      exit
-    end if
-
-    ! If we have multiple layers, check the iteration number
-    if (n >= bootstraps) then
-      ! Check for convergence
-      if (stack % difference() < tolerance) then
-        exit
-      end if
-    end if
-  end do
+  call stack % converge(threshold = threshold, iterations = bootstraps, bootstrap = .true.)
 
   ! Save the current state of the materials
   call stack % save
@@ -88,6 +58,12 @@ program critical_temperature
   !--------------------------------------------------------------------------------!
 
   do n = 1,bisections
+    ! Status information
+    call status_head('BISECTION')
+    call status_body('Temperature', critical)
+    call status_body('Bisection',   n)
+    call status_foot
+
     ! Set the temperature of the materials
     call stack % temperature(critical)
 
@@ -95,17 +71,7 @@ program critical_temperature
     call stack % load
 
     ! Update the material states
-    do m = 1,iterations
-      ! Status information
-      call status_head('UPDATING STATE')
-      call status_body('Temperature', critical)
-      call status_body('Bisection',   n)
-      call status_body('Iteration',   m)
-      call status_foot
-
-      ! Update the stack
-      call stack % update
-    end do
+    call stack % converge(iterations = iterations)
 
     ! Update the critical temperature estimate
     if (stack % gap() >= initgap) then

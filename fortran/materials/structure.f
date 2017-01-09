@@ -35,6 +35,7 @@ module structure_m
     procedure :: superconductors     => structure_superconductors
     procedure :: difference          => structure_difference
     procedure :: temperature         => structure_temperature
+    procedure :: converge            => structure_converge
     procedure :: write_density       => structure_write_density
     procedure :: write_current       => structure_write_current
     procedure :: write_magnetization => structure_write_magnetization
@@ -264,6 +265,90 @@ contains
         call m % update(freeze)
       end if
     end subroutine 
+  end subroutine
+
+  impure subroutine structure_converge(this, threshold, iterations, bootstrap, output)
+    !! Performs a convergence procedure, where the state of every material in the stack
+    !! is repeatedly updated until the residuals drop below some specified threshold 
+    !! and/or a certain number of iterations have been performed. If bootstrap is set
+    !! to true, the selfconsistency equations will only be solved once at the end, but
+    !! not inbetween the individual iterations. If output is set to true, then the
+    !! density of states, supercurrents, etc. will be written to files every iteration.
+    class(structure), target   :: this
+    real(wp),         optional :: threshold
+    real(wp)                   :: threshold_
+    integer,          optional :: iterations
+    integer                    :: iterations_
+    logical,          optional :: bootstrap
+    logical                    :: bootstrap_
+    logical,          optional :: output
+    logical                    :: output_
+    integer                    :: materials
+    integer                    :: superconductors
+    integer                    :: n
+
+    ! Set default arguments
+    threshold_  = 1
+    iterations_ = 0
+    bootstrap_  = .false.
+    output_     = .false.
+
+    ! Check optional arguments
+    if (present(threshold))  threshold_  = threshold
+    if (present(iterations)) iterations_ = iterations
+    if (present(bootstrap))  bootstrap_  = bootstrap
+    if (present(output))     output_     = output
+
+    ! Count the number of materials
+    materials       = this % materials()
+    superconductors = this % superconductors()
+
+    ! If we're not bootstrapping, then we have to solve the diffusion equation until convergence.
+    ! If we're bootstrapping, it's only required if we have at least one unlocked superconductor.
+    if ((.not. bootstrap_) .or. (superconductors > 0)) then
+      n = 0
+      do
+        ! Update counter
+        n = n+1
+
+        ! Status information
+        if (bootstrap_) then
+          call status_head('BOOTSTRAPPING')
+        else
+          call status_head('CONVERGING')
+        end if
+        call status_body('State difference', this % difference())
+        call status_body('Iteration', n)
+        call status_foot
+
+        ! Update the material state (non-selfconsistently)
+        call this % update(freeze = bootstrap_)
+
+        ! Write the results to files
+        if (output_) then
+          call this % write_density('density.dat')
+          call this % write_current('current.dat')
+          call this % write_magnetization('magnetization.dat')
+          call this % write_gap('gap.dat')
+        end if
+
+        ! Exit criterion #1: one update is provably sufficient
+        if ((materials == 1) .and. (superconductors == 0)) then
+          exit
+        end if
+
+        ! Exit criterion #2: minimum number of iterations reached,
+        ! and the materials converged within specified parameters
+        if ((n >= iterations_) .and. (this % difference() < threshold_)) then
+          exit
+        end if
+      end do
+    end if
+
+    ! Solve the selfconsistency equations at least once
+    if (bootstrap_) then
+      call this % load()
+    end if
   end subroutine
  
   impure function structure_materials(this) result(num)
