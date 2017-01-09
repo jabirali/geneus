@@ -85,28 +85,17 @@ program critical_current
     current(n) = stack % a % current(0,1)
   end do
 
-
-
-  !--------------------------------------------------------------------------------!
-  !                            FINALIZATION PROCEDURE                              !
-  !--------------------------------------------------------------------------------!
-
   ! Calculate the critical current
   critical = maxval(abs(current))
 
-  ! Status information
-  call status_head('CRITICAL CURRENT')
-  call status_body('Result', critical)
-  call status_foot
+  ! Write out the final results
+  call finalize
 
-  ! Write the current-phase relation to file
-  call dump('current.dat', [phase, current], ['Phase             ', 'Charge current    '])
 
-  ! Write the critical current to file
-  call dump('critical.dat', critical)
 
-  ! Deallocate memory
-  deallocate(phase, current)
+  !--------------------------------------------------------------------------------!
+  !                                 SUBROUTINES                                    !
+  !--------------------------------------------------------------------------------!
 
 contains
   impure subroutine prehook
@@ -121,5 +110,20 @@ contains
     write(filename,'(f5.3)') phase(n)
     call stack % write_current('current.' // filename // '.dat')
     call stack % write_gap(    'gap.'     // filename // '.dat')
+  end subroutine
+
+  impure subroutine finalize
+    ! Write out the final results.
+
+    ! Status information
+    call status_head('CRITICAL CURRENT')
+    call status_body('Result', critical)
+    call status_foot
+
+    ! Write the current-phase relation to file
+    call dump('current.dat', [phase, current], ['Phase             ', 'Charge current    '])
+
+    ! Write the critical current to file
+    call dump('critical.dat', critical)
   end subroutine
 end program

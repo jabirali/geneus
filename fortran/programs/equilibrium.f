@@ -26,10 +26,14 @@ program equilibrium
   ! Selfconsistent convergence procedure
   call stack % converge(threshold = tolerance, posthook = posthook)
 
-  ! Status information
-  call status_head('EQUILIBRIUM')
-  call status_body('State difference', stack % difference())
-  call status_foot
+  ! Write out the final results
+  call finalize
+
+
+
+  !--------------------------------------------------------------------------------!
+  !                                 SUBROUTINES                                    !
+  !--------------------------------------------------------------------------------!
 
 contains
   impure subroutine posthook
@@ -38,5 +42,14 @@ contains
     call stack % write_current('current.dat')
     call stack % write_magnetization('magnetization.dat')
     call stack % write_gap('gap.dat')
+  end subroutine
+
+  impure subroutine finalize
+    ! Write out the final results.
+
+    ! Status information
+    call status_head('EQUILIBRIUM')
+    call status_body('State difference', stack % difference())
+    call status_foot
   end subroutine
 end program

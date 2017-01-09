@@ -76,24 +76,31 @@ program critical_temperature
     critical = (minimum + maximum)/2
   end do
 
+  ! Write out the final results
+  call finalize
+
 
 
   !--------------------------------------------------------------------------------!
-  !                            FINALIZATION PROCEDURE                              !
+  !                                 SUBROUTINES                                    !
   !--------------------------------------------------------------------------------!
-
-  ! Status information
-  call status_head('CRITICAL TEMPERATURE')
-  call status_body('Result', critical)
-  call status_foot
-
-  ! Write the critical temperature to file
-  call dump('critical.dat', critical)
 
 contains
   impure subroutine prehook
     ! Write out status information.
     call status_body('Temperature', critical)
     call status_body('Bisection',   n)
+  end subroutine
+
+  impure subroutine finalize
+    ! Write out final results.
+
+    ! Status information
+    call status_head('CRITICAL TEMPERATURE')
+    call status_body('Result', critical)
+    call status_foot
+
+    ! Write the critical temperature to file
+    call dump('critical.dat', critical)
   end subroutine
 end program
