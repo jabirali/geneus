@@ -24,10 +24,19 @@ program equilibrium
   call stack % converge(threshold = threshold, bootstrap = .true.)
 
   ! Selfconsistent convergence procedure
-  call stack % converge(threshold = tolerance, output = .true.)
+  call stack % converge(threshold = tolerance, posthook = posthook)
 
   ! Status information
   call status_head('EQUILIBRIUM')
   call status_body('State difference', stack % difference())
   call status_foot
+
+contains
+  impure subroutine posthook
+    ! Write results to output files.
+    call stack % write_density('density.dat')
+    call stack % write_current('current.dat')
+    call stack % write_magnetization('magnetization.dat')
+    call stack % write_gap('gap.dat')
+  end subroutine
 end program

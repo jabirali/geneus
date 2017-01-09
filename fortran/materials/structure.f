@@ -273,13 +273,13 @@ contains
     end subroutine 
   end subroutine
 
-  impure subroutine structure_converge(this, threshold, iterations, bootstrap, output, prehook, posthook)
+  impure subroutine structure_converge(this, threshold, iterations, bootstrap, prehook, posthook)
     !! Performs a convergence procedure, where the state of every material in the stack
     !! is repeatedly updated until the residuals drop below some specified threshold 
     !! and/or a certain number of iterations have been performed. If bootstrap is set
     !! to true, the selfconsistency equations will only be solved once at the end, but
-    !! not inbetween the individual iterations. If output is set to true, then the
-    !! density of states, supercurrents, etc. will be written to files every iteration.
+    !! not inbetween the individual iterations. If a prehook and/or posthook is given,
+    !! those subroutines will be executed before/after each iteration of the update.
     class(structure), target   :: this
     real(wp),         optional :: threshold
     real(wp)                   :: threshold_
@@ -287,8 +287,6 @@ contains
     integer                    :: iterations_
     logical,          optional :: bootstrap
     logical                    :: bootstrap_
-    logical,          optional :: output
-    logical                    :: output_
     procedure(hook),  optional :: prehook
     procedure(hook),  optional :: posthook
     integer                    :: materials
@@ -299,13 +297,11 @@ contains
     threshold_  = 1
     iterations_ = 0
     bootstrap_  = .false.
-    output_     = .false.
 
     ! Check optional arguments
     if (present(threshold))  threshold_  = threshold
     if (present(iterations)) iterations_ = iterations
     if (present(bootstrap))  bootstrap_  = bootstrap
-    if (present(output))     output_     = output
 
     ! Count the number of materials
     materials       = this % materials()
@@ -336,12 +332,6 @@ contains
         call this % update(freeze = bootstrap_)
 
         ! Write the results to files
-        if (output_) then
-          call this % write_density('density.dat')
-          call this % write_current('current.dat')
-          call this % write_magnetization('magnetization.dat')
-          call this % write_gap('gap.dat')
-        end if
         if (present(posthook)) then
           call posthook
         end if

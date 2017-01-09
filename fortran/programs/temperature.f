@@ -92,6 +92,7 @@ program critical_temperature
 
 contains
   impure subroutine prehook
+    ! Write out status information.
     call status_body('Temperature', critical)
     call status_body('Bisection',   n)
   end subroutine

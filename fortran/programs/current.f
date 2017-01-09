@@ -28,7 +28,6 @@ program critical_current
   integer,  parameter             :: iterations  = 51
 
   ! Declare variables used by the program
-  character(len=5)                    :: filename = ''
   real(wp), dimension(:), allocatable :: phase
   real(wp), dimension(:), allocatable :: current
   real(wp)                            :: critical
@@ -111,10 +110,14 @@ program critical_current
 
 contains
   impure subroutine prehook
+    ! Write out status information.
     call status_body('Phase difference', phase(n))
     call status_body('Step number',      n)
   end subroutine
+
   impure subroutine posthook
+    ! Write results to output files.
+    character(len=5) :: filename
     write(filename,'(f5.3)') phase(n)
     call stack % write_current('current.' // filename // '.dat')
     call stack % write_gap(    'gap.'     // filename // '.dat')
