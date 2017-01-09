@@ -58,12 +58,6 @@ program critical_temperature
   !--------------------------------------------------------------------------------!
 
   do n = 1,bisections
-    ! Status information
-    call status_head('BISECTION')
-    call status_body('Temperature', critical)
-    call status_body('Bisection',   n)
-    call status_foot
-
     ! Set the temperature of the materials
     call stack % temperature(critical)
 
@@ -71,7 +65,7 @@ program critical_temperature
     call stack % load
 
     ! Update the material states
-    call stack % converge(iterations = iterations)
+    call stack % converge(iterations = iterations, prehook = prehook)
 
     ! Update the critical temperature estimate
     if (stack % gap() >= initgap) then
@@ -95,4 +89,10 @@ program critical_temperature
 
   ! Write the critical temperature to file
   call dump('critical.dat', critical)
+
+contains
+  impure subroutine prehook
+    call status_body('Temperature', critical)
+    call status_body('Bisection',   n)
+  end subroutine
 end program

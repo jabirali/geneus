@@ -75,22 +75,12 @@ program critical_current
 
   ! Calculate the charge current as a function of phase difference
   do n=1,size(phase)
-    ! Status information
-    call status_head('STEPPING')
-    call status_body('Phase difference', phase(n))
-    call status_foot
-
     ! Update the phase
     call sa % init( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
     call sb % init( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
 
     ! Update the state
-    call stack % converge(threshold = tolerance)
-
-    ! Write data to files
-    write(filename,'(f5.3)') phase(n)
-    call stack % write_current('current.' // filename // '.dat')
-    call stack % write_gap(    'gap.'     // filename // '.dat')
+    call stack % converge(threshold = tolerance, prehook = prehook, posthook = posthook)
 
     ! Save the charge current to array
     current(n) = stack % a % current(0,1)
@@ -118,4 +108,15 @@ program critical_current
 
   ! Deallocate memory
   deallocate(phase, current)
+
+contains
+  impure subroutine prehook
+    call status_body('Phase difference', phase(n))
+    call status_body('Step number',      n)
+  end subroutine
+  impure subroutine posthook
+    write(filename,'(f5.3)') phase(n)
+    call stack % write_current('current.' // filename // '.dat')
+    call stack % write_gap(    'gap.'     // filename // '.dat')
+  end subroutine
 end program

@@ -54,6 +54,12 @@ module structure_m
       class(material), pointer, intent(in) :: ptr
     end subroutine
   end interface
+
+  ! Interface for external routines that can be used by convergence() calls
+  abstract interface
+    subroutine hook()
+    end subroutine
+  end interface
 contains
   impure subroutine structure_push(this, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
@@ -267,7 +273,7 @@ contains
     end subroutine 
   end subroutine
 
-  impure subroutine structure_converge(this, threshold, iterations, bootstrap, output)
+  impure subroutine structure_converge(this, threshold, iterations, bootstrap, output, prehook, posthook)
     !! Performs a convergence procedure, where the state of every material in the stack
     !! is repeatedly updated until the residuals drop below some specified threshold 
     !! and/or a certain number of iterations have been performed. If bootstrap is set
@@ -283,6 +289,8 @@ contains
     logical                    :: bootstrap_
     logical,          optional :: output
     logical                    :: output_
+    procedure(hook),  optional :: prehook
+    procedure(hook),  optional :: posthook
     integer                    :: materials
     integer                    :: superconductors
     integer                    :: n
@@ -318,6 +326,9 @@ contains
           call status_head('CONVERGING')
         end if
         call status_body('State difference', this % difference())
+        if (present(prehook)) then
+          call prehook
+        end if
         call status_body('Iteration', n)
         call status_foot
 
@@ -330,6 +341,9 @@ contains
           call this % write_current('current.dat')
           call this % write_magnetization('magnetization.dat')
           call this % write_gap('gap.dat')
+        end if
+        if (present(posthook)) then
+          call posthook
         end if
 
         ! Exit criterion #1: one update is provably sufficient
