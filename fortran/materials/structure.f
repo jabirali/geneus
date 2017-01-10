@@ -427,14 +427,10 @@ contains
     class(structure), target  :: this
     character(*)              :: file
     integer                   :: unit
-    integer                   :: iostat
     real(wp)                  :: a, b
 
     ! Open output file
-    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
-    if (iostat /= 0) then
-      call error('Failed to open output file "' // file // '"!')
-    end if
+    unit = output(file)
 
     ! Initialize variables
     b = 0
@@ -479,14 +475,10 @@ contains
     class(structure), target  :: this
     character(*)              :: file
     integer                   :: unit
-    integer                   :: iostat
     real(wp)                  :: a, b
 
     ! Open output file
-    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
-    if (iostat /= 0) then
-      call error('Failed to open output file "' // file // '"!')
-    end if
+    unit = output(file)
 
     ! Initialize variables
     b = 0
@@ -526,14 +518,10 @@ contains
     class(structure), target  :: this
     character(*)              :: file
     integer                   :: unit
-    integer                   :: iostat
     real(wp)                  :: a, b
 
     ! Open output file
-    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
-    if (iostat /= 0) then
-      call error('Failed to open output file "' // file // '"!')
-    end if
+    unit = output(file)
 
     ! Initialize variables
     b = 0
@@ -572,14 +560,10 @@ contains
     class(structure), target  :: this
     character(*)              :: file
     integer                   :: unit
-    integer                   :: iostat
     real(wp)                  :: a, b
 
     ! Open output file
-    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
-    if (iostat /= 0) then
-      call error('Failed to open output file "' // file // '"!')
-    end if
+    unit = output(file)
 
     ! Initialize variables
     b = 0
@@ -635,10 +619,7 @@ contains
     iostat = 0
 
     ! Open the config file
-    open(newunit = unit, file = file, iostat = iostat, action = 'read', status = 'old')
-    if (iostat /= 0) then
-      call error('Failed to open configuration file "' // file // '"!')
-    end if
+    unit = input(file)
 
     ! Status information
     call status_box('CONFIGURATION')

@@ -125,6 +125,32 @@ contains
     write(*,'(a)') '╘═══════════════════════════════════╛'
   end subroutine
 
+  impure function input(file) result(unit)
+    !! This function is used to open an input file for reading.
+    character(len=*), intent(in) :: file
+    integer                      :: iostat
+    integer                      :: unit
+
+    ! Open the output file
+    open(newunit = unit, file = file, iostat = iostat, action = 'read', status = 'old')
+    if (iostat /= 0) then
+      call error('Failed to open input file "' // file // '"!')
+    end if
+  end function
+
+  impure function output(file) result(unit)
+    !! This function is used to open an output file for writing.
+    character(len=*), intent(in) :: file
+    integer                      :: iostat
+    integer                      :: unit
+
+    ! Open the output file
+    open(newunit = unit, file = file, iostat = iostat, action = 'write', status = 'replace')
+    if (iostat /= 0) then
+      call error('Failed to open output file "' // file // '"!')
+    end if
+  end function
+
   impure subroutine dump_arrays(filename, arrays, header)
     !! This subroutine is used to dump numerical arrays to an output file.
     use :: iso_fortran_env
@@ -134,19 +160,14 @@ contains
     character(len=*), dimension(:), intent(in) :: header
 
     real(real64), dimension(size(arrays)/size(header),size(header)) :: matrix
-
     integer :: unit
-    integer :: iostat
     integer :: n
 
     ! Reshape the data
     matrix = reshape(arrays, shape(matrix))
 
     ! Open the output file
-    open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
-    if (iostat /= 0) then
-      call error('Failed to open output file "' // filename // '"!')
-    end if
+    unit = output(filename)
 
     ! Write the header line
     write(unit,'(*(a20,:,"	"))') '# ' // header(1), header(2:)
@@ -171,14 +192,10 @@ contains
     character(len=2048) :: str
 
     integer :: unit
-    integer :: iostat
     integer :: n
 
     ! Open the output file
-    open(newunit = unit, file = filename, iostat = iostat, action = 'write', status = 'replace')
-    if (iostat /= 0) then
-      call error('Failed to open output file "' // filename // '"!')
-    end if
+    unit = output(filename)
 
     ! Write out command-line arguments
     do n=1,command_argument_count()
