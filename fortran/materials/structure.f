@@ -396,31 +396,13 @@ contains
   impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
     class(structure), target  :: this
-    integer                   :: n, s
     real(wp)                  :: difference
-
-    ! Initialize variables
-    n = 0
-    s = 0
-    difference = 0
 
     ! Traverse all materials
     call this % map(check)
-
-    ! Check whether we can assume convergence
-    if (s == 0 .and. n <= 1) then
-      difference = 0
-    end if
   contains
     subroutine check(m)
       class(material), pointer, intent(in) :: m
-      ! Count the material types
-      select type (m)
-        class is (superconductor)
-          s = s + 1
-        class default
-          n = n + 1
-      end select
       ! Accumulate the difference
       difference = max(difference, m % difference)
     end subroutine

@@ -31,7 +31,7 @@ program critical_current
   real(wp), dimension(:), allocatable :: phase
   real(wp), dimension(:), allocatable :: current
   real(wp)                            :: critical
-  integer                             :: n
+  integer                             :: n, m
 
 
 
@@ -59,11 +59,11 @@ program critical_current
 
   ! Depending on the number of unlocked superconductors in the junction, we might get a
   ! 2πn-periodicity instead of a 2π-periodicity, and should therefore account for that.
-  allocate(phase((n+1)*(iterations-1)+1))
-  allocate(current(size(phase)))
+  m = (n+1)*(iterations-1) + 1
+  allocate(phase(m), current(m))
   call linspace(phase, 1e-6_wp, 2*(n+1) - 1e-6_wp)
 
-  ! Non-selfconsistent bootstrap procedure
+  ! Start with a non-selfconsistent bootstrap procedure
   call stack % converge(threshold = threshold, bootstrap = .true.)
 
 
@@ -101,7 +101,6 @@ contains
   impure subroutine prehook
     ! Write out status information.
     call status_body('Phase difference', phase(n))
-    call status_body('Step number',      n)
   end subroutine
 
   impure subroutine posthook
