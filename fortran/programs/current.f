@@ -57,8 +57,8 @@ program critical_current
   ! Count the number of superconductors
   n = stack % superconductors()
 
-  ! Depending on the number of unlocked superconductors in the junction. [We might get a
-  ! 2πn-periodicity instead of a 2π-periodicity, and should therefore account for that.]
+  ! Depending on the number of unlocked superconductors in the junction, we might get a
+  ! 2πn-periodicity instead of a 2π-periodicity, and should therefore account for that.
   allocate(phase((n+1)*(iterations-1)+1))
   allocate(current(size(phase)))
   call linspace(phase, 1e-6_wp, 2*(n+1) - 1e-6_wp)
