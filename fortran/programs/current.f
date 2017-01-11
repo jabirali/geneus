@@ -10,9 +10,8 @@
 
 program critical_current
   use :: structure_m
-  use :: stdio_m
-  use :: math_m
   use :: calculus_m
+  use :: math_m
 
   !--------------------------------------------------------------------------------!
   !                                GLOBAL VARIABLES                                !
@@ -100,11 +99,15 @@ program critical_current
 contains
   impure subroutine prehook
     ! Write out status information.
+    use :: stdio_m
+
     call status_body('Phase difference', phase(n))
   end subroutine
 
   impure subroutine posthook
     ! Write results to output files.
+    use :: structure_m
+
     character(len=5) :: filename
     write(filename,'(f5.3)') phase(n)
     call stack % write_current('current.' // filename // '.dat')
@@ -113,6 +116,7 @@ contains
 
   impure subroutine finalize
     ! Write out the final results.
+    use :: stdio_m
 
     ! Status information
     call status_head('CRITICAL CURRENT')

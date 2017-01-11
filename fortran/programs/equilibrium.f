@@ -9,7 +9,6 @@
 
 program equilibrium
   use :: structure_m
-  use :: stdio_m
   use :: math_m
 
   ! Declare program control parameters
@@ -38,6 +37,8 @@ program equilibrium
 contains
   impure subroutine posthook
     ! Write results to output files.
+    use :: structure_m
+
     call stack % write_density('density.dat')
     call stack % write_current('current.dat')
     call stack % write_magnetization('magnetization.dat')
@@ -46,6 +47,7 @@ contains
 
   impure subroutine finalize
     ! Write out the final results.
+    use :: stdio_m
 
     ! Status information
     call status_head('EQUILIBRIUM')

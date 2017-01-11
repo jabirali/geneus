@@ -10,7 +10,6 @@
 
 program critical_temperature
   use :: structure_m
-  use :: stdio_m
   use :: math_m
 
   !--------------------------------------------------------------------------------!
@@ -88,12 +87,15 @@ program critical_temperature
 contains
   impure subroutine prehook
     ! Write out status information.
+    use :: stdio_m
+
     call status_body('Temperature', critical)
     call status_body('Bisection',   n)
   end subroutine
 
   impure subroutine finalize
     ! Write out final results.
+    use :: stdio_m
 
     ! Status information
     call status_head('CRITICAL TEMPERATURE')
