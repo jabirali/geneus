@@ -50,6 +50,10 @@ case "$1" in
     echo "Preparing for generation of DOCUMENTATION with FORD."
     echo
     cd doc
+    if [ -e html ]; then
+      echo "Removing the existing HTML documentation."
+      rm -r html
+    fi
     ford readme.md || exit 1
     echo "Documentation has been generated in the subdirectory 'doc'."
     echo "You can now open 'doc/html/index.html' in your web browser."
