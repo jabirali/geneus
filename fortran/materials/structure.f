@@ -253,10 +253,10 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_update(this, freeze)
+  impure subroutine structure_update(this, bootstrap)
     !! Updates the state of the entire multilayer stack.
     class(structure), target   :: this
-    logical,          optional :: freeze
+    logical,          optional :: bootstrap
     integer                    :: order
 
     ! Update materials in order
@@ -268,7 +268,7 @@ contains
       class(material), pointer, intent(in) :: m
 
       if (m % order == order) then
-        call m % update(freeze)
+        call m % update(bootstrap)
       end if
     end subroutine 
   end subroutine
@@ -329,7 +329,7 @@ contains
         call status_foot
 
         ! Update the material state (non-selfconsistently)
-        call this % update(freeze = bootstrap_)
+        call this % update(bootstrap = bootstrap_)
 
         ! Write the results to files
         if (present(posthook)) then

@@ -131,12 +131,12 @@ contains
   !                    IMPLEMENTATION OF STATE UPDATE METHODS                      !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine material_update(this, freeze)
+  impure subroutine material_update(this, bootstrap)
     ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
     use bvp_m
 
     class(material),   intent(inout) :: this                       ! Material that will be updated
-    logical, optional, intent(in)    :: freeze                     ! This flag prevents update posthooks
+    logical, optional, intent(in)    :: bootstrap                  ! This flag prevents update posthooks
     type(bvp_sol)                    :: sol                        ! Workspace for the bvp_solver procedures
     type(propagator)                 :: a                          ! State at this energy at the left  interface
     type(propagator)                 :: b                          ! State at this energy at the right interface
@@ -227,9 +227,9 @@ contains
       end if
     end if
 
-    ! Stop here if the material is frozen
-    if (present(freeze)) then
-      if (freeze) then
+    ! Stop here if bootstrapping
+    if (present(bootstrap)) then
+      if (bootstrap) then
         return
       end if
     end if
