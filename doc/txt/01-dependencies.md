@@ -17,8 +17,9 @@ own convenience, it is strongly recommended that you have these available:
    [students](https://software.intel.com/en-us/qualify-for-free-software/student) and
    [academics](https://software.intel.com/en-us/qualify-for-free-software/academicresearcher).
 
-Regarding dependencies, the code was last verified to work with the compilers
-GFortran 5.4.0, GFortran 6.2.1, and IFort 17.0.1.
+The code was last verified to work with the compilers GFortran 5.4.0, GFortran 6.2.1, and 
+IFort 17.0.1. Older versions than GFortran 5.0 and IFort 16.0 *may* or *may not* work;
+older versions of the code worked fine with GFortran 4.9, but I haven't tested recently.
 
 IFort generates much faster binaries than GFortran; for these programs, we're talking
 about a speedup of ~4x on an Intel Core i7 processor. I am not really sure if this due
@@ -33,10 +34,6 @@ the IFort binaries placing more variables on the stack than the GFortran binarie
 in that case, the problem goes away by running the command `ulimit -s unlimited`
 to increase the stack size (assuming a Linux/Unix system with a Bourne-based shell).
 If this doesn't work, please send a bug report, and try GFortran in the mean time.
-
-Note also that the project *may* or *may not* compile using older versions
-than GFortran 5.0 and IFort 16.0; I know that older versions of the code ran fine
-using GFortran 4.9, but I haven't spent much time testing old compilers.
 
 There are also some more optional dependencies:
 
