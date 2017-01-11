@@ -22,11 +22,8 @@ module conductor_m
   use :: spinscattering_m
   private
 
-  ! Public interface
-  public conductor, conductor_construct
-
   ! Type declarations
-  type, extends(material) :: conductor
+  type, public, extends(material) :: conductor
     ! These parameters control the physical characteristics of the material
     logical                          :: transparent_a           =  .false.                    ! Whether the left  interface is completely transparent
     logical                          :: transparent_b           =  .false.                    ! Whether the right interface is completely transparent
