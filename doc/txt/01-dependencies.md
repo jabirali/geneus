@@ -17,6 +17,8 @@ own convenience, it is strongly recommended that you have these available:
    [students](https://software.intel.com/en-us/qualify-for-free-software/student) and
    [academics](https://software.intel.com/en-us/qualify-for-free-software/academicresearcher).
 
+Regarding the dependencies, the code was last tested with IFort 17.0.1 and GFortran 6.2.1.
+
 IFort generates much faster binaries than GFortran; for my simulation programs, we're
 talking about a speedup of ~4x in benchmarks on an Intel Core i7 processor. I am
 not really sure if this due to better vectorization, more aggressive inter-procedural
