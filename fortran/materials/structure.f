@@ -336,8 +336,8 @@ contains
           call posthook
         end if
 
-        ! Exit criterion #1: one update is provably sufficient
-        if ((materials == 1) .and. (superconductors == 0)) then
+        ! Exit criterion #1: one iteration is sufficient for convergence
+        if ((materials == 1) .and. (superconductors == 0 .or. bootstrap_)) then
           exit
         end if
 
