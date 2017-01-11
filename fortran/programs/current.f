@@ -46,7 +46,7 @@ program critical_current
   sa = superconductor()
   sb = superconductor()
 
-  ! Lock the superconductors from updates
+  ! Disable the superconductor from updates
   call sa % conf('order','0')
   call sb % conf('order','0')
 
@@ -57,7 +57,7 @@ program critical_current
   ! Count the number of superconductors
   n = stack % superconductors()
 
-  ! Depending on the number of unlocked superconductors in the junction, we might get a
+  ! Depending on the number of enabled superconductors in the junction, we might get a
   ! 2πn-periodicity instead of a 2π-periodicity, and should therefore account for that.
   m = (n+1)*(iterations-1) + 1
   allocate(phase(m), current(m))

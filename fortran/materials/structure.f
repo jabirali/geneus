@@ -165,7 +165,7 @@ contains
       end if
     end function
     subroutine top(ptr)
-      ! Find the first unlocked material in the stack.
+      ! Find the first enabled material in the stack.
       class(material), pointer :: ptr
       ptr => this % a
       do while (check(ptr))
@@ -173,7 +173,7 @@ contains
       end do
     end subroutine
     subroutine next(ptr)
-      ! Find the next unlocked material in the stack.
+      ! Find the next enabled material in the stack.
       class(material), pointer :: ptr
       if (associated(ptr)) then
         ptr => ptr % material_b
@@ -185,7 +185,7 @@ contains
   end subroutine
 
   impure function structure_gap(this) result(gap)
-    !! Obtains the mean gap in the unlocked superconductor. If there are multiple such
+    !! Obtains the mean gap in the enabled superconductor. If there are multiple such
     !! superconductors in the junction, then it returns the minimum of the mean gaps.
     class(structure), target :: this
     real(wp)                 :: gap
@@ -200,7 +200,7 @@ contains
 
     ! If no superconductor was found, raise an error
     if (.not. found) then
-      call error('No unlocked superconductors in the junction!')
+      call error('No superconductors with order > 0 in the junction!')
     end if
   contains
     subroutine find(m)
@@ -308,7 +308,7 @@ contains
     superconductors = this % superconductors()
 
     ! If we're not bootstrapping, then we have to solve the diffusion equation until convergence.
-    ! If we're bootstrapping, it's only required if we have at least one unlocked superconductor.
+    ! If we're bootstrapping, it's only required if we have at least one enabled superconductor.
     if ((.not. bootstrap_) .or. (superconductors > 0)) then
       n = 0
       do
@@ -356,7 +356,7 @@ contains
   end subroutine
  
   impure function structure_materials(this) result(num)
-    !! Checks the number of unlocked materials in the multilayer stack.
+    !! Checks the number of enabled materials in the multilayer stack.
     class(structure), target :: this
     integer                  :: num
 
@@ -373,7 +373,7 @@ contains
   end function
 
   impure function structure_superconductors(this) result(num)
-    !! Checks the number of unlocked superconductors in the multilayer stack.
+    !! Checks the number of enabled superconductors in the multilayer stack.
     class(structure), target :: this
     integer                  :: num
 
@@ -683,7 +683,7 @@ contains
 
     ! Confirm that there is at least one material layer
     if (this % materials() < 1) then
-      call error('The material stack described by "' // file // '" has no unlocked layers!')
+      call error('The material stack described by "' // file // '" has no layers with order > 0!')
     end if
   end function
 end module
