@@ -77,8 +77,8 @@ elseif(Fortran_COMPILER_NAME MATCHES "gfortran.*" AND CMAKE_BUILD_TYPE MATCHES "
   set_source_files_properties(${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008  -ffree-form -fimplicit-none -Wconversion -pedantic -fcheck=all")
 elseif(Fortran_COMPILER_NAME MATCHES "ifort.*" AND CMAKE_BUILD_TYPE MATCHES "Release")
   # Compiling with INTEL IFORT in RELEASE mode
-  set(CMAKE_Fortran_FLAGS    "-xHost -ipo -fast")
-  set(CMAKE_EXE_LINKER_FLAGS "-xHost -ipo -fast")
+  set(CMAKE_Fortran_FLAGS    "-fast")
+  set(CMAKE_EXE_LINKER_FLAGS "-fast")
   set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-stand none -fixed")
   set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-stand none -free")
   set_source_files_properties(${src_mod} PROPERTIES COMPILE_FLAGS "-stand f08  -free -warn declarations,interfaces,usage -diag-disable 5112,5268")
