@@ -202,7 +202,13 @@ contains
         sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
 
         ! Solve the differential equation
-        sol = bvp_solver(sol, ode, bc, method=this%method, error_control=this%control, tol=this%tolerance, trace=this%information)
+        sol = bvp_solver(sol, ode, bc, method=this%method, error_control=this%control, &
+                         tol=this%tolerance, trace=this%information, stop_on_fail=.false.)
+
+        ! Check if the calculation succeeded
+        if (sol%info /= 0) then
+          call error('Failed to converge! This is usually because of an ill-posed problem, e.g. a system with no superconductors.')
+        end if
 
         ! Use the results to update the state
         call bvp_eval(sol, this%location, u)

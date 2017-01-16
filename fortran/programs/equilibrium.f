@@ -9,14 +9,21 @@
 
 program equilibrium
   use :: structure_m
+  use :: stdio_m
   use :: math_m
+
+  ! Declare the superconducting structure
+  type(structure) :: stack
 
   ! Declare program control parameters
   real(wp), parameter :: threshold = 1e-2
   real(wp), parameter :: tolerance = 1e-6
 
-  ! Create the superconducting structure
-  type(structure) :: stack
+  ! Redefine stdout and stderr 
+  stdout = output('output.log')
+  stderr = output('error.log')
+
+  ! Construct the superconducting structure
   stack = structure('materials.conf')
 
   ! Non-selfconsistent bootstrap procedure

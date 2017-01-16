@@ -11,6 +11,7 @@
 program critical_current
   use :: structure_m
   use :: calculus_m
+  use :: stdio_m
   use :: math_m
 
   !--------------------------------------------------------------------------------!
@@ -37,6 +38,10 @@ program critical_current
   !--------------------------------------------------------------------------------!
   !                           INITIALIZATION PROCEDURE                             !
   !--------------------------------------------------------------------------------!
+
+  ! Redefine stdout and stderr 
+  stdout = output('output.log')
+  stderr = output('error.log')
 
   ! Construct the central material stack
   stack = structure('materials.conf')

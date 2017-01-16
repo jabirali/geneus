@@ -81,8 +81,8 @@ contains
     end if
 
     ! Status information
-    write(*,*)
-    write(*,*) '[' // string // ']'
+    write(stdout,*)
+    write(stdout,*) '[' // string // ']'
   contains
     impure subroutine material_allocate(ptr, str)
       !! Allocates memory for a new material layer.
@@ -137,8 +137,8 @@ contains
     end if
 
     ! Status information
-    write(str,*) key // ':'
-    write(*,  *) str // val
+    write(str,    *) key // ':'
+    write(stdout, *) str // val
   end subroutine
 
   impure subroutine structure_map(this, routine)

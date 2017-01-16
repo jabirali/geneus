@@ -9,9 +9,9 @@ module stdio_m
   public
 
   ! Declare standard input/output units
-  integer,      parameter :: stdin   = input_unit
-  integer,      parameter :: stdout  = output_unit
-  integer,      parameter :: stderr  = error_unit
+  integer :: stdin  = input_unit
+  integer :: stdout = output_unit
+  integer :: stderr = error_unit
 
   ! Define escape codes for terminal colors
   character(*), parameter :: color_none   = '[00m'
@@ -70,11 +70,15 @@ contains
     title_((len(title_)-len(title)+1)/2:) = title
 
     ! Write out the boxed header
-    write(*,*)
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│ '         // title_ //          ' │'
-    write(*,'(a)') '├───────────────────────────────────┤'
-    write(*,'(a,3x,a,7x,i3.2,a,i2.2,a,i2.2,3x,a)') '│', 'Elapsed time:', hh, ':', mm, ':', ss, '│'
+    write(stdout,*)
+    write(stdout,'(a)') &
+      '╒═══════════════════════════════════╕'
+    write(stdout,'(a)') &
+      '│ '         // title_ //          ' │'
+    write(stdout,'(a)') &
+      '├───────────────────────────────────┤'
+    write(stdout,'(a,3x,a,7x,i3.2,a,i2.2,a,i2.2,3x,a)') &
+      '│', 'Elapsed time:', hh, ':', mm, ':', ss, '│'
   end subroutine
 
   impure subroutine status_body(title, value)
@@ -90,11 +94,11 @@ contains
     ! Print out the title and value
     select type(value)
       type is (integer)
-        write(*,'(a,3x,a,i10  ,2x,a)') '│', title_, value, '│'
+        write(stdout,'(a,3x,a,i10  ,2x,a)') '│', title_, value, '│'
       type is (real)
-        write(*,'(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
+        write(stdout,'(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
       type is (double precision)
-        write(*,'(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
+        write(stdout,'(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
     end select
   end subroutine
 
@@ -103,7 +107,8 @@ contains
     !! in particular, this routine writes out the bottom edge of such a box.
 
     ! Write out the boxed footer
-    write(*,'(a)') '╘═══════════════════════════════════╛'
+    write(stdout,'(a)') &
+      '╘═══════════════════════════════════╛'
 
     ! Flush the information to standard out
     flush(unit=stdout)
@@ -119,10 +124,13 @@ contains
     title_((len(title_)-len(title)+1)/2:) = title
 
     ! Write out the boxed message
-    write(*,*)
-    write(*,'(a)') '╒═══════════════════════════════════╕'
-    write(*,'(a)') '│ '         // title_ //          ' │'
-    write(*,'(a)') '╘═══════════════════════════════════╛'
+    write(stdout,*)
+    write(stdout,'(a)') &
+      '╒═══════════════════════════════════╕'
+    write(stdout,'(a)') &
+      '│ '         // title_ //          ' │'
+    write(stdout,'(a)') &
+      '╘═══════════════════════════════════╛'
   end subroutine
 
   impure function input(file) result(unit)
