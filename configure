@@ -37,14 +37,14 @@ case "$1" in
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild      || exit 1 ;;
 
-  "--win64")
+  "--windows")
     echo "Preparing for a compilation in RELEASE mode with MINGW32."
     if [ -e build ]; then
       echo "Removing the existing build directory."
       rm -r build
     fi
     echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=/usr/bin/x86_64-w64-mingw32-gfortran -DCMAKE_AR:PATH=/usr/bin/x86_64-w64-mingw32-gcc-ar -DCMAKE_RANLIB:PATH=x86_64-w64-mingw32-ranlib -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=x86_64-w64-mingw32-gfortran -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
 
   "--doc")
     echo "Preparing for generation of DOCUMENTATION with FORD."

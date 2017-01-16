@@ -53,7 +53,15 @@ endif()
 # Check which compiler we use
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
-if(Fortran_COMPILER_NAME MATCHES "gfortran.*" AND CMAKE_BUILD_TYPE MATCHES "Release")
+if(Fortran_COMPILER_NAME MATCHES "gfortran.*" AND CMAKE_SYSTEM_NAME MATCHES "Windows")
+  # Cross-compiling with GNU GFORTRAN for WINDOWS
+  set(CMAKE_Fortran_FLAGS          "-flto -Ofast -fno-stack-arrays -s")
+  set(CMAKE_EXE_LINKER_FLAGS       "-flto -Ofast -fwhole-program -static")
+  set_source_files_properties(${src_e77} PROPERTIES COMPILE_FLAGS "-std=legacy -ffixed-form")
+  set_source_files_properties(${src_e90} PROPERTIES COMPILE_FLAGS "-std=legacy -ffree-form")
+  set_source_files_properties(${src_mod} PROPERTIES COMPILE_FLAGS "-std=f2008  -ffree-form -fimplicit-none -Wconversion")
+  set_source_files_properties(${src_exe} PROPERTIES COMPILE_FLAGS "-std=f2008  -ffree-form -fimplicit-none -Wconversion")
+elseif(Fortran_COMPILER_NAME MATCHES "gfortran.*" AND CMAKE_BUILD_TYPE MATCHES "Release")
   # Compiling with GNU GFORTRAN in RELEASE mode
   set(CMAKE_AR                     "gcc-ar")
   SET(CMAKE_Fortran_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
