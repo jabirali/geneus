@@ -60,5 +60,9 @@ contains
     call status_head('EQUILIBRIUM')
     call status_body('State difference', stack % difference())
     call status_foot
+
+    ! Close output files
+    close(stdout)
+    close(stderr)
   end subroutine
 end program

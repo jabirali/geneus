@@ -34,6 +34,7 @@ contains
     character(*), intent(in) :: msg
 
     write(stderr,'(a)') color_green  // ' >> INFO: '    // color_none // msg
+    flush(stderr)
   end subroutine
 
   impure subroutine warning(msg)
@@ -41,6 +42,7 @@ contains
     character(*), intent(in) :: msg
 
     write(stderr,'(a)') color_yellow // ' >> WARNING: ' // color_none // msg
+    flush(stderr)
   end subroutine
 
   impure subroutine error(msg)
@@ -48,6 +50,7 @@ contains
     character(*), intent(in) :: msg
 
     write(stderr,'(a)') color_red    // ' >> ERROR: '   // color_none // msg
+    flush(stderr)
     stop
   end subroutine
 

@@ -109,5 +109,9 @@ contains
 
     ! Write the critical temperature to file
     call dump('critical.dat', critical)
+
+    ! Close output files
+    close(stdout)
+    close(stderr)
   end subroutine
 end program

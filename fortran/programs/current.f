@@ -133,5 +133,9 @@ contains
 
     ! Write the critical current to file
     call dump('critical.dat', critical)
+
+    ! Close output files
+    close(stdout)
+    close(stderr)
   end subroutine
 end program
