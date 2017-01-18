@@ -59,6 +59,7 @@ contains
     ! Status information
     call status_head('EQUILIBRIUM')
     call status_body('State difference', stack % difference())
+    call status_body('Charge violation', stack % chargeviolation())
     call status_foot
 
     ! Close output files

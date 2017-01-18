@@ -34,6 +34,7 @@ module structure_m
     procedure :: materials           => structure_materials
     procedure :: superconductors     => structure_superconductors
     procedure :: difference          => structure_difference
+    procedure :: chargeviolation     => structure_chargeviolation
     procedure :: temperature         => structure_temperature
     procedure :: converge            => structure_converge
     procedure :: write_density       => structure_write_density
@@ -322,6 +323,9 @@ contains
           call status_head('CONVERGING')
         end if
         call status_body('State difference', this % difference())
+        if (.not. bootstrap_) then
+          call status_body('Charge violation', this % chargeviolation())
+        end if
         if (present(prehook)) then
           call prehook
         end if
@@ -405,6 +409,33 @@ contains
       class(material), pointer, intent(in) :: m
       ! Accumulate the difference
       difference = max(difference, m % difference)
+    end subroutine
+  end function
+
+  impure function structure_chargeviolation(this) result(difference)
+    !! Checks how much the charge current varies with position. Since charge current
+    !! is supposed to be conserved through the junction, this provides a measure of
+    !! charge conservation violation, i.e. if the solution is physically realistic.
+    class(structure), target  :: this
+    real(wp)                  :: difference
+    real(wp)                  :: minimum
+    real(wp)                  :: maximum
+
+    ! Set starting values
+    minimum = +inf
+    maximum = -inf
+
+    ! Traverse all materials to find the most extreme currents
+    call this % map(check)
+
+    ! Calculate the difference between these extreme values
+    difference = maximum - minimum
+  contains
+    subroutine check(m)
+      class(material), pointer, intent(in) :: m
+      ! Determine the charge current extrema
+      maximum = max(maximum, maxval(m % current(0,:)))
+      minimum = min(minimum, minval(m % current(0,:)))
     end subroutine
   end function
 
