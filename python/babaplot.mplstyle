@@ -18,12 +18,11 @@ xtick.direction:             in
 ytick.direction:             in
 legend.loc:                  upper center
 legend.frameon:              False
-legend.borderaxespad:        -1.6
 
 
 # Dimensions
 figure.figsize:              8, 5
-#figure.autolayout:           True
+#figure.autolayout:          True
 xtick.major.size:            5.0
 xtick.minor.size:            0.0
 ytick.major.size:            5.0
@@ -37,27 +36,29 @@ ytick.major.pad:             12.0
 axes.labelpad:               12.0
 axes.linewidth:              2.0
 lines.linewidth:             3.0
+legend.borderaxespad:       -1.6
+legend.handlelength:         1.5
+legend.handletextpad:        0.3
+legend.columnspacing:        1.0
 
 
 # Colors
 image.cmap:                  viridis
 axes.prop_cycle:             cycler('color', ['377EB8', 'E41A1C', '000000', '984ea3', 'ff7f00'])
-#axes.prop_cycle:             cycler('color', ['377eb8', '4daf4a', 'e41a1c', '984ea3', 'ff7f00'])
 figure.facecolor:            ffffff
 axes.facecolor:              ffffff
-axes.edgecolor:              000000
+axes.edgecolor:              424242
 legend.facecolor:            ffffff
 legend.edgecolor:            000000
-xtick.color:                 000000
-ytick.color:                 000000
+xtick.color:                 424242
+ytick.color:                 424242
 axes.labelcolor:             000000
 
 
 # Fonts
 mathtext.fontset:            stix
 font.family:                 STIXGeneral
-axes.formatter.use_mathtext: True
-font.size:                   22
+font.size:                   20
 axes.labelsize:              large
 axes.titlesize:              large
 legend.fontsize:             medium
@@ -67,7 +68,13 @@ ytick.labelsize:             medium
 
 # Export
 savefig.dpi:                 600
-#savefig.bbox:                tight
+savefig.bbox:                tight
+
+# Formatter
+axes.formatter.use_mathtext:      True
+axes.formatter.useoffset: 	  False
+axes.formatter.offset_threshold:  4 
+axes.formatter.limits:            -3, 3
 
 # TeX fonts
 #text.usetex:                 True
