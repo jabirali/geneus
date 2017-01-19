@@ -652,6 +652,10 @@ contains
     ! Open the config file
     unit = input(file)
 
+    ! Command arguments
+    call get_command(str)
+    write(stdout, '(a)') trim(str)
+
     ! Status information
     call status_box('CONFIGURATION')
 

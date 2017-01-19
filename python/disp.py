@@ -84,14 +84,6 @@ def plot_current(data):
     spin_y   = data[:,3]
     spin_z   = data[:,4]
 
-    # Plot the charge current
-    ax = plot_window(r'Position $z/ξ$', r'Charge current $I_{e}/I_{e0}$', 'Charge current')
-    plt.plot(position, charge)
-    plt.axis([position.min(), 
-              position.max(), 
-              min(0.0, charge.min()) * 1.05,
-              max(0.0, charge.max()) * 1.05])
-
     # Plot the spin current
     ax = plot_window(r'Position $z/ξ$', r'Spin current $I_{σ}/I_{σ0}$', 'Spin current')
     plt.plot(position, spin_x, 
@@ -102,6 +94,15 @@ def plot_current(data):
               min(0.0, spin_x.min(), spin_y.min(), spin_z.min())*1.05, 
               max(0.0, spin_x.max(), spin_y.max(), spin_z.max())*1.05])
     plt.legend([r'Spin-$x$', r'Spin-$y$', r'Spin-$z$'], ncol = 3)
+
+    # Plot the charge current
+    ax = plot_window(r'Position $z/ξ$', r'Charge current $I_{e}/I_{e0}$', 'Charge current')
+    plt.plot(position, charge)
+    plt.axis([position.min(), 
+              position.max(), 
+              min(0.0, charge.min()) * 1.05,
+              max(0.0, charge.max()) * 1.05])
+
     plt.show()
 
 def plot_gap(data):
@@ -143,6 +144,8 @@ if __name__ == "__main__":
 
     # Loop over input files
     for filename in sys.argv[1:]:
+        print(filename)
+
         # Read data from file
         with open(filename, 'r') as f:
             desc = f.readline()   # File description

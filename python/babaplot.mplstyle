@@ -22,15 +22,16 @@ legend.borderaxespad:        -1.6
 
 
 # Dimensions
-figure.figsize:              14, 8
-xtick.major.size:            0.0
+figure.figsize:              8, 5
+#figure.autolayout:           True
+xtick.major.size:            5.0
 xtick.minor.size:            0.0
-ytick.major.size:            0.0
+ytick.major.size:            5.0
 ytick.minor.size:            0.0
-xtick.major.width:           1.0
-xtick.minor.width:           1.0
-ytick.major.width:           1.0
-ytick.minor.width:           1.0
+xtick.major.width:           2.0
+xtick.minor.width:           2.0
+ytick.major.width:           2.0
+ytick.minor.width:           2.0
 xtick.major.pad:             12.0
 ytick.major.pad:             12.0
 axes.labelpad:               12.0
@@ -59,14 +60,14 @@ axes.formatter.use_mathtext: True
 font.size:                   22
 axes.labelsize:              large
 axes.titlesize:              large
-legend.fontsize:             large
+legend.fontsize:             medium
 xtick.labelsize:             medium
 ytick.labelsize:             medium
 
 
 # Export
-savefig.dpi:                 1200
-savefig.bbox:                tight
+savefig.dpi:                 600
+#savefig.bbox:                tight
 
 # TeX fonts
 #text.usetex:                 True
