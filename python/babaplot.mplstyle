@@ -27,20 +27,21 @@ legend.frameon:              False
 # Dimensions
 figure.figsize:              8, 5
 #figure.autolayout:          True
-xtick.major.size:            5.75
+xtick.major.size:            4.00
 xtick.minor.size:            0.00
-ytick.major.size:            5.75
+ytick.major.size:            4.00
 ytick.minor.size:            0.00
-xtick.major.width:           1.50
-xtick.minor.width:           1.50
-ytick.major.width:           1.50
-ytick.minor.width:           1.50
-xtick.major.pad:             10.0
-ytick.major.pad:             10.0
-axes.labelpad:               12.0
-axes.linewidth:              1.50
-lines.linewidth:             3.00
+xtick.major.width:           0.75
+xtick.minor.width:           0.75
+ytick.major.width:           0.75
+ytick.minor.width:           0.75
+xtick.major.pad:             2.00
+ytick.major.pad:             2.00
+axes.labelpad:               3.00
+axes.linewidth:              0.75
+lines.linewidth:             1.25
 legend.borderaxespad:       -1.60
+#legend.borderaxespad:        0.00
 legend.handlelength:         1.50
 legend.handletextpad:        0.30
 legend.columnspacing:        1.00
@@ -62,12 +63,12 @@ axes.labelcolor:             000000
 # Fonts
 mathtext.fontset:            stix
 font.family:                 STIXGeneral
-font.size:                   20
-axes.labelsize:              large
-axes.titlesize:              large
-legend.fontsize:             medium
-xtick.labelsize:             medium
-ytick.labelsize:             medium
+font.size:                   10
+axes.labelsize:              medium
+axes.titlesize:              medium
+legend.fontsize:             small
+xtick.labelsize:             small
+ytick.labelsize:             small
 
 
 # Export
@@ -77,7 +78,7 @@ savefig.bbox:                tight
 # Formatter
 axes.formatter.use_mathtext:      True
 axes.formatter.useoffset: 	      False
-axes.formatter.limits:            -3, 3
+axes.formatter.limits:            0, 0
 
 # TeX fonts
 #text.usetex:                 True
