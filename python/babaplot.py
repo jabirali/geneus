@@ -7,11 +7,16 @@ mpl.style.use('~/Code/python/babaplot.mplstyle')
 
 # Define functions for creating figures
 def onecolumn(n, m):
-    '''Return a figure that is one column wide, e.g. appropriate for the Physical Review journals.'''
-    return plt.subplots(n, m, figsize=(3.35, (2.2*m)/n+0.3*(m>1)), tight_layout=True)
+    '''Return a figure that is one column wide.'''
+    return plt.subplots(n, m, figsize=(1*3.35, 1*(2.2*m)/n+0.3*(m>1)), tight_layout=True)
+
+def twocolumn(n, m):
+    '''Return a figure that are two columns wide.'''
+    return plt.subplots(n, m, figsize=(2*3.35, 2*(2.2*m)/n+0.3*(m>1)), tight_layout=True)
 
 # Define functions for styling figures
 def compactify(fig, label=1):
+    '''Restyle a figure to save space. This is appropriate for one-column figures with multiple plots stacked next to each other horizontally.'''
     for n, ax in enumerate(fig.axes):
         # Label each subfigure in order
         if (label > 0):
@@ -34,7 +39,7 @@ def compactify(fig, label=1):
                 xy = (0.98, 0.04)
 
             # Generate the label
-            ax.annotate('(' + string.ascii_lowercase[n] +')', xy=xy, va=va, ha=ha, 
+            ax.annotate('(' + string.ascii_lowercase[n] + ')', xy=xy, va=va, ha=ha, 
                     xycoords='axes fraction', fontweight='bold', fontsize='x-small')
 
         # Disable the legend
