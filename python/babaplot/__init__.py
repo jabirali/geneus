@@ -60,7 +60,9 @@ def compactify(fig):
                 xycoords='axes fraction', fontweight='bold', fontsize='x-small')
 
         # Disable the legend
-        ax.get_legend().set_visible(False)
+        legend = ax.get_legend()
+        if legend is not None: 
+            legend.set_visible(False)
 
         # Reposition the axis labels
         ax.get_yaxis().set_label_coords(-0.05, 0.50)

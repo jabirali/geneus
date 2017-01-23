@@ -42,9 +42,9 @@ axes.linewidth:              0.75
 lines.linewidth:             1.25
 legend.borderaxespad:       -1.60
 #legend.borderaxespad:        0.00
-legend.handlelength:         0.50
-legend.handletextpad:        0.30
-legend.columnspacing:        0.30
+legend.handlelength:         1.50
+legend.handletextpad:        0.50
+legend.columnspacing:        1.00
 
 
 # Colors
@@ -67,7 +67,7 @@ font.size:                   10
 axes.labelsize:              small
 axes.titlesize:              small
 figure.titlesize:            small
-legend.fontsize:             x-small
+legend.fontsize:             small
 xtick.labelsize:             x-small
 ytick.labelsize:             x-small
 
