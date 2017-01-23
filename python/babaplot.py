@@ -1,4 +1,6 @@
 import string
+import numpy as np
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -56,3 +58,22 @@ def compactify(fig, label=1):
         # Use scientific notation on the yticks
         ax.ticklabel_format(style='sci', axis='x', scilimits=(-3,+3))
         ax.ticklabel_format(style='sci', axis='y', scilimits=(-0,+0))
+
+def load(filename, statements=[], index=0):
+    '''Define a function for loading and interpolating a dataframe.'''
+
+    # Read the file into a dataframe
+    df = pd.read_table(filename, delim_whitespace=True, index_col=index)
+
+    # Process any eval statements
+    for statement in statements:
+        df.eval(statement, inplace=True)
+
+    # Generate a new index
+    index = np.linspace(df.index.min(), df.index.max(), 10240)
+
+    # Absorb the old index
+    index = np.unique(np.concatenate((df.index, index)))
+
+    # Reindex and interpolate
+    return df.reindex(index).interpolate(method='pchip')
