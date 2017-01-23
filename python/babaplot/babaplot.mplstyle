@@ -25,7 +25,7 @@ legend.frameon:              False
 
 
 # Dimensions
-figure.figsize:              8, 5
+figure.figsize:              3.35, 2.25
 #figure.autolayout:          True
 xtick.major.size:            4.00
 xtick.minor.size:            0.00
