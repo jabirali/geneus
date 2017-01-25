@@ -46,10 +46,19 @@ legend.handlelength:         1.50
 legend.handletextpad:        0.50
 legend.columnspacing:        1.00
 
+# Subplots
+#figure.subplot.left:   			 0.050
+#figure.subplot.right:  			 0.950
+#figure.subplot.bottom: 			 0.050
+#figure.subplot.top:    			 0.950
+#figure.subplot.wspace: 			 0.999
+#figure.subplot.hspace: 			 0.999
+
 
 # Colors
 image.cmap:                  viridis
-axes.prop_cycle:             cycler('color', ['000000', '377EB8', 'E41A1C', '984ea3', 'ff7f00'])
+axes.prop_cycle:             cycler('color', ['000000', '1673bf', 'bf1617', '1b9e77', 'd95f02', '7570b3'])
+#axes.prop_cycle:						 cycler('color', ['000000', 'd95f02', '1b9e77', '7570b3'])
 figure.facecolor:            ffffff
 axes.facecolor:              ffffff
 axes.edgecolor:              505050
@@ -82,8 +91,9 @@ axes.formatter.useoffset: 	      False
 axes.formatter.limits:            0, 0
 
 # TeX fonts
-#text.usetex:                 True
-#text.latex.unicode:          True
+text.usetex:                 True
+text.latex.unicode:          True
+text.latex.preamble:         \usepackage{txfonts}
 #text.latex.preamble:         \usepackage[scale=1.07]{biolinum}\usepackage{/home/jabirali/Academic/Thesis/eulerpx/eulerpx}\sfmath
 
 

@@ -10,6 +10,9 @@ pd.options.display.width = 132
 # Set the matplotlib stylesheet
 mpl.style.use('~/Code/python/babaplot.mplstyle')
 
+# Extract colors of the stylesheet
+color = [color['color'] for color in list(mpl.rcParams['axes.prop_cycle'])]
+
 
 
 ################################################################################
@@ -44,9 +47,10 @@ def load(filename, statements=[], index=0):
 # Subroutines for plotting data
 ################################################################################
 
-def grid(cols, n, m):
+def grid(cols, n, m, width=1, height=1/1.618, tight_layout=True, **kwargs):
     '''Return a figure that is one column wide.'''
-    return plt.subplots(n, m, figsize=(cols*3.35, cols*(2.2*n)/m+0.3*(m>1)), tight_layout=True)
+
+    return plt.subplots(n, m, figsize=(3.35*width, 3.35*height*(1.0*(n/m)+0.07*(n==1 and m>1))), tight_layout=tight_layout, **kwargs)
 
 def compactify(fig):
     '''Restyle a figure to save space. This is appropriate for one-column figures with multiple plots stacked next to each other horizontally.'''
@@ -56,7 +60,7 @@ def compactify(fig):
         ha = 'center'
         xy = (0.5, 1.04)
 
-        ax.annotate('(' + string.ascii_lowercase[n] + ')', xy=xy, va=va, ha=ha, 
+        ax.annotate(r'$\mathbf{(' + string.ascii_lowercase[n] + ')}$', xy=xy, va=va, ha=ha, 
                 xycoords='axes fraction', fontweight='bold', fontsize='x-small')
 
         # Disable the legend
@@ -65,8 +69,8 @@ def compactify(fig):
             legend.set_visible(False)
 
         # Reposition the axis labels
-        ax.get_yaxis().set_label_coords(-0.05, 0.50)
-        ax.get_xaxis().set_label_coords( 0.50,-0.12)
+        ax.get_yaxis().set_label_coords(-0.06, 0.50)
+        ax.get_xaxis().set_label_coords( 0.50,-0.14)
 
         # Only display ticks at the endpoints
         ax.set_xticks(ax.get_xlim())
