@@ -225,6 +225,13 @@ contains
   pure function propagator_current(this) result(r)
     !! Calculates the spectral current at zero temperature. The result is a 4-vector,
     !! where element 0 is the charge current, and elements 1:3 are the spin currents.
+    !!
+    !! @TODO: 
+    !!   The equation below should be changed from:
+    !!     r = 8 * re(trace(pauli * k))
+    !!   to the more logical form:
+    !!     r = 2 * re(trace(pauli * k))
+    !!   This would changes the current unit to J₀=eN₀∆₀²ξ²A/L, without a factor 1/4.
     class(propagator), intent(in) :: this
     real(wp)                      :: r(0:3)
     type(spin)                    :: k
