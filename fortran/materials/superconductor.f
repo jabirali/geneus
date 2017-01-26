@@ -15,6 +15,7 @@ module superconductor_m
   ! Type declaration
   type, public, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
+    complex(wp), allocatable :: gap_backup(:,:)    ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     real(wp)                 :: coupling = 0.00_wp ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
@@ -23,6 +24,7 @@ module superconductor_m
     procedure                :: init                => superconductor_init                ! Initializes the propagators
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
     procedure                :: update_gap          => superconductor_update_gap          ! Calculates the superconducting order parameter
+    procedure                :: update_boost        => superconductor_update_boost        ! Boosts the convergence of the order parameter
     procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the propagators
     procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the propagators
 
@@ -54,6 +56,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
+    allocate(this%gap_backup(size(this%location),0:3))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -125,6 +128,9 @@ contains
 
     ! Update the superconducting gap
     call this%update_gap
+
+    ! Boost the convergence if possible
+    call this%update_boost
   end subroutine
 
   impure subroutine superconductor_update_gap(this)
@@ -160,6 +166,12 @@ contains
         gap_z(n) = integrate(this%energy, gap_e, 1e-6_wp, this%energy(ubound(this%energy,1)))
       end do
 
+      ! Save the calculated gap as backup
+      associate( b => this % gap_backup, m => lbound(b,2), n => ubound(b,2) )
+        b(:,m:n-1) = b(:,m+1:n)
+        b(:,  n  ) = gap_z
+      end associate
+
       ! Interpolate the gap as a function of position to a higher resolution
       this % gap_function = interpolate(this % location, gap_z, this % gap_location)
 
@@ -178,6 +190,45 @@ contains
     end if
   end subroutine
 
+  impure subroutine superconductor_update_boost(this)
+    !! Use Steffensen's method to boost the convergence of the order parameter; 
+    !! i.e. replace fixpoint iteration with a special variant of Newtons method.
+    use :: calculus_m
+
+    class(superconductor), intent(inout)        :: this
+    complex(wp), dimension(size(this%location)) :: gap, diff
+
+    associate(b  => this % gap_backup,      &
+              b0 => this % gap_backup(:,0), &
+              b1 => this % gap_backup(:,1), &
+              b2 => this % gap_backup(:,2), &
+              b3 => this % gap_backup(:,3)  )
+
+      ! Check if we have enough calculations to boost
+      if (sum(abs(b0))/size(b0) > 1e-10) then
+        ! Calculate the boost
+        diff = ((b2 - b1)**2)/(b3 - 2*b2 + b1)
+
+        ! Calculate the gap
+        gap = b1 - diff
+
+        ! Reset the gap backups
+        b = 0
+
+        ! Interpolate the gap as a function of position to a higher resolution
+        this % gap_function = interpolate(this % location, gap, this % gap_location)
+
+        ! Status information
+        if (this%information >= 0 .and. this%order > 0) then
+          write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(diff))/size(diff)
+          flush(stdout)
+        end if
+
+        ! Perform one extra update
+        call this % update
+      end if
+    end associate
+  end subroutine
   !--------------------------------------------------------------------------------!
   !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
   !--------------------------------------------------------------------------------!
@@ -188,6 +239,7 @@ contains
     complex(wp),           intent(in)    :: gap
 
     this%gap_function = gap
+    this%gap_backup   = 0
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)

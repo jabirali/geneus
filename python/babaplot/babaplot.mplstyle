@@ -91,9 +91,9 @@ axes.formatter.useoffset: 	      False
 axes.formatter.limits:            0, 0
 
 # TeX fonts
-text.usetex:                 True
-text.latex.unicode:          True
-text.latex.preamble:         \usepackage{txfonts}
+#text.usetex:                 True
+#text.latex.unicode:          True
+#text.latex.preamble:         \usepackage{txfonts}
 #text.latex.preamble:         \usepackage[scale=1.07]{biolinum}\usepackage{/home/jabirali/Academic/Thesis/eulerpx/eulerpx}\sfmath
 
 
