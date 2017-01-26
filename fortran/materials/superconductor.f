@@ -212,9 +212,6 @@ contains
         ! Calculate the gap
         gap = b1 - diff
 
-        ! Reset the gap backups
-        b = 0
-
         ! Interpolate the gap as a function of position to a higher resolution
         this % gap_function = interpolate(this % location, gap, this % gap_location)
 
@@ -224,8 +221,14 @@ contains
           flush(stdout)
         end if
 
+        ! Reset the gap backups
+        b = 0
+
         ! Perform one extra update
         call this % update
+
+        ! Reset the gap backups
+        b = 0
       end if
     end associate
   end subroutine
