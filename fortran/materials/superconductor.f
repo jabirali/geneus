@@ -205,7 +205,7 @@ contains
               g4 => this % gap_backup(:,4)  )
 
       ! Update the iterator
-      this % iteration = modulo(this % iteration + 1, 8)
+      this % iteration = modulo(this % iteration + 1, 7)
 
       ! Control the boost pattern
       select case (this % iteration)
@@ -222,12 +222,6 @@ contains
           ! Perform a Steffensen 2nd-order boost
           g = g2 - (g3-g2)**2/(g4-2*g3+g2)
         case (6)
-          ! Switch to a 4th-order Runge-Kutta method
-          this % method = 4
-
-          ! Perform a regular iteration with no boost
-          return
-        case (7)
           ! Switch to a 6th-order Runge-Kutta method
           this % method = 6
 
