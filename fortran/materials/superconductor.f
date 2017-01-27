@@ -196,7 +196,7 @@ contains
     !! i.e. replace fixpoint iteration with a special variant of Newtons method.
     use :: calculus_m
     class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: g, dx1, dx2, dy1
+    complex(wp), dimension(size(this%location)) :: g
 
     associate(g0 => this % gap_backup(:,0), &
               g1 => this % gap_backup(:,1), &
@@ -205,11 +205,11 @@ contains
               g4 => this % gap_backup(:,4)  )
 
       ! Update the iterator
-      this % iteration = this % iteration + 1
+      this % iteration = modulo(this % iteration + 1, 8)
 
       ! Control the boost pattern
       select case (this % iteration)
-        case (:4)
+        case (:3)
           ! Switch to a 4th-order Runge-Kutta method
           this % method = 4
 
@@ -220,21 +220,19 @@ contains
           this % method = 6
 
           ! Perform a Steffensen 2nd-order boost
-          dx1 = g3 - g2
-          dx2 = (g4 - 2*g3 + g2)/dx1
-          g = g2 - dx1/dx2
+          g = g2 - (g3-g2)**2/(g4-2*g3+g2)
         case (6)
+          ! Switch to a 4th-order Runge-Kutta method
+          this % method = 4
+
           ! Perform a regular iteration with no boost
           return
-        case (7:)
-          ! Reset the iteration counter
-          this % iteration = 0
+        case (7)
+          ! Switch to a 6th-order Runge-Kutta method
+          this % method = 6
 
           ! Perform a Kung-Traub 4th-order boost
-          dx1 = g1 - g0
-          dy1 = g4 - g3
-          dx2 = (g2 - 2*g1 + g0)/dx1
-          g = g3 - (dy1*dx1**2)/(dx2*(dy1-dx1)**2)
+          g = g3 - ((g4-g3)*(g2-g1)*(g0-g3))/(((g2-g1)-(g4-g3))*((g1-g0)-(g4-g3)))
       end select
 
       ! Interpolate the gap as a function of position to a higher resolution
@@ -268,8 +266,8 @@ contains
     complex(wp),           intent(in)    :: gap
 
     this%gap_function = gap
-    this%gap_backup   = 0
-    this%iteration    = 0
+    this%gap_backup   = gap
+    this%iteration    = -1
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
