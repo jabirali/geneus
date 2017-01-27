@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),0:3))
+    allocate(this%gap_backup(size(this%location),0:4))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -195,36 +195,37 @@ contains
     !! Use Steffensen's method to boost the convergence of the order parameter; 
     !! i.e. replace fixpoint iteration with a special variant of Newtons method.
     use :: calculus_m
-    class(superconductor), intent(inout) :: this
-    integer                              :: method
+    class(superconductor), intent(inout)        :: this
+    complex(wp), dimension(size(this%location)) :: g, d1, d2, d3
 
     associate(g0 => this % gap_backup(:,0), &
               g1 => this % gap_backup(:,1), &
               g2 => this % gap_backup(:,2), &
-              g3 => this % gap_backup(:,3)  )
+              g3 => this % gap_backup(:,3), &
+              g4 => this % gap_backup(:,4)  )
 
       ! Update the iterator
       this % iteration = this % iteration + 1
 
+      ! Estimate the derivatives of the gap
+      d1 = (  1.0/12.0 )*g0 + ( -2.0/3.0 )*g1 + (  0.0/1.0 )*g2 + (  2.0/3.0 )*g3 + ( -1.0/12.0 )*g4
+      d2 = ( -1.0/12.0 )*g0 + (  4.0/3.0 )*g1 + ( -5.0/2.0 )*g2 + (  4.0/3.0 )*g3 + ( -1.0/12.0 )*g4
+      d3 = ( -1.0/ 2.0 )*g0 + (  1.0/1.0 )*g1 + (  0.0/1.0 )*g2 + ( -1.0/1.0 )*g3 + (  1.0/ 2.0 )*g4
+
       ! Use Steffensen's method
       select case (this % iteration)
-        case (:3)
+        case (:6)
           ! Switch to a 4th-order Runge-Kutta method
           this % method = 4
 
           ! Don't perform any boosts
           return
-        case (4:)
-          ! Take a backup of the current gaps
-          g0 = g1
-          g1 = g2
-          g2 = g3
-
-          ! Calculate the gap boost
-          g3 = g0 - (g1 - g0)**2/(g2 - 2*g1 + g0)
-
+        case (7:)
           ! Switch to a 6th-order Runge-Kutta method
           this % method = 6
+
+          ! Boost convergence using the Halley scheme
+          g = g2 - (d1*d2)/(d2**2 - d1*d3/2)
 
           ! Go back to normal iterations
           this % iteration = 0
@@ -232,12 +233,12 @@ contains
 
       ! Status information
       if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g3 - g2))/size(g2)
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g4))/size(g)
         flush(stdout)
       end if
 
       ! Interpolate the gap as a function of position to a higher resolution
-      this % gap_function = interpolate(this % location, g3, this % gap_location)
+      this % gap_function = interpolate(this % location, g, this % gap_location)
 
       ! Silently perform one extra update (using a 6th-order method)
       call this % update(bootstrap = .true.)
