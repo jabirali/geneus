@@ -209,7 +209,7 @@ contains
 
       ! Control the boost pattern
       select case (this % iteration)
-        case (:3)
+        case (:4)
           ! Switch to a 4th-order Runge-Kutta method
           this % method = 4
 
