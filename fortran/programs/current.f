@@ -24,7 +24,7 @@ program critical_current
 
   ! Declare program control parameters
   real(wp), parameter             :: threshold   = 1e-2
-  real(wp), parameter             :: tolerance   = 1e-6
+  real(wp), parameter             :: tolerance   = 1e-8
   integer,  parameter             :: iterations  = 51
 
   ! Declare variables used by the program

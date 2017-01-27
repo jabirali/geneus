@@ -19,6 +19,7 @@ module superconductor_m
     complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     real(wp)                 :: coupling = 0.00_wp ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
@@ -194,44 +195,55 @@ contains
     !! Use Steffensen's method to boost the convergence of the order parameter; 
     !! i.e. replace fixpoint iteration with a special variant of Newtons method.
     use :: calculus_m
+    class(superconductor), intent(inout) :: this
+    integer                              :: method
 
-    class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: gap, diff
+    associate(g0 => this % gap_backup(:,0), &
+              g1 => this % gap_backup(:,1), &
+              g2 => this % gap_backup(:,2), &
+              g3 => this % gap_backup(:,3)  )
 
-    associate(b  => this % gap_backup,      &
-              b0 => this % gap_backup(:,0), &
-              b1 => this % gap_backup(:,1), &
-              b2 => this % gap_backup(:,2), &
-              b3 => this % gap_backup(:,3)  )
+      ! Update the iterator
+      this % iteration = this % iteration + 1
 
-      ! Check if we have enough calculations to boost
-      if (sum(abs(b0))/size(b0) > 1e-10) then
-        ! Calculate the boost
-        diff = ((b2 - b1)**2)/(b3 - 2*b2 + b1)
+      ! Use Steffensen's method
+      select case (this % iteration)
+        case (:3)
+          ! Switch to a 4th-order Runge-Kutta method
+          this % method = 4
 
-        ! Calculate the gap
-        gap = b1 - diff
+          ! Don't perform any boosts
+          return
+        case (4:)
+          ! Take a backup of the current gaps
+          g0 = g1
+          g1 = g2
+          g2 = g3
 
-        ! Interpolate the gap as a function of position to a higher resolution
-        this % gap_function = interpolate(this % location, gap, this % gap_location)
+          ! Calculate the gap boost
+          g3 = g0 - (g1 - g0)**2/(g2 - 2*g1 + g0)
 
-        ! Status information
-        if (this%information >= 0 .and. this%order > 0) then
-          write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(diff))/size(diff)
-          flush(stdout)
-        end if
+          ! Switch to a 6th-order Runge-Kutta method
+          this % method = 6
 
-        ! Reset the gap backups
-        b = 0
+          ! Go back to normal iterations
+          this % iteration = 0
+      end select
 
-        ! Perform one extra update
-        call this % update
-
-        ! Reset the gap backups
-        b = 0
+      ! Status information
+      if (this%information >= 0 .and. this%order > 0) then
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g3 - g2))/size(g2)
+        flush(stdout)
       end if
+
+      ! Interpolate the gap as a function of position to a higher resolution
+      this % gap_function = interpolate(this % location, g3, this % gap_location)
+
+      ! Silently perform one extra update (using a 6th-order method)
+      call this % update(bootstrap = .true.)
     end associate
   end subroutine
+
   !--------------------------------------------------------------------------------!
   !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
   !--------------------------------------------------------------------------------!
@@ -243,6 +255,7 @@ contains
 
     this%gap_function = gap
     this%gap_backup   = 0
+    this%iteration    = 0
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)

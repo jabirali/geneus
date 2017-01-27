@@ -17,7 +17,7 @@ program equilibrium
 
   ! Declare program control parameters
   real(wp), parameter :: threshold = 1e-2
-  real(wp), parameter :: tolerance = 1e-6
+  real(wp), parameter :: tolerance = 1e-8
 
   ! Redefine stdout and stderr 
   stdout = output('output.log')
