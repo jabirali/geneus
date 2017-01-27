@@ -222,7 +222,7 @@ contains
           ! Perform a Steffensen 2nd-order boost
           dx1 = g3 - g2
           dx2 = (g4 - 2*g3 + g2)/dx1
-          g = g2 - dx1**2/dx2
+          g = g2 - dx1/dx2
         case (6)
           ! Perform a regular iteration with no boost
           return
@@ -230,19 +230,12 @@ contains
           ! Reset the iteration counter
           this % iteration = 0
 
-          ! Perform a Peng 4th-order boost
+          ! Perform a Kung-Traub 4th-order boost
           dx1 = g1 - g0
           dy1 = g4 - g3
           dx2 = (g2 - 2*g1 + g0)/dx1
-          g = g4 - (dx1/dx2) * (dy1/dx1 + (1 + 1/(1 + dx2)) * (dy1/dx1)**2)
+          g = g3 - (dy1*dx1**2)/(dx2*(dy1-dx1)**2)
       end select
-
-      ! Make backups of the gaps
-      g0 = g1
-      g1 = g2
-      g2 = g3
-      g3 = g4
-      g4 = g
 
       ! Interpolate the gap as a function of position to a higher resolution
       this % gap_function = interpolate(this % location, g, this % gap_location)
@@ -255,6 +248,13 @@ contains
         write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g4))/size(g)
         flush(stdout)
       end if
+
+      ! Make backups of the gaps
+      g0 = g1
+      g1 = g2
+      g2 = g3
+      g3 = g4
+      g4 = g
     end associate
   end subroutine
 
