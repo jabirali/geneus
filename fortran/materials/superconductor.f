@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),1:3))
+    allocate(this%gap_backup(size(this%location),0:4))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -196,38 +196,53 @@ contains
     !! i.e. replace fixpoint iteration with a special variant of Newtons method.
     use :: calculus_m
     class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: g, d1, d2
+    complex(wp), dimension(size(this%location)) :: g, dx1, dx2, dy1
 
-    associate(g1 => this % gap_backup(:,1), &
+    associate(g0 => this % gap_backup(:,0), &
+              g1 => this % gap_backup(:,1), &
               g2 => this % gap_backup(:,2), &
-              g3 => this % gap_backup(:,3)  )
+              g3 => this % gap_backup(:,3), &
+              g4 => this % gap_backup(:,4)  )
 
       ! Update the iterator
       this % iteration = this % iteration + 1
 
-      ! Estimate the derivatives of the gap
-      d1 = (g3 - g1)/2
-      d2 = g3 - 2*g2 + g1
+      ! Control the boost pattern
+      select case (this % iteration)
+        case (:4)
+          ! Switch to a 4th-order Runge-Kutta method
+          this % method = 4
 
-      ! Control the boost frequency
-      if (this % iteration <= 4) then
-        ! Switch to a 4th-order Runge-Kutta method
-        this % method = 4
+          ! Perform a regular iteration with no boost
+          return
+        case (5)
+          ! Switch to a 6th-order Runge-Kutta method
+          this % method = 6
 
-        ! Don't perform the boost yet
-        return
-      else
-        ! Switch to a 6th-order Runge-Kutta method
-        this % method = 6
+          ! Perform a Steffensen 2nd-order boost
+          dx1 = g3 - g2
+          dx2 = (g4 - 2*g3 + g2)/dx1
+          g = g2 - dx1**2/dx2
+        case (6)
+          ! Perform a regular iteration with no boost
+          return
+        case (7:)
+          ! Reset the iteration counter
+          this % iteration = 0
 
-        ! Reset the iteration counter
-        this % iteration = 0
-      end if
+          ! Perform a Peng 4th-order boost
+          dx1 = g1 - g0
+          dy1 = g4 - g3
+          dx2 = (g2 - 2*g1 + g0)/dx1
+          g = g4 - (dx1/dx2) * (dy1/dx1 + (1 + 1/(1 + dx2)) * (dy1/dx1)**2)
+      end select
 
-      ! Boost the convergence using Steffensens method
-      where ( abs(1-g/g3) < 0.1 )
-        g = g2 - d1**2/d2
-      end where
+      ! Make backups of the gaps
+      g0 = g1
+      g1 = g2
+      g2 = g3
+      g3 = g4
+      g4 = g
 
       ! Interpolate the gap as a function of position to a higher resolution
       this % gap_function = interpolate(this % location, g, this % gap_location)
@@ -237,7 +252,7 @@ contains
 
       ! Status information
       if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g3))/size(g)
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g4))/size(g)
         flush(stdout)
       end if
     end associate
