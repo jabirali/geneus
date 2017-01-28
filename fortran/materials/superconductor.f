@@ -192,9 +192,24 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_boost(this)
-    !! Use Steffensens method to boost the convergence of the order parameter; 
-    !! i.e. replace fixpoint iteration with a special variant of Newtons method.
+    !! Boost the convergence of the order parameter using the Kung-Traub algorithm; see 
+    !! e.g. equation (2.111) in "Multipoint Methods for Solving Nonlinear Equations".
+    !!
+    !! The basic idea is that a selfconsistent solution of the Usadel equations can be
+    !! regarded as a fixpoint iteration problem Δ=f(Δ), where the function f consists
+    !! of solving the diffusion and gap equations one time. We're seeking the point
+    !! where f'(Δ)=0, and this can be done more efficiently using e.g. Newtons method
+    !! than a straight-forward fixpoint-iteration. Using Newtons method, we get:
+    !!   Δ_{n+1} = Δ_{n} - f'(Δ_n)/f''(Δ_n)
+    !! Using a finite-difference approximation for the derivatives, we arrive at the
+    !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
+    !!   Δ_{n+1} = Δ_{n-2} - (Δ_{n-1} - Δ_{n-2})/(Δ_{n} - 2Δ_{n-1} + Δ_{n-2})
+    !! This boost is then performed every 4th iteration to improve the convergence.
+    !! The Kung-Traub algorithm further improves upon this concept by adding another
+    !! correction step after the Steffensen method, yielding a 4th-order convergence.
+
     use :: calculus_m
+
     class(superconductor), intent(inout)        :: this
     complex(wp), dimension(size(this%location)) :: g
 
@@ -221,7 +236,7 @@ contains
 
           ! Perform a Steffensen 2nd-order boost
           g = g2 - (g3-g2)**2/(g4-2*g3+g2)
-        case (6)
+        case (6:)
           ! Switch to a 6th-order Runge-Kutta method
           this % method = 6
 
