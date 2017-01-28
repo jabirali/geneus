@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),0:4))
+    allocate(this%gap_backup(size(this%location),0:6))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -217,7 +217,9 @@ contains
               g1 => this % gap_backup(:,1), &
               g2 => this % gap_backup(:,2), &
               g3 => this % gap_backup(:,3), &
-              g4 => this % gap_backup(:,4)  )
+              g4 => this % gap_backup(:,4), &
+              g5 => this % gap_backup(:,5), &
+              g6 => this % gap_backup(:,6)  )
 
       ! Update the iterator
       this % iteration = modulo(this % iteration + 1, 7)
@@ -228,20 +230,20 @@ contains
           ! Switch to a 4th-order Runge-Kutta method
           this % method = 4
 
-          ! Perform a regular iteration with no boost
+          ! Perform a regualr fixpoint iteration
           return
         case (5)
           ! Switch to a 6th-order Runge-Kutta method
           this % method = 6
 
           ! Perform a Steffensen 2nd-order boost
-          g = g2 - (g3-g2)**2/(g4-2*g3+g2)
-        case (6:)
-          ! Switch to a 6th-order Runge-Kutta method
-          this % method = 6
-
+          g = x(4) - f(4)/d(4,5)
+        case (6)
           ! Perform a Kung-Traub 4th-order boost
-          g = g3 - ((g4-g3)*(g2-g1)*(g0-g3))/(((g2-g1)-(g4-g3))*((g1-g0)-(g4-g3)))
+          g = x(5) - (f(3)*f(5))/((f(3)-f(5))*d(2,5))
+        !case (7:)
+        !  ! Perform a Kung-Traub 8th-order boost
+        !  g = x(5) - (f(3) * f(1) * (x(3)-x(0)+f(0)/d(0,5))) / ((f(3) - f(5)) * (f(1) - f(5))) + f(3)/d(3,5)
       end select
 
       ! Interpolate the gap as a function of position to a higher resolution
@@ -252,7 +254,7 @@ contains
 
       ! Status information
       if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g4))/size(g)
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g6))/size(g)
         flush(stdout)
       end if
 
@@ -261,8 +263,34 @@ contains
       g1 = g2
       g2 = g3
       g3 = g4
-      g4 = g
+      g4 = g5
+      g5 = g6
+      g6 = g
     end associate
+  contains
+    pure function x(n) result(r)
+      ! Define an accessor method for the gap value after n iterations.
+      integer, intent(in)                             :: n
+      complex(wp), dimension(size(this%gap_backup,1)) :: r
+
+      r = this % gap_backup(:,n)
+    end function
+
+    pure function f(n) result(r)
+      ! Estimate the finite-difference first-derivative between iterations n and n+1.
+      integer, intent(in)                             :: n
+      complex(wp), dimension(size(this%gap_backup,1)) :: r
+
+      r = x(n+1) - x(n)
+    end function
+
+    pure function d(n,m) result(r)
+      ! Estimate the finite-difference second-derivative between iterations n and m.
+      integer, intent(in)                             :: n, m
+      complex(wp), dimension(size(this%gap_backup,1)) :: r
+
+      r = (f(n) - f(m))/(x(n) - x(m))
+    end function
   end subroutine
 
   !--------------------------------------------------------------------------------!
