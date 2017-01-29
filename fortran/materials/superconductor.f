@@ -33,7 +33,6 @@ module superconductor_m
     ! These methods are used to access and mutate the parameters
     procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
     procedure                :: get_gap             => superconductor_get_gap             ! Returns the superconducting order parameter at a given position
-    procedure                :: get_gap_mean        => superconductor_get_gap_mean        ! Returns the superconducting order parameter averaged over the material
 
     ! These methods define miscellaneous utility functions
     procedure                :: conf                => superconductor_conf                ! Configures material parameters
@@ -318,14 +317,6 @@ contains
         fp = f(n-1) + (f(n)-f(n-1))*(p*m-(n-2))
       end if
     end associate
-  end function
-
-  pure function superconductor_get_gap_mean(this) result(gap)
-    ! Returns the superconducting order parameter average in the material.
-    class(superconductor), intent(in)  :: this
-    complex(wp)                        :: gap
-
-    gap = sum(this%gap_function)/max(1,size(this%gap_function)) 
   end function
 
   !--------------------------------------------------------------------------------!
