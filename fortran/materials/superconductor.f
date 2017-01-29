@@ -203,7 +203,7 @@ contains
     ! Update the iterator
     this % iteration = this % iteration + 1
     if (this % iteration > this % boost) then
-      this % iteration = -3
+      this % iteration = -4
     end if
 
     ! Adjust the boundary value problem solver
@@ -295,7 +295,7 @@ contains
 
     this % gap_function = gap
     this % gap_backup   = gap
-    this % iteration    = -5
+    this % iteration    = this % boost
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
