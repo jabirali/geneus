@@ -18,8 +18,9 @@ module superconductor_m
     complex(wp), allocatable :: gap_backup(:,:)    ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    real(wp)                 :: coupling = 0.00_wp ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
-    integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
+    real(wp)                 :: coupling  =  0     ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
+    integer                  :: boost     =  3     ! What kind of selfconsistent iteration scheme to use (0 = fixpoint, 1 = Steffensen's method, 2 = Ostrowski's method, 3 = Cordero's method)
+    integer                  :: iteration = -1     ! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
@@ -192,8 +193,8 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_boost(this)
-    !! Boost the convergence of the order parameter using the Kung-Traub algorithm; see 
-    !! e.g. equation (2.111) in "Multipoint Methods for Solving Nonlinear Equations".
+    !! Boost the convergence of the order parameter using either Steffensen's method
+    !! (2nd-order), Ostrowski's method (4th-order), or Cordero's method (8th-order).
     !!
     !! The basic idea is that a selfconsistent solution of the Usadel equations can be
     !! regarded as a fixpoint iteration problem Δ=f(Δ), where the function f consists
@@ -204,9 +205,9 @@ contains
     !! Using a finite-difference approximation for the derivatives, we arrive at the
     !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
     !!   Δ_{n+1} = Δ_{n-2} - (Δ_{n-1} - Δ_{n-2})/(Δ_{n} - 2Δ_{n-1} + Δ_{n-2})
-    !! This boost is then performed every 4th iteration to improve the convergence.
-    !! The Kung-Traub algorithm further improves upon this concept by adding another
-    !! correction step after the Steffensen method, yielding a 4th-order convergence.
+    !! Ostrowski's and Cordero's methods further improve the convergence by adding 
+    !! more steps to the iteration scheme. See e.g. "A stable family with high order
+    !! of convergence for solving nonlinear equations" by Cordero et al. (2015).
 
     use :: calculus_m
 
@@ -222,28 +223,46 @@ contains
               g6 => this % gap_backup(:,6)  )
 
       ! Update the iterator
-      this % iteration = modulo(this % iteration + 1, 7)
+      this % iteration = this % iteration + 1
 
       ! Control the boost pattern
       select case (this % iteration)
-        case (:4)
+        case (:5)
           ! Switch to a 4th-order Runge-Kutta method
           this % method = 4
 
-          ! Perform a regualr fixpoint iteration
+          ! Reset the iterator
+          if (this % boost <= 0) then
+            this % iteration = 0
+          end if
+
+          ! Perform a regular fixpoint iteration
           return
-        case (5)
+        case (6)
           ! Switch to a 6th-order Runge-Kutta method
           this % method = 6
 
-          ! Perform a Steffensen 2nd-order boost
-          g = x(4) - f(4)/d(4,5)
-        case (6)
-          ! Perform a Kung-Traub 4th-order boost
-          g = x(5) - (f(3)*f(5))/((f(3)-f(5))*d(2,5))
-        !case (7:)
-        !  ! Perform a Kung-Traub 8th-order boost
-        !  g = x(5) - (f(3) * f(1) * (x(3)-x(0)+f(0)/d(0,5))) / ((f(3) - f(5)) * (f(1) - f(5))) + f(3)/d(3,5)
+          ! Reset the iterator
+          if (this % boost == 1) then
+            this % iteration = 0
+          end if
+
+          ! Perform the 1st boost with Steffensen's method (2nd order)
+          g = x(4) - d1(4)/d2(4,5)
+        case (7)
+          ! Perform the 2nd boost with Ostrowski's method (4th order)
+          g = x(2) - (1 + d1(5)/(d1(2)-2*d1(5))) * d1(2)/d2(2,3)
+
+          ! Reset the iterator
+          if (this % boost == 2) then
+            this % iteration = 0
+          end if
+        case (8)
+          ! Perform the 3rd boost with Cordero's method (8th order)
+          g = x(5) - d1(5)/(d2(5,3) + 2*(x(5)-x(3))*d3(5,3,0) - (x(5)-x(3))*d3(3,0,0))
+
+          ! Reset the iterator
+          this % iteration = 0
       end select
 
       ! Interpolate the gap as a function of position to a higher resolution
@@ -276,20 +295,32 @@ contains
       r = this % gap_backup(:,n)
     end function
 
-    pure function f(n) result(r)
-      ! Estimate the finite-difference first-derivative between iterations n and n+1.
+    pure function d1(n) result(r)
+      ! Estimate the finite-difference 1st-derivative between iterations n and n+1.
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
       r = x(n+1) - x(n)
     end function
 
-    pure function d(n,m) result(r)
-      ! Estimate the finite-difference second-derivative between iterations n and m.
+    pure function d2(n,m) result(r)
+      ! Estimate the finite-difference 2nd-derivative between iterations n and m.
       integer, intent(in)                             :: n, m
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = (f(n) - f(m))/(x(n) - x(m))
+      if (n /= m) then
+        r = (d1(m)   - d1(n))/(x(m)   - x(n))
+      else
+        r = (d1(n+1) - d1(n))/(x(n+1) - x(n))
+      end if
+    end function
+
+    pure function d3(n,m,k) result(r)
+      ! Estimate the finite-difference 3rd-derivative between iterations n, m, k.
+      integer, intent(in)                             :: n, m, k
+      complex(wp), dimension(size(this%gap_backup,1)) :: r
+
+      r = (d2(m,k) - d2(n,m))/(x(k) - x(n))
     end function
   end subroutine
 
@@ -304,7 +335,6 @@ contains
 
     this%gap_function = gap
     this%gap_backup   = gap
-    this%iteration    = -1
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
@@ -350,6 +380,11 @@ contains
     real(wp)                             :: tmp
 
     select case(key)
+      case("boost")
+        call evaluate(val, this%boost)
+        if (this%boost < 0 .or. this%boost > 3) then
+          call error("The 'boost' parameter must be in the range [0,3].")
+        end if
       case("coupling")
         call evaluate(val, this%coupling)
       case ('gap')
