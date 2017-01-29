@@ -9,7 +9,12 @@ module calculus_m
   private
 
   ! Declare which routines to export
-  public :: differentiate, integrate, interpolate, linspace
+  public :: mean, differentiate, integrate, interpolate, linspace
+
+  interface mean
+    !! Public interface for routines that calculate the mean value.
+    module procedure mean_array_re, mean_array_cx 
+  end interface
 
   interface differentiate
     !! Public interface for various differentiation routines.
@@ -26,8 +31,24 @@ module calculus_m
   interface interpolate
     !! Public interface for various interpolation routines.
     module procedure interpolate_pchip, interpolate_pchip_cx, interpolate_pchip_scalar, interpolate_pchip_cx_scalar
-  end interface
+  end interface 
 contains
+  pure function mean_array_re(x) result(r)
+    !! Calculates the mean value of a real-valued array.
+    real(wp), intent(in) :: x(:)
+    real(wp)             :: r
+
+    r = sum(x)/max(1,size(x))
+  end function
+
+  pure function mean_array_cx(x) result(r)
+    !! Calculates the mean value of a complex-valued array.
+    complex(wp), intent(in) :: x(:)
+    complex(wp)             :: r
+
+    r = sum(x)/max(1,size(x))
+  end function
+
   pure subroutine linspace(array, first, last)
     !! Populates an array with elements from `first` to `last`, inclusive.
     real(wp), intent(out) :: array(:)   !! Output array to populate

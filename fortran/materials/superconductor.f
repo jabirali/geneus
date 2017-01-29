@@ -20,7 +20,7 @@ module superconductor_m
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     real(wp)                 :: coupling  =  0     ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
     integer                  :: boost     =  3     ! What kind of selfconsistent iteration scheme to use (0 = fixpoint, 1 = Steffensen's method, 2 = Ostrowski's method, 3 = Cordero's method)
-    integer                  :: iteration = -1     ! Used to count where in the selfconsistent iteration cycle we are
+    integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
@@ -139,21 +139,14 @@ contains
     ! Update the superconducting gap if the BCS coupling constant is nonzero.
     use :: calculus_m
 
-    class(superconductor), intent(inout) :: this         ! Superconductor object that will be updated
-    complex(wp),           allocatable   :: gap_e(:)     ! Used to calculate the superconducting order parameter (as a function of energy)
-    complex(wp),           allocatable   :: gap_z(:)     ! Used to calculate the superconducting order parameter (as a function of position)
-    complex(wp)                          :: diff         ! Change in the superconducting order parameter mean
-    complex(wp)                          :: singlet      ! Singlet component of the anomalous propagators
-    integer                              :: n, m         ! Loop variables
+    class(superconductor), intent(inout)        :: this       ! Superconductor object that will be updated
+    complex(wp), dimension(size(this%energy))   :: gap_e      ! Used to calculate the order parameter (as a function of energy)
+    complex(wp), dimension(size(this%location)) :: gap_z      ! Used to calculate the order parameter (as a function of position)
+    complex(wp)                                 :: singlet    ! Singlet component of the anomalous propagators
+    real(wp)                                    :: diff       ! Change of the gap between two iterations
+    integer                                     :: n, m       ! Loop variables
 
     if (abs(this%coupling) > eps) then
-      ! Allocate workspace memory
-      allocate(gap_e(size(this%energy)))
-      allocate(gap_z(size(this%location)))
-
-      ! Calculate the mean superconducting order parameter
-      diff = this%get_gap_mean()
-
       ! Iterate over the stored propagators
       do n = 1,size(this%location)
         do m = 1,size(this%energy)
@@ -168,27 +161,21 @@ contains
         gap_z(n) = integrate(this%energy, gap_e, 1e-6_wp, this%energy(ubound(this%energy,1)))
       end do
 
+      ! Interpolate the gap as a function of position to a higher resolution
+      this % gap_function = interpolate(this % location, gap_z, this % gap_location)
+
       ! Save the calculated gap as backup
       associate( b => this % gap_backup, m => lbound(b,2), n => ubound(b,2) )
         b(:,m:n-1) = b(:,m+1:n)
         b(:,  n  ) = gap_z
+        diff       = mean(abs(b(:,n) - b(:,n-1)))
       end associate
-
-      ! Interpolate the gap as a function of position to a higher resolution
-      this % gap_function = interpolate(this % location, gap_z, this % gap_location)
-
-      ! Calculate the difference in mean superconducting order parameter
-      diff = this%get_gap_mean() - diff
 
       ! Status information
       if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap change: ',abs(diff)
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap change: ', diff
         flush(stdout)
       end if
-
-      ! Deallocate workspace memory
-      deallocate(gap_e)
-      deallocate(gap_z)
     end if
   end subroutine
 
@@ -214,78 +201,52 @@ contains
     class(superconductor), intent(inout)        :: this
     complex(wp), dimension(size(this%location)) :: g
 
-    associate(g0 => this % gap_backup(:,0), &
-              g1 => this % gap_backup(:,1), &
-              g2 => this % gap_backup(:,2), &
-              g3 => this % gap_backup(:,3), &
-              g4 => this % gap_backup(:,4), &
-              g5 => this % gap_backup(:,5), &
-              g6 => this % gap_backup(:,6)  )
+    ! Update the iterator
+    this % iteration = this % iteration + 1
+    if (this % iteration > this % boost) then
+      this % iteration = -3
+    end if
 
-      ! Update the iterator
-      this % iteration = this % iteration + 1
+    ! Adjust the boundary value problem solver
+    if (this % iteration > 0) then
+      this % method = 6
+    else
+      this % method = 4
+    end if
 
-      ! Control the boost pattern
-      select case (this % iteration)
-        case (:5)
-          ! Switch to a 4th-order Runge-Kutta method
-          this % method = 4
+    ! Control the boost pattern
+    select case (this % iteration)
+      case (:0)
+        ! Perform a regular fixpoint iteration
+        return
+      case (1)
+        ! Perform the 1st boost with Steffensen's method (2nd order)
+        g = x(4) - d1(4)/d2(4,5)
+      case (2)
+        ! Perform the 2nd boost with Ostrowski's method (4th order)
+        g = x(2) - (1 + d1(5)/(d1(2)-2*d1(5))) * (d1(2)/d2(2,3))
+      case (3)
+        ! Perform the 3rd boost with Cordero's method (8th order)
+        g = x(5) - d1(5)/(d2(5,3) + 2*(x(5)-x(3))*d3(5,3,0) - (x(5)-x(3))*d3(3,0,0))
+    end select
 
-          ! Reset the iterator
-          if (this % boost <= 0) then
-            this % iteration = 0
-          end if
+    ! Interpolate the gap as a function of position to a higher resolution
+    this % gap_function = interpolate(this % location, g, this % gap_location)
 
-          ! Perform a regular fixpoint iteration
-          return
-        case (6)
-          ! Switch to a 6th-order Runge-Kutta method
-          this % method = 6
+    ! Perform one extra update
+    call this % update(bootstrap = .true.)
 
-          ! Reset the iterator
-          if (this % boost == 1) then
-            this % iteration = 0
-          end if
-
-          ! Perform the 1st boost with Steffensen's method (2nd order)
-          g = x(4) - d1(4)/d2(4,5)
-        case (7)
-          ! Perform the 2nd boost with Ostrowski's method (4th order)
-          g = x(2) - (1 + d1(5)/(d1(2)-2*d1(5))) * d1(2)/d2(2,3)
-
-          ! Reset the iterator
-          if (this % boost == 2) then
-            this % iteration = 0
-          end if
-        case (8)
-          ! Perform the 3rd boost with Cordero's method (8th order)
-          g = x(5) - d1(5)/(d2(5,3) + 2*(x(5)-x(3))*d3(5,3,0) - (x(5)-x(3))*d3(3,0,0))
-
-          ! Reset the iterator
-          this % iteration = 0
-      end select
-
-      ! Interpolate the gap as a function of position to a higher resolution
-      this % gap_function = interpolate(this % location, g, this % gap_location)
-
-      ! Perform one extra update
-      call this % update(bootstrap = .true.)
-
-      ! Status information
-      if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ',sum(abs(g - g6))/size(g)
-        flush(stdout)
-      end if
-
-      ! Make backups of the gaps
-      g0 = g1
-      g1 = g2
-      g2 = g3
-      g3 = g4
-      g4 = g5
-      g5 = g6
-      g6 = g
+    ! Save the calculated gap as backup
+    associate( x => this % gap_backup, m => lbound(x,2), n => ubound(x,2) )
+      x(:,m:n-1) = x(:,m+1:n)
+      x(:,  n  ) = g
     end associate
+
+    ! Status information
+    if (this%information >= 0 .and. this%order > 0) then
+      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(x(6)-x(5)))
+      flush(stdout)
+    end if
   contains
     pure function x(n) result(r)
       ! Define an accessor method for the gap value after n iterations.
@@ -333,8 +294,9 @@ contains
     class(superconductor), intent(inout) :: this
     complex(wp),           intent(in)    :: gap
 
-    this%gap_function = gap
-    this%gap_backup   = gap
+    this % gap_function = gap
+    this % gap_backup   = gap
+    this % iteration    = -5
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
