@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),0:3))
+    allocate(this%gap_backup(size(this%location),0:6))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -219,11 +219,11 @@ contains
         ! Perform a regular fixpoint iteration
         return
       case (1)
-        ! Perform a boost using the Chebyshev method (4th order)
-        U = (d1(0)/d2(0))
-        L = (d3(0)/d2(0)) * U
-        g = g(0) - U*(1+L/2)
-        this % iteration = -6
+        ! Perform a boost using the Super-Halley method (4th order)
+        U = (d1(3)/d2(3))
+        L = (d3(3)/d2(3)) * U
+        g = g(3) - U * (1 + (L/2)/(1-L))
+        this % iteration = -7
     end select
 
     ! Interpolate the gap as a function of position to a higher resolution
@@ -257,7 +257,7 @@ contains
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = x(n+1) - x(n)
+      r = 0.5 * (x(n+1) - x(n-1))
     end function
 
     pure function d2(n) result(r)
@@ -265,7 +265,7 @@ contains
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = (d1(n+1) - d1(n))/(x(n+1) - x(n))
+      r = 0.5 * (d1(n+1) - d1(n-1))/(x(n+1) - x(n-1))
     end function
 
     pure function d3(n) result(r)
@@ -273,7 +273,7 @@ contains
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = (d2(n+1) - d2(n))/(x(n+1) - x(n))
+      r = 0.5 * (d2(n+1) - d2(n-1))/(x(n+1) - x(n-1))
     end function
   end subroutine
 
