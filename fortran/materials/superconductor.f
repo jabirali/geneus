@@ -219,11 +219,11 @@ contains
         ! Perform a regular fixpoint iteration
         return
       case (1)
-        ! Perform a boost using the Super-Halley method (4th order)
+        ! Perform a boost using the Chebyshev method (4th order)
         U = (d1(0)/d2(0))
         L = (d3(0)/d2(0)) * U
-        g = g(0) - U * (1 + (L/2)/(1-L))
-        this % iteration = -8
+        g = g(0) - U*(1+L/2)
+        this % iteration = -6
     end select
 
     ! Interpolate the gap as a function of position to a higher resolution
