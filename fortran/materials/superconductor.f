@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),0:6))
+    allocate(this%gap_backup(size(this%location),0:3))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -198,7 +198,7 @@ contains
     use :: calculus_m
 
     class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: g
+    complex(wp), dimension(size(this%location)) :: g, L, U
 
     ! Update the iterator
     this % iteration = this % iteration + 1
@@ -219,14 +219,11 @@ contains
         ! Perform a regular fixpoint iteration
         return
       case (1)
-        ! Perform the 1st boost with Steffensen's method (2nd order)
-        g = x(4) - d1(4)/d2(4,5)
-      case (2)
-        ! Perform the 2nd boost with Ostrowski's method (4th order)
-        g = x(2) - (1 + d1(5)/(d1(2)-2*d1(5))) * (d1(2)/d2(2,3))
-      case (3)
-        ! Perform the 3rd boost with Cordero's method (8th order)
-        g = x(5) - d1(5)/(d2(5,3) + 2*(x(5)-x(3))*d3(5,3,0) - (x(5)-x(3))*d3(3,0,0))
+        ! Perform a boost using the Super-Halley method (4th order)
+        U = (d1(0)/d2(0))
+        L = (d3(0)/d2(0)) * U
+        g = g(0) - U * (1 + (L/2)/(1-L))
+        this % iteration = -8
     end select
 
     ! Interpolate the gap as a function of position to a higher resolution
@@ -243,7 +240,7 @@ contains
 
     ! Status information
     if (this%information >= 0 .and. this%order > 0) then
-      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(x(6)-x(5)))
+      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(x(3)-x(2)))
       flush(stdout)
     end if
   contains
@@ -256,31 +253,27 @@ contains
     end function
 
     pure function d1(n) result(r)
-      ! Estimate the finite-difference 1st-derivative between iterations n and n+1.
+      ! Estimate the finite-difference 1st-derivative.
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
       r = x(n+1) - x(n)
     end function
 
-    pure function d2(n,m) result(r)
-      ! Estimate the finite-difference 2nd-derivative between iterations n and m.
-      integer, intent(in)                             :: n, m
+    pure function d2(n) result(r)
+      ! Estimate the finite-difference 2nd-derivative.
+      integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      if (n /= m) then
-        r = (d1(m)   - d1(n))/(x(m)   - x(n))
-      else
-        r = (d1(n+1) - d1(n))/(x(n+1) - x(n))
-      end if
+      r = (d1(n+1) - d1(n))/(x(n+1) - x(n))
     end function
 
-    pure function d3(n,m,k) result(r)
-      ! Estimate the finite-difference 3rd-derivative between iterations n, m, k.
-      integer, intent(in)                             :: n, m, k
+    pure function d3(n) result(r)
+      ! Estimate the finite-difference 3rd-derivative.
+      integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = (d2(m,k) - d2(n,m))/(x(k) - x(n))
+      r = (d2(n+1) - d2(n))/(x(n+1) - x(n))
     end function
   end subroutine
 
