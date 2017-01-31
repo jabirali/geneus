@@ -202,6 +202,7 @@ contains
 
     class(superconductor), intent(inout)        :: this
     complex(wp), dimension(size(this%location)) :: g
+    logical                                     :: u
 
     if (this % boost) then
       ! Update the iterator
@@ -226,8 +227,17 @@ contains
       ! Interpolate the gap as a function of position to a higher resolution
       this % gap_function = interpolate(this % location, g, this % gap_location)
 
-      ! Perform one extra update
-      call this % update(bootstrap = .true.)
+      ! Perform one extra update if necessary
+      u = .false.
+      if (associated(this % material_a)) then
+        u = u .or. (this % material_a % order > 0)
+      end if
+      if (associated(this % material_b)) then
+        u = u .or. (this % material_b % order > 0)
+      end if
+      if (u) then
+        call this % update(bootstrap = .true.)
+      end if
 
       ! Status information
       if (this%information >= 0 .and. this%order > 0) then
