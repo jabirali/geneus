@@ -19,7 +19,7 @@ module superconductor_m
     complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     real(wp)                 :: coupling  =  0     ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
-    integer                  :: boost     =  3     ! What kind of selfconsistent iteration scheme to use (0 = fixpoint, 1 = Steffensen's method, 2 = Ostrowski's method, 3 = Cordero's method)
+    integer                  :: boost     =  2     ! What kind of selfconsistent iteration scheme to use (0 = fixpoint, 1 = Steffensen method, 2 = Super-Halley method)
     integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
@@ -179,8 +179,10 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_boost(this)
-    !! Boost the convergence of the order parameter using either Steffensen's method
-    !! (2nd-order), Ostrowski's method (4th-order), or Cordero's method (8th-order).
+    !! Boost the convergence of the order parameter using either the Super-Halley
+    !! scheme (4th-order convergence), the Steffensen scheme (2nd-order convergence),
+    !! or resort to using a conventional fixpoint-iteration (1st-order convergence).
+    !! Which of these schemes to use is controlled by the 'boost' config parameter.
     !!
     !! The basic idea is that a selfconsistent solution of the Usadel equations can be
     !! regarded as a fixpoint iteration problem Δ=f(Δ), where the function f consists
@@ -191,9 +193,13 @@ contains
     !! Using a finite-difference approximation for the derivatives, we arrive at the
     !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
     !!   Δ_{n+1} = Δ_{n-2} - (Δ_{n-1} - Δ_{n-2})/(Δ_{n} - 2Δ_{n-1} + Δ_{n-2})
-    !! Ostrowski's and Cordero's methods further improve the convergence by adding 
-    !! more steps to the iteration scheme. See e.g. "A stable family with high order
-    !! of convergence for solving nonlinear equations" by Cordero et al. (2015).
+    !! The Super-Halley method improves the scheme by including the third derivative.
+    !!
+    !! @NOTE:
+    !!   I have also experimented with several higher-order multi-step methods. However, 
+    !!   my experience so far is that these are less stable than Steffensen's method and
+    !!   the Super-Halley method, and as a result, often converged more slowly for some
+    !!   systems. These methods have therefore been removed as alternatives in the code.
 
     use :: calculus_m
 
@@ -201,51 +207,55 @@ contains
     complex(wp), dimension(size(this%location)) :: g, L, U
 
     ! Update the iterator
-    this % iteration = this % iteration + 1
-    if (this % iteration > this % boost) then
-      this % iteration = -4
-    end if
+    this % iteration = modulo(this % iteration + 1, 5)
 
-    ! Adjust the boundary value problem solver
-    if (this % iteration > 0) then
+    ! Right after a convergence boost, a 6th-order Runge-Kutta algorithm is the 
+    ! most efficient alternative for solving the diffusion equations. Otherwise,
+    ! a 4th-order algorithm is sufficient, and spends less time per iteration.
+    if (this % boost > 0 .and. this % iteration == 0) then
       this % method = 6
     else
       this % method = 4
     end if
 
-    ! Control the boost pattern
-    select case (this % iteration)
-      case (:0)
-        ! Perform a regular fixpoint iteration
-        return
-      case (1)
-        ! Perform a boost using the Super-Halley method (4th order)
-        U = (d1(0)/d2(0))
-        L = (d3(0)/d2(0)) * U
-        g = x(0) - U * (1 + (L/2)/(1-L))
-        this % iteration = -6
-    end select
+    ! Convergence boost algorithm
+    if (this % iteration == 0) then
+      ! Choose what algorithm to use for the convergence boost
+      select case (this % boost)
+        case (1)
+          ! Steffensen's method (2nd-order convergence)
+          g = f(1) - d1(1)/d2(1)
+        case (2)
+          ! Super-Halley method (4th-order convergence)
+          U = (d1(0)/d2(0))
+          L = (d3(0)/d2(0)) * U
+          g = f(0) - U * (1 + (L/2)/(1-L))
+        case default
+          ! Fixpoint iteration  (1st-order convergence)
+          return
+      end select
 
-    ! Interpolate the gap as a function of position to a higher resolution
-    this % gap_function = interpolate(this % location, g, this % gap_location)
+      ! Interpolate the gap as a function of position to a higher resolution
+      this % gap_function = interpolate(this % location, g, this % gap_location)
 
-    ! Perform one extra update
-    call this % update(bootstrap = .true.)
+      ! Perform one extra update
+      call this % update(bootstrap = .true.)
 
-    ! Save the calculated gap as backup
-    associate( x => this % gap_backup, m => lbound(x,2), n => ubound(x,2) )
-      x(:,m:n-1) = x(:,m+1:n)
-      x(:,  n  ) = g
-    end associate
+      ! Save the calculated gap as backup
+      associate( f => this % gap_backup, m => lbound(f,2), n => ubound(f,2) )
+        f(:,m:n-1) = f(:,m+1:n)
+        f(:,  n  ) = g
+      end associate
 
-    ! Status information
-    if (this%information >= 0 .and. this%order > 0) then
-      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(x(3)-x(2)))
-      flush(stdout)
+      ! Status information
+      if (this%information >= 0 .and. this%order > 0) then
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(f(3)-f(2)))
+        flush(stdout)
+      end if
     end if
   contains
-    pure function x(n) result(r)
-      ! Define an accessor method for the gap value after n iterations.
+    pure function f(n) result(r)
+      ! Define an accessor for the gap after n iterations.
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
@@ -257,7 +267,7 @@ contains
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = x(n+1) - x(n)
+      r = f(n+1) - f(n)
     end function
 
     pure function d2(n) result(r)
@@ -265,7 +275,7 @@ contains
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = (d1(n+1) - d1(n))/(x(n+1) - x(n))
+      r = (d1(n+1) - d1(n))/d1(n)
     end function
 
     pure function d3(n) result(r)
@@ -273,7 +283,7 @@ contains
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
-      r = (d2(n+1) - d2(n))/(x(n+1) - x(n))
+      r = (d2(n+1) - d2(n))/d1(n)
     end function
   end subroutine
 
@@ -288,7 +298,7 @@ contains
 
     this % gap_function = gap
     this % gap_backup   = gap
-    this % iteration    = this % boost
+    this % iteration    = 0
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
@@ -328,8 +338,8 @@ contains
     select case(key)
       case("boost")
         call evaluate(val, this%boost)
-        if (this%boost < 0 .or. this%boost > 3) then
-          call error("The 'boost' parameter must be in the range [0,3].")
+        if (this%boost < 0 .or. this%boost > 2) then
+          call error("The 'boost' parameter must be in the range [0,2].")
         end if
       case("coupling")
         call evaluate(val, this%coupling)
