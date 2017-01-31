@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),-2:2))
+    allocate(this%gap_backup(size(this%location),1:3))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -189,14 +189,14 @@ contains
     !!   Δ_{n+1} = Δ_{n} - f'(Δ_n)/f''(Δ_n)
     !! Using a finite-difference approximation for the derivatives, we arrive at the
     !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
-    !!   Δ_{n+1} = Δ_{n-2} - (Δ_{n-1} - Δ_{n-2})/(Δ_{n} - 2Δ_{n-1} + Δ_{n-2})
-    !! This drastically improves the convergence compared to fixpoint-iteration.
+    !!   Δ_{n+3} = Δ_{n} - (Δ_{n+1} - Δ_{n})/(Δ_{n+2} - 2Δ_{n+1} + Δ_{n})
+    !! In most of my tests, the simulation time is then reduced by a factor 2x to 3x.
     !!
     !! @NOTE:
-    !!   I have also experimented with several higher-order multi-step methods. However, 
-    !!   my experience so far is that these are less stable than Steffensen's method and
-    !!   the Super-Halley method, and as a result, often converged more slowly for some
-    !!   systems. These methods have therefore been removed as alternatives in the code.
+    !!   I have also experimented with several higher-order methods, including methods
+    !!   that utilize the 3rd derivative or perform multiple successive boosts. However, 
+    !!   my experience so far is that these are less stable than Steffensen's method,
+    !!   and often converged more slowly. These methods have therefore been discarded.
 
     use :: calculus_m
 
@@ -218,7 +218,7 @@ contains
 
       ! Boost the convergence using Steffensen's method when the iterator resets
       if (this % iteration == 0) then
-        g = f(0) - d1(0)/d2(0)
+        g = f(1) - (f(2)-f(1))**2/(f(3)-2*f(2)+f(1))
       else
         return
       end if
@@ -229,15 +229,9 @@ contains
       ! Perform one extra update
       call this % update(bootstrap = .true.)
 
-      ! Save the calculated gap as backup
-      associate( f => this % gap_backup, m => lbound(f,2), n => ubound(f,2) )
-        f(:,m:n-1) = f(:,m+1:n)
-        f(:,  n  ) = g
-      end associate
-
       ! Status information
       if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(f(2)-f(1)))
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(g-f(3)))
         flush(stdout)
       end if
     end if
@@ -248,32 +242,6 @@ contains
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
       r = this % gap_backup(:,n)
-    end function
-
-    pure function d1(n) result(r)
-      ! Estimate the finite-difference 1st-derivative.
-      integer, intent(in)                             :: n
-      complex(wp), dimension(size(this%gap_backup,1)) :: r
-      real(wp),    dimension(-2:+2)                   :: a
-
-      ! Define a 5-point central-difference stencil
-      a = [+1/12.0_wp, -2/3.0_wp, 0/1.0_wp, +2/3.0_wp, -1/12.0_wp]
-
-      ! Calculate the derivative using the stencil
-      r = a(-2)*f(n-2) + a(-1)*f(n-1) + a(0)*f(0) + a(+1)*f(n+1) + a(+2)*f(n+2)
-    end function
-
-    pure function d2(n) result(r)
-      ! Estimate the finite-difference 2nd-derivative.
-      integer, intent(in)                             :: n
-      complex(wp), dimension(size(this%gap_backup,1)) :: r
-      real(wp),    dimension(-2:+2)                   :: a
-
-      ! Define a 5-point central-difference stencil
-      a = [-1/12.0_wp, +4/3.0_wp, -5/2.0_wp, +4/3.0_wp, -1/12.0_wp]
-
-      ! Calculate the derivative using the stencil
-      r = (a(-2)*f(n-2) + a(-1)*f(n-1) + a(0)*f(0) + a(+1)*f(n+1) + a(+2)*f(n+2))/d1(n)
     end function
   end subroutine
 
