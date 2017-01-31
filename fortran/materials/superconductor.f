@@ -19,14 +19,14 @@ module superconductor_m
     complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     real(wp)                 :: coupling  =  0     ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
-    integer                  :: boost     =  3     ! What kind of selfconsistent iteration scheme to use (0 = fixpoint, 1 = Steffensen's method, 2 = Ostrowski's method, 3 = Cordero's method)
+    logical                  :: boost     = .true. ! Whether to use a convergence acceleration algorithm (Steffensen's method)
     integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
     procedure                :: update_gap          => superconductor_update_gap          ! Calculates the superconducting order parameter
-    procedure                :: update_boost        => superconductor_update_boost        ! Boosts the convergence of the order parameter
+    procedure                :: update_boost        => superconductor_update_boost        ! Boosts the convergence of the order parameter (Steffensen's method)
     procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the propagators
     procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the propagators
 
@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),0:6))
+    allocate(this%gap_backup(size(this%location),-2:2))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -179,8 +179,7 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_boost(this)
-    !! Boost the convergence of the order parameter using either Steffensen's method
-    !! (2nd-order), Ostrowski's method (4th-order), or Cordero's method (8th-order).
+    !! Boost the convergence of the order parameter using Steffensen's method.
     !!
     !! The basic idea is that a selfconsistent solution of the Usadel equations can be
     !! regarded as a fixpoint iteration problem Δ=f(Δ), where the function f consists
@@ -191,61 +190,60 @@ contains
     !! Using a finite-difference approximation for the derivatives, we arrive at the
     !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
     !!   Δ_{n+1} = Δ_{n-2} - (Δ_{n-1} - Δ_{n-2})/(Δ_{n} - 2Δ_{n-1} + Δ_{n-2})
-    !! Ostrowski's and Cordero's methods further improve the convergence by adding 
-    !! more steps to the iteration scheme. See e.g. "A stable family with high order
-    !! of convergence for solving nonlinear equations" by Cordero et al. (2015).
+    !! This drastically improves the convergence compared to fixpoint-iteration.
+    !!
+    !! @NOTE:
+    !!   I have also experimented with several higher-order multi-step methods. However, 
+    !!   my experience so far is that these are less stable than Steffensen's method and
+    !!   the Super-Halley method, and as a result, often converged more slowly for some
+    !!   systems. These methods have therefore been removed as alternatives in the code.
 
     use :: calculus_m
 
     class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: g, L, U
+    complex(wp), dimension(size(this%location)) :: g
 
-    ! Update the iterator
-    this % iteration = this % iteration + 1
-    if (this % iteration > this % boost) then
-      this % iteration = -4
-    end if
+    if (this % boost) then
+      ! Update the iterator
+      this % iteration = modulo(this % iteration + 1, 8)
 
-    ! Adjust the boundary value problem solver
-    if (this % iteration > 0) then
-      this % method = 6
-    else
-      this % method = 4
-    end if
+      ! Right after a convergence boost, a 6th-order Runge-Kutta algorithm is the 
+      ! most efficient alternative for solving the diffusion equations. Otherwise,
+      ! a 4th-order algorithm is sufficient, and spends less time per iteration.
+      if (this % iteration == 0) then
+        this % method = 6
+      else
+        this % method = 4
+      end if
 
-    ! Control the boost pattern
-    select case (this % iteration)
-      case (:0)
-        ! Perform a regular fixpoint iteration
+      ! Boost the convergence using Steffensen's method when the iterator resets
+      if (this % iteration == 0) then
+        g = f(0) - d1(0)/d2(0)
+      else
         return
-      case (1)
-        ! Perform a boost using the Super-Halley method (4th order)
-        U = (d1(3)/d2(3))
-        L = (d3(3)/d2(3)) * U
-        g = g(3) - U * (1 + (L/2)/(1-L))
-        this % iteration = -7
-    end select
+      end if
 
-    ! Interpolate the gap as a function of position to a higher resolution
-    this % gap_function = interpolate(this % location, g, this % gap_location)
+      ! Interpolate the gap as a function of position to a higher resolution
+      this % gap_function = interpolate(this % location, g, this % gap_location)
 
-    ! Perform one extra update
-    call this % update(bootstrap = .true.)
+      ! Perform one extra update
+      call this % update(bootstrap = .true.)
 
-    ! Save the calculated gap as backup
-    associate( x => this % gap_backup, m => lbound(x,2), n => ubound(x,2) )
-      x(:,m:n-1) = x(:,m+1:n)
-      x(:,  n  ) = g
-    end associate
+      ! Save the calculated gap as backup
+      associate( f => this % gap_backup, m => lbound(f,2), n => ubound(f,2) )
+        f(:,m:n-1) = f(:,m+1:n)
+        f(:,  n  ) = g
+      end associate
 
-    ! Status information
-    if (this%information >= 0 .and. this%order > 0) then
-      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(x(3)-x(2)))
-      flush(stdout)
+      ! Status information
+      if (this%information >= 0 .and. this%order > 0) then
+        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(f(2)-f(1)))
+        flush(stdout)
+      end if
     end if
   contains
-    pure function x(n) result(r)
-      ! Define an accessor method for the gap value after n iterations.
+    pure function f(n) result(r)
+      ! Define an accessor for the gap after n iterations.
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
 
@@ -256,24 +254,26 @@ contains
       ! Estimate the finite-difference 1st-derivative.
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
+      real(wp),    dimension(-2:+2)                   :: a
 
-      r = 0.5 * (x(n+1) - x(n-1))
+      ! Define a 5-point central-difference stencil
+      a = [+1/12.0_wp, -2/3.0_wp, 0/1.0_wp, +2/3.0_wp, -1/12.0_wp]
+
+      ! Calculate the derivative using the stencil
+      r = a(-2)*f(n-2) + a(-1)*f(n-1) + a(0)*f(0) + a(+1)*f(n+1) + a(+2)*f(n+2)
     end function
 
     pure function d2(n) result(r)
       ! Estimate the finite-difference 2nd-derivative.
       integer, intent(in)                             :: n
       complex(wp), dimension(size(this%gap_backup,1)) :: r
+      real(wp),    dimension(-2:+2)                   :: a
 
-      r = 0.5 * (d1(n+1) - d1(n-1))/(x(n+1) - x(n-1))
-    end function
+      ! Define a 5-point central-difference stencil
+      a = [-1/12.0_wp, +4/3.0_wp, -5/2.0_wp, +4/3.0_wp, -1/12.0_wp]
 
-    pure function d3(n) result(r)
-      ! Estimate the finite-difference 3rd-derivative.
-      integer, intent(in)                             :: n
-      complex(wp), dimension(size(this%gap_backup,1)) :: r
-
-      r = 0.5 * (d2(n+1) - d2(n-1))/(x(n+1) - x(n-1))
+      ! Calculate the derivative using the stencil
+      r = (a(-2)*f(n-2) + a(-1)*f(n-1) + a(0)*f(0) + a(+1)*f(n+1) + a(+2)*f(n+2))/d1(n)
     end function
   end subroutine
 
@@ -288,7 +288,7 @@ contains
 
     this % gap_function = gap
     this % gap_backup   = gap
-    this % iteration    = this % boost
+    this % iteration    = 0
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
@@ -328,9 +328,6 @@ contains
     select case(key)
       case("boost")
         call evaluate(val, this%boost)
-        if (this%boost < 0 .or. this%boost > 3) then
-          call error("The 'boost' parameter must be in the range [0,3].")
-        end if
       case("coupling")
         call evaluate(val, this%coupling)
       case ('gap')
