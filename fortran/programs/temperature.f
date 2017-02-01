@@ -46,6 +46,9 @@ program critical_temperature
   ! Construct the material stack
   stack = structure('materials.conf')
 
+  ! Disable convergence boosts
+  call stack % boost(.false.)
+
   ! Initialize the stack to a barely superconducting state
   call stack % init(cx(initgap,0.0_wp))
 
