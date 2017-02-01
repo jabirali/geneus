@@ -35,6 +35,7 @@ module superconductor_m
     procedure                :: get_gap             => superconductor_get_gap             ! Returns the superconducting order parameter at a given position
 
     ! These methods define miscellaneous utility functions
+    procedure                :: load                => superconductor_load                ! Loads the state of a superconductor
     procedure                :: conf                => superconductor_conf                ! Configures material parameters
   end type
 
@@ -325,5 +326,17 @@ contains
       case default
         call this%conductor%conf(key, val)
     end select
+  end subroutine
+
+  impure subroutine superconductor_load(this)
+    ! Load a backup of a previous material state.
+    use :: material_m
+    class(superconductor), intent(inout) :: this
+
+    ! Call the superclass prehook
+    call material_load(this)
+
+    ! Reset the iteration counter
+    this % iteration = 0
   end subroutine
 end module

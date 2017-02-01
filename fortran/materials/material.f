@@ -15,7 +15,7 @@ module material_m
   private
 
   ! Public declarations
-  public :: material_conf
+  public :: material_conf, material_load
 
   ! Type declarations
   type, public, abstract :: material
