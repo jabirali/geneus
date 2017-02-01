@@ -18,7 +18,6 @@ module superconductor_m
     complex(wp), allocatable :: gap_backup(:,:)    ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    real(wp)                 :: coupling  =  0     ! BCS coupling constant that defines the strength of the superconductor (dimensionless)
     logical                  :: boost     = .true. ! Whether to use a convergence acceleration algorithm (Steffensen's method)
     integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
   contains
@@ -63,11 +62,6 @@ contains
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
     call this%set_gap( (1.0_wp,0.0_wp) )
-
-    ! Initialize the coupling constant
-    if (this%energy(size(this%energy)) > 0) then
-      this%coupling = 1/acosh(this%energy(size(this%energy)))
-    end if
   end function
 
   pure subroutine superconductor_init(this, gap)
@@ -136,46 +130,48 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_gap(this)
-    ! Update the superconducting gap if the BCS coupling constant is nonzero.
+    !! Calculate the superconducting gap Δ(z) from the propagators using a selfconsistency equation.
     use :: calculus_m
 
     class(superconductor), intent(inout)        :: this       ! Superconductor object that will be updated
     complex(wp), dimension(size(this%energy))   :: gap_e      ! Used to calculate the order parameter (as a function of energy)
     complex(wp), dimension(size(this%location)) :: gap_z      ! Used to calculate the order parameter (as a function of position)
     complex(wp)                                 :: singlet    ! Singlet component of the anomalous propagators
+    real(wp)                                    :: coupling   ! The BCS coupling that gives rise to superconductivity
     real(wp)                                    :: diff       ! Change of the gap between two iterations
     integer                                     :: n, m       ! Loop variables
 
-    if (abs(this%coupling) > eps) then
-      ! Iterate over the stored propagators
-      do n = 1,size(this%location)
-        do m = 1,size(this%energy)
-          ! Calculate the singlet components of the anomalous propagators
-          singlet = ( this%propagator(m,n)%singlet() - conjg(this%propagator(m,n)%singlett()) )/2.0_wp
+    ! Calculate the appropriate coupling from the cutoff energy
+    coupling = 1/acosh(this%energy(size(this%energy)))
 
-          ! Calculate the gap equation integrand and store it in an array
-          gap_e(m)  = singlet * this%coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
-        end do
+    ! Iterate over the stored propagators
+    do n = 1,size(this%location)
+      do m = 1,size(this%energy)
+        ! Calculate the singlet components of the anomalous propagators
+        singlet = ( this%propagator(m,n)%singlet() - conjg(this%propagator(m,n)%singlett()) )/2.0_wp
 
-        ! Interpolate and integrate the results, and update the superconducting order parameter
-        gap_z(n) = integrate(this%energy, gap_e, 1e-6_wp, this%energy(ubound(this%energy,1)))
+        ! Calculate the gap equation integrand and store it in an array
+        gap_e(m)  = singlet * coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
       end do
 
-      ! Interpolate the gap as a function of position to a higher resolution
-      this % gap_function = interpolate(this % location, gap_z, this % gap_location)
+      ! Interpolate and integrate the results, and update the superconducting order parameter
+      gap_z(n) = integrate(this%energy, gap_e, 1e-6_wp, this%energy(ubound(this%energy,1)))
+    end do
 
-      ! Save the calculated gap as backup
-      associate( b => this % gap_backup, m => lbound(b,2), n => ubound(b,2) )
-        b(:,m:n-1) = b(:,m+1:n)
-        b(:,  n  ) = gap_z
-        diff       = mean(abs(b(:,n) - b(:,n-1)))
-      end associate
+    ! Interpolate the gap as a function of position to a higher resolution
+    this % gap_function = interpolate(this % location, gap_z, this % gap_location)
 
-      ! Status information
-      if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap change: ', diff
-        flush(stdout)
-      end if
+    ! Save the calculated gap as backup
+    associate( b => this % gap_backup, m => lbound(b,2), n => ubound(b,2) )
+      b(:,m:n-1) = b(:,m+1:n)
+      b(:,  n  ) = gap_z
+      diff       = mean(abs(b(:,n) - b(:,n-1)))
+    end associate
+
+    ! Status information
+    if (this%information >= 0 .and. this%order > 0) then
+      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap change: ', diff
+      flush(stdout)
     end if
   end subroutine
 
@@ -307,8 +303,6 @@ contains
     select case(key)
       case("boost")
         call evaluate(val, this%boost)
-      case("coupling")
-        call evaluate(val, this%coupling)
       case ('gap')
         block
           integer  :: index
