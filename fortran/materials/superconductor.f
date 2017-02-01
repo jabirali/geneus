@@ -15,11 +15,11 @@ module superconductor_m
   ! Type declaration
   type, public, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(wp), allocatable :: gap_backup(:,:)    ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
-    complex(wp), allocatable :: gap_function(:)    ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp),    allocatable :: gap_location(:)    ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    logical                  :: boost     = .true. ! Whether to use a convergence acceleration algorithm (Steffensen's method)
-    integer                  :: iteration          ! Used to count where in the selfconsistent iteration cycle we are
+    complex(wp), allocatable :: gap_backup(:,:)      ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
+    complex(wp), allocatable :: gap_function(:)      ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
+    real(wp),    allocatable :: gap_location(:)      ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
+    integer                  :: selfconsistency = 2  ! What kind of selfconsistency scheme to use (0 = none, 1 = fixpoint-iteration, 2 = Steffensen's method)
+    integer                  :: iteration            ! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
     procedure                :: init                => superconductor_init                ! Initializes the propagators
@@ -122,11 +122,15 @@ contains
     ! Call the superclass posthook
     call this%conductor%update_posthook
 
-    ! Update the superconducting gap
-    call this%update_gap
+    ! Update the superconducting gap using fixpoint-iteration
+    if (this % selfconsistency >= 1) then
+      call this%update_gap
+    end if
 
-    ! Boost the convergence if possible
-    call this%update_boost
+    ! Boost the superconducting gap using Steffensen's method
+    if (this % selfconsistency >= 2) then
+      call this%update_boost
+    end if
   end subroutine
 
   impure subroutine superconductor_update_gap(this)
@@ -201,46 +205,44 @@ contains
     complex(wp), dimension(size(this%location)) :: g
     logical                                     :: u
 
-    if (this % boost) then
-      ! Update the iterator
-      this % iteration = modulo(this % iteration + 1, 8)
+    ! Update the iterator
+    this % iteration = modulo(this % iteration + 1, 8)
 
-      ! Right after a convergence boost, a 6th-order Runge-Kutta algorithm is the 
-      ! most efficient alternative for solving the diffusion equations. Otherwise,
-      ! a 4th-order algorithm is sufficient, and spends less time per iteration.
-      if (this % iteration == 0) then
-        this % method = 6
-      else
-        this % method = 4
-      end if
+    ! Right after a convergence boost, a 6th-order Runge-Kutta algorithm is the 
+    ! most efficient alternative for solving the diffusion equations. Otherwise,
+    ! a 4th-order algorithm is sufficient, and spends less time per iteration.
+    if (this % iteration == 0) then
+      this % method = 6
+    else
+      this % method = 4
+    end if
 
-      ! Boost the convergence using Steffensen's method when the iterator resets
-      if (this % iteration == 0) then
-        g = f(1) - (f(2)-f(1))**2/(f(3)-2*f(2)+f(1))
-      else
-        return
-      end if
+    ! Boost the convergence using Steffensen's method when the iterator resets
+    if (this % iteration == 0) then
+      g = f(1) - (f(2)-f(1))**2/(f(3)-2*f(2)+f(1))
+    else
+      return
+    end if
 
-      ! Interpolate the gap as a function of position to a higher resolution
-      this % gap_function = interpolate(this % location, g, this % gap_location)
+    ! Interpolate the gap as a function of position to a higher resolution
+    this % gap_function = interpolate(this % location, g, this % gap_location)
 
-      ! Perform one extra update if necessary
-      u = .false.
-      if (associated(this % material_a)) then
-        u = u .or. (this % material_a % order > 0)
-      end if
-      if (associated(this % material_b)) then
-        u = u .or. (this % material_b % order > 0)
-      end if
-      if (u) then
-        call this % update(bootstrap = .true.)
-      end if
+    ! Perform one extra update if necessary
+    u = .false.
+    if (associated(this % material_a)) then
+      u = u .or. (this % material_a % order > 0)
+    end if
+    if (associated(this % material_b)) then
+      u = u .or. (this % material_b % order > 0)
+    end if
+    if (u) then
+      call this % update(bootstrap = .true.)
+    end if
 
-      ! Status information
-      if (this%information >= 0 .and. this%order > 0) then
-        write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(g-f(3)))
-        flush(stdout)
-      end if
+    ! Status information
+    if (this%information >= 0 .and. this%order > 0) then
+      write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(g-f(3)))
+      flush(stdout)
     end if
   contains
     pure function f(n) result(r)
@@ -301,9 +303,12 @@ contains
     real(wp)                             :: tmp
 
     select case(key)
-      case("boost")
-        call evaluate(val, this%boost)
-      case ('gap')
+      case("selfconsistency")
+        call evaluate(val, this%selfconsistency)
+        if (this % selfconsistency < 0 .or. this % selfconsistency > 2) then
+          call error("The selfconsistency scheme should be in the range [0,2].")
+        end if
+      case ("gap")
         block
           integer  :: index
           real(wp) :: gap, phase

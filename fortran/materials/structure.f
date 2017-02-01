@@ -36,7 +36,7 @@ module structure_m
     procedure :: difference          => structure_difference
     procedure :: chargeviolation     => structure_chargeviolation
     procedure :: temperature         => structure_temperature
-    procedure :: boost               => structure_boost
+    procedure :: selfconsistency     => structure_selfconsistency
     procedure :: converge            => structure_converge
     procedure :: write_density       => structure_write_density
     procedure :: write_current       => structure_write_current
@@ -440,19 +440,18 @@ contains
     end subroutine
   end function
 
-  impure subroutine structure_boost(this, boost)
-    !! Turns on or off convergence boosts for superconductors in the stack.
+  impure subroutine structure_selfconsistency(this, scheme)
+    !! Controls the selfconsistency scheme used for superconductors in the stack.
     class(structure), target  :: this
-    logical                   :: boost
+    integer                   :: scheme
 
-    ! Update the temperature of all materials
     call this % map(set)
   contains
     subroutine set(m)
       class(material), pointer, intent(in) :: m
       select type (m)
         class is (superconductor)
-          m % boost = boost
+          m % selfconsistency = scheme
       end select
     end subroutine
   end subroutine
