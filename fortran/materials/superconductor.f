@@ -15,7 +15,7 @@ module superconductor_m
   ! Type declaration
   type, public, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(wp), allocatable :: gap_backup(:,:)      ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
+    complex(wp), allocatable :: gap_history(:,:)     ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)      ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     integer                  :: selfconsistency = 2  ! What kind of selfconsistency scheme to use (0 = none, 1 = fixpoint-iteration, 2 = Steffensen's method)
@@ -57,7 +57,7 @@ contains
     this%conductor = conductor()
 
     ! Initialize the order parameter
-    allocate(this%gap_backup(size(this%location),1:3))
+    allocate(this%gap_history(size(this%location),1:3))
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
@@ -166,7 +166,7 @@ contains
     this % gap_function = interpolate(this % location, gap_z, this % gap_location)
 
     ! Save the calculated gap as backup
-    associate( b => this % gap_backup, m => lbound(b,2), n => ubound(b,2) )
+    associate( b => this % gap_history, m => lbound(b,2), n => ubound(b,2) )
       b(:,m:n-1) = b(:,m+1:n)
       b(:,  n  ) = gap_z
       diff       = mean(abs(b(:,n) - b(:,n-1)))
@@ -247,10 +247,10 @@ contains
   contains
     pure function f(n) result(r)
       ! Define an accessor for the gap after n iterations.
-      integer, intent(in)                             :: n
-      complex(wp), dimension(size(this%gap_backup,1)) :: r
+      integer, intent(in)                              :: n
+      complex(wp), dimension(size(this%gap_history,1)) :: r
 
-      r = this % gap_backup(:,n)
+      r = this % gap_history(:,n)
     end function
   end subroutine
 
@@ -264,7 +264,7 @@ contains
     complex(wp),           intent(in)    :: gap
 
     this % gap_function = gap
-    this % gap_backup   = gap
+    this % gap_history  = gap
     this % iteration    = 0
   end subroutine
 
