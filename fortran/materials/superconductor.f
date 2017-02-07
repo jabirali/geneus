@@ -166,7 +166,7 @@ contains
     this % gap_function = interpolate(this % location, gap_z, this % gap_location)
 
     ! Save the calculated gap as backup
-    associate( b => this % gap_history, m => lbound(b,2), n => ubound(b,2) )
+    associate( b => this % gap_history, m => lbound(this % gap_history,2), n => ubound(this % gap_history,2) )
       b(:,m:n-1) = b(:,m+1:n)
       b(:,  n  ) = gap_z
       diff       = mean(abs(b(:,n) - b(:,n-1)))
@@ -300,7 +300,6 @@ contains
     class(superconductor), intent(inout) :: this
     character(*),          intent(in)    :: key
     character(*),          intent(in)    :: val
-    real(wp)                             :: tmp
 
     select case(key)
       case("selfconsistency")
