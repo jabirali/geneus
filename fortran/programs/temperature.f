@@ -21,11 +21,11 @@ program critical_temperature
   type(structure)                 :: stack
 
   ! Declare program control parameters
-  integer,      parameter         :: bootstraps = 12
-  integer,      parameter         :: bisections = 12
-  integer,      parameter         :: iterations = 12
-  real(wp),     parameter         :: threshold  = 1e-8_wp
-  real(wp),     parameter         :: initgap    = 1e-5_wp
+  integer,      parameter         :: bisections = 20
+  integer,      parameter         :: bootstraps = 20
+  integer,      parameter         :: iterations = 10
+  real(wp),     parameter         :: threshold  = 1e-08_wp
+  real(wp),     parameter         :: initgap    = 1e-06_wp
 
   ! Declare variables used by the program
   real(wp)                        :: minimum    = 0.00_wp
