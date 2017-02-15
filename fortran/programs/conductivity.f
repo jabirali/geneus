@@ -43,6 +43,16 @@ program conductivity
   call finalize
 
   ! @TODO: Calculate the conductivity
+  !
+  !    Trapezoid integration:
+  !     integral[f(z), z=a, z=b] = 0.5·sum( (z(k+1)-z(k))·(f(k+1)-f(k)) )
+  !    
+  !    Implementation:
+  !     h0(0)  = h_alpha
+  !     h0(1:) = h(0) + 0.5*cumsum( (z(1:n)-z(0:n-1)) * (Minv(1:n)-Minv(0:n-1)) )
+  !    
+  !     h(0)  = h0(0)
+  !     h(1:) = h0(1:) + i[A, 0.5*cumsum( (z(1:n)-z(0:n-1)) * (h(1:n)-h(0:n-1)) )]
 
 
 
