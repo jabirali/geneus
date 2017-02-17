@@ -3,14 +3,23 @@
 !> Category: Programs
 !>
 !> This program calculates the charge conductivity of an S/X/N superconducting thin-film structure.
+!> 
+!> @TODO: Check if we need to generalize to spin-active boundary conditions.
 
 program conductivity
   use :: structure_m
   use :: stdio_m
   use :: math_m
+  use :: nambu_m
+
+  !--------------------------------------------------------------------------------!
+  !                           INITIALIZATION PROCEDURE                             !
+  !--------------------------------------------------------------------------------!
 
   ! Declare the superconducting structure
-  type(structure) :: stack
+  type(structure)              :: stack
+  type(conductor),      target :: ba
+  type(superconductor), target :: bb
 
   ! Declare program control parameters
   real(wp), parameter :: threshold = 1e-2
@@ -23,15 +32,31 @@ program conductivity
   ! Construct the superconducting structure
   stack = structure('materials.conf')
 
-  ! @TODO: Check that the stack has only one layer
+  ! Make the left interface transparent
+  call stack % conf('transparent_a', 'T')
 
-  ! @TODO: Check if the boundary conditions are spin-active?
+  ! Construct the surrounding bulk materials
+  ba = conductor()
+  bb = superconductor()
 
-  ! @TODO: Connect S and N layers around it
+  ! Connect the bulk materials to the stack
+  stack % a % material_a => ba
+  stack % b % material_b => bb
 
-  ! @TODO: Disable updates in the S and N
+  ! Disable the bulk materials from updates
+  call ba % conf('order','0')
+  call bb % conf('order','0')
 
-  ! @TODO: Make the N interface transparent
+  ! Ensure that we only have one material in the stack
+  if (stack % materials() > 1) then
+    call error('The material stack should only consist of one layer.')
+  end if
+
+
+
+  !--------------------------------------------------------------------------------!
+  !                           EQUILIBRIUM CALCULATION                              !
+  !--------------------------------------------------------------------------------!
 
   ! Non-selfconsistent bootstrap procedure
   call stack % converge(threshold = threshold, bootstrap = .true.)
@@ -41,6 +66,12 @@ program conductivity
 
   ! Write out the final results
   !call finalize
+
+  !--------------------------------------------------------------------------------!
+  !                        NONEQUILIBRIUM CALCULATION                              !
+  !--------------------------------------------------------------------------------!
+
+
 
   ! @TODO: Calculate the conductivity
   !

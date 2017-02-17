@@ -14,13 +14,15 @@ module nambu_m
   ! Public interface
   public nambu
   public inverse, trace, conjg, sum
+  public nambu0, nambu00, nambu01, nambu02, nambu03
+  public nambu3, nambu30, nambu31, nambu32, nambu33
 
   ! Type declaration
   type nambu
     complex(wp) :: matrix(4,4) = 0.0_wp   !! Encapsulate a spin and Nambu space matrix
   contains
     ! Overload constructors and operators
-    generic :: nambu         => cons_rscalar, cons_cscalar, cons_cmatrix, cons_nambu, cons_spin
+    generic :: nambu         => cons_rscalar, cons_cscalar, cons_cmatrix, cons_nambu
     generic :: assignment(=) => assr_rscalar, assr_cscalar, assr_cmatrix, assl_cmatrix
     generic :: operator(+)   => addl_rscalar, addr_rscalar, addl_cscalar, addr_cscalar, addl_cmatrix, addr_cmatrix, add_nambu
     generic :: operator(-)   => subl_rscalar, subr_rscalar, subl_cscalar, subr_cscalar, subl_cmatrix, subr_cmatrix, sub_nambu
@@ -30,7 +32,6 @@ module nambu_m
 
     ! Specific methods for construction
     procedure,   nopass,   private :: cons_nambu   => nambu_cons_nambu     !! Construction from a nambu object
-    procedure,   nopass,   private :: cons_spin    => nambu_cons_spin      !! Construction from a spin object
     procedure,   nopass,   private :: cons_rscalar => nambu_cons_rscalar   !! Construction from a real scalar 
     procedure,   nopass,   private :: cons_cscalar => nambu_cons_cscalar   !! Construction from a complex scalar 
     procedure,   nopass,   private :: cons_cmatrix => nambu_cons_cmatrix   !! Construction from a complex matrix
@@ -97,14 +98,14 @@ module nambu_m
   end interface
 
   ! Define the 4×4 Pauli matrices
-  type(nambu), parameter :: nambu00 = nambu(+pauli0, +conjg(pauli0))
-  type(nambu), parameter :: nambu01 = nambu(+pauli1, +conjg(pauli1))
-  type(nambu), parameter :: nambu02 = nambu(+pauli2, +conjg(pauli2))
-  type(nambu), parameter :: nambu03 = nambu(+pauli3, +conjg(pauli3))
-  type(nambu), parameter :: nambu30 = nambu(+pauli0, -conjg(pauli0))
-  type(nambu), parameter :: nambu31 = nambu(+pauli1, -conjg(pauli1))
-  type(nambu), parameter :: nambu32 = nambu(+pauli2, -conjg(pauli2))
-  type(nambu), parameter :: nambu33 = nambu(+pauli3, -conjg(pauli3))
+  type(nambu), parameter :: nambu00 = nambu(pauli0%matrix)
+  type(nambu), parameter :: nambu01 = nambu(pauli1%matrix)
+  type(nambu), parameter :: nambu02 = nambu(pauli2%matrix)
+  type(nambu), parameter :: nambu03 = nambu(pauli3%matrix)
+  type(nambu), parameter :: nambu30 = nambu(pauli0%matrix)
+  type(nambu), parameter :: nambu31 = nambu(pauli1%matrix)
+  type(nambu), parameter :: nambu32 = nambu(pauli2%matrix)
+  type(nambu), parameter :: nambu33 = nambu(pauli3%matrix)
 
   ! Define the 4×4 Pauli vectors
   type(nambu), parameter, dimension(0:3) :: nambu0 = [nambu00, nambu01, nambu02, nambu03]
@@ -133,7 +134,7 @@ contains
 
   pure function nambu_cons_cmatrix(other) result(this)
     !! Constructs a nambu object from a complex matrix.
-    complex(wp), intent(in) :: other(4,4)
+    complex(wp), intent(in) :: other(:,:)
     type(nambu)             :: this
 
     this = other
@@ -146,16 +147,6 @@ contains
 
     this = other
   end function
-
-  pure function nambu_cons_spin(a, b) result(this)
-    !! Constructs a nambu object from existing spin objects.
-    type(spin),  intent(in) :: a, b
-    type(nambu)             :: this
-
-    this%matrix(1:2,1:2) = a % matrix
-    this%matrix(3:4,3:4) = b % matrix
-  end function
-
 
   !--------------------------------------------------------------------------------!
   !                         SPECIFIC IMPORT PROCEDURES                             !
@@ -180,9 +171,16 @@ contains
   pure subroutine nambu_assr_cmatrix(this, other)
     !! Imports data to a nambu object from a complex matrix.
     class(nambu),  intent(inout) :: this
-    complex(wp),   intent(in)    :: other(4,4)
+    complex(wp),   intent(in)    :: other(:,:)
 
-    this%matrix = other
+    this % matrix = 0
+    select case (size(other))
+      case (2**2)
+        this % matrix = other 
+      case (4**2)
+        this % matrix(1:2,1:2) = other
+        this % matrix(3:4,3:4) = conjg(other)
+    end select
   end subroutine
 
 
