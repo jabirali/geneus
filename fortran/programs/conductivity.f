@@ -40,7 +40,7 @@ program conductivity
   call stack % converge(threshold = tolerance, posthook = posthook)
 
   ! Write out the final results
-  call finalize
+  !call finalize
 
   ! @TODO: Calculate the conductivity
   !
