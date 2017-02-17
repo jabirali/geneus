@@ -16,7 +16,7 @@ module structure_m
   private
 
   ! Export class(material) types
-  public conductor, superconductor, ferromagnet, halfmetal
+  public material, conductor, superconductor, ferromagnet, halfmetal
 
   ! Type declaration
   type, public :: structure

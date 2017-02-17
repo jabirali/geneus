@@ -17,9 +17,10 @@ program conductivity
   !--------------------------------------------------------------------------------!
 
   ! Declare the superconducting structure
-  type(structure)              :: stack
-  type(conductor),      target :: ba
-  type(superconductor), target :: bb
+  type(structure)               :: stack
+  type(material),       pointer :: layer
+  type(conductor),      target  :: bulk_a
+  type(superconductor), target  :: bulk_b
 
   ! Declare program control parameters
   real(wp), parameter :: threshold = 1e-2
@@ -30,22 +31,23 @@ program conductivity
   stderr = output('error.log')
 
   ! Construct the superconducting structure
-  stack = structure('materials.conf')
+  stack =  structure('materials.conf')
+  layer => stack % a
 
   ! Make the left interface transparent
-  call stack % conf('transparent_a', 'T')
+  call layer % conf('transparent_a', 'T')
 
-  ! Construct the surrounding bulk materials
-  ba = conductor()
-  bb = superconductor()
+  ! Construct a bulk normal metal on the left
+  bulk_a = conductor()
+  bulk_b = superconductor()
 
   ! Connect the bulk materials to the stack
-  stack % a % material_a => ba
-  stack % b % material_b => bb
+  layer % material_a => bulk_a
+  layer % material_b => bulk_b
 
   ! Disable the bulk materials from updates
-  call ba % conf('order','0')
-  call bb % conf('order','0')
+  call bulk_a % conf('order','0')
+  call bulk_b % conf('order','0')
 
   ! Ensure that we only have one material in the stack
   if (stack % materials() > 1) then
@@ -70,6 +72,9 @@ program conductivity
   !--------------------------------------------------------------------------------!
   !                        NONEQUILIBRIUM CALCULATION                              !
   !--------------------------------------------------------------------------------!
+
+  ! Calculate the diffusion coefficients
+  do n=1,length(stack
 
 
 
