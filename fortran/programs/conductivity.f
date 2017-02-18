@@ -116,7 +116,7 @@ program main
 
         ! Normalize and invert the diffusion matrix 
         !diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inverse(diffusion(:,:,n,m))
-        diffusion(:,:,n,m) = matrix_inverse4(diffusion(:,:,n,m))
+        diffusion(:,:,n,m) = inv(diffusion(:,:,n,m))
         print *,diffusion(:,:,n,m)
       end block
     end do
@@ -156,11 +156,11 @@ program main
       complex(wp), dimension(0:7,0:7) :: integral
       
       ! Perform the integral of the inverse diffusion matrix
-      integral = 0 !inverse(boundary_a(:,:,n))
+      integral = inv(boundary_a(:,:,n))
       do m=1,size(location)-1
         integral = integral - (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))
       end do
-      integral = inverse(integral)
+      integral = inv(integral)
 
       ! Invert the result of the integral and save it
       conductivity(n) = re(integral(4,4) - integral(4,0))
@@ -219,4 +219,26 @@ contains
     close(stdout)
     close(stderr)
   end subroutine
+
+  impure function inv(a) result(r)
+    ! Calculates the inverse of a square matrix.
+    complex(dp), dimension(:,:),      intent(in) :: a
+    complex(dp), dimension(size(a,1), size(a,1)) :: r
+
+    external    :: zgetrf, zgetri        ! LAPACK routines
+    complex(dp) :: work(size(a,1)*64)    ! Working array
+    integer     :: ipiv(size(a,1))       ! Pivot indices
+    integer     :: info                  ! Error status
+
+    associate(n => size(a,1), m => size(work))
+      ! Make a copy
+      r = a
+
+      ! LU factorization
+      call zgetrf( n, n, r, n, ipiv, info )
+
+      ! Matrix inversion
+      call zgetri( n, r, n, ipiv, work, m, info )
+    end associate
+  end function
 end program
