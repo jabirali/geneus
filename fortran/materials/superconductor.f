@@ -61,7 +61,7 @@ contains
     allocate(this%gap_location(4096 * size(this%location)))
     allocate(this%gap_function(size(this%gap_location)))
     call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
-    call this%set_gap( (1.0_wp,0.0_wp) )
+    call this%init( (1.0_wp,0.0_wp) )
   end function
 
   pure subroutine superconductor_init(this, gap)

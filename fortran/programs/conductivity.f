@@ -82,12 +82,11 @@ program main
   ! Selfconsistent convergence procedure
   call stack % converge(threshold = tolerance, posthook = posthook)
 
-  ! Write out the final results
-  !call finalize
-
   !--------------------------------------------------------------------------------!
   !                        NONEQUILIBRIUM CALCULATION                              !
   !--------------------------------------------------------------------------------!
+
+  !@TODO: Write status info while looping over energies
 
   ! Allocate working memory
   allocate(diffusion( 0:7, 0:7, size(energy), size(location)), &
@@ -108,16 +107,50 @@ program main
         advanced = layer % propagator(n,m) % advanced()
 
         ! Calculate the diffusion matrix coefficients
-        do j=0,7
-          do i=0,7
-            diffusion(i,j,n,m) = trace(nambu(i) * nambu(j) - nambu(i) * retarded * nambu(j) * advanced)
+        do i=0,7
+          do j=0,7
+            diffusion(i,j,n,m) = trace(nambuv(i) * nambuv(j) - nambuv(i) * retarded * nambuv(j) * advanced)
           end do
         end do
 
+        ! Diffusion should be: 8I, where I identity.
+        ! Retarded, advanced should be: ±(diag(1) - antidiag(0.1i))
+
         ! Normalize and invert the diffusion matrix 
-        !diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inverse(diffusion(:,:,n,m))
+        !diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inv(diffusion(:,:,n,m))
         diffusion(:,:,n,m) = inv(diffusion(:,:,n,m))
-        print *,diffusion(:,:,n,m)
+
+        if (n==1 .and. m==size(location)) then
+        print *,'retarded re:'
+          do i=1,4
+            print *,re(retarded % matrix(i,:))
+          end do
+
+        print *,'retarded im:'
+          do i=1,4
+            print *,aimag(retarded % matrix(i,:))
+          end do
+
+        print *,'advanced re:'
+          do i=1,4
+            print *,re(advanced % matrix(i,:))
+          end do
+
+        print *,'advanced im:'
+          do i=1,4
+            print *,aimag(advanced % matrix(i,:))
+          end do
+
+        print *,'M re:'
+          do i=0,7
+            print *,re(diffusion(i,:,n,m))
+          end do
+
+        print *,'M im:'
+          do i=0,7
+            print *,im(diffusion(i,:,n,m))
+          end do
+        end if
       end block
     end do
   end do
@@ -140,11 +173,11 @@ program main
       ! Calculate the boundary matrix coefficients
       do i=0,7
         do j=0,7
-          boundary_a(i,j,n) = trace(nambu(i) * (retarded_a*nambu(j) - nambu(j)*advanced_a) * advanced_b &
-                                  - nambu(i) * retarded_b * (retarded_a*nambu(j) - nambu(j)*advanced_a) )
+          boundary_a(i,j,n) = trace(nambuv(i) * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) * advanced_b &
+                                  - nambuv(i) * retarded_b * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) )
 
-          boundary_b(i,j,n) = trace(nambu(i) * (retarded_b*nambu(j) - nambu(j)*advanced_b) * advanced_a &
-                                  - nambu(i) * retarded_a * (retarded_b*nambu(j) - nambu(j)*advanced_b) )
+          boundary_b(i,j,n) = trace(nambuv(i) * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) * advanced_a &
+                                  - nambuv(i) * retarded_a * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) )
         end do
       end do
     end block
@@ -158,12 +191,12 @@ program main
       ! Perform the integral of the inverse diffusion matrix
       integral = inv(boundary_a(:,:,n))
       do m=1,size(location)-1
-        integral = integral - (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))
+        integral = integral + (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))
       end do
       integral = inv(integral)
 
       ! Invert the result of the integral and save it
-      conductivity(n) = re(integral(4,4) - integral(4,0))
+      conductivity(n) = re(integral(4,4) - integral(4,0))/4
     end block
   end do
 

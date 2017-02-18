@@ -122,7 +122,7 @@ contains
     class(propagator), intent(in) :: this   !! Propagator object
     type(nambu)                   :: matrix !! Propagator matrix
 
-    matrix = nambu(4) * transpose(conjg(-this % matrix())) * nambu(4)
+    matrix = nambuv(4) * transpose(conjg(-this % matrix())) * nambuv(4)
   end function
 
   pure function propagator_matrix(this) result(matrix)

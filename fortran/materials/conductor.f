@@ -113,7 +113,7 @@ contains
 
     ! Initialize propagators
     allocate(this%propagator(size(this%energy),size(this%location)))
-    call this%init( cx(1.0_wp,0.0_wp) )
+    call this%init( (0.0_wp,0.0_wp) )
   end function
 
   pure subroutine conductor_init(this, gap)

@@ -12,7 +12,7 @@ module nambu_m
   private
 
   ! Public interface
-  public nambu
+  public nambu, nambuv
   public inverse, trace, conjg, sum
 
   ! Type declaration
@@ -20,7 +20,7 @@ module nambu_m
     complex(wp) :: matrix(4,4) = 0.0_wp   !! Encapsulate a spin and Nambu space matrix
   contains
     ! Overload constructors and operators
-    generic :: nambu         => cons_rscalar, cons_cscalar, cons_cmatrix, cons_iscalar, cons_nambu
+    generic :: nambu         => cons_rscalar, cons_cscalar, cons_cmatrix, cons_nambu
     generic :: assignment(=) => assr_rscalar, assr_cscalar, assr_cmatrix, assl_cmatrix
     generic :: operator(+)   => addl_rscalar, addr_rscalar, addl_cscalar, addr_cscalar, addl_cmatrix, addr_cmatrix, add_nambu
     generic :: operator(-)   => subl_rscalar, subr_rscalar, subl_cscalar, subr_cscalar, subl_cmatrix, subr_cmatrix, sub_nambu
@@ -30,7 +30,6 @@ module nambu_m
 
     ! Specific methods for construction
     procedure,   nopass,   private :: cons_nambu   => nambu_cons_nambu     !! Construction from a nambu object
-    procedure,   nopass,   private :: cons_iscalar => nambu_cons_iscalar   !! Construction from a index number 
     procedure,   nopass,   private :: cons_rscalar => nambu_cons_rscalar   !! Construction from a real scalar 
     procedure,   nopass,   private :: cons_cscalar => nambu_cons_cscalar   !! Construction from a complex scalar 
     procedure,   nopass,   private :: cons_cmatrix => nambu_cons_cmatrix   !! Construction from a complex matrix
@@ -101,17 +100,45 @@ contains
   !                            SPECIFIC CONSTRUCTORS                               !
   !--------------------------------------------------------------------------------!
 
-  pure function nambu_cons_iscalar(n) result(r)
+  pure function nambuv(n) result(r)
     !! Constructs basis vector number n in spin-nambu space.
     integer, intent(in) :: n
     type(nambu)         :: r
 
-    r % matrix(1:2,1:2) = pauli(n) % matrix
-    if (n <= 3) then
-      r % matrix(3:4,3:4) = +conjg(r % matrix(1:2,1:2))
-    else
-      r % matrix(3:4,3:4) = -conjg(r % matrix(1:2,1:2))
-    end if
+    select case (n)
+      case(0)
+        ! Basis matrix τ₀σ₀
+        r % matrix(1:2,1:2) = +pauli0 % matrix
+        r % matrix(3:4,3:4) = +pauli0 % matrix
+      case(1)
+        ! Basis matrix τ₀σ₁
+        r % matrix(1:2,1:2) = +pauli1 % matrix
+        r % matrix(3:4,3:4) = +pauli1 % matrix
+      case(2)
+        ! Basis matrix τ₀σ₂
+        r % matrix(1:2,1:2) = +pauli2 % matrix
+        r % matrix(3:4,3:4) = -pauli2 % matrix
+      case(3)
+        ! Basis matrix τ₀σ₃
+        r % matrix(1:2,1:2) = +pauli3 % matrix
+        r % matrix(3:4,3:4) = +pauli3 % matrix
+      case(4)
+        ! Basis matrix τ₃σ₀
+        r % matrix(1:2,1:2) = +pauli0 % matrix
+        r % matrix(3:4,3:4) = -pauli0 % matrix
+      case(5)
+        ! Basis matrix τ₃σ₁
+        r % matrix(1:2,1:2) = +pauli1 % matrix
+        r % matrix(3:4,3:4) = -pauli1 % matrix
+      case(6)
+        ! Basis matrix τ₃σ₂
+        r % matrix(1:2,1:2) = +pauli2 % matrix
+        r % matrix(3:4,3:4) = +pauli2 % matrix
+      case(7)
+        ! Basis matrix τ₃σ₃
+        r % matrix(1:2,1:2) = +pauli3 % matrix
+        r % matrix(3:4,3:4) = -pauli3 % matrix
+    end select
   end function
 
   pure function nambu_cons_rscalar(other) result(this)
