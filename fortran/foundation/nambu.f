@@ -16,6 +16,7 @@ module nambu_m
   public inverse, trace, conjg, sum
   public nambu0, nambu00, nambu01, nambu02, nambu03
   public nambu3, nambu30, nambu31, nambu32, nambu33
+  public nambuv
 
   ! Type declaration
   type nambu
@@ -98,18 +99,19 @@ module nambu_m
   end interface
 
   ! Define the 4×4 Pauli matrices
-  type(nambu), parameter :: nambu00 = nambu(pauli0%matrix)
-  type(nambu), parameter :: nambu01 = nambu(pauli1%matrix)
-  type(nambu), parameter :: nambu02 = nambu(pauli2%matrix)
-  type(nambu), parameter :: nambu03 = nambu(pauli3%matrix)
-  type(nambu), parameter :: nambu30 = nambu(pauli0%matrix)
-  type(nambu), parameter :: nambu31 = nambu(pauli1%matrix)
-  type(nambu), parameter :: nambu32 = nambu(pauli2%matrix)
-  type(nambu), parameter :: nambu33 = nambu(pauli3%matrix)
+  type(nambu), parameter :: nambu00 = nambu(pauli0 % matrix)
+  type(nambu), parameter :: nambu01 = nambu(pauli1 % matrix)
+  type(nambu), parameter :: nambu02 = nambu(pauli2 % matrix)
+  type(nambu), parameter :: nambu03 = nambu(pauli3 % matrix)
+  type(nambu), parameter :: nambu30 = nambu(pauli0 % matrix)
+  type(nambu), parameter :: nambu31 = nambu(pauli1 % matrix)
+  type(nambu), parameter :: nambu32 = nambu(pauli2 % matrix)
+  type(nambu), parameter :: nambu33 = nambu(pauli3 % matrix)
 
   ! Define the 4×4 Pauli vectors
   type(nambu), parameter, dimension(0:3) :: nambu0 = [nambu00, nambu01, nambu02, nambu03]
   type(nambu), parameter, dimension(0:3) :: nambu3 = [nambu30, nambu31, nambu32, nambu33]
+  type(nambu), parameter, dimension(0:7) :: nambuv = [nambu0, nambu3]
 contains
 
   !--------------------------------------------------------------------------------!

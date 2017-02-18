@@ -25,12 +25,6 @@ module conductor_m
   ! Type declarations
   type, public, extends(material) :: conductor
     ! These parameters control the physical characteristics of the material
-    logical                          :: transparent_a           =  .false.                    ! Whether the left  interface is completely transparent
-    logical                          :: transparent_b           =  .false.                    ! Whether the right interface is completely transparent
-    logical                          :: reflecting_a            =  .false.                    ! Whether the left  interface is completely reflecting
-    logical                          :: reflecting_b            =  .false.                    ! Whether the right interface is completely reflecting
-    real(wp)                         :: conductance_a           =  0.30_wp                    ! Normalized conductance at the left  interface
-    real(wp)                         :: conductance_b           =  0.30_wp                    ! Normalized conductance at the right interface
     real(wp)                         :: spinmixing_a            =  0.00_wp                    ! Normalized spin-mixing at the left  interface
     real(wp)                         :: spinmixing_b            =  0.00_wp                    ! Normalized spin-mixing at the right interface
     real(wp)                         :: polarization_a          =  0.00_wp                    ! Spin-polarization at the left  interface

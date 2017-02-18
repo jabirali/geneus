@@ -20,6 +20,12 @@ module material_m
   ! Type declarations
   type, public, abstract :: material
     ! These parameters determine the basic physical behaviour of a diffusive material
+    logical                                   :: transparent_a         =  .false.           ! Whether the left  interface is completely transparent
+    logical                                   :: transparent_b         =  .false.           ! Whether the right interface is completely transparent
+    logical                                   :: reflecting_a          =  .false.           ! Whether the left  interface is completely reflecting
+    logical                                   :: reflecting_b          =  .false.           ! Whether the right interface is completely reflecting
+    real(wp)                                  :: conductance_a         =  0.30_wp           ! Normalized conductance at the left  interface
+    real(wp)                                  :: conductance_b         =  0.30_wp           ! Normalized conductance at the right interface
     real(wp)                                  :: thouless              =  1.00_wp           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
     real(wp)                                  :: temperature           =  0.01_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
     real(wp)                                  :: scattering_inelastic  =  0.01_wp           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)

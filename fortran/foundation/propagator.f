@@ -11,6 +11,7 @@
 module propagator_m
   use :: math_m
   use :: spin_m
+  use :: nambu_m
   private
 
   ! Public interface
@@ -26,6 +27,8 @@ module propagator_m
     type(spin) :: Nt                                !! Normalization Nt = (I - γ~γ)^-1
   contains
     ! Accessors for propagator components
+    procedure  :: retarded  => propagator_retarded  !! 4×4 matrix representation of the retarded propagator
+    procedure  :: advanced  => propagator_advanced  !! 4×4 matrix representation of the advanced propagator
     procedure  :: matrix    => propagator_matrix    !! 4×4 matrix representation of the propagator
     procedure  :: matrixt   => propagator_matrixt   !! 4×4 matrix representation of the propagator   (tilde-conjugated)
     procedure  :: singlet   => propagator_singlet   !! Singlet component of the anomalous propagator
@@ -104,6 +107,22 @@ contains
     ! Update normalization matrices
     this % N  = inverse( pauli0 - this%g  * this%gt )
     this % Nt = inverse( pauli0 - this%gt * this%g  )
+  end function
+
+  pure function propagator_retarded(this) result(matrix)
+    !! Calculates the 4×4 retarded propagator from the Riccati parameters of the object.
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: matrix !! Propagator matrix
+
+    matrix = this % matrix()
+  end function
+
+  pure function propagator_advanced(this) result(matrix)
+    !! Calculates the 4×4 advanced propagator from the Riccati parameters of the object.
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: matrix !! Propagator matrix
+
+    matrix = nambu30 * transpose(conjg(-this % matrix())) * nambu30
   end function
 
   pure function propagator_matrix(this) result(matrix)
