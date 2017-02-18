@@ -6,11 +6,12 @@
 !> 
 !> @TODO: Check if we need to generalize to spin-active boundary conditions.
 
-program conductivity
+program main
   use :: structure_m
   use :: stdio_m
   use :: math_m
   use :: nambu_m
+  use :: matrix_m
 
   !--------------------------------------------------------------------------------!
   !                           INITIALIZATION PROCEDURE                             !
@@ -29,6 +30,7 @@ program conductivity
   complex(wp), allocatable, dimension(:,:,:,:) :: diffusion
   complex(wp), allocatable, dimension(:,:,:)   :: boundary_a
   complex(wp), allocatable, dimension(:,:,:)   :: boundary_b
+  real(wp),    allocatable, dimension(:)       :: conductivity
 
   ! Declare program control parameters
   real(wp), parameter :: threshold = 1e-2
@@ -90,7 +92,8 @@ program conductivity
   ! Allocate working memory
   allocate(diffusion( 0:7, 0:7, size(energy), size(location)), &
            boundary_a(0:7, 0:7, size(energy)),                 &
-           boundary_b(0:7, 0:7, size(energy))                  )
+           boundary_b(0:7, 0:7, size(energy)),                 &
+           conductivity(size(energy))                          )
 
   ! Calculate the diffusion matrix
   do n=1,size(energy)
@@ -105,14 +108,16 @@ program conductivity
         advanced = layer % propagator(n,m) % advanced()
 
         ! Calculate the diffusion matrix coefficients
-        do i=0,7
-          do j=0,7
-            diffusion(i,j,n,m) = trace(nambuv(i) * nambuv(j) - nambuv(i) * retarded * nambuv(j) * advanced)
+        do j=0,7
+          do i=0,7
+            diffusion(i,j,n,m) = trace(nambu(i) * nambu(j) - nambu(i) * retarded * nambu(j) * advanced)
           end do
         end do
 
         ! Normalize and invert the diffusion matrix 
-        diffusion(:,:,n,m) = inverse(2 * layer % conductance_b * diffusion(:,:,n,m))
+        !diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inverse(diffusion(:,:,n,m))
+        diffusion(:,:,n,m) = matrix_inverse4(diffusion(:,:,n,m))
+        print *,diffusion(:,:,n,m)
       end block
     end do
   end do
@@ -135,22 +140,41 @@ program conductivity
       ! Calculate the boundary matrix coefficients
       do i=0,7
         do j=0,7
-          boundary_a(i,j,n) = trace(nambuv(i) * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) * advanced_b &
-                                  - nambuv(i) * retarded_b * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) )
+          boundary_a(i,j,n) = trace(nambu(i) * (retarded_a*nambu(j) - nambu(j)*advanced_a) * advanced_b &
+                                  - nambu(i) * retarded_b * (retarded_a*nambu(j) - nambu(j)*advanced_a) )
 
-          boundary_b(i,j,n) = trace(nambuv(i) * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) * advanced_a &
-                                  - nambuv(i) * retarded_a * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) )
+          boundary_b(i,j,n) = trace(nambu(i) * (retarded_b*nambu(j) - nambu(j)*advanced_b) * advanced_a &
+                                  - nambu(i) * retarded_a * (retarded_b*nambu(j) - nambu(j)*advanced_b) )
         end do
       end do
     end block
   end do
 
-  ! Calculate the diffusion coefficients
-  !do n=1,length(stack
+  ! Calculate the differential conductivity
+  do n=1,size(energy)
+    block
+      complex(wp), dimension(0:7,0:7) :: integral
+      
+      ! Perform the integral of the inverse diffusion matrix
+      integral = 0 !inverse(boundary_a(:,:,n))
+      do m=1,size(location)-1
+        integral = integral - (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))
+      end do
+      integral = inverse(integral)
+
+      ! Invert the result of the integral and save it
+      conductivity(n) = re(integral(4,4) - integral(4,0))
+    end block
+  end do
+
+  ! Write the results to a file
+  call finalize
 
 
 
-  ! @TODO: Calculate the conductivity
+
+
+  ! @TODO: iterative
   !
   !    Trapezoid integration:
   !     integral[f(z), z=a, z=b] = 0.5·sum( (z(k+1)-z(k))·(f(k+1)-f(k)) )
@@ -173,6 +197,7 @@ contains
     ! Write results to output files.
     use :: structure_m
 
+    ! Density of states
     call stack % write_density('density.dat')
   end subroutine
 
@@ -184,7 +209,11 @@ contains
     call status_head('COMPLETE')
     call status_body('State difference', stack % difference())
     call status_body('Charge violation', stack % chargeviolation())
+    call status_body('Zero-bias result', conductivity(1))
     call status_foot
+
+    ! Write out the conductivity
+    call dump('conductivity.dat', [energy, conductivity], ['Voltage     ', 'Conductivity'])
 
     ! Close output files
     close(stdout)
