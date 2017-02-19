@@ -117,8 +117,7 @@ program main
         ! Retarded, advanced should be: ±(diag(1) - antidiag(0.1i))
 
         ! Normalize and invert the diffusion matrix 
-        !diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inv(diffusion(:,:,n,m))
-        diffusion(:,:,n,m) = inv(diffusion(:,:,n,m))
+        diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inv(diffusion(:,:,n,m))
 
         if (n==1 .and. m==size(location)) then
         print *,'retarded re:'
@@ -167,8 +166,8 @@ program main
       advanced_a = layer  % propagator(n,size(location)) % advanced()
 
       ! Extract the retarded and advanced propagators on the other side
-      retarded_a = bulk_b % propagator(n,1) % retarded()
-      advanced_a = bulk_b % propagator(n,1) % advanced()
+      retarded_b = bulk_b % propagator(n,1) % retarded()
+      advanced_b = bulk_b % propagator(n,1) % advanced()
 
       ! Calculate the boundary matrix coefficients
       do i=0,7
@@ -191,12 +190,12 @@ program main
       ! Perform the integral of the inverse diffusion matrix
       integral = inv(boundary_a(:,:,n))
       do m=1,size(location)-1
-        integral = integral + (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))
+        integral = integral - (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))/4
       end do
       integral = inv(integral)
 
       ! Invert the result of the integral and save it
-      conductivity(n) = re(integral(4,4) - integral(4,0))/4
+      conductivity(n) = re(integral(4,4) - integral(4,0))/16
     end block
   end do
 
