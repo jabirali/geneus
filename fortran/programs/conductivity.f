@@ -82,11 +82,12 @@ program main
   ! Selfconsistent convergence procedure
   call stack % converge(threshold = tolerance, posthook = posthook)
 
+  ! Status information
+  call finalize_equilibrium
+
   !--------------------------------------------------------------------------------!
   !                        NONEQUILIBRIUM CALCULATION                              !
   !--------------------------------------------------------------------------------!
-
-  !@TODO: Write status info while looping over energies
 
   ! Allocate working memory
   allocate(diffusion( 0:7, 0:7, size(energy), size(location)), &
@@ -95,6 +96,7 @@ program main
            conductivity(size(energy))                          )
 
   ! Calculate the diffusion matrix
+  call stage('Diffusion matrices')
   do n=1,size(energy)
     do m=1,size(location)
       block
@@ -113,48 +115,14 @@ program main
           end do
         end do
 
-        ! Diffusion should be: 8I, where I identity.
-        ! Retarded, advanced should be: ±(diag(1) - antidiag(0.1i))
-
         ! Normalize and invert the diffusion matrix 
         diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inv(diffusion(:,:,n,m))
-
-        if (n==1 .and. m==size(location)) then
-        print *,'retarded re:'
-          do i=1,4
-            print *,re(retarded % matrix(i,:))
-          end do
-
-        print *,'retarded im:'
-          do i=1,4
-            print *,aimag(retarded % matrix(i,:))
-          end do
-
-        print *,'advanced re:'
-          do i=1,4
-            print *,re(advanced % matrix(i,:))
-          end do
-
-        print *,'advanced im:'
-          do i=1,4
-            print *,aimag(advanced % matrix(i,:))
-          end do
-
-        print *,'M re:'
-          do i=0,7
-            print *,re(diffusion(i,:,n,m))
-          end do
-
-        print *,'M im:'
-          do i=0,7
-            print *,im(diffusion(i,:,n,m))
-          end do
-        end if
       end block
     end do
   end do
 
   ! Calculate the boundary matrices
+  call stage('Interface matrices')
   do n=1,size(energy)
     block
       ! Declare local variables
@@ -183,6 +151,7 @@ program main
   end do
 
   ! Calculate the differential conductivity
+  call stage('Conductivity')
   do n=1,size(energy)
     block
       complex(wp), dimension(0:7,0:7) :: integral
@@ -200,7 +169,7 @@ program main
   end do
 
   ! Write the results to a file
-  call finalize
+  call finalize_nonequilibrium
 
 
 
@@ -233,15 +202,48 @@ contains
     call stack % write_density('density.dat')
   end subroutine
 
-  impure subroutine finalize
+  impure subroutine stage(str)
+    ! Write status information to standard out.
+    character(len=*) :: str
+    integer,  save   :: n = 0
+    integer          :: m
+    
+    ! Calculate iterator
+    n = n + 1
+
+    ! Calculate colour
+    select case(n)
+      case (:1)
+        m = 31
+      case (2)
+        m = 33
+      case (3:)
+        m = 32
+    end select
+
+    ! Status information
+    write(stdout,'(2x,"[1m#",i0,2x,"[",i0,"m",a,"[0m")') n, m, str
+    flush(stdout)
+  end subroutine
+
+  impure subroutine finalize_equilibrium
     ! Write out the final results.
     use :: stdio_m
 
     ! Status information
-    call status_head('COMPLETE')
+    call status_head('EQUILIBRIUM')
     call status_body('State difference', stack % difference())
     call status_body('Charge violation', stack % chargeviolation())
-    call status_body('Zero-bias result', conductivity(1))
+    call status_foot
+  end subroutine
+
+  impure subroutine finalize_nonequilibrium
+    ! Write out the final results.
+    use :: stdio_m
+
+    ! Status information
+    call status_head('CONDUCTIVITY')
+    call status_body('Zero-bias peak',   conductivity(1))
     call status_foot
 
     ! Write out the conductivity
