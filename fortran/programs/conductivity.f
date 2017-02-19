@@ -117,10 +117,7 @@ program main
         end do
 
         ! Calculate the negative-energy diffusion matrix coefficients
-        diffusion_m(0:3,0:3,n,m) = +conjg(diffusion_p(0:3,0:3,n,m))
-        diffusion_m(4:7,0:3,n,m) = -conjg(diffusion_p(4:7,0:3,n,m))
-        diffusion_m(0:3,4:7,n,m) = -conjg(diffusion_p(0:3,4:7,n,m))
-        diffusion_m(4:7,4:7,n,m) = +conjg(diffusion_p(4:7,4:7,n,m))
+        diffusion_m(:,:,n,m) = minus(diffusion_p(:,:,n,m))
 
         ! Normalize and invert the diffusion matrices
         diffusion_p(:,:,n,m) = (layer % conductance_b/2) * inv(diffusion_p(:,:,n,m))
@@ -157,15 +154,8 @@ program main
       end do
 
       ! Calculate the negative-energy boundary matrix coefficients
-      boundary_ma(0:3,0:3,n) = +conjg(boundary_pa(0:3,0:3,n))
-      boundary_ma(4:7,0:3,n) = -conjg(boundary_pa(4:7,0:3,n))
-      boundary_ma(0:3,4:7,n) = -conjg(boundary_pa(0:3,4:7,n))
-      boundary_ma(4:7,4:7,n) = +conjg(boundary_pa(4:7,4:7,n))
-
-      boundary_mb(0:3,0:3,n) = +conjg(boundary_pb(0:3,0:3,n))
-      boundary_mb(4:7,0:3,n) = -conjg(boundary_pb(4:7,0:3,n))
-      boundary_mb(0:3,4:7,n) = -conjg(boundary_pb(0:3,4:7,n))
-      boundary_mb(4:7,4:7,n) = +conjg(boundary_pb(4:7,4:7,n))
+      boundary_ma(:,:,n) = minus(boundary_pa(:,:,n))
+      boundary_mb(:,:,n) = minus(boundary_pb(:,:,n))
     end block
   end do
 
@@ -194,7 +184,7 @@ program main
     end block
   end do
 
-  ! Scale the conductivity based on the high-voltage limit
+  ! Normalize the conductivity to its high-voltage limit
   conductivity = conductivity/conductivity(size(conductivity))
 
   ! Write the results to a file
@@ -287,5 +277,16 @@ contains
       ! Matrix inversion
       call zgetri( n, r, n, ipiv, work, m, info )
     end associate
+  end function
+
+  pure function minus(a) result(r)
+    ! Calculates the negative-energy version of a matrix based on its positive-energy version.
+    complex(wp), dimension(0:7,0:7), intent(in) :: a
+    complex(wp), dimension(0:7,0:7)             :: r
+
+    r(0:3,0:3) = +conjg(a(0:3,0:3))
+    r(4:7,0:3) = -conjg(a(4:7,0:3))
+    r(0:3,4:7) = -conjg(a(0:3,4:7))
+    r(4:7,4:7) = +conjg(a(4:7,4:7))
   end function
 end program

@@ -34,7 +34,7 @@ add_library(s4tran STATIC ${src_mod} ${src_e90} ${src_e77})
 foreach(src_name ${src_exe})
   get_filename_component( exe_name ${src_name} NAME_WE )
   add_executable( ${exe_name} ${src_name} )
-  target_link_libraries( ${exe_name} s4tran ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+  target_link_libraries( ${exe_name} s4tran ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} )
 endforeach()
 
 
