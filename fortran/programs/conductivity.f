@@ -25,11 +25,9 @@ program main
 
   ! Declare the nonequilibrium matrices
   integer                                      :: n, m, i, j
-  real(wp),    pointer,     dimension(:)       :: energy
-  real(wp),    pointer,     dimension(:)       :: location
-  complex(wp), allocatable, dimension(:,:,:,:) :: diffusion
-  complex(wp), allocatable, dimension(:,:,:)   :: boundary_a
-  complex(wp), allocatable, dimension(:,:,:)   :: boundary_b
+  real(wp),    pointer,     dimension(:)       :: energy, location
+  complex(wp), allocatable, dimension(:,:,:,:) :: diffusion_p, diffusion_m
+  complex(wp), allocatable, dimension(:,:,:)   :: boundary_pa, boundary_pb, boundary_ma, boundary_mb
   real(wp),    allocatable, dimension(:)       :: conductivity
 
   ! Declare program control parameters
@@ -90,10 +88,13 @@ program main
   !--------------------------------------------------------------------------------!
 
   ! Allocate working memory
-  allocate(diffusion( 0:7, 0:7, size(energy), size(location)), &
-           boundary_a(0:7, 0:7, size(energy)),                 &
-           boundary_b(0:7, 0:7, size(energy)),                 &
-           conductivity(size(energy))                          )
+  allocate(diffusion_p(0:7, 0:7, size(energy), size(location)), &
+           diffusion_m(0:7, 0:7, size(energy), size(location)), &
+           boundary_pa(0:7, 0:7, size(energy)),                 &
+           boundary_pb(0:7, 0:7, size(energy)),                 &
+           boundary_ma(0:7, 0:7, size(energy)),                 &
+           boundary_mb(0:7, 0:7, size(energy)),                 &
+           conductivity(size(energy))                           )
 
   ! Calculate the diffusion matrix
   call stage('Diffusion matrices')
@@ -108,15 +109,22 @@ program main
         retarded = layer % propagator(n,m) % retarded()
         advanced = layer % propagator(n,m) % advanced()
 
-        ! Calculate the diffusion matrix coefficients
+        ! Calculate the positive-energy diffusion matrix coefficients
         do i=0,7
           do j=0,7
-            diffusion(i,j,n,m) = trace(nambuv(i) * nambuv(j) - nambuv(i) * retarded * nambuv(j) * advanced)
+            diffusion_p(i,j,n,m) = trace(nambuv(i) * nambuv(j) - nambuv(i) * retarded * nambuv(j) * advanced)
           end do
         end do
 
-        ! Normalize and invert the diffusion matrix 
-        diffusion(:,:,n,m) = (layer % conductance_b/sqrt(layer % thouless)) * inv(diffusion(:,:,n,m))
+        ! Calculate the negative-energy diffusion matrix coefficients
+        diffusion_m(0:3,0:3,n,m) = +conjg(diffusion_p(0:3,0:3,n,m))
+        diffusion_m(4:7,0:3,n,m) = -conjg(diffusion_p(4:7,0:3,n,m))
+        diffusion_m(0:3,4:7,n,m) = -conjg(diffusion_p(0:3,4:7,n,m))
+        diffusion_m(4:7,4:7,n,m) = +conjg(diffusion_p(4:7,4:7,n,m))
+
+        ! Normalize and invert the diffusion matrices
+        diffusion_p(:,:,n,m) = (layer % conductance_b/2) * inv(diffusion_p(:,:,n,m))
+        diffusion_m(:,:,n,m) = (layer % conductance_b/2) * inv(diffusion_m(:,:,n,m))
       end block
     end do
   end do
@@ -137,16 +145,27 @@ program main
       retarded_b = bulk_b % propagator(n,1) % retarded()
       advanced_b = bulk_b % propagator(n,1) % advanced()
 
-      ! Calculate the boundary matrix coefficients
+      ! Calculate the positive-energy boundary matrix coefficients
       do i=0,7
         do j=0,7
-          boundary_a(i,j,n) = trace(nambuv(i) * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) * advanced_b &
-                                  - nambuv(i) * retarded_b * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) )
+          boundary_pa(i,j,n) = trace(nambuv(i) * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) * advanced_b &
+                                   - nambuv(i) * retarded_b * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) )
 
-          boundary_b(i,j,n) = trace(nambuv(i) * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) * advanced_a &
-                                  - nambuv(i) * retarded_a * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) )
+          boundary_pb(i,j,n) = trace(nambuv(i) * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) * advanced_a &
+                                   - nambuv(i) * retarded_a * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) )
         end do
       end do
+
+      ! Calculate the negative-energy boundary matrix coefficients
+      boundary_ma(0:3,0:3,n) = +conjg(boundary_pa(0:3,0:3,n))
+      boundary_ma(4:7,0:3,n) = -conjg(boundary_pa(4:7,0:3,n))
+      boundary_ma(0:3,4:7,n) = -conjg(boundary_pa(0:3,4:7,n))
+      boundary_ma(4:7,4:7,n) = +conjg(boundary_pa(4:7,4:7,n))
+
+      boundary_mb(0:3,0:3,n) = +conjg(boundary_pb(0:3,0:3,n))
+      boundary_mb(4:7,0:3,n) = -conjg(boundary_pb(4:7,0:3,n))
+      boundary_mb(0:3,4:7,n) = -conjg(boundary_pb(0:3,4:7,n))
+      boundary_mb(4:7,4:7,n) = +conjg(boundary_pb(4:7,4:7,n))
     end block
   end do
 
@@ -154,38 +173,32 @@ program main
   call stage('Conductivity')
   do n=1,size(energy)
     block
-      complex(wp), dimension(0:7,0:7) :: integral
+      complex(wp), dimension(0:7,0:7) :: integral_p, integral_m
       
-      ! Perform the integral of the inverse diffusion matrix
-      integral = inv(boundary_a(:,:,n))
+      ! Perform the positive-energy integral
+      integral_p = inv(boundary_pa(:,:,n))
       do m=1,size(location)-1
-        integral = integral - (location(m+1)-location(m)) * (diffusion(:,:,n,m+1)+diffusion(:,:,n,m))/4
+        integral_p = integral_p - (location(m+1)-location(m)) * (diffusion_p(:,:,n,m+1) + diffusion_p(:,:,n,m))/2
       end do
-      integral = inv(integral)
+      integral_p = inv(integral_p)
+
+      ! Perform the negative-energy integral
+      integral_m = inv(boundary_ma(:,:,n))
+      do m=1,size(location)-1
+        integral_m = integral_m - (location(m+1)-location(m)) * (diffusion_m(:,:,n,m+1) + diffusion_m(:,:,n,m))/2
+      end do
+      integral_m = inv(integral_m)
 
       ! Invert the result of the integral and save it
-      conductivity(n) = re(integral(4,4) - integral(4,0))/16
+      conductivity(n) = re(integral_p(4,4) - integral_p(4,0) + integral_m(4,0) + integral_m(4,4))/4
     end block
   end do
 
+  ! Scale the conductivity based on the high-voltage limit
+  conductivity = conductivity/conductivity(size(conductivity))
+
   ! Write the results to a file
   call finalize_nonequilibrium
-
-
-
-
-
-  ! @TODO: iterative
-  !
-  !    Trapezoid integration:
-  !     integral[f(z), z=a, z=b] = 0.5·sum( (z(k+1)-z(k))·(f(k+1)-f(k)) )
-  !    
-  !    Implementation:
-  !     h0(0)  = h_alpha
-  !     h0(1:) = h(0) + 0.5*cumsum( (z(1:n)-z(0:n-1)) * (Minv(1:n)-Minv(0:n-1)) )
-  !    
-  !     h(0)  = h0(0)
-  !     h(1:) = h0(1:) + i[A, 0.5*cumsum( (z(1:n)-z(0:n-1)) * (h(1:n)-h(0:n-1)) )]
 
 
 
