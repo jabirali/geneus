@@ -257,15 +257,4 @@ contains
       call zgetri( n, r, n, ipiv, work, m, info )
     end associate
   end function
-
-  pure function minus(a) result(r)
-    ! Calculates the negative-energy version of a matrix based on its positive-energy version.
-    complex(wp), dimension(0:7,0:7), intent(in) :: a
-    complex(wp), dimension(0:7,0:7)             :: r
-
-    r(0:3,0:3) = +conjg(a(0:3,0:3))
-    r(4:7,0:3) = -conjg(a(4:7,0:3))
-    r(0:3,4:7) = -conjg(a(0:3,4:7))
-    r(4:7,4:7) = +conjg(a(4:7,4:7))
-  end function
 end program
