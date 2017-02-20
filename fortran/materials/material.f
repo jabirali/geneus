@@ -315,33 +315,35 @@ contains
     real(wp)                       :: prefactor
     integer                        :: n, m
 
-    ! Allocate memory if necessary
-    if (.not. allocated(this%current)) then
-      allocate(this%current(0:3,size(this%location)))
-    end if
+    if (size(this%energy) > 1) then
+      ! Allocate memory if necessary
+      if (.not. allocated(this%current)) then
+        allocate(this%current(0:3,size(this%location)))
+      end if
 
-    ! Allocate workspace memory
-    allocate(current(size(this%energy),0:3))
+      ! Allocate workspace memory
+      allocate(current(size(this%energy),0:3))
 
-    ! Iterate over the stored propagators
-    do n = 1,size(this%location)
-      do m = 1,size(this%energy)
-        ! This factor converts from a zero-temperature to finite-temperature spectral current
-        prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+      ! Iterate over the stored propagators
+      do n = 1,size(this%location)
+        do m = 1,size(this%energy)
+          ! This factor converts from a zero-temperature to finite-temperature spectral current
+          prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
-        ! Calculate the contribution to the spectral currents at this position in the material
-        current(m,:) = prefactor * this % propagator(m,n) % current()
+          ! Calculate the contribution to the spectral currents at this position in the material
+          current(m,:) = prefactor * this % propagator(m,n) % current()
+        end do
+
+        ! Interpolate and integrate the results, and update the current vector
+        this%current(0,n) = integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(1,n) = integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(2,n) = integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(3,n) = integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
       end do
 
-      ! Interpolate and integrate the results, and update the current vector
-      this%current(0,n) = integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
-      this%current(1,n) = integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
-      this%current(2,n) = integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
-      this%current(3,n) = integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
-    end do
-
-    ! Deallocate workspace memory
-    deallocate(current)
+      ! Deallocate workspace memory
+      deallocate(current)
+    end if
   end subroutine
 
   impure subroutine material_update_magnetization(this)
@@ -353,32 +355,34 @@ contains
     real(wp)                       :: prefactor
     integer                        :: n, m
 
-    ! Allocate memory if necessary
-    if (.not. allocated(this%magnetization)) then
-      allocate(this%magnetization(1:3,size(this%location)))
-    end if
+    if (size(this % energy) > 1) then
+      ! Allocate memory if necessary
+      if (.not. allocated(this%magnetization)) then
+        allocate(this%magnetization(1:3,size(this%location)))
+      end if
 
-    ! Allocate workspace memory
-    allocate(magnetization(size(this%energy),1:3))
+      ! Allocate workspace memory
+      allocate(magnetization(size(this%energy),1:3))
 
-    ! Iterate over the stored propagators
-    do n = 1,size(this%location)
-      do m = 1,size(this%energy)
-        ! This factor converts from a zero-temperature to finite-temperature magnetization
-        prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+      ! Iterate over the stored propagators
+      do n = 1,size(this%location)
+        do m = 1,size(this%energy)
+          ! This factor converts from a zero-temperature to finite-temperature magnetization
+          prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
-        ! Calculate the contribution to the spectral magnetization at this position
-        magnetization(m,:) = prefactor * re(trace(pauli(1:3) * this % propagator(m,n) % N))
+          ! Calculate the contribution to the spectral magnetization at this position
+          magnetization(m,:) = prefactor * re(trace(pauli(1:3) * this % propagator(m,n) % N))
+        end do
+
+        ! Interpolate and integrate the results, and update the magnetization vector
+        this%magnetization(1,n) = integrate(this%energy, magnetization(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%magnetization(2,n) = integrate(this%energy, magnetization(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%magnetization(3,n) = integrate(this%energy, magnetization(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
       end do
 
-      ! Interpolate and integrate the results, and update the magnetization vector
-      this%magnetization(1,n) = integrate(this%energy, magnetization(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
-      this%magnetization(2,n) = integrate(this%energy, magnetization(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
-      this%magnetization(3,n) = integrate(this%energy, magnetization(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
-    end do
-
-    ! Deallocate workspace memory
-    deallocate(magnetization)
+      ! Deallocate workspace memory
+      deallocate(magnetization)
+    end if
   end subroutine
 
   pure subroutine material_update_density(this)

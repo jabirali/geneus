@@ -499,22 +499,24 @@ contains
       real(wp)                             :: x
       integer                              :: n, m
 
-      ! Calculate the endpoints of this layer
-      a = b
-      b = b + 1/sqrt(ptr % thouless)
+      if (allocated(ptr % density)) then
+        ! Calculate the endpoints of this layer
+        a = b
+        b = b + 1/sqrt(ptr % thouless)
 
-      ! Write out the density of states in this layer
-      do m=1,size(ptr % location)
-        x = a + (b-a) * ptr % location(m)
-        do n=size(ptr % energy),1,-1
-          ! Negative energies
-          write(unit,'(*(es20.12e3,:,"	"))') x, -ptr % energy(n), ptr % density(n,m)
+        ! Write out the density of states in this layer
+        do m=1,size(ptr % location)
+          x = a + (b-a) * ptr % location(m)
+          do n=size(ptr % energy),1,-1
+            ! Negative energies
+            write(unit,'(*(es20.12e3,:,"	"))') x, -ptr % energy(n), ptr % density(n,m)
+          end do
+          do n=1,size(ptr % energy),+1
+            ! Positive energies
+            write(unit,'(*(es20.12e3,:,"	"))') x, +ptr % energy(n), ptr % density(n,m)
+          end do
         end do
-        do n=1,size(ptr % energy),+1
-          ! Positive energies
-          write(unit,'(*(es20.12e3,:,"	"))') x, +ptr % energy(n), ptr % density(n,m)
-        end do
-      end do
+      end if
     end subroutine
   end subroutine
 
@@ -549,15 +551,17 @@ contains
       real(wp)                             :: x
       integer                              :: m
 
-      ! Calculate the endpoints of this layer
-      a = b
-      b = b + 1/sqrt(ptr % thouless)
+      if (allocated(ptr % current)) then
+        ! Calculate the endpoints of this layer
+        a = b
+        b = b + 1/sqrt(ptr % thouless)
 
-      ! Write out the currents in this layer
-      do m=1,size(ptr % location)
-        x = a + (b-a) * ptr % location(m)
-        write(unit,'(*(es20.12e3,:,"	"))') x, ptr % current(:,m)
-      end do
+        ! Write out the currents in this layer
+        do m=1,size(ptr % location)
+          x = a + (b-a) * ptr % location(m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % current(:,m)
+        end do
+      end if
     end subroutine
   end subroutine
 
@@ -591,15 +595,17 @@ contains
       real(wp)                             :: x
       integer                              :: m
 
-      ! Calculate the endpoints of this layer
-      a = b
-      b = b + 1/sqrt(ptr % thouless)
+      if (allocated(ptr % magnetization)) then 
+        ! Calculate the endpoints of this layer
+        a = b
+        b = b + 1/sqrt(ptr % thouless)
 
-      ! Write out the magnetization in this layer
-      do m=1,size(ptr % location)
-        x = a + (b-a) * ptr % location(m)
-        write(unit,'(*(es20.12e3,:,"	"))') x, ptr % magnetization(:,m)
-      end do
+        ! Write out the magnetization in this layer
+        do m=1,size(ptr % location)
+          x = a + (b-a) * ptr % location(m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % magnetization(:,m)
+        end do
+      end if
     end subroutine
   end subroutine
 

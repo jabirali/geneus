@@ -542,6 +542,16 @@ contains
           this % spinscattering = spinscattering(this)
         end if
         call evaluate(val, this % spinscattering % spinorbit)
+      case ('zeroenergy')
+        block
+          logical :: tmp
+          call evaluate(val, tmp)
+          if (tmp) then
+            deallocate(this % energy)
+            allocate(this % energy(1))
+            this % energy(1) = 0
+          end if
+        end block
       case default
         call material_conf(this, key, val)
     end select
