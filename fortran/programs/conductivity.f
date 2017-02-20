@@ -124,8 +124,8 @@ program main
   do n=1,size(energy)
     block
       ! Declare local variables
-      type(nambu) :: retarded_a, advanced_a
-      type(nambu) :: retarded_b, advanced_b
+      type(nambu) :: retarded_a, advanced_a, keldysh_a
+      type(nambu) :: retarded_b, advanced_b, keldysh_b
 
       ! Extract the retarded and advanced propagators on this side
       retarded_a = layer  % propagator(n,size(location)) % retarded()
@@ -135,14 +135,16 @@ program main
       retarded_b = bulk_b % propagator(n,1) % retarded()
       advanced_b = bulk_b % propagator(n,1) % advanced()
 
-      ! Calculate the boundary matrix coefficients
+      ! Calculate the boundary matrices
       do i=0,7
         do j=0,7
-          boundary_a(i,j,n) = trace(nambuv(i) * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) * advanced_b &
-                                  - nambuv(i) * retarded_b * (retarded_a*nambuv(j) - nambuv(j)*advanced_a) )/8
+          ! Calculate the keldysh propagator placeholders
+          keldysh_a = retarded_a*nambuv(j) - nambuv(j)*advanced_a
+          keldysh_b = retarded_b*nambuv(j) - nambuv(j)*advanced_b
 
-          boundary_b(i,j,n) = trace(nambuv(i) * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) * advanced_a &
-                                  - nambuv(i) * retarded_a * (retarded_b*nambuv(j) - nambuv(j)*advanced_b) )/8
+          ! Calculate the boundary matrix coefficients
+          boundary_a(i,j,n) = trace(nambuv(i) * (keldysh_a * advanced_b - retarded_b * keldysh_a))/8
+          boundary_b(i,j,n) = trace(nambuv(i) * (keldysh_b * advanced_a - retarded_a * keldysh_b))/8
         end do
       end do
     end block
@@ -237,14 +239,14 @@ contains
   end subroutine
 
   impure function inv(a) result(r)
-    ! Calculates the inverse of a square matrix.
+    ! Calculates the inverse of a general square matrix using LAPACK.
     complex(dp), dimension(:,:),      intent(in) :: a
     complex(dp), dimension(size(a,1), size(a,1)) :: r
 
-    external    :: zgetrf, zgetri        ! LAPACK routines
-    complex(dp) :: work(size(a,1)*64)    ! Working array
-    integer     :: ipiv(size(a,1))       ! Pivot indices
-    integer     :: info                  ! Error status
+    external    :: zgetrf, zgetri       ! LAPACK routines
+    complex(dp) :: work(size(a,1)*64)   ! Working array
+    integer     :: ipiv(size(a,1))      ! Pivot indices
+    integer     :: info                 ! Error status
 
     associate(n => size(a,1), m => size(work))
       ! Make a copy

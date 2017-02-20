@@ -9,7 +9,7 @@ module matrix_m
   private
 
   ! Declare which routines to export
-  public :: trace, diag, inverse, identity, commutator, anticommutator, matrix_inverse4
+  public :: trace, diag, inverse, identity, commutator, anticommutator
 
   ! Define common identity matrices
   real(wp), parameter, public :: identity2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
