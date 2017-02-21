@@ -656,14 +656,15 @@ contains
     end subroutine
   end subroutine
 
-  impure function structure_construct(file) result(this)
+  impure function structure_construct() result(this)
     !! Constructs a multilayer stack from a configuration file.
     use :: stdio_m
 
     type(structure)          :: this
-    character(*), intent(in) :: file
+    character(len=4096)      :: file
     integer                  :: unit
     integer                  :: iostat
+    integer                  :: status
     character(len=2048)      :: str, arg
     integer                  :: line, i, j, k
 
@@ -671,9 +672,14 @@ contains
     line   = 0
     unit   = 0
     iostat = 0
+    status = 0
 
     ! Open the config file
-    unit = input(file)
+    call get_command_argument(1, file, status=status)
+    if ( status /= 0 ) then
+      call error('Missing the command line argument #1, i.e. the name of configuration file.')
+    end if
+    unit = input(trim(file))
 
     ! Command arguments
     call get_command(str)
@@ -704,10 +710,14 @@ contains
       i = scan(str, '{')
       j = scan(str, '}')
       do while ( i > 0 .and. j-1 >= i+1 )
-        read(str(i+1:j-1),*) k
-        call get_command_argument(k, arg, status=k)
-        if ( k /= 0 ) then
-          call error('Missing command line arguments.')
+        read(str(i+1:j-1), *, iostat = status) k
+        if ( status /= 0 ) then
+          call error('Failed to parse parameter ' // str(i:j) // ' defined by the configuration file.')
+        end if
+        call get_command_argument(k+1, arg, status=status)
+        if ( status /= 0 ) then
+          write(arg,'(i0)') k+1
+          call error('Missing command line argument #' // trim(arg) // ', i.e. parameter ' // str(i:j) // ' defined by the configuration file.')
         end if
         str = str(:i-1) // trim(arg) // str(j+1:)
         i = scan(str, '{')

@@ -43,7 +43,7 @@ program main
   !--------------------------------------------------------------------------------!
 
   ! Construct the superconducting structure from a configuration file
-  stack = structure('materials.conf')
+  stack = structure()
   if (stack % materials() > 1) then
     call error('The material stack should only consist of one layer.')
   end if

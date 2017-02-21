@@ -8,7 +8,7 @@
 !> The structure is constructed based on the configuration file 'materials.conf', which the program
 !> expects to find in the runtime directory, and the results are written to the file 'critical.dat'. 
 
-program critical_temperature
+program main
   use :: structure_m
   use :: stdio_m
   use :: math_m
@@ -44,7 +44,7 @@ program critical_temperature
   stderr = output('error.log')
 
   ! Construct the material stack
-  stack = structure('materials.conf')
+  stack = structure()
 
   ! Use fixpoint-iteration for selfconsistent calculations
   call stack % selfconsistency(1)

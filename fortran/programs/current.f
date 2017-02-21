@@ -8,7 +8,7 @@
 !> file 'materials.conf', which the program expects to find in the runtime directory. The results are
 !> then written to various output files that will be created in the runtime directory.
 
-program critical_current
+program main
   use :: structure_m
   use :: calculus_m
   use :: stdio_m
@@ -44,7 +44,7 @@ program critical_current
   stderr = output('error.log')
 
   ! Construct the central material stack
-  stack = structure('materials.conf')
+  stack = structure()
 
   ! Construct the surrounding superconductors
   sa = superconductor()

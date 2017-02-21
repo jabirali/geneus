@@ -7,7 +7,7 @@
 !> The heterostructure is constructed based on the configuration file 'materials.conf',  which is
 !> expected to be in the runtime directory. The output is written to files in the same directory.
 
-program equilibrium
+program main
   use :: structure_m
   use :: stdio_m
   use :: math_m
@@ -24,7 +24,7 @@ program equilibrium
   stderr = output('error.log')
 
   ! Construct the superconducting structure
-  stack = structure('materials.conf')
+  stack = structure()
 
   ! Non-selfconsistent bootstrap procedure
   call stack % converge(threshold = threshold, bootstrap = .true.)
