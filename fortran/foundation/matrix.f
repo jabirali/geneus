@@ -148,6 +148,36 @@ contains
     end do
   end function
 
+  pure subroutine factorize(a,p)
+    !! Perform an in-place PLU decomposition of a square matrix A, similar to LAPACK's *gebtrf subroutines.
+    !! [Based on the example code presented on http://rosettacode.org/wiki/LU_decomposition#Fortran]
+    !! @TODO: This function is still experimental, and needs testing before being used for serious stuff.
+    complex(wp), intent(inout) :: a(:,:)
+    integer,     intent(  out) :: p(size(a,1))
+    integer                    :: n, m, i, j
+
+    ! Check the size of the input matrix
+    n = size(a,1)
+
+    ! Initialize the permutation vector
+    p = [ ( i, i=1,n ) ]
+
+    ! Perform the PLU factorization
+    do i = 1,n-1
+      ! Permutation
+      m = maxloc(abs(a(p(i:),i)),1) + i-1
+      if (m /= i) then
+        p([i, m]) = p([m, i])
+      end if
+
+      ! Factorizatrion
+      a(p(i+1:),i) = a(p(i+1:),i) / a(p(i),i) 
+      do j=i+1,n
+        a(p(i+1:),j) = a(p(i+1:),j) - a(p(i+1:),i) * a(p(i),j)
+      end do
+    end do
+  end subroutine
+
   pure function commutator(A, B) result(C)
     !! Calculate the commutator between two complex square matrices of the same dimension.
     complex(wp), intent(in) :: A(:,:)                   !! Left  matrix
