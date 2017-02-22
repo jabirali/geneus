@@ -136,18 +136,6 @@ contains
     B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
   end function
 
-  pure function matrix_trace(A) result(r)
-    !! Calculate the trace of a complex matrix.
-    complex(wp), intent(in)  :: A(:,:)   !! Matrix
-    complex(wp)              :: r        !! Tr(A)
-    integer                  :: n
-
-    r = 0
-    do n = 1,min(size(A,1),size(A,2))
-      r = r + A(n,n)
-    end do
-  end function
-
   pure function matrix_inversen(A) result(B)
     !! Invert a general N×N matrix using Gauss-Jordan elimination with partial pivoting.
     !! [This implementation is based on Algorithm #2 in "Efficient matrix inversion via 
@@ -179,6 +167,18 @@ contains
 
     ! Pivot inversion
     B(:,P) = B
+  end function
+
+  pure function matrix_trace(A) result(r)
+    !! Calculate the trace of a complex matrix.
+    complex(wp), intent(in)  :: A(:,:)   !! Matrix
+    complex(wp)              :: r        !! Tr(A)
+    integer                  :: n
+
+    r = 0
+    do n = 1,min(size(A,1),size(A,2))
+      r = r + A(n,n)
+    end do
   end function
 
   pure function commutator(A, B) result(C)
