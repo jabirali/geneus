@@ -47,7 +47,7 @@ contains
   end function
 
   pure function matrix_inverse(A) result(B)
-    !! Performs a direct calculation of the inverse of an N×N matrix, where N≤4.
+    !! Calculates the inverse of a general square matrix.
     complex(wp), intent(in) :: A(:,:)                   !! Matrix
     complex(wp)             :: B(size(A,1),size(A,2))   !! Inverse matrix
 
@@ -59,7 +59,7 @@ contains
       case(4**2)
         B = matrix_inverse4(A)
       case default
-        B = 0.0_wp
+        B = matrix_inversen(A)
     end select
   end function
 
@@ -148,35 +148,38 @@ contains
     end do
   end function
 
-  pure subroutine factorize(a,p)
-    !! Perform an in-place PLU decomposition of a square matrix A, similar to LAPACK's *gebtrf subroutines.
-    !! [Based on the example code presented on http://rosettacode.org/wiki/LU_decomposition#Fortran]
-    !! @TODO: This function is still experimental, and needs testing before being used for serious stuff.
-    complex(wp), intent(inout) :: a(:,:)
-    integer,     intent(  out) :: p(size(a,1))
-    integer                    :: n, m, i, j
+  pure function matrix_inversen(A) result(B)
+    !! Invert a general N×N matrix using Gauss-Jordan elimination with partial pivoting.
+    !! [This implementation is based on Algorithm #2 in "Efficient matrix inversion via 
+    !! Gauss-Jordan elimination and its parallelization" by E.S. Quintana et al. (1998)]
+    complex(wp), dimension(:,:), intent(in)     :: A
+    complex(wp), dimension(size(A,1),size(A,1)) :: B
+    integer,     dimension(size(A,1))           :: P
+    complex(wp)                                 :: Q
+    integer                                     :: n, i, j
 
-    ! Check the size of the input matrix
-    n = size(a,1)
+    ! Intialize variables
+    n = size(A,1)
+    P = [ ( i, i=1,n ) ]
+    B = A
 
-    ! Initialize the permutation vector
-    p = [ ( i, i=1,n ) ]
+    ! Matrix inversion
+    do i=1,n
+      ! Pivoting procedure
+      j = (i-1) + maxloc(abs(a(i:,i)),1)
+      P([i,j])   = P([j,i])
+      B([i,j],:) = B([j,i],:)
 
-    ! Perform the PLU factorization
-    do i = 1,n-1
-      ! Permutation
-      m = maxloc(abs(a(p(i:),i)),1) + i-1
-      if (m /= i) then
-        p([i, m]) = p([m, i])
-      end if
-
-      ! Factorizatrion
-      a(p(i+1:),i) = a(p(i+1:),i) / a(p(i),i) 
-      do j=i+1,n
-        a(p(i+1:),j) = a(p(i+1:),j) - a(p(i+1:),i) * a(p(i),j)
-      end do
+      ! Jordan transformation
+      Q      = B(i,i)
+      B(:,i) = [B(:i-1,i), (0.0_wp,0.0_wp), B(i+1:,i)] / (-Q)
+      B      = B + matmul(B(:,[i]), B([i],:))
+      B(i,:) = [B(i,:i-1), (1.0_wp,0.0_wp), B(i,i+1:)] / (+Q)
     end do
-  end subroutine
+
+    ! Pivot inversion
+    B(:,P) = B
+  end function
 
   pure function commutator(A, B) result(C)
     !! Calculate the commutator between two complex square matrices of the same dimension.

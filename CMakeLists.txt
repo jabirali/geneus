@@ -17,10 +17,6 @@ cmake_minimum_required(VERSION 2.6)
 # Programming languages
 enable_language(Fortran)
 
-# System libraries
-find_package(BLAS   REQUIRED)
-find_package(LAPACK REQUIRED)
-
 # Source files
 file(GLOB src_e77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
 file(GLOB src_e90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f" "fortran/external/fparser.f")
@@ -34,7 +30,7 @@ add_library(s4tran STATIC ${src_mod} ${src_e90} ${src_e77})
 foreach(src_name ${src_exe})
   get_filename_component( exe_name ${src_name} NAME_WE )
   add_executable( ${exe_name} ${src_name} )
-  target_link_libraries( ${exe_name} s4tran ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} )
+  target_link_libraries( ${exe_name} s4tran )
 endforeach()
 
 
