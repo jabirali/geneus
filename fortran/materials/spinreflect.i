@@ -3,6 +3,10 @@
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-mixing at fully reflecting interfaces.
+!>
+!> @TODO: Rewrite using the new nambu.f library, replacing e.g. diag(m·σ,m·σ*) with m*nambuv(1:3).
+!>        Also, we may then for brevity replace matmul(G,matmul(M,G)) with G*M*G, and so on.
+!> @TODO: Consider integrating this into spinactive.i as a special case with a different equation for I.
 
 pure subroutine spinreflect_update_prehook(this)
   ! Updates the internal variables associated with fully reflecting spin-active interfaces.

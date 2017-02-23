@@ -3,6 +3,9 @@
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-flip and spin-orbit scattering.
+!>
+!> @TODO: Rewrite using the new nambu.f library, replacing e.g. diag(m·σ,m·σ*) with m*nambuv(1:3).
+!>        Also, we may then for brevity replace matmul(G,matmul(M,G)) with G*M*G, and so on.
 
 
 module spinscattering_m

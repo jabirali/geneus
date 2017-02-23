@@ -3,6 +3,10 @@
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-active tunneling and vacuum interfaces.
+!>
+!> @TODO: Rewrite using the new nambu.f library, replacing e.g. diag(m·σ,m·σ*) with m*nambuv(1:3).
+!>        Also, we may then for brevity replace matmul(G,matmul(M,G)) with G*M*G, and so on.
+!> @TODO: Implement these routines as a spinactive object that is encapsulated inside class(conductor).
 
 pure subroutine spinactive_update_prehook(this)
   !! Updates the internal variables associated with spin-active interfaces.
