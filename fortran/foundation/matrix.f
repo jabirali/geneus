@@ -47,126 +47,55 @@ contains
   end function
 
   pure function matrix_inverse(A) result(B)
-    !! Calculates the inverse of a general square matrix.
-    complex(wp), intent(in) :: A(:,:)                   !! Matrix
-    complex(wp)             :: B(size(A,1),size(A,2))   !! Inverse matrix
-
-    select case(size(A))
-      case(2**2)
-        B = matrix_inverse2(A)
-      case(3**2)
-        B = matrix_inverse3(A)
-      case(4**2)
-        B = matrix_inverse4(A)
-      case default
-        B = matrix_inversen(A)
-    end select
-  end function
-
-  pure function matrix_inverse2(A) result(B)
-    !! Performs a direct calculation of the inverse of a 2×2 matrix.
-    complex(wp), intent(in) :: A(2,2)   !! Matrix
-    complex(wp)             :: B(2,2)   !! Inverse matrix
-    complex(wp)             :: detinv
-
-    ! Calculate the inverse determinant of the matrix
-    detinv = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
-
-    ! Calculate the inverse of the matrix
-    B(1,1) = +detinv * A(2,2)
-    B(2,1) = -detinv * A(2,1)
-    B(1,2) = -detinv * A(1,2)
-    B(2,2) = +detinv * A(1,1)
-  end function
-
-  pure function matrix_inverse3(A) result(B)
-    !! Performs a direct calculation of the inverse of a 3×3 matrix.
-    !! [Based on the subroutine M33INV by David G. Simpson, NASA.]
-    complex(wp), intent(in) :: A(3,3)   !! Matrix
-    complex(wp)             :: B(3,3)   !! Inverse matrix
-    complex(wp)             :: detinv
-
-    ! Calculate the inverse determinant of the matrix
-    detinv = 1/(A(1,1)*A(2,2)*A(3,3) - A(1,1)*A(2,3)*A(3,2)&
-              - A(1,2)*A(2,1)*A(3,3) + A(1,2)*A(2,3)*A(3,1)&
-              + A(1,3)*A(2,1)*A(3,2) - A(1,3)*A(2,2)*A(3,1))
-
-    ! Calculate the inverse of the matrix
-    B(1,1) = +detinv * (A(2,2)*A(3,3) - A(2,3)*A(3,2))
-    B(2,1) = -detinv * (A(2,1)*A(3,3) - A(2,3)*A(3,1))
-    B(3,1) = +detinv * (A(2,1)*A(3,2) - A(2,2)*A(3,1))
-    B(1,2) = -detinv * (A(1,2)*A(3,3) - A(1,3)*A(3,2))
-    B(2,2) = +detinv * (A(1,1)*A(3,3) - A(1,3)*A(3,1))
-    B(3,2) = -detinv * (A(1,1)*A(3,2) - A(1,2)*A(3,1))
-    B(1,3) = +detinv * (A(1,2)*A(2,3) - A(1,3)*A(2,2))
-    B(2,3) = -detinv * (A(1,1)*A(2,3) - A(1,3)*A(2,1))
-    B(3,3) = +detinv * (A(1,1)*A(2,2) - A(1,2)*A(2,1))
-  end function
-
-  pure function matrix_inverse4(A) result(B)
-    !! Performs a direct calculation of the inverse of a 4×4 matrix.
-    !! [Based on the subroutine M44INV by David G. Simpson, NASA.]
-    complex(wp), intent(in) :: A(4,4)   !! Matrix
-    complex(wp)             :: B(4,4)   !! Inverse matrix
-    complex(wp)             :: detinv
-
-    ! Calculate the inverse determinant of the matrix
-    detinv = &
-      1/(A(1,1)*(A(2,2)*(A(3,3)*A(4,4)-A(3,4)*A(4,3))+A(2,3)*(A(3,4)*A(4,2)-A(3,2)*A(4,4))+A(2,4)*(A(3,2)*A(4,3)-A(3,3)*A(4,2)))&
-       - A(1,2)*(A(2,1)*(A(3,3)*A(4,4)-A(3,4)*A(4,3))+A(2,3)*(A(3,4)*A(4,1)-A(3,1)*A(4,4))+A(2,4)*(A(3,1)*A(4,3)-A(3,3)*A(4,1)))&
-       + A(1,3)*(A(2,1)*(A(3,2)*A(4,4)-A(3,4)*A(4,2))+A(2,2)*(A(3,4)*A(4,1)-A(3,1)*A(4,4))+A(2,4)*(A(3,1)*A(4,2)-A(3,2)*A(4,1)))&
-       - A(1,4)*(A(2,1)*(A(3,2)*A(4,3)-A(3,3)*A(4,2))+A(2,2)*(A(3,3)*A(4,1)-A(3,1)*A(4,3))+A(2,3)*(A(3,1)*A(4,2)-A(3,2)*A(4,1))))
-
-    ! Calculate the inverse of the matrix
-    B(1,1) = detinv*(A(2,2)*(A(3,3)*A(4,4)-A(3,4)*A(4,3))+A(2,3)*(A(3,4)*A(4,2)-A(3,2)*A(4,4))+A(2,4)*(A(3,2)*A(4,3)-A(3,3)*A(4,2)))
-    B(2,1) = detinv*(A(2,1)*(A(3,4)*A(4,3)-A(3,3)*A(4,4))+A(2,3)*(A(3,1)*A(4,4)-A(3,4)*A(4,1))+A(2,4)*(A(3,3)*A(4,1)-A(3,1)*A(4,3)))
-    B(3,1) = detinv*(A(2,1)*(A(3,2)*A(4,4)-A(3,4)*A(4,2))+A(2,2)*(A(3,4)*A(4,1)-A(3,1)*A(4,4))+A(2,4)*(A(3,1)*A(4,2)-A(3,2)*A(4,1)))
-    B(4,1) = detinv*(A(2,1)*(A(3,3)*A(4,2)-A(3,2)*A(4,3))+A(2,2)*(A(3,1)*A(4,3)-A(3,3)*A(4,1))+A(2,3)*(A(3,2)*A(4,1)-A(3,1)*A(4,2)))
-    B(1,2) = detinv*(A(1,2)*(A(3,4)*A(4,3)-A(3,3)*A(4,4))+A(1,3)*(A(3,2)*A(4,4)-A(3,4)*A(4,2))+A(1,4)*(A(3,3)*A(4,2)-A(3,2)*A(4,3)))
-    B(2,2) = detinv*(A(1,1)*(A(3,3)*A(4,4)-A(3,4)*A(4,3))+A(1,3)*(A(3,4)*A(4,1)-A(3,1)*A(4,4))+A(1,4)*(A(3,1)*A(4,3)-A(3,3)*A(4,1)))
-    B(3,2) = detinv*(A(1,1)*(A(3,4)*A(4,2)-A(3,2)*A(4,4))+A(1,2)*(A(3,1)*A(4,4)-A(3,4)*A(4,1))+A(1,4)*(A(3,2)*A(4,1)-A(3,1)*A(4,2)))
-    B(4,2) = detinv*(A(1,1)*(A(3,2)*A(4,3)-A(3,3)*A(4,2))+A(1,2)*(A(3,3)*A(4,1)-A(3,1)*A(4,3))+A(1,3)*(A(3,1)*A(4,2)-A(3,2)*A(4,1)))
-    B(1,3) = detinv*(A(1,2)*(A(2,3)*A(4,4)-A(2,4)*A(4,3))+A(1,3)*(A(2,4)*A(4,2)-A(2,2)*A(4,4))+A(1,4)*(A(2,2)*A(4,3)-A(2,3)*A(4,2)))
-    B(2,3) = detinv*(A(1,1)*(A(2,4)*A(4,3)-A(2,3)*A(4,4))+A(1,3)*(A(2,1)*A(4,4)-A(2,4)*A(4,1))+A(1,4)*(A(2,3)*A(4,1)-A(2,1)*A(4,3)))
-    B(3,3) = detinv*(A(1,1)*(A(2,2)*A(4,4)-A(2,4)*A(4,2))+A(1,2)*(A(2,4)*A(4,1)-A(2,1)*A(4,4))+A(1,4)*(A(2,1)*A(4,2)-A(2,2)*A(4,1)))
-    B(4,3) = detinv*(A(1,1)*(A(2,3)*A(4,2)-A(2,2)*A(4,3))+A(1,2)*(A(2,1)*A(4,3)-A(2,3)*A(4,1))+A(1,3)*(A(2,2)*A(4,1)-A(2,1)*A(4,2)))
-    B(1,4) = detinv*(A(1,2)*(A(2,4)*A(3,3)-A(2,3)*A(3,4))+A(1,3)*(A(2,2)*A(3,4)-A(2,4)*A(3,2))+A(1,4)*(A(2,3)*A(3,2)-A(2,2)*A(3,3)))
-    B(2,4) = detinv*(A(1,1)*(A(2,3)*A(3,4)-A(2,4)*A(3,3))+A(1,3)*(A(2,4)*A(3,1)-A(2,1)*A(3,4))+A(1,4)*(A(2,1)*A(3,3)-A(2,3)*A(3,1)))
-    B(3,4) = detinv*(A(1,1)*(A(2,4)*A(3,2)-A(2,2)*A(3,4))+A(1,2)*(A(2,1)*A(3,4)-A(2,4)*A(3,1))+A(1,4)*(A(2,2)*A(3,1)-A(2,1)*A(3,2)))
-    B(4,4) = detinv*(A(1,1)*(A(2,2)*A(3,3)-A(2,3)*A(3,2))+A(1,2)*(A(2,3)*A(3,1)-A(2,1)*A(3,3))+A(1,3)*(A(2,1)*A(3,2)-A(2,2)*A(3,1)))
-  end function
-
-  pure function matrix_inversen(A) result(B)
     !! Invert a general N×N matrix using Gauss-Jordan elimination with partial pivoting.
+    !! In the special case N=2, the inverse is evaluated using a cofactoring algorithm.
     !! [This implementation is based on Algorithm #2 in "Efficient matrix inversion via 
     !! Gauss-Jordan elimination and its parallelization" by E.S. Quintana et al. (1998)]
     complex(wp), dimension(:,:), intent(in)     :: A
     complex(wp), dimension(size(A,1),size(A,1)) :: B
     integer,     dimension(size(A,1))           :: P
     complex(wp)                                 :: Q
-    integer                                     :: n, i, j
+    integer                                     :: i, j
 
-    ! Intialize variables
-    n = size(A,1)
-    P = [ ( i, i=1,n ) ]
-    B = A
+    select case (size(A,1))
+      case (1)
+        ! Trivial case
+        B(1,1) = 1/A(1,1)
 
-    ! Matrix inversion
-    do i=1,n
-      ! Pivoting procedure
-      j = (i-1) + maxloc(abs(a(i:,i)),1)
-      P([i,j])   = P([j,i])
-      B([i,j],:) = B([j,i],:)
+      case (2)
+        ! Inverse determinant
+        Q = 1/(A(1,1)*A(2,2) - A(1,2)*A(2,1))
 
-      ! Jordan transformation
-      Q      = B(i,i)
-      B(:,i) = [B(:i-1,i), (0.0_wp,0.0_wp), B(i+1:,i)] / (-Q)
-      B      = B + matmul(B(:,[i]), B([i],:))
-      B(i,:) = [B(i,:i-1), (1.0_wp,0.0_wp), B(i,i+1:)] / (+Q)
-    end do
+        ! Inverse matrix
+        B(1,1) = +Q * A(2,2)
+        B(2,1) = -Q * A(2,1)
+        B(1,2) = -Q * A(1,2)
+        B(2,2) = +Q * A(1,1)
 
-    ! Pivot inversion
-    B(:,P) = B
+      case default
+        ! Permutation array
+        P = [ ( i, i=1,size(A,1) ) ]
+
+        ! Matrix copy
+        B = A
+
+        ! Matrix inversion
+        do i=1,size(A,1)
+          ! Pivoting procedure
+          j = (i-1) + maxloc(abs(a(i:,i)),1)
+          P([i,j])   = P([j,i])
+          B([i,j],:) = B([j,i],:)
+
+          ! Jordan transformation
+          Q      = B(i,i)
+          B(:,i) = [B(:i-1,i), (0.0_wp,0.0_wp), B(i+1:,i)] / (-Q)
+          B      = B + matmul(B(:,[i]), B([i],:))
+          B(i,:) = [B(i,:i-1), (1.0_wp,0.0_wp), B(i,i+1:)] / (+Q)
+        end do
+
+        ! Pivot inversion
+        B(:,P) = B
+    end select
   end function
 
   pure function matrix_trace(A) result(r)
