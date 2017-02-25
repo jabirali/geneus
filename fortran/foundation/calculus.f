@@ -30,7 +30,8 @@ module calculus_m
 
   interface interpolate
     !! Public interface for various interpolation routines.
-    module procedure interpolate_pchip, interpolate_pchip_cx, interpolate_pchip_scalar, interpolate_pchip_cx_scalar
+    module procedure interpolate_pchip,        interpolate_pchip_cx, &
+                     interpolate_pchip_scalar, interpolate_pchip_cx_scalar
   end interface 
 contains
   pure function mean_array_re(x) result(r)

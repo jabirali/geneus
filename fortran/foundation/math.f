@@ -6,6 +6,20 @@
 !> floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
 !> the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
 !> As for module procedures, this library defines some common utility functions for working with e.g. complex numbers.
+!>
+!> @TODO:
+!>   To make future reuse of the math routines in other projects easier, and also clean up the s4tran code 
+!>   internally, the math routines should be refactored as follows:
+!>    (1) This module should be renamed to e.g. flop_m, because it has to do with basic floating-point operations;
+!>    (2) All the other math modules matrix_m, calculus_m, etc. should then import flop_m and do their thing;
+!>    (3) A new module with the name math_m imports all these other modules, and reexports their function interfaces;
+!>    (4) If and when parametrized derived types get implemented in GFortran too, spin_m and nambu_m can be merged into
+!>        a general matrix library for N×N stuff. Until then, they stay out of the general math library I'm making.
+!>   This way, other libraries and programs can simply "use :: math_m", and automatically get access to everything,
+!>   without having to cherry-pick the parts of the library that are relevant to import. (All of math_m is linked
+!>   together into one library libs4tran.a anyway, so this shouldn't affect compilation time. The only thing that
+!>   would speed up compilation time would be to adopt submodules, but that implies dropping gfortran 5.x support,
+!>   and at the same time adopting the ugly C habit of defining the interface in the .h file away from the function.)
 
 module math_m
   use :: iso_fortran_env
