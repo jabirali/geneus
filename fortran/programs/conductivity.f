@@ -108,8 +108,8 @@ program main
         advanced = layer % propagator(n,m) % advanced()
 
         ! Calculate the diffusion matrix coefficients
-        do i=0,7
-          do j=0,7
+        do j=0,7
+          do i=0,7
             diffusion(i,j,n,m) = trace(nambuv(i) * nambuv(j) - nambuv(i) * retarded * nambuv(j) * advanced)/8
           end do
         end do
@@ -137,8 +137,8 @@ program main
       advanced_b = bulk_b % propagator(n,1) % advanced()
 
       ! Calculate the boundary matrices
-      do i=0,7
-        do j=0,7
+      do j=0,7
+        do i=0,7
           ! Calculate the keldysh propagator placeholders
           keldysh_a = retarded_a*nambuv(j) - nambuv(j)*advanced_a
           keldysh_b = retarded_b*nambuv(j) - nambuv(j)*advanced_b
