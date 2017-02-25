@@ -36,26 +36,26 @@ module calculus_m
 contains
   pure function mean_array_re(x) result(r)
     !! Calculates the mean value of a real-valued array.
-    real(wp), intent(in) :: x(:)
-    real(wp)             :: r
+    real(wp), dimension(:), intent(in) :: x   !! Real-valued array
+    real(wp)                           :: r   !! Mean value <x>
 
     r = sum(x)/max(1,size(x))
   end function
 
   pure function mean_array_cx(x) result(r)
     !! Calculates the mean value of a complex-valued array.
-    complex(wp), intent(in) :: x(:)
-    complex(wp)             :: r
+    complex(wp), dimension(:), intent(in) :: x  !! Complex-valued array
+    complex(wp)                           :: r  !! Mean value <x>
 
     r = sum(x)/max(1,size(x))
   end function
 
   pure subroutine linspace(array, first, last)
-    !! Populates an array with elements from `first` to `last`, inclusive.
-    real(wp), intent(out) :: array(:)   !! Output array to populate
-    real(wp), intent(in)  :: first      !! Value of first element
-    real(wp), intent(in)  :: last       !! Value of last  element
-    integer               :: n
+    !! Populates an existing array with elements from `first` to `last`, inclusive.
+    real(wp), dimension(:), intent(out) :: array   !! Output array to populate
+    real(wp),               intent(in)  :: first   !! Value of first element
+    real(wp),               intent(in)  :: last    !! Value of last  element
+    integer                             :: n
 
     do n=1,size(array)
       array(n) = first + ((last-first)*(n-1))/(size(array)-1)
@@ -66,9 +66,9 @@ contains
     !! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation
     !! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     !! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)         !! Variable x
-    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp)              :: r(size(x))   !! Derivative dy/dx
+    real(wp), dimension(:),       intent(in)  :: x   !! Variable x
+    real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp), dimension(size(x))              :: r   !! Derivative dy/dx
 
     ! Differentiate using finite differences
     associate(n => size(x))
@@ -80,9 +80,9 @@ contains
 
   pure function differentiate_linear_cx(x, y) result(r)
     !! Complex version of differentiate_linear.
-    real(wp),    intent(in)  :: x(:)         !! Variable x
-    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    complex(wp)              :: r(size(x))   !! Derivative dy/dx
+    real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
+    complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    complex(wp), dimension(size(x))              :: r   !! Derivative dy/dx
 
     ! Differentiate using finite differences
     associate(n => size(x))
@@ -95,9 +95,9 @@ contains
   pure function integrate_linear(x, y) result(r)
     !! This function calculates the integral of an array y with respect to x using a trapezoid
     !! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)         !! Variable x
-    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp)              :: r            !! Integral ∫y(x)·dx
+    real(wp), dimension(:),       intent(in)  :: x   !! Variable x
+    real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp)                                  :: r   !! Integral ∫y(x)·dx
 
     ! Integrate using the trapezoidal rule
     associate(n => size(x))
@@ -107,9 +107,9 @@ contains
 
   pure function integrate_linear_cx(x, y) result(r)
     !! Complex version of integrate_linear.
-    real(wp),    intent(in) :: x(:)         !! Variable x
-    complex(wp), intent(in) :: y(size(x))   !! Function y(x)
-    complex(wp)             :: r            !! Integral ∫y(x)·dx
+    real(wp),    dimension(:),       intent(in) :: x   !! Variable x
+    complex(wp), dimension(size(x)), intent(in) :: y   !! Function y(x)
+    complex(wp)                                 :: r   !! Integral ∫y(x)·dx
 
     ! Integrate using the trapezoidal rule
     associate(n => size(x))
@@ -121,15 +121,16 @@ contains
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on
     !! discrete numerical data, and subsequently evaluates the integral of the interpolation in the
     !! range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)        !! Variable x
-    real(wp), intent(in)  :: y(size(x))  !! Function y(x)
-    real(wp), intent(in)  :: a           !! Left endpoint
-    real(wp), intent(in)  :: b           !! Right endpoint
-    real(wp)              :: r           !! Integral ∫y(x)·dx
+    real(wp), dimension(:),       intent(in)  :: x  !! Variable x
+    real(wp), dimension(size(x)), intent(in)  :: y  !! Function y(x)
+    real(wp),                     intent(in)  :: a  !! Left endpoint
+    real(wp),                     intent(in)  :: b  !! Right endpoint
+    real(wp)                                  :: r  !! Integral ∫y(x)·dx
 
-    real(wp), external    :: dpchqa
-    real(wp)              :: d(size(x))
-    integer               :: err
+    external                                  :: dpchez
+    real(wp), external                        :: dpchqa
+    real(wp), dimension(size(x))              :: d
+    integer                                   :: err
 
     ! Create a PCHIP interpolation of the input data
     call dpchez(size(x), x, y, d, .false., 0, 0, err)
@@ -140,11 +141,11 @@ contains
 
   function integrate_pchip_cx(x, y, a, b) result(r)
     !! Wrapper for integrate_pchip that accepts complex arguments.
-    real(wp),    intent(in)  :: x(:)         !! Variable x
-    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp),    intent(in)  :: a            !! Left endpoint
-    real(wp),    intent(in)  :: b            !! Right endpoint
-    complex(wp)              :: r            !! Integral ∫y(x)·dx
+    real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
+    complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp),                        intent(in)  :: a   !! Left endpoint
+    real(wp),                        intent(in)  :: b   !! Right endpoint
+    complex(wp)                                  :: r   !! Integral ∫y(x)·dx
 
     ! Integrate the real and imaginary parts separately
     r = cx( integrate_pchip(x, re(y), a, b),&
@@ -154,13 +155,15 @@ contains
   function interpolate_pchip(x, y, p) result(r)
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
     !! and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.
-    real(wp), intent(in)  :: x(:)         !! Variable x
-    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp), intent(in)  :: p(:)         !! Interpolation domain p
-    real(wp)              :: r(size(p))   !! Interpolation result y(p)
+    real(wp), dimension(:),       intent(in)  :: x   !! Variable x
+    real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp), dimension(:),       intent(in)  :: p   !! Interpolation domain p
+    real(wp), dimension(size(p))              :: r   !! Interpolation result y(p)
 
-    real(wp)              :: d(size(x))
-    integer               :: err
+    external                                  :: dpchez
+    external                                  :: dpchfe
+    real(wp), dimension(size(x))              :: d
+    integer                                   :: err
 
     ! Create a PCHIP interpolation of the input data
     call dpchez(size(x), x, y, d, .false., 0, 0, err)
@@ -171,10 +174,10 @@ contains
 
   function interpolate_pchip_cx(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts complex arguments.
-    real(wp),    intent(in)  :: x(:)         !! Variable x
-    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp),    intent(in)  :: p(:)         !! Interpolation domain p
-    complex(wp)              :: r(size(p))   !! Interpolation result y(p)
+    real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
+    complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp),    dimension(:),       intent(in)  :: p   !! Interpolation domain p
+    complex(wp), dimension(size(p))              :: r   !! Interpolation result y(p)
 
     ! Interpolate the real and imaginary parts separately
     r = cx( interpolate_pchip(x, re(y), p),&
@@ -183,11 +186,11 @@ contains
 
   function interpolate_pchip_scalar(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts scalar arguments.
-    real(wp), intent(in)  :: x(:)         !! Variable x
-    real(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp), intent(in)  :: p            !! Interpolation point p
-    real(wp)              :: r            !! Interpolation result y(p)
-    real(wp)              :: rs(1) 
+    real(wp), dimension(:),       intent(in)  :: x   !! Variable x
+    real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp),                     intent(in)  :: p   !! Interpolation point p
+    real(wp)                                  :: r   !! Interpolation result y(p)
+    real(wp)                                  :: rs(1) 
 
     ! Perform the interpolation
     rs = interpolate_pchip(x, y, [p])
@@ -198,11 +201,11 @@ contains
 
   function interpolate_pchip_cx_scalar(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts complex scalar arguments.
-    real(wp),    intent(in)  :: x(:)         !! Variable x
-    complex(wp), intent(in)  :: y(size(x))   !! Function y(x)
-    real(wp),    intent(in)  :: p            !! Interpolation point p
-    complex(wp)              :: r            !! Interpolation result y(p)
-    complex(wp)              :: rs(1) 
+    real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
+    complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
+    real(wp),                        intent(in)  :: p   !! Interpolation point p
+    complex(wp)                                  :: r   !! Interpolation result y(p)
+    complex(wp)                                  :: rs(1) 
 
     ! Perform the interpolation
     rs = cx( interpolate_pchip(x, re(y), [p]),&
