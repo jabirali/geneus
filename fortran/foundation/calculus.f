@@ -11,6 +11,11 @@ module calculus_m
   ! Declare which routines to export
   public :: mean, differentiate, integrate, interpolate, linspace
 
+  interface linspace
+    !! Public interface for routines that initialize arrays that span certain number ranges.
+    module procedure linspace_array_re
+  end interface
+
   interface mean
     !! Public interface for routines that calculate the mean value.
     module procedure mean_array_re, mean_array_cx 
@@ -18,22 +23,43 @@ module calculus_m
 
   interface differentiate
     !! Public interface for various differentiation routines.
-    module procedure differentiate_linear, differentiate_linear_cx
+    module procedure differentiate_array_re, differentiate_array_cx
   end interface
 
   ! Declare public interfaces
   interface integrate
     !! Public interface for various integration routines.
-    module procedure integrate_linear, integrate_linear_cx, &
-                     integrate_pchip,  integrate_pchip_cx
+    module procedure integrate_array_re, integrate_array_cx, &
+                     integrate_range_re, integrate_range_cx
   end interface
 
   interface interpolate
     !! Public interface for various interpolation routines.
-    module procedure interpolate_pchip,        interpolate_pchip_cx, &
-                     interpolate_pchip_scalar, interpolate_pchip_cx_scalar
+    module procedure interpolate_array_re, interpolate_array_cx, &
+                     interpolate_point_re, interpolate_point_cx
   end interface 
 contains
+
+  !--------------------------------------------------------------------------------
+  ! Specific implementations of the `linspace` interface
+  !--------------------------------------------------------------------------------
+
+  pure subroutine linspace_array_re(array, first, last)
+    !! Populates an existing array with elements from `first` to `last`, inclusive.
+    real(wp), dimension(:), intent(out) :: array   !! Output array to populate
+    real(wp),               intent(in)  :: first   !! Value of first element
+    real(wp),               intent(in)  :: last    !! Value of last  element
+    integer                             :: n
+
+    do n=1,size(array)
+      array(n) = first + ((last-first)*(n-1))/(size(array)-1)
+    end do
+  end subroutine
+
+  !--------------------------------------------------------------------------------
+  ! Specific implementations of the `mean` interface
+  !--------------------------------------------------------------------------------
+
   pure function mean_array_re(x) result(r)
     !! Calculates the mean value of a real-valued array.
     real(wp), dimension(:), intent(in) :: x   !! Real-valued array
@@ -50,19 +76,11 @@ contains
     r = sum(x)/max(1,size(x))
   end function
 
-  pure subroutine linspace(array, first, last)
-    !! Populates an existing array with elements from `first` to `last`, inclusive.
-    real(wp), dimension(:), intent(out) :: array   !! Output array to populate
-    real(wp),               intent(in)  :: first   !! Value of first element
-    real(wp),               intent(in)  :: last    !! Value of last  element
-    integer                             :: n
+  !--------------------------------------------------------------------------------
+  ! Specific implementations of the `differentiate` interface
+  !--------------------------------------------------------------------------------
 
-    do n=1,size(array)
-      array(n) = first + ((last-first)*(n-1))/(size(array)-1)
-    end do
-  end subroutine
-
-  pure function differentiate_linear(x, y) result(r)
+  pure function differentiate_array_re(x, y) result(r)
     !! This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation
     !! at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
     !! approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.
@@ -78,7 +96,7 @@ contains
     end associate
   end function
 
-  pure function differentiate_linear_cx(x, y) result(r)
+  pure function differentiate_array_cx(x, y) result(r)
     !! Complex version of differentiate_linear.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
@@ -92,7 +110,11 @@ contains
     end associate
   end function
 
-  pure function integrate_linear(x, y) result(r)
+  !--------------------------------------------------------------------------------
+  ! Specific implementations of the `integrate` interface
+  !--------------------------------------------------------------------------------
+
+  pure function integrate_array_re(x, y) result(r)
     !! This function calculates the integral of an array y with respect to x using a trapezoid
     !! approximation. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), dimension(:),       intent(in)  :: x   !! Variable x
@@ -105,7 +127,7 @@ contains
     end associate
   end function
 
-  pure function integrate_linear_cx(x, y) result(r)
+  pure function integrate_array_cx(x, y) result(r)
     !! Complex version of integrate_linear.
     real(wp),    dimension(:),       intent(in) :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in) :: y   !! Function y(x)
@@ -117,7 +139,7 @@ contains
     end associate
   end function
 
-  function integrate_pchip(x, y, a, b) result(r)
+  function integrate_range_re(x, y, a, b) result(r)
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on
     !! discrete numerical data, and subsequently evaluates the integral of the interpolation in the
     !! range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.
@@ -139,7 +161,7 @@ contains
     r = dpchqa(size(x), x, y, d, a, b, err)
   end function
 
-  function integrate_pchip_cx(x, y, a, b) result(r)
+  function integrate_range_cx(x, y, a, b) result(r)
     !! Wrapper for integrate_pchip that accepts complex arguments.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
@@ -148,11 +170,15 @@ contains
     complex(wp)                                  :: r   !! Integral ∫y(x)·dx
 
     ! Integrate the real and imaginary parts separately
-    r = cx( integrate_pchip(x, re(y), a, b),&
-            integrate_pchip(x, im(y), a, b) )
+    r = cx( integrate_range_re(x, re(y), a, b),&
+            integrate_range_re(x, im(y), a, b) )
   end function
 
-  function interpolate_pchip(x, y, p) result(r)
+  !--------------------------------------------------------------------------------
+  ! Specific implementations of the `interpolate` interface
+  !--------------------------------------------------------------------------------
+
+  function interpolate_array_re(x, y, p) result(r)
     !! This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
     !! and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.
     real(wp), dimension(:),       intent(in)  :: x   !! Variable x
@@ -172,7 +198,7 @@ contains
     call dpchfe(size(x), x, y, d, 1, .false., size(p), p, r, err)
   end function
 
-  function interpolate_pchip_cx(x, y, p) result(r)
+  function interpolate_array_cx(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts complex arguments.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
@@ -180,11 +206,11 @@ contains
     complex(wp), dimension(size(p))              :: r   !! Interpolation result y(p)
 
     ! Interpolate the real and imaginary parts separately
-    r = cx( interpolate_pchip(x, re(y), p),&
-            interpolate_pchip(x, im(y), p) )
+    r = cx( interpolate_array_re(x, re(y), p),&
+            interpolate_array_re(x, im(y), p) )
   end function
 
-  function interpolate_pchip_scalar(x, y, p) result(r)
+  function interpolate_point_re(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts scalar arguments.
     real(wp), dimension(:),       intent(in)  :: x   !! Variable x
     real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
@@ -193,13 +219,13 @@ contains
     real(wp)                                  :: rs(1) 
 
     ! Perform the interpolation
-    rs = interpolate_pchip(x, y, [p])
+    rs = interpolate_array_re(x, y, [p])
 
     ! Extract the scalar result
     r = rs(1)
   end function
 
-  function interpolate_pchip_cx_scalar(x, y, p) result(r)
+  function interpolate_point_cx(x, y, p) result(r)
     !! Wrapper for interpolate_pchip that accepts complex scalar arguments.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
@@ -208,8 +234,8 @@ contains
     complex(wp)                                  :: rs(1) 
 
     ! Perform the interpolation
-    rs = cx( interpolate_pchip(x, re(y), [p]),&
-             interpolate_pchip(x, im(y), [p]) )
+    rs = cx( interpolate_array_re(x, re(y), [p]),&
+             interpolate_array_re(x, im(y), [p]) )
 
     ! Extract the scalar result
     r = rs(1)
