@@ -97,7 +97,7 @@ contains
   end function
 
   pure function differentiate_array_cx(x, y) result(r)
-    !! Complex version of differentiate_linear.
+    !! Complex version of differentiate_array_re.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     complex(wp), dimension(size(x))              :: r   !! Derivative dy/dx
@@ -128,7 +128,7 @@ contains
   end function
 
   pure function integrate_array_cx(x, y) result(r)
-    !! Complex version of integrate_linear.
+    !! Complex version of integrate_array_re.
     real(wp),    dimension(:),       intent(in) :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in) :: y   !! Function y(x)
     complex(wp)                                 :: r   !! Integral ∫y(x)·dx
@@ -162,7 +162,7 @@ contains
   end function
 
   function integrate_range_cx(x, y, a, b) result(r)
-    !! Wrapper for integrate_pchip that accepts complex arguments.
+    !! Complex version of integrate_range_re.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     real(wp),                        intent(in)  :: a   !! Left endpoint
@@ -199,7 +199,7 @@ contains
   end function
 
   function interpolate_array_cx(x, y, p) result(r)
-    !! Wrapper for interpolate_pchip that accepts complex arguments.
+    !! Complex version of interpolate_array_re.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     real(wp),    dimension(:),       intent(in)  :: p   !! Interpolation domain p
@@ -226,7 +226,7 @@ contains
   end function
 
   function interpolate_point_cx(x, y, p) result(r)
-    !! Wrapper for interpolate_pchip that accepts complex scalar arguments.
+    !! Complex version of interpolate_point_re.
     real(wp),    dimension(:),       intent(in)  :: x   !! Variable x
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     real(wp),                        intent(in)  :: p   !! Interpolation point p
