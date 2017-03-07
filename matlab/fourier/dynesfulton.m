@@ -1,4 +1,11 @@
-function dynesfulton(inputfile)
+function dynesfulton(inputfile, threshold)
+  % This function uses the Dynes-Fulton method [PRB 3(9) 3015 (1971)] to estimate
+  % the current density distribution based on critical current measurements.
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % IMPORT AND PREPROCESS THE CURRENT-FIELD MEASUREMENTS
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
   % Import data from an input file
   data    = load(inputfile);
   field   = data(:,1);
@@ -12,7 +19,7 @@ function dynesfulton(inputfile)
   c = curvature(current, field);
 
   % Identify spikes in the curvature
-  u = trim(spikes(c));
+  u = trim(spikes(c, threshold));
 
   % Create a sign array that flips after each spike
   s = (-1) .^ cumsum(u);
@@ -25,12 +32,23 @@ function dynesfulton(inputfile)
     current = -current;
   end
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % INTERPOLATE, FIND THE CURRENT DENSITY, AND SMOOTH
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
   % Interpolate the input data to a higher precision
   field_i   = linspace(min(field), max(field), 10240);
   current_i = pchip(field, current, field_i);
 
-  % TODO: Make this part work
-  fourier = ifft(field);
+  % Perform a Fourier transform of the results
+  [density, position] = fourier(current, field);
+
+  % Smooth the resulting current density to get the trend
+  density = smooth(position, density, 'lowess');
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % VISUALIZE THE FINAL RESULTS
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   % Plot the reconstruction
   current_p = current; current_p(current < 0) = NaN;
@@ -43,7 +61,7 @@ function dynesfulton(inputfile)
 
   % Plot the Fourier transformation
   figure;
-  plot(real(fourier));
+  plot(position, density, 'k-');
   title('Reconstruction of the J(x) curve');
   xlabel('Position x');
   xlabel('Charge current J');
@@ -69,11 +87,11 @@ function v = trim(u)
   end
 end
 
-function u = spikes(y)
+function u = spikes(y, t)
   % Identifies maxima in a dataset that can be classified as outliers.
   % [Assumption: the original data set a median that is roughly zero.]
 
-  u = y > 3*mad(y,1);
+  u = y > t*mad(y,1);
 end
 
 function c = curvature(y, x)
@@ -112,4 +130,28 @@ function d = differentiate2(y, x)
 
   % Calculate the finite-difference second-derivative
   d(2:N-1) = 4 * (y(3:N) - 2*y(2:N-1) + y(1:N-2)) ./ (x(3:N) - x(1:N-2)).^2;
+end
+
+function [Y,X] = fourier(y, x)
+  % Performs a Fourier transformation of an array y(x).
+
+  % Find an adequate array size
+  n = 2^nextpow2(length(y));
+
+  % Perform the transformation
+  Y = ifft(y, n, 'symmetric');
+
+  % Reorganize the results
+  p = floor(1+n/2);
+  Y = abs(real([Y(p+1:end); Y(1:p)]));
+
+  % Construct a fitting domain
+  q = (1/mean(diff(x)));
+  X = linspace(-q, q, length(Y))';
+
+  % Calculate the norm using trapezoid integration
+  s = sqrt(sum( (Y(2:end).^2+Y(1:end-1).^2) .* (X(2:end)-X(1:end-1)))/2);
+
+  % Normalize the output result
+  Y = Y/s;
 end
