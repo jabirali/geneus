@@ -13,6 +13,12 @@ function dynesfulton(inputfile, outputfile)
   d1(1) = (current(1+1)-current(1))/(field(1+1)-field(1));
   d1(N) = (current(N)-current(N-1))/(field(N)-field(N-1));
 
+  % TODO: Estimate the second derivative
+  % TODO: Estimate the curvature c=f''(x)/f(x)
+  % TODO: Use c>0 as an indicator for sign-change — in the fraunhofer
+  %       case, we typically get c>>0 when approaching a sign change from
+  %       the center, c<<0 when approaching from outside, c=-10 normally.
+
   % Create the indicator function
   % TODO: Make this more robust using med+mad to find d1 spikes
   u = ones(N,1);
