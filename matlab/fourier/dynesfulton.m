@@ -1,8 +1,12 @@
-function c = dynesfulton(inputfile)
+function dynesfulton(inputfile)
   % Import data from an input file
   data    = load(inputfile);
   field   = data(:,1);
-  current = abs(data(:,2));
+  current = data(:,2);
+
+  % Remove any signs and direct currents
+  current = abs(current);
+  current = current - min(current);
 
   % Estimate the local curvature
   c = curvature(current, field);
@@ -16,22 +20,33 @@ function c = dynesfulton(inputfile)
   % Use this to restore the sign of the measured current
   current = s .* current;
 
+  % Make sure the central lobe is a peak
+  if (abs(max(current)) < abs(min(current)))
+    current = -current;
+  end
+
   % Interpolate the input data to a higher precision
-  field_i   = linspace(min(field), max(field), 4096);
+  field_i   = linspace(min(field), max(field), 10240);
   current_i = pchip(field, current, field_i);
 
-  % Plot the reconstruction and interpolation
-  current_p = current;
-  current_m = current;
-  current_p(current < 0) = NaN;
-  current_m(current > 0) = NaN;
-  plot(field_i, current_i, 'k-', field, current_p, 'b.', field, current_m, 'r.');
-  xlabel('Applied field H');
-  ylabel('Charge current I');
-
-  % Perform a Fourier transform
   % TODO: Make this part work
-  fourier = ifft(field)
+  fourier = ifft(field);
+
+  % Plot the reconstruction
+  current_p = current; current_p(current < 0) = NaN;
+  current_m = current; current_m(current > 0) = NaN;
+  figure;
+  plot(field_i, current_i, 'k-', field, current_p, 'b.', field, current_m, 'r.');
+  title('Reconstruction of the J(H) curve');
+  xlabel('Applied magnetic field H');
+  ylabel('Charge current J');
+
+  % Plot the Fourier transformation
+  figure;
+  plot(real(fourier));
+  title('Reconstruction of the J(x) curve');
+  xlabel('Position x');
+  xlabel('Charge current J');
 end
 
 function v = trim(u)
@@ -50,25 +65,20 @@ function v = trim(u)
   % Finally, construct the trimmed boolean array
   v = zeros(size(u));
   for n=1:min(size(p),size(q))
-    v(ceil(1+p(n)/2+q(n)/2)) = 1;
+    v(ceil(1+(p(n)+q(n))/2)) = 1;
   end
 end
 
 function u = spikes(y)
-  % Uses an outlier-detection algorithm to identify abberant maxima in a dataset.
+  % Identifies maxima in a dataset that can be classified as outliers.
+  % [Assumption: the original data set a median that is roughly zero.]
 
-  % Find the median and median-absolute-deviation of the input array
-  N = length(y);
-  m = median(y);
-  s = mad(y,1);
-
-  % Identify regions that exceed a statistical threshold value
-  u = y > m + 3*s;
+  u = y > 3*mad(y,1);
 end
 
 function c = curvature(y, x)
-  % Calculates the local curvature of some function y(x), using a finite-difference
-  % approximation for the numerical derivatives dy/dx and d²y/dx² of the arrays.
+  % Calculates the local curvature of some function y(x), using finite-difference
+  % approximations for the numerical derivatives dy/dx and d²y/dx² of the arrays.
 
   % Calculate the first and second derivatives
   d1 = differentiate1(y, x);
