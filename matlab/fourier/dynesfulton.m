@@ -1,5 +1,5 @@
-function c = dynesfulton(inputfile, outputfile)
-  % Load input file
+function c = dynesfulton(inputfile)
+  % Import data from an input file
   data    = load(inputfile);
   field   = data(:,1);
   current = abs(data(:,2));
@@ -8,7 +8,7 @@ function c = dynesfulton(inputfile, outputfile)
   c = curvature(current, field);
 
   % Identify spikes in the curvature
-  u = spikes(c);
+  u = trim(spikes(c));
 
   % Create a sign array that flips after each spike
   s = (-1) .^ cumsum(u);
@@ -16,19 +16,42 @@ function c = dynesfulton(inputfile, outputfile)
   % Use this to restore the sign of the measured current
   current = s .* current;
 
-  % Make sure the central peak is a maximum
-  if (abs(max(current)) < abs(min(current)))
-    current = -current;
-  end
+  % Interpolate the input data to a higher precision
+  field_i   = linspace(min(field), max(field), 4096);
+  current_i = pchip(field, current, field_i);
+
+  % Plot the reconstruction and interpolation
+  current_p = current;
+  current_m = current;
+  current_p(current < 0) = NaN;
+  current_m(current > 0) = NaN;
+  plot(field_i, current_i, 'k-', field, current_p, 'b.', field, current_m, 'r.');
+  xlabel('Applied field H');
+  ylabel('Charge current I');
 
   % Perform a Fourier transform
   % TODO: Make this part work
   fourier = ifft(field)
+end
 
-  % Dump processed output
-  %data = [field, u];
-  data = u;
-  save(outputfile, 'data', '-ascii');
+function v = trim(u)
+  % Takes a boolean array, and replaces consecutive true-valued regions in the array
+  % with a single true element in the center of the region. For instance:
+  %  trim([0,1,1,1,0,0,0,1,1,1,1,1,0,0]) = [0,0,1,0,0,0,0,0,0,1,0,0,0,0]
+
+  % Differentiate the boolean array — the result should be +1 at the start of a
+  % true-valued region, -1 at the end of such a region, and 0 otherwise
+  d = diff(u);
+
+  % Identify the start and stop of true-valued regions
+  p = find(d > 0);
+  q = find(d < 0);
+
+  % Finally, construct the trimmed boolean array
+  v = zeros(size(u));
+  for n=1:min(size(p),size(q))
+    v(ceil(1+p(n)/2+q(n)/2)) = 1;
+  end
 end
 
 function u = spikes(y)
@@ -41,15 +64,6 @@ function u = spikes(y)
 
   % Identify regions that exceed a statistical threshold value
   u = y > m + 3*s;
-
-  % Check where the outlier regions start and stop
-  %d  = differentiate1(u, (1:N)');
-  %u1 = find(d > 0);
-  %u2 = find(d < 0);
-
-  %um = mean([u1, u2]')';
-
-  %um = u;
 end
 
 function c = curvature(y, x)
@@ -87,5 +101,5 @@ function d = differentiate2(y, x)
   d = zeros(N,1);
 
   % Calculate the finite-difference second-derivative
-  d(2:N-1) = (y(3:N) - 2*y(2:N-1) + y(1:N-2)) ./ (x(3:N) - x(1:N-2)).^2;
+  d(2:N-1) = 4 * (y(3:N) - 2*y(2:N-1) + y(1:N-2)) ./ (x(3:N) - x(1:N-2)).^2;
 end
