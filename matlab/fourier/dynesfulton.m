@@ -44,27 +44,41 @@ function dynesfulton(inputfile, threshold)
   [density, position] = fourier(current, field);
 
   % Smooth the resulting current density to get the trend
-  density = smooth(position, density, 'lowess');
+  density_s = smooth(position, density, 'lowess');
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % VISUALIZE THE FINAL RESULTS
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  % Plot the reconstruction
+  % First subfigure
+  figure;
+  subplot(3,1,1);
+
+  % Plot the original measurements
+  plot(data(:,1), data(:,2), 'b.', data(:,1), data(:,2), 'k-');
+  xlabel('H');
+  ylabel('J_c(H)');
+
+  % Second subfigure
+  subplot(3,1,2);
+
+  % Plot the reconstructed current
   current_p = current; current_p(current < 0) = NaN;
   current_m = current; current_m(current > 0) = NaN;
-  figure;
   plot(field_i, current_i, 'k-', field, current_p, 'b.', field, current_m, 'r.');
-  title('Reconstruction of the J(H) curve');
-  xlabel('Applied magnetic field H');
-  ylabel('Charge current J');
+  xlabel('H');
+  ylabel('J(H)');
+
+  % Third subfigure
+  subplot(3,1,3);
 
   % Plot the Fourier transformation
-  figure;
-  plot(position, density, 'k-');
-  title('Reconstruction of the J(x) curve');
-  xlabel('Position x');
-  xlabel('Charge current J');
+  hold on
+  area(position, density,   'FaceColor', 'k');
+  plot(position, density_s, 'r-');
+  hold off
+  xlabel('x');
+  ylabel('j(x)');
 end
 
 function v = trim(u)
@@ -135,18 +149,15 @@ end
 function [Y,X] = fourier(y, x)
   % Performs a Fourier transformation of an array y(x).
 
-  % Find an adequate array size
-  n = 2^nextpow2(length(y));
-
   % Perform the transformation
-  Y = ifft(y, n, 'symmetric');
+  Y = fft(y);
 
   % Reorganize the results
-  p = floor(1+n/2);
+  p = floor(1+length(y)/2);
   Y = abs(real([Y(p+1:end); Y(1:p)]));
 
   % Construct a fitting domain
-  q = (1/mean(diff(x)));
+  q = 2/(mean(diff(x)));
   X = linspace(-q, q, length(Y))';
 
   % Calculate the norm using trapezoid integration
