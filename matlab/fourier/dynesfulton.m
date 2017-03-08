@@ -37,14 +37,14 @@ function dynesfulton(inputfile, threshold)
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   % Interpolate the input data to a higher precision
-  field_i   = linspace(min(field), max(field), 10240);
-  current_i = pchip(field, current, field_i);
+  %field   = linspace(min(field), max(field), 10240)';
+  %current = pchip(field, current, field_i);
 
   % Perform a Fourier transform of the results
   [density, position] = fourier(current, field);
 
   % Smooth the resulting current density to get the trend
-  density_s = smooth(position, density, 'lowess');
+  %density = smooth(position, density, 'lowess');
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % VISUALIZE THE FINAL RESULTS
@@ -55,7 +55,7 @@ function dynesfulton(inputfile, threshold)
   subplot(3,1,1);
 
   % Plot the original measurements
-  plot(data(:,1), data(:,2), 'b.', data(:,1), data(:,2), 'k-');
+  plot(data(:,1), data(:,2), 'k.-');
   xlabel('H');
   ylabel('J_c(H)');
 
@@ -65,7 +65,7 @@ function dynesfulton(inputfile, threshold)
   % Plot the reconstructed current
   current_p = current; current_p(current < 0) = NaN;
   current_m = current; current_m(current > 0) = NaN;
-  plot(field_i, current_i, 'k-', field, current_p, 'b.', field, current_m, 'r.');
+  plot(field, current, 'k-', field, current_p, 'b.', field, current_m, 'r.');
   xlabel('H');
   ylabel('J(H)');
 
@@ -73,12 +73,10 @@ function dynesfulton(inputfile, threshold)
   subplot(3,1,3);
 
   % Plot the Fourier transformation
-  hold on
   area(position, density,   'FaceColor', 'k');
-  plot(position, density_s, 'r-');
-  hold off
   xlabel('x');
   ylabel('j(x)');
+  xlim([-3, 3]);
 end
 
 function v = trim(u)
