@@ -9,17 +9,15 @@ function dynesfulton(inputfile, threshold)
   % Import data from an input file
   data    = load(inputfile);
   field   = data(:,1);
-  current = data(:,2);
+  current = abs(data(:,2));
 
-  % Remove any signs and direct currents
-  current = abs(current);
-  current = current - min(current);
-
-  % Estimate the local curvature
-  c = curvature(current, field);
-
-  % Identify spikes in the curvature
-  u = trim(spikes(c, threshold));
+  % Identify nodepoints in the current
+  u = trim(current < threshold*max(current))
+  % TODO: If this doesn't work well, try calculating the local
+  %       median m and median-absolute-deviation s, where local
+  %       here means calculated from the e.g. 20 neighbouring
+  %       elements. If the point is below m-3s, then we have
+  %       a local minimum, and can use trim to find its center.
 
   % Create a sign array that flips after each spike
   s = (-1) .^ cumsum(u);
@@ -80,8 +78,8 @@ function dynesfulton(inputfile, threshold)
 end
 
 function v = trim(u)
-  % Takes a boolean array, and replaces consecutive true-valued regions in the array
-  % with a single true element in the center of the region. For instance:
+  % Takes a boolean array, and replaces consecutive true-valued regions in the 
+  % array with a single true element in the center of the region. For instance:
   %  trim([0,1,1,1,0,0,0,1,1,1,1,1,0,0]) = [0,0,1,0,0,0,0,0,0,1,0,0,0,0]
 
   % Differentiate the boolean array — the result should be +1 at the start of a
@@ -99,50 +97,6 @@ function v = trim(u)
   end
 end
 
-function u = spikes(y, t)
-  % Identifies maxima in a dataset that can be classified as outliers.
-  % [Assumption: the original data set a median that is roughly zero.]
-
-  u = y > t*mad(y,1);
-end
-
-function c = curvature(y, x)
-  % Calculates the local curvature of some function y(x), using finite-difference
-  % approximations for the numerical derivatives dy/dx and d²y/dx² of the arrays.
-
-  % Calculate the first and second derivatives
-  d1 = differentiate1(y, x);
-  d2 = differentiate2(y, x);
-
-  % Calculate the signed local curvature 
-  c = d2 ./ (1+d1.^2).^(3/2);
-end
-
-function d = differentiate1(y, x)
-  % Calculates the first-derivative dy/dx, using a central-difference approximation in 
-  % the interior domain, and a forward/backward-difference approximation at the edges.
-
-  % Initialize variables
-  N = min(length(x),length(y));
-  d = zeros(N,1);
-
-  % Calculate the finite-difference first-derivative
-  d(  1  ) = (y( 2 )-y(  1  )) ./ (x( 2 )-x(  1  ));
-  d(2:N-1) = (y(3:N)-y(1:N-2)) ./ (x(3:N)-x(1:N-2));
-  d(  N  ) = (y( N )-y( N-1 )) ./ (x( N )-x( N-1 ));
-end
-
-function d = differentiate2(y, x)
-  % Calculates the second-derivative d²y/dx², using a central-difference approximation
-  % in the interior domain of the function y(x), and skipping calculation at the edges.
-
-  % Initialize variables
-  N = min(length(x),length(y));
-  d = zeros(N,1);
-
-  % Calculate the finite-difference second-derivative
-  d(2:N-1) = 4 * (y(3:N) - 2*y(2:N-1) + y(1:N-2)) ./ (x(3:N) - x(1:N-2)).^2;
-end
 
 function [Y,X] = fourier(y, x)
   % Performs a Fourier transformation of an array y(x).
