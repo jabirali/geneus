@@ -11,6 +11,15 @@
 !>   subobjects spinactive_a and spinactive_b of a type(spinactive). These types can be moved into modules spinorbit_m
 !>   and spinactive_m, together with the associated methods diffusion_spinorbit etc. We can then have separate modules
 !>   spinorbit_m and spinactive_m that the current module depends on, leading to greater encapsulation and separation.
+!>
+!> @TODO
+!>   Rename spinorbit_film/spinorbit_wire/spinorbit_bulk to rashba and dresselhaus, since these are the more common
+!>   names used in the litterature, and this will make it easier for other people to learn to use the code in the future.
+!>   The best way to define the Rashba coupling is likely to use a vector, i.e. "rashba = [ax,ay,az]", where we can use 
+!>   A=α(σ×e) to get the A-field. We can then add another option "nanowire = T" or "dimensions = 1", so spinorbit_prehook
+!>   knows it should prune away the e_x and e_y components of the A-field if true. For backwards compatibility, we should
+!>   perhaps interpret "rashba = az" as "rashba = [ax,ay,az]" if no brackets are detected in the value string. Think
+!>   of something smart for the dresselhaus coupling as well; check e.g. Tom's thesis regarding nanowire dresselhaus.
 
 module conductor_m
   use :: stdio_m
