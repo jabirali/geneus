@@ -57,9 +57,9 @@ legend.columnspacing:        1.00
 
 # Colors
 image.cmap:                  viridis
-axes.prop_cycle:             cycler('color', ['000000', '793ba9', 'd96d00', '388761'])
+axes.prop_cycle:             cycler('color', ['000000', '813fb5', 'eb7200', '3d946a'])
 #axes.prop_cycle:            cycler('color', ['000000', '1673bf', 'bf1617', '1b9e77'])
-#axes.prop_cycle:						 cycler('color', ['000000', 'd95f02', '1b9e77', '7570b3'])
+#axes.prop_cycle:						 cycler('color', ['000000', '7570b3', 'd95f02', '1b9e77'])
 figure.facecolor:            ffffff
 axes.facecolor:              ffffff
 axes.edgecolor:              505050
