@@ -114,8 +114,8 @@ program main
           end do
         end do
 
-        ! Normalize and invert the diffusion matrix
-        diffusion(:,:,n,m) = (layer % conductance_b/2) * inverse(diffusion(:,:,n,m))
+        ! Invert the diffusion matrix
+        diffusion(:,:,n,m) = inverse(diffusion(:,:,n,m))
       end block
     end do
   end do
@@ -144,8 +144,8 @@ program main
           keldysh_b = retarded_b*nambuv(j) - nambuv(j)*advanced_b
 
           ! Calculate the boundary matrix coefficients
-          boundary_a(i,j,n) = trace(nambuv(i) * (keldysh_a * advanced_b - retarded_b * keldysh_a))/8
-          boundary_b(i,j,n) = trace(nambuv(i) * (keldysh_b * advanced_a - retarded_a * keldysh_b))/8
+          boundary_a(i,j,n) = (layer % conductance_b) * trace(nambuv(i) * (keldysh_a * advanced_b - retarded_b * keldysh_a))/16
+          boundary_b(i,j,n) = (layer % conductance_b) * trace(nambuv(i) * (keldysh_b * advanced_a - retarded_a * keldysh_b))/16
         end do
       end do
     end block
@@ -158,14 +158,14 @@ program main
       complex(wp), dimension(0:7,0:7) :: integral
       
       ! Perform the integral
-      integral = -inverse(boundary_a(:,:,n))
+      integral = 0
       do m=1,size(location)-1
         integral = integral + (location(m+1)-location(m)) * (diffusion(:,:,n,m+1) + diffusion(:,:,n,m))/2
       end do
-      integral = inverse(integral)
+      integral = matmul(boundary_a(:,:,n), inverse(matmul(integral,boundary_a(:,:,n)) - identity(8)))
 
       ! Invert the result of the integral and save it
-      conductivity(n) = re(integral(4,4) - integral(4,0))/2
+      conductivity(n) = re(integral(4,4) - integral(4,0)) / (layer % conductance_b)
     end block
   end do
 
