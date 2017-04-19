@@ -1,4 +1,4 @@
-function dynesfulton(inputfile, threshold)
+function dynesfulton(inputfile, outputfile)
   % This function uses the Dynes-Fulton method [PRB 3(9) 3015 (1971)] to estimate
   % the current density distribution based on critical current measurements.
 
@@ -8,109 +8,110 @@ function dynesfulton(inputfile, threshold)
 
   % Import data from an input file
   data    = load(inputfile);
+
+  % Extract data using SI units
   field   = data(:,1);
-  current = abs(data(:,2));
+  current = data(:,2);
 
-  % Identify nodepoints in the current
-  u = trim(current < threshold*max(current))
-  % TODO: If this doesn't work well, try calculating the local
-  %       median m and median-absolute-deviation s, where local
-  %       here means calculated from the e.g. 20 neighbouring
-  %       elements. If the point is below m-3s, then we have
-  %       a local minimum, and can use trim to find its center.
 
-  % Create a sign array that flips after each spike
-  s = (-1) .^ cumsum(u);
-
-  % Use this to restore the sign of the measured current
-  current = s .* current;
-
-  % Make sure the central lobe is a peak
-  if (abs(max(current)) < abs(min(current)))
-    current = -current;
-  end
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % INTERPOLATE, FIND THE CURRENT DENSITY, AND SMOOTH
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+  % Remove duplicates
+  d = diff(field);
+  field_u   = [field(1)  ];
+  current_u = [current(1)];
+  for n=1:size(d)
+	  if (d(n) > 0)
+		  field_u   = [field_u;   field(n+1)  ];
+		  current_u = [current_u; current(n+1)];
+	  end
+  end
+
   % Interpolate the input data to a higher precision
-  %field   = linspace(min(field), max(field), 10240)';
-  %current = pchip(field, current, field_i);
+  field_i   = linspace(-300, +300, 10240)';
+  current_i = pchip(field_u, current_u, field_i);
+  current_j = (current_i + fliplr(current_i')')/2;
+  current_k = [current_i(1:5120); fliplr(current_i(1:5120)')'];
 
   % Perform a Fourier transform of the results
-  [density, position] = fourier(current, field);
+  beta_i                  = field_i * 0.48359785;
+  [density_i, position_i] = fourier(current_i, beta_i);
+  [density_j, position_j] = fourier(current_j, beta_i);
+  [density_k, position_k] = fourier(current_k, beta_i);
 
   % Smooth the resulting current density to get the trend
   %density = smooth(position, density, 'lowess');
+
+
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % VISUALIZE THE FINAL RESULTS
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  % First subfigure
-  figure;
-  subplot(3,1,1);
-
-  % Plot the original measurements
-  plot(data(:,1), data(:,2), 'k.-');
-  xlabel('H');
-  ylabel('J_c(H)');
-
-  % Second subfigure
-  subplot(3,1,2);
-
   % Plot the reconstructed current
-  current_p = current; current_p(current < 0) = NaN;
-  current_m = current; current_m(current > 0) = NaN;
-  plot(field, current, 'k-', field, current_p, 'b.', field, current_m, 'r.');
-  xlabel('H');
-  ylabel('J(H)');
+  subplot(3,2,1);
+  plot(field_i, current_i, 'k-');
+  title('Asymmetric data');
+  xlabel('Applied field μ₀H [mT]');
+  ylabel('Total current J(H)');
+  xlim([-300, +300]);
+  ylim([-1.1, +1.1]);
 
-  % Third subfigure
-  subplot(3,1,3);
+  subplot(3,2,3);
+  plot(field_i, current_j, 'k-');
+  title('Symmetrized data');
+  xlabel('Applied field μ₀H [mT]');
+  ylabel('Total current J(H)');
+  xlim([-300, +300]);
+  ylim([-1.1, +1.1]);
+
+  subplot(3,2,5);
+  plot(field_i, current_k, 'k-');
+  title('Mirrored data');
+  xlabel('Applied field μ₀H [mT]');
+  ylabel('Total current J(H)');
+  xlim([-300, +300]);
+  ylim([-1.1, +1.1]);
 
   % Plot the Fourier transformation
-  area(position, density,   'FaceColor', 'k');
-  xlabel('x');
-  ylabel('j(x)');
-  xlim([-3, 3]);
+  subplot(3,2,2);
+  area(position_i, density_i,   'FaceColor', 'k');
+  title('Asymmetric data');
+  xlabel('Position x [μm]');
+  ylabel('Current density j(x)');
+  xlim([-0.5, +0.5]);
+
+  subplot(3,2,4);
+  area(position_j, density_j,   'FaceColor', 'k');
+  title('Symmetrized data');
+  xlabel('Position x [μm]');
+  ylabel('Current density j(x)');
+  xlim([-0.5, +0.5]);
+
+  subplot(3,2,6);
+  area(position_k, density_k,   'FaceColor', 'k');
+  title('Mirrored data');
+  xlabel('Position x [μm]');
+  ylabel('Current density j(x)');
+  xlim([-0.5, +0.5]);
+
+  % Save the results
+  output = [position_i, density_i];
+  save(outputfile, 'output', '-ascii');
 end
-
-function v = trim(u)
-  % Takes a boolean array, and replaces consecutive true-valued regions in the 
-  % array with a single true element in the center of the region. For instance:
-  %  trim([0,1,1,1,0,0,0,1,1,1,1,1,0,0]) = [0,0,1,0,0,0,0,0,0,1,0,0,0,0]
-
-  % Differentiate the boolean array — the result should be +1 at the start of a
-  % true-valued region, -1 at the end of such a region, and 0 otherwise
-  d = diff(u);
-
-  % Identify the start and stop of true-valued regions
-  p = find(d > 0);
-  q = find(d < 0);
-
-  % Finally, construct the trimmed boolean array
-  v = zeros(size(u));
-  for n=1:min(size(p),size(q))
-    v(ceil(1+(p(n)+q(n))/2)) = 1;
-  end
-end
-
 
 function [Y,X] = fourier(y, x)
   % Performs a Fourier transformation of an array y(x).
 
   % Perform the transformation
-  Y = fft(y);
-
-  % Reorganize the results
-  p = floor(1+length(y)/2);
-  Y = abs(real([Y(p+1:end); Y(1:p)]));
+  Y = abs(fftshift(ifft(y)));
 
   % Construct a fitting domain
-  q = 2/(mean(diff(x)));
-  X = linspace(-q, q, length(Y))';
+  q = 1/(mean(diff(x)));
+  X = linspace(-q/2, +q/2, length(Y))';
 
   % Calculate the norm using trapezoid integration
   s = sqrt(sum( (Y(2:end).^2+Y(1:end-1).^2) .* (X(2:end)-X(1:end-1)))/2);
