@@ -30,7 +30,6 @@ module propagator_m
     procedure  :: retarded  => propagator_retarded  !! 4×4 matrix representation of the retarded propagator
     procedure  :: advanced  => propagator_advanced  !! 4×4 matrix representation of the advanced propagator
     procedure  :: matrix    => propagator_matrix    !! 4×4 matrix representation of the propagator
-    procedure  :: matrixt   => propagator_matrixt   !! 4×4 matrix representation of the propagator   (tilde-conjugated)
     procedure  :: singlet   => propagator_singlet   !! Singlet component of the anomalous propagator
     procedure  :: singlett  => propagator_singlett  !! Singlet component of the anomalous propagator (tilde-conjugated)
     procedure  :: triplet   => propagator_triplet   !! Triplet component of the anomalous propagator
@@ -135,20 +134,6 @@ contains
       M(1:2,3:4) = (+2.0_wp) * N  * g
       M(3:4,1:2) = (-2.0_wp) * Nt * gt
       M(3:4,3:4) = (-2.0_wp) * Nt + I
-    end associate
-  end function
-
-  pure function propagator_matrixt(this) result(matrix)
-    !! Calculates the 4×4 Green's function matrix from the Riccati parameters of the Green's function object.
-    !! In contrast to propagator_matrix(), this function returns the tilde-conjugated form of the matrix.
-    class(propagator), intent(in) :: this        !! Green's function object
-    complex(wp)                   :: matrix(4,4) !! Green's function matrix
-
-    associate(g => this % g, gt => this % gt, N => this % N, Nt => this % Nt, I => pauli0, M => matrix)
-      M(1:2,1:2) = (+2.0_wp) * Nt - I
-      M(1:2,3:4) = (+2.0_wp) * Nt * gt
-      M(3:4,1:2) = (-2.0_wp) * N  * g
-      M(3:4,3:4) = (-2.0_wp) * N  + I
     end associate
   end function
 
