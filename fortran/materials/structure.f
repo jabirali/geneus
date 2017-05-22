@@ -40,6 +40,7 @@ module structure_m
     procedure :: converge            => structure_converge
     procedure :: write_density       => structure_write_density
     procedure :: write_current       => structure_write_current
+    procedure :: write_decomposition => structure_write_decomposition
     procedure :: write_magnetization => structure_write_magnetization
     procedure :: write_gap           => structure_write_gap
   end type
@@ -560,6 +561,51 @@ contains
         do m=1,size(ptr % location)
           x = a + (b-a) * ptr % location(m)
           write(unit,'(*(es20.12e3,:,"	"))') x, ptr % current(:,m)
+        end do
+      end if
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_write_decomposition(this, file)
+    !! Writes the singlet/triplet decomposition of the charge current to a given output file.
+    class(structure), target  :: this
+    character(*)              :: file
+    integer                   :: unit
+    real(wp)                  :: a, b
+
+    ! Open output file
+    unit = output(file)
+
+    ! Initialize variables
+    b = 0
+
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Singlet           ', &
+                                '  Triplet-x         ', &
+                                '  Triplet-y         ', &
+                                '  Triplet-z         '
+
+    ! Traverse all materials
+    call this % map(write_decomposition)
+
+    ! Close output file
+    close(unit = unit)
+  contains
+    subroutine write_decomposition(ptr)
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: m
+
+      if (allocated(ptr % decomposition)) then
+        ! Calculate the endpoints of this layer
+        a = b
+        b = b + 1/sqrt(ptr % thouless)
+
+        ! Write out the currents in this layer
+        do m=1,size(ptr % location)
+          x = a + (b-a) * ptr % location(m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % decomposition(:,m)
         end do
       end if
     end subroutine

@@ -410,6 +410,9 @@ contains
     ! Calculate the charge and spin currents
     call this%update_current
 
+    ! Calculate the current decomposition
+    call this%update_decomposition
+
     ! Call the spinorbit posthook
     if (allocated(this%spinorbit)) then
       call this%spinorbit%update_posthook
