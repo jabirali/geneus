@@ -23,21 +23,24 @@ module propagator_m
     type(spin) :: gt                                !! Riccati parameter γ~
     type(spin) :: dg                                !! Derivative dγ /dz
     type(spin) :: dgt                               !! Derivative dγ~/dz
-    type(spin) :: N                                 !! Normalization N  = (I - γγ~)^-1
-    type(spin) :: Nt                                !! Normalization Nt = (I - γ~γ)^-1
+    type(spin) :: N                                 !! Normalization N  = (1 - γγ~)^-1
+    type(spin) :: Nt                                !! Normalization Nt = (1 - γ~γ)^-1
   contains
-    ! Accessors for propagator components
-    procedure  :: retarded  => propagator_retarded  !! 4×4 matrix representation of the retarded propagator
-    procedure  :: advanced  => propagator_advanced  !! 4×4 matrix representation of the advanced propagator
-    procedure  :: matrix    => propagator_matrix    !! 4×4 matrix representation of the propagator
-    procedure  :: singlet   => propagator_singlet   !! Singlet component of the anomalous propagator
-    procedure  :: singlett  => propagator_singlett  !! Singlet component of the anomalous propagator (tilde-conjugated)
-    procedure  :: triplet   => propagator_triplet   !! Triplet component of the anomalous propagator
-    procedure  :: triplett  => propagator_triplett  !! Triplet component of the anomalous propagator (tilde-conjugated)
+    ! Accessors for propagator matrices (4×4 propagators in Nambu space)
+    procedure  :: retarded           => propagator_retarded           !! Retarded propagator (G^R)
+    procedure  :: advanced           => propagator_advanced           !! Advanced propagator (G^A)
+    procedure  :: retarded_gradient  => propagator_retarded_gradient  !! Retarded propagator gradient (dG^R/dz)
+    procedure  :: advanced_gradient  => propagator_advanced_gradient  !! Advanced propagator gradient (dG^A/dz)
+
+    ! Accessors for propagator components (singlet/triplet decomposition)
+    procedure  :: singlet            => propagator_singlet            !! Singlet component of the anomalous retarded propagator (f_s)
+    procedure  :: singlett           => propagator_singlett           !! Singlet component of the anomalous retarded propagator (f_s~)
+    procedure  :: triplet            => propagator_triplet            !! Triplet component of the anomalous retarded propagator (f_t)
+    procedure  :: triplett           => propagator_triplett           !! Triplet component of the anomalous retarded propagator (f_t~)
 
     ! Accessors for derived physical quantities
-    procedure  :: density   => propagator_density   !! Density of states at this position and energy
-    procedure  :: current   => propagator_current   !! Spectral current  at this position and energy
+    procedure  :: density            => propagator_density            !! Density of states at this position z and energy ε
+    procedure  :: current            => propagator_current            !! Spectral current  at this position z and energy ε
   end type
 
   ! Type constructor
@@ -80,7 +83,7 @@ contains
   pure function propagator_construct_bcs(energy, gap) result(this)
     ! Constructs a state corresponding to a BCS superconductor at some given energy, which may have an imaginary
     ! term representing inelastic scattering. The second argument 'gap' is the superconducting order parameter Δ.
-    type(propagator)        :: this      ! Green's function object that will be constructed
+    type(propagator)        :: this      ! Propagator object that will be constructed
     complex(wp), intent(in) :: energy    ! Quasiparticle energy (including inelastic scattering contribution)
     complex(wp), intent(in) :: gap       ! Superconducting order parameter (including superconducting phase)
 
@@ -108,33 +111,53 @@ contains
     this % Nt = inverse( pauli0 - this%gt * this%g  )
   end function
 
-  pure function propagator_retarded(this) result(matrix)
-    !! Calculates the 4×4 retarded propagator from the Riccati parameters of the object.
+  pure function propagator_retarded(this) result(r)
+    !! Calculates the 4×4 retarded propagator (G^R).
     class(propagator), intent(in) :: this   !! Propagator object
-    type(nambu)                   :: matrix !! Propagator matrix
+    type(nambu)                   :: r      !! Propagator matrix
 
-    matrix = this % matrix()
-  end function
-
-  pure function propagator_advanced(this) result(matrix)
-    !! Calculates the 4×4 advanced propagator from the Riccati parameters of the object.
-    class(propagator), intent(in) :: this   !! Propagator object
-    type(nambu)                   :: matrix !! Propagator matrix
-
-    matrix = nambuv(4) * transpose(conjg(-this % matrix())) * nambuv(4)
-  end function
-
-  pure function propagator_matrix(this) result(matrix)
-    !! Calculates the 4×4 Green's function matrix from the Riccati parameters of the Green's function object.
-    class(propagator), intent(in) :: this        !! Green's function object
-    complex(wp)                   :: matrix(4,4) !! Green's function matrix
-
-    associate(g => this % g, gt => this % gt, N => this % N, Nt => this % Nt, I => pauli0, M => matrix)
+    associate(g => this % g, gt => this % gt, &
+              N => this % N, Nt => this % Nt, &
+              I => pauli0,   M  => r % matrix )
       M(1:2,1:2) = (+2.0_wp) * N  - I
       M(1:2,3:4) = (+2.0_wp) * N  * g
       M(3:4,1:2) = (-2.0_wp) * Nt * gt
       M(3:4,3:4) = (-2.0_wp) * Nt + I
     end associate
+  end function
+
+  pure function propagator_retarded_gradient(this) result(r)
+    !! Calculates the 4×4 retarded propagator gradient (dG^R/dz).
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: r      !! Propagator gradient
+
+    associate(g  => this % g,  gt  => this % gt,  &
+              dg => this % dg, dgt => this % dgt, &
+              N  => this % N,  Nt  => this % Nt,  &
+              I  => pauli0,    M   => r % matrix  )
+      M(1:2,1:2) = (+1.0_wp) * N  * (dg*gt  +  g*dgt) * N
+      M(1:2,3:4) = (+2.0_wp) * N  * (dg  - g *dgt*g ) * Nt
+      M(3:4,1:2) = (-2.0_wp) * Nt * (dgt - gt*dg *gt) * N
+      M(3:4,3:4) = (-1.0_wp) * Nt * (dgt*g  +  gt*dg) * Nt
+    end associate
+  end function
+
+  pure function propagator_advanced(this) result(r)
+    !! Calculates the 4×4 advanced propagator (G^A).
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: r      !! Propagator matrix
+
+    r = this % retarded()
+    r = nambuv(4) * transpose(conjg(-r % matrix)) * nambuv(4)
+  end function
+
+  pure function propagator_advanced_gradient(this) result(r)
+    !! Calculates the 4×4 advanced propagator gradient (dG^A/dz).
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: r      !! Propagator gradient
+
+    r = this % retarded_gradient()
+    r = nambuv(4) * transpose(conjg(-r % matrix)) * nambuv(4)
   end function
 
   pure subroutine propagator_import_rvector(a, b)
@@ -157,7 +180,7 @@ contains
     complex(wp),      intent(out) :: a(4,4)
     type(propagator), intent(in)  :: b
 
-    a = b % matrix()
+    a = b % retarded()
   end subroutine
 
   pure subroutine propagator_export_rvector(a, b)
@@ -172,7 +195,7 @@ contains
   end subroutine
 
   pure function propagator_singlet(this) result(r)
-    ! Calculates the singlet component of the anomalous Green's function f.
+    ! Calculates the singlet component of the anomalous propagator f.
     class(propagator), intent(in) :: this
     complex(wp)                   :: r
     type(spin)                    :: f
@@ -182,7 +205,7 @@ contains
   end function
 
   pure function propagator_singlett(this) result(r)
-    ! Calculates the singlet component of the tilde-conjugated anomalous Green's function f~.
+    ! Calculates the singlet component of the tilde-conjugated anomalous propagator f~.
     class(propagator), intent(in) :: this
     complex(wp)                   :: r
     type(spin)                    :: ft
@@ -192,7 +215,7 @@ contains
   end function
 
   pure function propagator_triplet(this) result(r)
-    ! Calculates the triplet component of the anomalous Green's function f.
+    ! Calculates the triplet component of the anomalous propagator f.
     class(propagator), intent(in) :: this
     complex(wp)                   :: r(3)
     type(spin)                    :: f
@@ -205,7 +228,7 @@ contains
   end function
 
   pure function propagator_triplett(this) result(r)
-    ! Calculates the triplet component of the tilde-conjugated anomalous Green's function f~.
+    ! Calculates the triplet component of the tilde-conjugated anomalous propagator f~.
     class(propagator), intent(in) :: this
     complex(wp)                   :: r(3)
     type(spin)                    :: ft

@@ -183,7 +183,7 @@ contains
           ! (The `block` prevents a segfault when compiling with IFort 16 and full 
           !  optimization; I have no idea why. It has no effect under GFortran 6.)
           block
-            G  = propagators(m,n) % matrix()
+            G  = propagators(m,n) % retarded()
           end block
 
           ! Calculate the corresponding spin-orbit contribution to the 4×4 spectral matrix current
