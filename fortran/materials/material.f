@@ -36,8 +36,9 @@ module material_m
     real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
     type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
     type(propagator),             allocatable :: backup(:,:)                                ! Backup values for the propagator
-    real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
     real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states        [unit: N₀]
+    real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
+    real(wp),                     allocatable :: decomposition(:,:)                         ! Decomposition of the charge current into singlets and triplets
     real(wp),                     allocatable :: magnetization(:,:)                         ! Discretized values for the induced magnetization    [unit: N₀gμ/2]
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
@@ -58,8 +59,9 @@ module material_m
     ! These methods define how to update the physical state of the material
     procedure(init),                 deferred :: init                                                   ! Initializes  the propagators
     procedure                                 :: update                => material_update               ! Recalculates the propagators
-    procedure                                 :: update_current        => material_update_current       ! Calculates the electric and spin currents
     procedure                                 :: update_density        => material_update_density       ! Calculates the density of states
+    procedure                                 :: update_current        => material_update_current       ! Calculates the electric and spin currents
+    procedure                                 :: update_decomposition  => material_update_decomposition ! Calculates the singlet/triplet decomposition
     procedure                                 :: update_magnetization  => material_update_magnetization ! Calculates the induced magnetization
     procedure(update),               deferred :: update_prehook                                         ! Executed before calculating the propagators
     procedure(update),               deferred :: update_posthook                                        ! Executed after  calculating the propagators
@@ -345,6 +347,47 @@ contains
       deallocate(current)
     end if
   end subroutine
+
+  impure subroutine material_update_decomposition(this)
+    ! Calculate the singlet/triplet decomposition of the charge current in the material.
+    use :: calculus_m
+
+    class(material), intent(inout) :: this
+    real(wp),        allocatable   :: current(:,:)
+    real(wp)                       :: prefactor
+    integer                        :: n, m
+
+    if (size(this%energy) > 1) then
+      ! Allocate memory if necessary
+      if (.not. allocated(this%decomposition)) then
+        allocate(this%decomposition(0:3,size(this%location)))
+      end if
+
+      ! Allocate workspace memory
+      allocate(current(size(this%energy),0:3))
+
+      ! Iterate over the stored propagators
+      do n = 1,size(this%location)
+        do m = 1,size(this%energy)
+          ! This factor converts from a zero-temperature to finite-temperature spectral current
+          prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+
+          ! Calculate the contribution to the spectral currents at this position in the material
+          current(m,:) = prefactor * this % propagator(m,n) % current()
+        end do
+
+        ! Interpolate and integrate the results, and update the current vector
+        this%decomposition(0,n) = integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(1,n) = integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(2,n) = integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(3,n) = integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
+      end do
+
+      ! Deallocate workspace memory
+      deallocate(current)
+    end if
+  end subroutine
+
 
   impure subroutine material_update_magnetization(this)
     ! Calculate the induced magnetization in the material.
