@@ -5,7 +5,6 @@
 !> This program calculates the charge conductivity of an S/X/N superconducting thin-film structure.
 !> 
 !> @TODO: Check if we need to generalize to spin-active boundary conditions.
-!> @TODO: Replace diffusion and boundary_* by real matrices, since they are provably real. Define real matrix inversion.
 
 program main
   use :: structure_m
