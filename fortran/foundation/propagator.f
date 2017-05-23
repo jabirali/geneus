@@ -198,33 +198,39 @@ contains
     complex(wp), dimension(0:3), optional, intent(out) :: ft    !! Anomalous propagator (f~)
     complex(wp), dimension(0:3), optional, intent(out) :: df    !! Anomalous propagator gradient (df /dz)
     complex(wp), dimension(0:3), optional, intent(out) :: dft   !! Anomalous propagator gradient (df~/dz)
+    type(spin),  dimension(0:3)                        :: P, Pt !  Pauli vectors used for the calculation
     type(nambu)                                        :: G     !  4×4 retarded propagator (G^R)
 
-    ! Calculate and decompose the anomalous propagator
+    ! Calculate the Pauli matrices necessary to invert f=[f·σ]iσ₂
+    P  = ((0.0_wp,-0.5_wp) * pauli2) * pauli
+    Pt = conjg(P)
+
+
+    ! Calculate and decompose the propagator
     if (present(f) .or. present(ft)) then
       ! Extract the retarded propagator
       G  = this % retarded()
 
       ! Perform the singlet/triplet decomposition
       if (present(f )) then
-        f   = trace(pauli * ( G % matrix(1:2, 3:4) * pauli2)) * (0.0_wp,-0.5_wp)
+        f   = trace(spin(+G % matrix(1:2, 3:4)) * P )
       end if
       if (present(ft)) then
-        ft  = trace(pauli * ( G % matrix(3:4, 1:2) * pauli2)) * (0.0_wp,+0.5_wp)
+        ft  = trace(spin(-G % matrix(3:4, 1:2)) * Pt)
       end if
     end if
 
-    ! Calculate and decompose the gradient
+    ! Calculate and decompose the propagator gradient
     if (present(df) .or. present(dft)) then
       ! Extract the retarded propagator gradient
       G  = this % retarded_gradient()
 
       ! Perform the singlet/triplet decomposition
       if (present(df )) then
-        df   = trace(pauli * ( G % matrix(1:2, 3:4) * pauli2)) * (0.0_wp,-0.5_wp)
+        df   = trace(spin(+G % matrix(1:2, 3:4)) * P )
       end if
       if (present(dft)) then
-        dft  = trace(pauli * ( G % matrix(3:4, 1:2) * pauli2)) * (0.0_wp,+0.5_wp)
+        dft  = trace(spin(-G % matrix(3:4, 1:2)) * Pt)
       end if
     end if
   end subroutine
