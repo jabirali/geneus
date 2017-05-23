@@ -309,7 +309,8 @@ contains
   end subroutine
 
   impure subroutine material_update_current(this)
-    ! Calculate the charge and spin currents in the material.
+    !! Calculate the charge and spin currents in the material.
+    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
     use :: calculus_m
 
     class(material), intent(inout) :: this
@@ -349,12 +350,11 @@ contains
   end subroutine
 
   impure subroutine material_update_decomposition(this)
-    ! Calculate the singlet/triplet decomposition of the charge current in the material.
+    !! Calculate the singlet/triplet decomposition of the charge current in the material.
+    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
     use :: calculus_m
-    use :: nambu_m
 
     class(material), intent(inout) :: this
-    type(nambu)                    :: G, dG
     complex(wp)                    :: f(0:3), df(0:3), ft(0:3), dft(0:3)
     real(wp),        allocatable   :: current(:,:)
     real(wp)                       :: prefactor
@@ -397,7 +397,8 @@ contains
 
 
   impure subroutine material_update_magnetization(this)
-    ! Calculate the induced magnetization in the material.
+    !! Calculate the induced magnetization in the material.
+    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
     use :: calculus_m
 
     class(material), intent(inout) :: this

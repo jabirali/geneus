@@ -155,6 +155,7 @@ contains
   impure subroutine spinorbit_update_current(this)
     !! Calculate the spin-orbit coupling terms in the charge and spin currents, 
     !! i.e. determine how the SU(2) gauge field affects the relevant currents.
+    !! @TODO: The tanh(...) has to be generalized for nonequilibrium calculations.
     class(spinorbit), intent(inout)  :: this
     real(wp),         allocatable    :: spectral(:,:)
     real(wp)                         :: prefactor

@@ -7,10 +7,10 @@
 !> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
 !>
 !> @TODO
-!>   Move the spinorbit fields into a separate subobject type(spinorbit), and the spinactive fields into two separate
-!>   subobjects spinactive_a and spinactive_b of a type(spinactive). These types can be moved into modules spinorbit_m
-!>   and spinactive_m, together with the associated methods diffusion_spinorbit etc. We can then have separate modules
-!>   spinorbit_m and spinactive_m that the current module depends on, leading to greater encapsulation and separation.
+!>   Move the the spinactive field into separate subobjects spinactive_a and spinactive_b of a type(spinactive). This
+!>   type can be moved into a module spinactive_m, together with the associated methods diffusion_spinorbit etc. We can
+!>   then have separate modules spinorbit_m and spinactive_m that the current module depends on, leading to greater 
+!>   encapsulation and separation. The spinreflect.i contents should also be merged into the same type and module.
 !>
 !> @TODO
 !>   Rename spinorbit_film/spinorbit_wire/spinorbit_bulk to rashba and dresselhaus, since these are the more common

@@ -135,6 +135,7 @@ contains
 
   impure subroutine superconductor_update_gap(this)
     !! Calculate the superconducting gap Δ(z) from the propagators using a selfconsistency equation.
+    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
     use :: calculus_m
 
     class(superconductor), intent(inout)        :: this       ! Superconductor object that will be updated
