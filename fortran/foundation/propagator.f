@@ -26,19 +26,14 @@ module propagator_m
     type(spin) :: N                                 !! Normalization N  = (1 - γγ~)^-1
     type(spin) :: Nt                                !! Normalization Nt = (1 - γ~γ)^-1
   contains
-    ! Accessors for propagator matrices (4×4 propagators in Nambu space)
+    ! Accessors for the propagator matrices represented by this object
     procedure  :: retarded           => propagator_retarded           !! Retarded propagator (G^R)
     procedure  :: advanced           => propagator_advanced           !! Advanced propagator (G^A)
     procedure  :: retarded_gradient  => propagator_retarded_gradient  !! Retarded propagator gradient (dG^R/dz)
     procedure  :: advanced_gradient  => propagator_advanced_gradient  !! Advanced propagator gradient (dG^A/dz)
 
-    ! Accessors for propagator components (singlet/triplet decomposition)
-    procedure  :: singlet            => propagator_singlet            !! Singlet component of the anomalous retarded propagator (f_s)
-    procedure  :: singlett           => propagator_singlett           !! Singlet component of the anomalous retarded propagator (f_s~)
-    procedure  :: triplet            => propagator_triplet            !! Triplet component of the anomalous retarded propagator (f_t)
-    procedure  :: triplett           => propagator_triplett           !! Triplet component of the anomalous retarded propagator (f_t~)
-
-    ! Accessors for derived physical quantities
+    ! Accessors for physical quantities that derive from this object
+    procedure  :: decompose          => propagator_decompose          !! Singlet/triplet decomposition of the anomalous retarded propagator (f)
     procedure  :: density            => propagator_density            !! Density of states at this position z and energy ε
     procedure  :: current            => propagator_current            !! Spectral current  at this position z and energy ε
   end type
@@ -194,52 +189,45 @@ contains
     a(25:32) = b%dgt
   end subroutine
 
-  pure function propagator_singlet(this) result(r)
-    ! Calculates the singlet component of the anomalous propagator f.
-    class(propagator), intent(in) :: this
-    complex(wp)                   :: r
-    type(spin)                    :: f
+  pure subroutine propagator_decompose(this, f, ft, df, dft)
+    !! Performs a singlet/triplet decomposition of the anomalous retarded propagators (f, f~)
+    !! and their derivatives (df/dz, df~/dz). Each of these are returned as a complex 4-vector,
+    !! where f(0) corresponds to the singlet component and f(1:3) to the triplet component.
+    class(propagator),                     intent(in)  :: this  !! Propagator object
+    complex(wp), dimension(0:3), optional, intent(out) :: f     !! Anomalous propagator (f )
+    complex(wp), dimension(0:3), optional, intent(out) :: ft    !! Anomalous propagator (f~)
+    complex(wp), dimension(0:3), optional, intent(out) :: df    !! Anomalous propagator gradient (df /dz)
+    complex(wp), dimension(0:3), optional, intent(out) :: dft   !! Anomalous propagator gradient (df~/dz)
+    type(nambu)                                        :: G     !  4×4 retarded propagator (G)
 
-    f = this % N * this % g
-    r = f % matrix(1,2) - f % matrix(2,1)
-  end function
+    ! Calculate and decompose the anomalous propagator
+    if (present(f) .or. present(ft)) then
+      ! Extract the retarded propagator
+      G  = this % retarded()
 
-  pure function propagator_singlett(this) result(r)
-    ! Calculates the singlet component of the tilde-conjugated anomalous propagator f~.
-    class(propagator), intent(in) :: this
-    complex(wp)                   :: r
-    type(spin)                    :: ft
+      ! Perform the singlet/triplet decomposition
+      if (present(f )) then
+        f   = trace(pauli * ( G % matrix(1:2, 3:4) * pauli2)) * (0.0_wp,-0.5_wp)
+      end if
+      if (present(ft)) then
+        ft  = trace(pauli * ( G % matrix(3:4, 1:2) * pauli2)) * (0.0_wp,+0.5_wp)
+      end if
+    end if
 
-    ft = this % Nt * this % gt
-    r  = ft % matrix(1,2) - ft % matrix(2,1)
-  end function
+    ! Calculate and decompose the gradient
+    if (present(df) .or. present(dft)) then
+      ! Extract the retarded propagator gradient
+      G  = this % retarded_gradient()
 
-  pure function propagator_triplet(this) result(r)
-    ! Calculates the triplet component of the anomalous propagator f.
-    class(propagator), intent(in) :: this
-    complex(wp)                   :: r(3)
-    type(spin)                    :: f
-
-    f = this % N * this % g
-
-    r = [ (f%matrix(2,2) - f%matrix(1,1))*(1.0_wp, 0.0_wp), &
-          (f%matrix(1,1) + f%matrix(2,2))*(0.0_wp,-1.0_wp), &
-          (f%matrix(1,2) + f%matrix(2,1))*(1.0_wp, 0.0_wp)  ];
-  end function
-
-  pure function propagator_triplett(this) result(r)
-    ! Calculates the triplet component of the tilde-conjugated anomalous propagator f~.
-    class(propagator), intent(in) :: this
-    complex(wp)                   :: r(3)
-    type(spin)                    :: ft
-
-    ft = this % Nt * this % gt
-
-    r = [ (ft%matrix(2,2) - ft%matrix(1,1))*(1.0_wp, 0.0_wp), &
-          (ft%matrix(1,1) + ft%matrix(2,2))*(0.0_wp,-1.0_wp), &
-          (ft%matrix(1,2) + ft%matrix(2,1))*(1.0_wp, 0.0_wp)  ];
-  end function
-
+      ! Perform the singlet/triplet decomposition
+      if (present(df )) then
+        df   = trace(pauli * ( G % matrix(1:2, 3:4) * pauli2)) * (0.0_wp,-0.5_wp)
+      end if
+      if (present(dft)) then
+        dft  = trace(pauli * ( G % matrix(3:4, 1:2) * pauli2)) * (0.0_wp,+0.5_wp)
+      end if
+    end if
+  end subroutine
 
   pure function propagator_density(this) result(r)
     ! Calculates the local density of states.

@@ -140,7 +140,7 @@ contains
     class(superconductor), intent(inout)        :: this       ! Superconductor object that will be updated
     complex(wp), dimension(size(this%energy))   :: gap_e      ! Used to calculate the order parameter (as a function of energy)
     complex(wp), dimension(size(this%location)) :: gap_z      ! Used to calculate the order parameter (as a function of position)
-    complex(wp)                                 :: singlet    ! Singlet component of the anomalous propagators
+    complex(wp), dimension(0:3)                 :: f, ft      ! Singlet/triplet decomposition of the anomalous propagators
     real(wp)                                    :: coupling   ! The BCS coupling that gives rise to superconductivity
     real(wp)                                    :: diff       ! Change of the gap between two iterations
     integer                                     :: n, m       ! Loop variables
@@ -151,11 +151,11 @@ contains
     ! Iterate over the stored propagators
     do n = 1,size(this%location)
       do m = 1,size(this%energy)
-        ! Calculate the singlet components of the anomalous propagators
-        singlet = ( this%propagator(m,n)%singlet() - conjg(this%propagator(m,n)%singlett()) )/2.0_wp
+        ! Perform a singlet/triplet decomposition of the anomalous propagators
+        call this % propagator(m,n) % decompose(f = f, ft = ft)
 
         ! Calculate the gap equation integrand and store it in an array
-        gap_e(m)  = singlet * coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+        gap_e(m)  = ((f(0) - conjg(ft(0)))/2) * coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
       end do
 
       ! Interpolate and integrate the results, and update the superconducting order parameter

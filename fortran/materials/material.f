@@ -375,20 +375,12 @@ contains
           ! This factor converts from a zero-temperature to finite-temperature spectral current
           prefactor = 8 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
-          ! Extract the retarded propagator and its gradient
-          G  = this % propagator(m,n) % retarded()
-          dG = this % propagator(m,n) % retarded_gradient()
-
-          ! Extract the anomalous singlet and triplet components from the above
-          ! [Prefactors ±i were removed because they cancel in f·dft and ft·df]
-          f   = trace(pauli * ( G % matrix(1:2, 3:4) * pauli2))/2
-          ft  = trace(pauli * ( G % matrix(3:4, 1:2) * pauli2))/2
-          df  = trace(pauli * (dG % matrix(1:2, 3:4) * pauli2))/2
-          dft = trace(pauli * (dG % matrix(3:4, 1:2) * pauli2))/2
+          ! Perform the singlet/triplet decomposition of the retarded propagator and its gradient
+          call this % propagator(m,n) % decompose(f = f, ft = ft, df = df, dft = dft)
 
           ! Calculate the contribution to the spectral charge current
           ! @TODO: Spin-orbit coupling terms [proportional to f(1:3)×ft(1:3)]
-          current(m,:) = prefactor * [+1,-1,-1,-1] * re(f*dft - conjg(ft*df))
+          current(m,:) = prefactor * [+1,-1,-1,-1] * re(f*dft - ft*df)
         end do
 
         ! Interpolate and integrate the results, and update the current vector
