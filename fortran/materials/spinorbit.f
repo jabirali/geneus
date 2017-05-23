@@ -3,15 +3,13 @@
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.
-!>
-!> @TODO: Rewrite using the new nambu.f library, replacing e.g. diag(m·σ,m·σ*) with m*nambuv(1:3).
-!>        Also, we may then for brevity replace matmul(G,matmul(M,G)) with G*M*G, and so on.
 
 module spinorbit_m
   use :: material_m
   use :: calculus_m
   use :: matrix_m
   use :: math_m
+  use :: nambu_m
   use :: spin_m
   private
 
@@ -24,7 +22,6 @@ module spinorbit_m
     type(spin)                  :: field(3)                                                  ! Spin-orbit coupling field, i.e. SU(2) gauge field
 
     ! These variables are used by internal subroutines
-    complex(wp), dimension(4,4) :: sigma0, sigma1, sigma2, sigma3                            ! Pauli matrices that are used internally in this object
     type(spin)                  :: Ax,  Ay,  Az,  A2                                         ! Spin-orbit coupling matrices (the components and square)
     type(spin)                  :: Axt, Ayt, Azt, A2t                                        ! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
@@ -51,12 +48,6 @@ contains
 
     ! Ensure that the spin-orbit field is zero
     this % field = spin(0)
-
-    ! Construct the necessary 4×4 basis matrices
-    this % sigma0 = diag(+pauli0%matrix, -pauli0%matrix)
-    this % sigma1 = diag(+pauli1%matrix, -pauli1%matrix)
-    this % sigma2 = diag(+pauli2%matrix, +pauli2%matrix)
-    this % sigma3 = diag(+pauli3%matrix, -pauli3%matrix)
   end function
 
   impure subroutine spinorbit_update_prehook(this)
@@ -88,7 +79,7 @@ contains
     class(spinorbit), intent(in)    :: this
     type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: d2g, d2gt
-    type(spin)                      :: N,  Nt
+    type(spin)                      :: N, Nt
 
     ! Rename the spin-orbit coupling matrices
     associate(Ax => this % Ax, Axt => this % Axt, &
@@ -159,12 +150,12 @@ contains
     class(spinorbit), intent(inout)  :: this
     real(wp),         allocatable    :: spectral(:,:)
     real(wp)                         :: prefactor
-    complex(wp),      dimension(4,4) :: G, A, K
+    type(nambu)                      :: G, A, K
     integer                          :: n, m
 
     associate(location    => this % material % location,    &
               energy      => this % material % energy,      &
-              propagators => this % material % propagator,  &
+              propagator  => this % material % propagator,  &
               temperature => this % material % temperature, &
               current     => this % material % current      )
 
@@ -172,7 +163,7 @@ contains
       allocate(spectral(size(energy),0:3))
 
       ! Construct the 4×4 spin-orbit matrix
-      A  = diag(+this%Az%matrix, -this%Azt%matrix)
+      A = diag(+this%Az%matrix, -this%Azt%matrix)
 
       ! Iterate over the stored propagators
       do n = 1,size(location)
@@ -180,21 +171,17 @@ contains
           ! This factor converts from a zero-temperature to finite-temperature spectral current
           prefactor = 4 * tanh(0.8819384944310228_wp * energy(m)/temperature)
 
-          ! Construct the 4×4 propagator matrices at this position and energy
-          ! (The `block` prevents a segfault when compiling with IFort 16 and full 
-          !  optimization; I have no idea why. It has no effect under GFortran 6.)
-          block
-            G  = propagators(m,n) % retarded()
-          end block
+          ! Construct the 4×4 propagator matrix at this position and energy
+          G = propagator(m,n) % retarded()
 
-          ! Calculate the corresponding spin-orbit contribution to the 4×4 spectral matrix current
-          K = matmul(G,matmul(A,G))
+          ! Calculate the 4×4 kernel used to calculate the spectral currents
+          K = prefactor * (G*A*G)
 
-          ! Calculate the contribution to the spectral charge and spin currents at this position
-          spectral(m,0) = prefactor * im(trace(matmul(this%sigma0,K)))
-          spectral(m,1) = prefactor * im(trace(matmul(this%sigma1,K)))
-          spectral(m,2) = prefactor * im(trace(matmul(this%sigma2,K)))
-          spectral(m,3) = prefactor * im(trace(matmul(this%sigma3,K)))
+          ! Calculate the spectral charge and spin currents at this position
+          spectral(m,0) = im(trace(nambuv(4)*K))
+          spectral(m,1) = im(trace(nambuv(5)*K))
+          spectral(m,2) = im(trace(nambuv(6)*K))
+          spectral(m,3) = im(trace(nambuv(7)*K))
         end do
 
         ! Interpolate and integrate the results, and update the current vector

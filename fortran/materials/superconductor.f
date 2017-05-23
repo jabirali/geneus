@@ -160,7 +160,7 @@ contains
       end do
 
       ! Interpolate and integrate the results, and update the superconducting order parameter
-      gap_z(n) = integrate(this%energy, gap_e, 1e-6_wp, this%energy(ubound(this%energy,1)))
+      gap_z(n) = integrate(this%energy, gap_e, this%energy(1), this%energy(ubound(this%energy,1)))
     end do
 
     ! Interpolate the gap as a function of position to a higher resolution
