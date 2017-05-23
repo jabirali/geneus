@@ -198,7 +198,7 @@ contains
     complex(wp), dimension(0:3), optional, intent(out) :: ft    !! Anomalous propagator (f~)
     complex(wp), dimension(0:3), optional, intent(out) :: df    !! Anomalous propagator gradient (df /dz)
     complex(wp), dimension(0:3), optional, intent(out) :: dft   !! Anomalous propagator gradient (df~/dz)
-    type(nambu)                                        :: G     !  4×4 retarded propagator (G)
+    type(nambu)                                        :: G     !  4×4 retarded propagator (G^R)
 
     ! Calculate and decompose the anomalous propagator
     if (present(f) .or. present(ft)) then

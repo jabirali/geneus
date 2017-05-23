@@ -314,7 +314,7 @@ contains
     use :: calculus_m
 
     class(material), intent(inout) :: this
-    real(wp),        allocatable   :: current(:,:)
+    real(wp),        allocatable   :: spectral(:,:)
     real(wp)                       :: prefactor
     integer                        :: n, m
 
@@ -325,7 +325,7 @@ contains
       end if
 
       ! Allocate workspace memory
-      allocate(current(size(this%energy),0:3))
+      allocate(spectral(size(this%energy),0:3))
 
       ! Iterate over the stored propagators
       do n = 1,size(this%location)
@@ -334,18 +334,18 @@ contains
           prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
           ! Calculate the contribution to the spectral currents at this position in the material
-          current(m,:) = prefactor * this % propagator(m,n) % current()
+          spectral(m,:) = prefactor * this % propagator(m,n) % current()
         end do
 
         ! Interpolate and integrate the results, and update the current vector
-        this%current(0,n) = integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%current(1,n) = integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%current(2,n) = integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%current(3,n) = integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(0,n) = integrate(this%energy, spectral(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(1,n) = integrate(this%energy, spectral(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(2,n) = integrate(this%energy, spectral(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%current(3,n) = integrate(this%energy, spectral(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
       end do
 
       ! Deallocate workspace memory
-      deallocate(current)
+      deallocate(spectral)
     end if
   end subroutine
 
@@ -356,8 +356,8 @@ contains
 
     class(material), intent(inout) :: this
     complex(wp)                    :: f(0:3), df(0:3), ft(0:3), dft(0:3)
-    real(wp),        allocatable   :: current(:,:)
-    real(wp)                       :: prefactor
+    real(wp),        allocatable   :: spectral(:,:)
+    real(wp)                       :: prefactor(0:3)
     integer                        :: n, m
 
     if (size(this%energy) > 1) then
@@ -367,31 +367,31 @@ contains
       end if
 
       ! Allocate workspace memory
-      allocate(current(size(this%energy),0:3))
+      allocate(spectral(size(this%energy),0:3))
 
       ! Iterate over the stored propagators
       do n = 1,size(this%location)
         do m = 1,size(this%energy)
-          ! This factor converts from a zero-temperature to finite-temperature spectral current
-          prefactor = 8 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+          ! This factor converts from a zero-temperature to finite-temperature spectral current, and
+          ! adds the signs that distinguish between the (positive) singlet and (negative) triplet current
+          prefactor = [+1,-1,-1,-1] * 8 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
           ! Perform the singlet/triplet decomposition of the retarded propagator and its gradient
           call this % propagator(m,n) % decompose(f = f, ft = ft, df = df, dft = dft)
 
           ! Calculate the contribution to the spectral charge current
-          ! @TODO: Spin-orbit coupling terms [proportional to f(1:3)×ft(1:3)]
-          current(m,:) = prefactor * [+1,-1,-1,-1] * re(f*dft - ft*df)
+          spectral(m,:) = prefactor * re(f*dft - ft*df)
         end do
 
         ! Interpolate and integrate the results, and update the current vector
-        this%decomposition(0,n) = integrate(this%energy, current(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%decomposition(1,n) = integrate(this%energy, current(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%decomposition(2,n) = integrate(this%energy, current(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%decomposition(3,n) = integrate(this%energy, current(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(0,n) = integrate(this%energy, spectral(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(1,n) = integrate(this%energy, spectral(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(2,n) = integrate(this%energy, spectral(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(3,n) = integrate(this%energy, spectral(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
       end do
 
       ! Deallocate workspace memory
-      deallocate(current)
+      deallocate(spectral)
     end if
   end subroutine
 
