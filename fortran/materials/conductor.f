@@ -51,12 +51,12 @@ module conductor_m
     real(wp),             allocatable :: misalignment_b(:)                                    ! Magnetization of the right interface (unit vector) (used for reflections)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(wp),             private :: M_a(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
-    complex(wp),             private :: M_b(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
-    complex(wp),             private :: M0_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
-    complex(wp),             private :: M0_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
-    complex(wp),             private :: M1_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
-    complex(wp),             private :: M1_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
+    complex(wp)                      :: M_a(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
+    complex(wp)                      :: M_b(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
+    complex(wp)                      :: M0_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
+    complex(wp)                      :: M0_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
+    complex(wp)                      :: M1_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
+    complex(wp)                      :: M1_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
     complex(wp),             private :: S1_a, S1_b                                            ! Spin-mixing prefactor proportional to sin(ϕ)
     complex(wp),             private :: S2_a, S2_b                                            ! Spin-mixing prefactor proportional to sin(ϕ/2)²
   contains

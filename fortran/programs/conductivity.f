@@ -18,16 +18,18 @@ program main
   !--------------------------------------------------------------------------------!
 
   ! Declare the superconducting structure
-  class(material),      pointer :: layer
+  class(conductor),     pointer :: layer
   type(structure)               :: stack
   type(conductor),      target  :: bulk_a
   type(superconductor), target  :: bulk_b
 
   ! Declare the nonequilibrium matrices
   integer                                      :: n, m, i, j
-  real(wp),    pointer,     dimension(:)       :: energy, location
+  real(wp),    pointer,     dimension(:)       :: energy
+  real(wp),    pointer,     dimension(:)       :: location
   complex(wp), allocatable, dimension(:,:,:,:) :: diffusion
-  complex(wp), allocatable, dimension(:,:,:)   :: boundary_a, boundary_b
+  complex(wp), allocatable, dimension(:,:,:)   :: boundary_aa
+  complex(wp), allocatable, dimension(:,:,:)   :: boundary_ab
   real(wp),    allocatable, dimension(:)       :: voltage
   real(wp),    allocatable, dimension(:)       :: conductivity
 
@@ -50,9 +52,14 @@ program main
   end if
 
   ! Make a pointer to the central layer and its properties
-  layer    => stack % a
-  energy   => layer % energy
-  location => layer % location
+  select type(m => stack % a)
+    class is (conductor)
+      layer    => m
+      energy   => m % energy
+      location => m % location
+    class default
+      call error('This program only supports conductor-class materials.')
+  end select
 
   ! Make the left interface of the central layer transparent
   call layer % conf('transparent_a', 'T')
@@ -89,11 +96,11 @@ program main
   !--------------------------------------------------------------------------------!
 
   ! Allocate working memory
-  allocate(diffusion( 0:7, 0:7, size(energy), size(location)), &
-           boundary_a(0:7, 0:7, size(energy)),                 &
-           boundary_b(0:7, 0:7, size(energy)),                 &
-           voltage(     -size(energy):+size(energy)),          &
-           conductivity(-size(energy):+size(energy))           )
+  allocate(diffusion(  0:7, 0:7, size(energy), size(location)), &
+           boundary_aa(0:7, 0:7, size(energy)),                 &
+           boundary_ab(0:7, 0:7, size(energy)),                 &
+           voltage(     -size(energy):+size(energy)),           &
+           conductivity(-size(energy):+size(energy))            )
 
   ! Calculate the diffusion matrix
   call stage('Diffusion matrices')
@@ -145,8 +152,8 @@ program main
           keldysh_b = retarded_b*nambuv(j) - nambuv(j)*advanced_b
 
           ! Calculate the boundary matrix coefficients
-          boundary_a(i,j,n) = (layer % conductance_b) * trace(nambuv(i) * (keldysh_a * advanced_b - retarded_b * keldysh_a))/16
-          boundary_b(i,j,n) = (layer % conductance_b) * trace(nambuv(i) * (keldysh_b * advanced_a - retarded_a * keldysh_b))/16
+          boundary_aa(i,j,n) = (layer%conductance_b) * trace(nambuv(i) * (keldysh_a*R(advanced_b) - R(retarded_b)*keldysh_a))/16
+          boundary_ab(i,j,n) = (layer%conductance_b) * trace(nambuv(i) * (keldysh_b*T(advanced_a) - T(retarded_a)*keldysh_b))/16
         end do
       end do
     end block
@@ -170,7 +177,7 @@ program main
       do m=1,size(location)-1
         integral = integral + (location(m+1)-location(m)) * (diffusion(:,:,n,m+1) + diffusion(:,:,n,m))/2
       end do
-      integral = matmul(boundary_a(:,:,n), inverse(matmul(integral,boundary_a(:,:,n)) - identity(8)))
+      integral = matmul(boundary_aa(:,:,n), inverse(matmul(integral,boundary_aa(:,:,n)) - identity(8)))
 
       ! Invert the result of the integral and save it
       conductivity(+n) = re(integral(4,4) + integral(4,0)) / (layer % conductance_b)
@@ -250,4 +257,52 @@ contains
     close(stdout)
     close(stderr)
   end subroutine
+
+  pure function T(U)
+    ! Calculates the contents of the spin-active boundary condition commutators:
+    !   I_a ~ [G_a, T(G_b)],   I_b ~ [T(G_a), G_b]
+    ! This is used for the calculation of the boundary coefficient matrices.
+    !
+    ! @NOTE: This version includes only transmission terms.
+
+    type(nambu), intent(in) :: U
+    type(nambu)             :: T
+    type(nambu)             :: M
+    real(wp)                :: GMR
+    real(wp)                :: GT1
+
+    ! Extract the interface conductances from the material
+    associate(P => layer % polarization_b)
+      GMR  = P/(1 + sqrt(1-P**2))
+      GT1  = (1 - sqrt(1-P**2))/(1 + sqrt(1-P**2))
+    end associate
+
+    ! Extract the interface magnetizations from the material
+    M = layer % M_b
+
+    ! Calculate the result
+    T = U + GMR * (M*U+U*M) + GT1 * M*U*M
+  end function
+
+  pure function R(U)
+    ! Calculates the contents of the spin-active boundary condition commutators:
+    !   I_a ~ [G_a, R(G_b)],   I_b ~ [R(G_a), G_b]
+    ! This is used for the calculation of the boundary coefficient matrices.
+    !
+    ! @NOTE: This version includes both transmission and reflection terms.
+
+    type(nambu), intent(in) :: U
+    type(nambu)             :: R
+    type(nambu)             :: M
+    complex(wp)             :: Gphi
+
+    ! Extract the interface conductances from the material
+    Gphi = (0,-1) * (layer % spinmixing_b)
+
+    ! Extract the interface magnetizations from the material
+    M = layer % M0_b
+
+    ! Calculate the result
+    R = T(U) + Gphi*M
+  end function
 end program
