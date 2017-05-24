@@ -28,6 +28,7 @@ program main
   real(wp),    pointer,     dimension(:)       :: energy, location
   complex(wp), allocatable, dimension(:,:,:,:) :: diffusion
   complex(wp), allocatable, dimension(:,:,:)   :: boundary_a, boundary_b
+  real(wp),    allocatable, dimension(:)       :: voltage
   real(wp),    allocatable, dimension(:)       :: conductivity
 
   ! Declare program control parameters
@@ -91,7 +92,8 @@ program main
   allocate(diffusion( 0:7, 0:7, size(energy), size(location)), &
            boundary_a(0:7, 0:7, size(energy)),                 &
            boundary_b(0:7, 0:7, size(energy)),                 &
-           conductivity(size(energy))                          )
+           voltage(     -size(energy):+size(energy)),          &
+           conductivity(-size(energy):+size(energy))           )
 
   ! Calculate the diffusion matrix
   call stage('Diffusion matrices')
@@ -150,6 +152,13 @@ program main
     end block
   end do
 
+  ! Initialize the array of applied voltages
+  voltage(0) = 0
+  do n=1,size(energy)
+    voltage(+n) = +energy(n)
+    voltage(-n) = -energy(n)
+  end do
+
   ! Calculate the differential conductivity
   call stage('Conductivity')
   do n=1,size(energy)
@@ -164,9 +173,13 @@ program main
       integral = matmul(boundary_a(:,:,n), inverse(matmul(integral,boundary_a(:,:,n)) - identity(8)))
 
       ! Invert the result of the integral and save it
-      conductivity(n) = re(integral(4,4) - integral(4,0)) / (layer % conductance_b)
+      conductivity(+n) = re(integral(4,4) + integral(4,0)) / (layer % conductance_b)
+      conductivity(-n) = re(integral(4,4) - integral(4,0)) / (layer % conductance_b)
     end block
   end do
+
+  ! Estimate the zero-bias conductance peak
+  conductivity(0) = (conductivity(+1) + conductivity(-1))/2
 
   ! Write the results to a file
   call finalize_nonequilibrium
@@ -231,7 +244,7 @@ contains
     call status_foot
 
     ! Write out the conductivity
-    call dump('conductivity.dat', [energy, conductivity], ['Voltage     ', 'Conductivity'])
+    call dump('conductivity.dat', [voltage, conductivity], ['Voltage     ', 'Conductivity'])
 
     ! Close output files
     close(stdout)
