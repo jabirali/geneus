@@ -3,8 +3,6 @@
 !> Category: Programs
 !>
 !> This program calculates the charge conductivity of an S/X/N superconducting thin-film structure.
-!> 
-!> @TODO: Check if we need to generalize to spin-active boundary conditions.
 
 program main
   use :: structure_m
@@ -60,6 +58,11 @@ program main
     class default
       call error('This program only supports conductor-class materials.')
   end select
+
+  ! Make sure we're using supported boundary conditions
+  if (layer % transparent_b .or. layer % reflecting_b .or. layer % secondorder_b /= 0) then
+    call warning('Only first-order tunneling boundary conditions is currently supported by this program.')
+  end if
 
   ! Make the left interface of the central layer transparent
   call layer % conf('transparent_a', 'T')
