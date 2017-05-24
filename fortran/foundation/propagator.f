@@ -19,12 +19,12 @@ module propagator_m
 
   ! Type declaration
   type propagator
-    type(spin) :: g                                 !! Riccati parameter γ
-    type(spin) :: gt                                !! Riccati parameter γ~
-    type(spin) :: dg                                !! Derivative dγ /dz
-    type(spin) :: dgt                               !! Derivative dγ~/dz
-    type(spin) :: N                                 !! Normalization N  = (1 - γγ~)^-1
-    type(spin) :: Nt                                !! Normalization Nt = (1 - γ~γ)^-1
+    type(spin) :: g                                                   !! Riccati parameter γ
+    type(spin) :: gt                                                  !! Riccati parameter γ~
+    type(spin) :: dg                                                  !! Derivative dγ /dz
+    type(spin) :: dgt                                                 !! Derivative dγ~/dz
+    type(spin) :: N                                                   !! Normalization N  = (1 - γγ~)^-1
+    type(spin) :: Nt                                                  !! Normalization Nt = (1 - γ~γ)^-1
   contains
     ! Accessors for the propagator matrices represented by this object
     procedure  :: retarded           => propagator_retarded           !! Retarded propagator (G^R)
@@ -130,10 +130,10 @@ contains
               dg => this % dg, dgt => this % dgt, &
               N  => this % N,  Nt  => this % Nt,  &
               I  => pauli0,    M   => r % matrix  )
-      M(1:2,1:2) = (+1.0_wp) * N  * (dg*gt  +  g*dgt) * N
-      M(1:2,3:4) = (+2.0_wp) * N  * (dg  - g *dgt*g ) * Nt
-      M(3:4,1:2) = (-2.0_wp) * Nt * (dgt - gt*dg *gt) * N
-      M(3:4,3:4) = (-1.0_wp) * Nt * (dgt*g  +  gt*dg) * Nt
+      M(1:2,1:2) = (+2.0_wp) * N  * (dg*gt  +  g*dgt) * N
+      M(1:2,3:4) = (+2.0_wp) * N  * (dg  + g *dgt*g ) * Nt
+      M(3:4,1:2) = (-2.0_wp) * Nt * (dgt + gt*dg *gt) * N
+      M(3:4,3:4) = (-2.0_wp) * Nt * (dgt*g  +  gt*dg) * Nt
     end associate
   end function
 
