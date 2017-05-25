@@ -79,10 +79,6 @@ program main
   call bulk_a % conf('order','0')
   call bulk_b % conf('order','0')
 
-  ! Set the inelastic scattering parameters
-  bulk_a % scattering_inelastic = layer % scattering_inelastic
-  bulk_b % scattering_inelastic = layer % scattering_inelastic
-
 
 
   !--------------------------------------------------------------------------------!
