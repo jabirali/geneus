@@ -254,7 +254,7 @@ contains
 
     ! Status information
     call status_head('CONDUCTIVITY')
-    call status_body('Zero-bias peak',   conductivity(1))
+    call status_body('Zero-bias peak',   conductivity(0))
     call status_foot
 
     ! Write out the conductivity
