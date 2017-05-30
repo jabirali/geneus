@@ -763,7 +763,7 @@ contains
         call get_command_argument(k+1, arg, status=status)
         if ( status /= 0 ) then
           write(arg,'(i0)') k+1
-          call error('Missing command line argument #' // trim(arg) // ', i.e. parameter ' // str(i:j) // ' defined by the configuration file.')
+          call error('Missing command line argument #' // trim(arg) // ', i.e. parameter ' // str(i:j) // ' in the config file.')
         end if
         str = str(:i-1) // trim(arg) // str(j+1:)
         i = scan(str, '{')

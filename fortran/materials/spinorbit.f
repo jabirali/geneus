@@ -158,7 +158,7 @@ contains
 
     associate(location    => this % material % location,    &
               energy      => this % material % energy,      &
-              propagator  => this % material % propagator,  &
+              propagators => this % material % propagator,  &
               temperature => this % material % temperature, &
               current     => this % material % current      )
 
@@ -175,7 +175,7 @@ contains
           prefactor = 4 * tanh(0.8819384944310228_wp * energy(m)/temperature)
 
           ! Construct the 4×4 propagator matrix at this position and energy
-          G = propagator(m,n) % retarded()
+          G = propagators(m,n) % retarded()
 
           ! Calculate the 4×4 kernel used to calculate the spectral currents
           K = prefactor * (G*A*G)
@@ -222,13 +222,13 @@ contains
     class(spinorbit),         intent(inout)  :: this
     type(spin),  dimension(1:3)              :: tripleproduct
     complex(wp), dimension(0:4)              :: f, ft
-    complex(wp), dimension(:,:), allocatable :: spectral
-    complex(wp)                              :: prefactor
+    real(wp),    dimension(:,:), allocatable :: spectral
+    real(wp)                                 :: prefactor
     integer                                  :: n, m
 
     associate(location    => this % material % location,     &
               energy      => this % material % energy,       &
-              propagator  => this % material % propagator,   &
+              propagators => this % material % propagator,   &
               temperature => this % material % temperature,  &
               current     => this % material % decomposition,&
               Az          => this % Az                       )
@@ -243,7 +243,7 @@ contains
           prefactor = 16 * tanh(0.8819384944310228_wp * energy(m)/temperature)
 
           ! Perform the singlet/triplet decomposition of the retarded propagator and its gradient
-          call propagator(m,n) % decompose(f = f, ft = ft)
+          call propagators(m,n) % decompose(f = f, ft = ft)
 
           ! Calculate the triple-product [f(1:3)×ft(1:3)]·σ, and partition it by triplet type
           tripleproduct(1) = (pauli2/2.0_wp) * (f(3)*ft(1) - f(1)*ft(3)) + (pauli3/2.0_wp) * (f(1)*ft(2) - f(2)*ft(1))
