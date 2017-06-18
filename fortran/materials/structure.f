@@ -136,6 +136,8 @@ contains
     if (associated(this % b)) then
       call this % b % conf(key, val)
     else
+      ! @TODO: Implement generic configuration of the stack here,
+      !        e.g. the ability to toggle various output routines.
       call error('Attempted to configure a non-existant material!')
     end if
 
@@ -770,7 +772,7 @@ contains
         j = scan(str, '}')
       end do
 
-      ! Construct a material
+      ! Construct the material
       i = scan(str, '[')
       j = scan(str, ']')
       if (i == 1 .and. j > i) then
@@ -778,7 +780,7 @@ contains
         cycle
       end if
 
-      ! Construct a material
+      ! Configure the material
       i = scan(str, ':')
       if ( i > 0 ) then
         call this % conf(trim(adjustl(str(:i-1))), trim(adjustl(str(i+1:))))
