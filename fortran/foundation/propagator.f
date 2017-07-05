@@ -19,23 +19,38 @@ module propagator_m
 
   ! Type declaration
   type propagator
+    ! Riccati parametrization of equilibrium propagators (retarded and advanced)
     type(spin) :: g                                                   !! Riccati parameter γ
     type(spin) :: gt                                                  !! Riccati parameter γ~
-    type(spin) :: dg                                                  !! Derivative dγ /dz
-    type(spin) :: dgt                                                 !! Derivative dγ~/dz
-    type(spin) :: N                                                   !! Normalization N  = (1 - γγ~)^-1
-    type(spin) :: Nt                                                  !! Normalization Nt = (1 - γ~γ)^-1
+    type(spin) :: dg                                                  !! Riccati parameter ∇γ
+    type(spin) :: dgt                                                 !! Riccati parameter ∇γ~
+    type(spin) :: d2g                                                 !! Riccati parameter ∇²γ
+    type(spin) :: d2gt                                                !! Riccati parameter ∇²γ~
+    type(spin) :: N                                                   !! Riccati normalization N
+    type(spin) :: Nt                                                  !! Riccati normalization N~
+
+    ! Distribution-trace parametrization nonequilibrium propagators (Keldysh)
+    real(wp), dimension(0:7) :: h(8)   = [1,0,0,0,0,0,0,0]            !! Distribution-trace H
+    real(wp), dimension(0:7) :: dh(8)  = [0,0,0,0,0,0,0,0]            !! Distribution-trace ∇H
+    real(wp), dimension(0:7) :: d2h(8) = [0,0,0,0,0,0,0,0]            !! Distribution-trace ∇²H
   contains
     ! Accessors for the propagator matrices represented by this object
-    procedure  :: retarded           => propagator_retarded           !! Retarded propagator (G^R)
-    procedure  :: advanced           => propagator_advanced           !! Advanced propagator (G^A)
-    procedure  :: retarded_gradient  => propagator_retarded_gradient  !! Retarded propagator gradient (dG^R/dz)
-    procedure  :: advanced_gradient  => propagator_advanced_gradient  !! Advanced propagator gradient (dG^A/dz)
+    procedure  :: retarded           => propagator_retarded           !! Retarded propagator G^R
+    procedure  :: retarded_gradient  => propagator_retarded_gradient  !! Retarded propagator ∇G^R
+  ! procedure  :: retarded_laplacian => propagator_retarded_laplacian !! Retarded propagator ∇²G^R
+
+    procedure  :: advanced           => propagator_advanced           !! Advanced propagator G^A
+    procedure  :: advanced_gradient  => propagator_advanced_gradient  !! Advanced propagator ∇G^A
+  ! procedure  :: advanced_laplacian => propagator_advanced_laplacian !! Advanced propagator ∇²G^A
+
+  ! procedure  :: keldysh            => propagator_keldysh            !! Advanced propagator G^K
+  ! procedure  :: keldysh_gradient   => propagator_keldysh_gradient   !! Advanced propagator ∇G^K
+  ! procedure  :: keldysh_laplacian  => propagator_keldysh_laplacian  !! Advanced propagator ∇²G^K
 
     ! Accessors for physical quantities that derive from this object
-    procedure  :: decompose          => propagator_decompose          !! Singlet/triplet decomposition of the anomalous retarded propagator (f)
-    procedure  :: density            => propagator_density            !! Density of states at this position z and energy ε
-    procedure  :: current            => propagator_current            !! Spectral current  at this position z and energy ε
+    procedure  :: decompose          => propagator_decompose          !! Singlet/triplet decomposition
+    procedure  :: density            => propagator_density            !! Density of states
+    procedure  :: current            => propagator_current            !! Spectral currents
   end type
 
   ! Type constructor
