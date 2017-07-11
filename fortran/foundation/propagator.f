@@ -54,8 +54,9 @@ module propagator_m
 
     ! Accessors for physical quantities that derive from the propagators
     procedure  :: supercurrent       => propagator_supercurrent                 !! Spectral supercurrents
-    procedure  :: losercurrent       => propagator_losercurrent                 !! Spectral dissipative currents
+    procedure  :: lossycurrent       => propagator_lossycurrent                 !! Spectral dissipative currents
     procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
+    procedure  :: correlation        => propagator_correlation                  !! Spectral correlation
 
     procedure  :: current            => propagator_current                      !! Spectral currents
     procedure  :: density            => propagator_density                      !! Density of states
@@ -313,7 +314,7 @@ contains
     end do
   end function
 
-  pure function propagator_losercurrent(this) result(J)
+  pure function propagator_lossycurrent(this) result(J)
     !! Calculates the spectral dissipative currents in the junction. The result is returned in
     !! the form of an 8-vector containing the charge, spin, heat, and spin-heat currents.
     class(propagator), intent(in) :: this     !! Propagator object
@@ -353,6 +354,25 @@ contains
     do n=0,7
       Q(n) = -re(trace(nambuv(n) * GK))/4
     end do
+  end function
+
+  pure function propagator_correlation(this) result(s)
+    !! Calculates the spectral pair-correlation function. This is useful e.g. for
+    !! self-consistently calculating the superconducting gap in a superconductor.
+    class(propagator), intent(in) :: this    !! Propagator object
+    complex(wp)                   :: s       !! Spectral correlation
+    type(nambu)                   :: GK      !! Keldysh propagator
+    type(spin)                    :: f, ft   !! Anomalous propagators
+
+    ! Calculate the propagator
+    GK = this % keldysh()
+
+    ! Extract the anomalous components
+    f  = GK % matrix(1:2,3:4) 
+    ft = GK % matrix(3:4,1:2)
+
+    ! Trace out the singlet component
+    s = trace((0.0_wp,-1.0_wp) * pauli2 * (f+conjg(ft)))/8
   end function
 
   pure subroutine propagator_decompose(this, f, ft, df, dft)
