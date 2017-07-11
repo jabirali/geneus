@@ -101,7 +101,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure function nambuv(n) result(r)
-    !! Constructs basis vector number n in spin-nambu space.
+    !! Constructs basis matrix number n in spin-nambu space.
     integer, intent(in) :: n
     type(nambu)         :: r
 

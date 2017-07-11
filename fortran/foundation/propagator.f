@@ -53,6 +53,10 @@ module propagator_m
   ! procedure  :: distribution_laplacian  => propagator_distribution_laplacian  !! Distribution matrix ∇²H
 
     ! Accessors for physical quantities that derive from the propagators
+    procedure  :: supercurrent       => propagator_supercurrent                 !! Spectral supercurrents
+    procedure  :: losercurrent       => propagator_losercurrent                 !! Spectral dissipative currents
+    procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
+
     procedure  :: current            => propagator_current                      !! Spectral currents
     procedure  :: density            => propagator_density                      !! Density of states
     procedure  :: decompose          => propagator_decompose                    !! Singlet/triplet decomposition
@@ -281,6 +285,75 @@ contains
     a(17:24) = b%dg
     a(25:32) = b%dgt
   end subroutine
+
+  pure function propagator_supercurrent(this) result(J)
+    !! Calculates the spectral supercurrents in the junction. The result is returned in the
+    !! form of an 8-vector containing the charge, spin, heat, and spin-heat currents.
+    class(propagator), intent(in) :: this     !! Propagator object
+    real(wp),      dimension(0:7) :: J        !! Spectral supercurrent
+    type(nambu)                   :: I        !! Matrix supercurrent
+    type(nambu)                   :: H        !! Distribution function
+    type(nambu)                   :: GR, dGR  !! Retarded propagator
+    type(nambu)                   :: GA, dGA  !! Advanced propagator
+    integer                       :: n
+
+    ! Calculate the propagators
+    H   = this % distribution()
+    GR  = this % retarded()
+    GA  = this % advanced()
+    dGR = this % retarded_gradient()
+    dGA = this % advanced_gradient()
+
+    ! Calculate the matrix current
+    I = (GR*dGR)*H - H*(GA*dGA)
+
+    ! Pauli-decompose the current
+    do n=0,7
+      J(n) = re(trace((nambuv(4) * nambuv(n)) * I))/4
+    end do
+  end function
+
+  pure function propagator_losercurrent(this) result(J)
+    !! Calculates the spectral dissipative currents in the junction. The result is returned in
+    !! the form of an 8-vector containing the charge, spin, heat, and spin-heat currents.
+    class(propagator), intent(in) :: this     !! Propagator object
+    real(wp),      dimension(0:7) :: J        !! Spectral dissipative current
+    type(nambu)                   :: I        !! Matrix dissipative current
+    type(nambu)                   :: dH       !! Distribution function
+    type(nambu)                   :: GR       !! Retarded propagator
+    type(nambu)                   :: GA       !! Advanced propagator
+    integer                       :: n
+
+    ! Calculate the propagators
+    dH = this % distribution_gradient()
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Calculate the matrix current
+    I = dH - GR*dH*GA
+
+    ! Pauli-decompose the current
+    do n=0,7
+      J(n) = re(trace((nambuv(4) * nambuv(n)) * I))/4
+    end do
+  end function
+
+  pure function propagator_accumulation(this) result(Q)
+    !! Calculates the spectral accumulations in the junction. The result is returned in the
+    !! form of an 8-vector containing the charge, spin, heat, and spin-heat accumulations.
+    class(propagator), intent(in) :: this     !! Propagator object
+    real(wp),      dimension(0:7) :: Q        !! Spectral accumulation
+    type(nambu)                   :: GK       !! Keldysh propagator
+    integer                       :: n
+
+    ! Calculate the propagator
+    GK = this % keldysh()
+
+    ! Pauli-decompose it
+    do n=0,7
+      Q(n) = -re(trace(nambuv(n) * GK))/4
+    end do
+  end function
 
   pure subroutine propagator_decompose(this, f, ft, df, dft)
     !! Performs a singlet/triplet decomposition of the anomalous retarded propagators (f, f~)
