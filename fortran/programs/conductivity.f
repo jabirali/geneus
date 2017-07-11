@@ -3,6 +3,11 @@
 !> Category: Programs
 !>
 !> This program calculates the charge conductivity of an S/X/N superconducting thin-film structure.
+!>
+!> @NOTE:
+!>   This method has been shown to only work in homogeneous S/F systems.
+!>   After a proper nonequilibrium method is devised, this program is
+!>   therefore staged for deletion from the project.
 
 program main
   use :: structure_m
@@ -42,6 +47,9 @@ program main
   !--------------------------------------------------------------------------------!
   !                            CONSTRUCTION PROCEDURE                              !
   !--------------------------------------------------------------------------------!
+
+  ! Output a warning about the results
+  call warning('Note that this program only works for homogeneous S/F systems.')
 
   ! Construct the superconducting structure from a configuration file
   stack = structure()

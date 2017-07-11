@@ -2,11 +2,12 @@
 !> Date:     2015-07-11
 !> Category: Foundation
 !>
-!> This module defines the data type 'propagator', which represents the propagator at a given position and energy. This
-!> is done by internally storing the Riccati parameters γ and γ~ and their first derivatives dγ/dz and dγ~/dz. These are
-!> sufficient to reconstruct the 4×4 matrix representation of the propagator, and associated physical quantities such as
-!> the density of states.  To make it easier to interact with differential equation solvers, which often operate on real
-!> state vectors, the assignment operator is overloaded so that objects can be transformed to 32-element real arrays.
+!> This module defines the data type 'propagator', which represents the propagator at a given position and energy. 
+!> The equilibrium propagators (retarded and advanced) are stored internally using the Riccati parameters γ and γ~
+!> and their derivatives, while the nonequilibrium propagator (Keldysh) is represented by taking the traces of the
+!> distribution function and its derivatives. These quantities are together sufficient to reconstruct the full 8×8
+!> propagator and its derivatives, and can be used to calculate associated physical quantities such as the density
+!> of states, charge currents, spin currents, heat currents, spin-heat currents, and various accumulation effects.
 
 module propagator_m
   use :: math_m
@@ -29,10 +30,10 @@ module propagator_m
     type(spin) :: N                                                             !! Riccati normalization N
     type(spin) :: Nt                                                            !! Riccati normalization N~
 
-    ! Distribution-trace parametrization nonequilibrium propagators (Keldysh)
-    real(wp), dimension(0:7) :: h(8)   = [1,0,0,0,0,0,0,0]                      !! Distribution-trace H
-    real(wp), dimension(0:7) :: dh(8)  = [0,0,0,0,0,0,0,0]                      !! Distribution-trace ∇H
-    real(wp), dimension(0:7) :: d2h(8) = [0,0,0,0,0,0,0,0]                      !! Distribution-trace ∇²H
+    ! Distribution-trace parametrization of nonequilibrium propagators (Keldysh)
+    real(wp), dimension(0:7) :: h   = [1,0,0,0,0,0,0,0]                         !! Distribution-trace H
+    real(wp), dimension(0:7) :: dh  = [0,0,0,0,0,0,0,0]                         !! Distribution-trace ∇H
+    real(wp), dimension(0:7) :: d2h = [0,0,0,0,0,0,0,0]                         !! Distribution-trace ∇²H
   contains
     ! Accessors for the propagator matrices represented by this object
     procedure  :: retarded                => propagator_retarded                !! Retarded propagator G^R
@@ -43,18 +44,18 @@ module propagator_m
     procedure  :: advanced_gradient       => propagator_advanced_gradient       !! Advanced propagator ∇G^A
   ! procedure  :: advanced_laplacian      => propagator_advanced_laplacian      !! Advanced propagator ∇²G^A
 
-  ! procedure  :: keldysh                 => propagator_keldysh                 !! Advanced propagator G^K
-  ! procedure  :: keldysh_gradient        => propagator_keldysh_gradient        !! Advanced propagator ∇G^K
-  ! procedure  :: keldysh_laplacian       => propagator_keldysh_laplacian       !! Advanced propagator ∇²G^K
+    procedure  :: keldysh                 => propagator_keldysh                 !! Keldysh propagator G^K
+    procedure  :: keldysh_gradient        => propagator_keldysh_gradient        !! Keldysh propagator ∇G^K
+  ! procedure  :: keldysh_laplacian       => propagator_keldysh_laplacian       !! Keldysh propagator ∇²G^K
 
-  ! procedure  :: distribution            => propagator_distribution            !! Distribution matrix H
-  ! procedure  :: distribution_gradient   => propagator_distribution_gradient   !! Distribution matrix ∇H
+    procedure  :: distribution            => propagator_distribution            !! Distribution matrix H
+    procedure  :: distribution_gradient   => propagator_distribution_gradient   !! Distribution matrix ∇H
   ! procedure  :: distribution_laplacian  => propagator_distribution_laplacian  !! Distribution matrix ∇²H
 
-    ! Accessors for physical quantities that derive from this object
-    procedure  :: decompose          => propagator_decompose                    !! Singlet/triplet decomposition
-    procedure  :: density            => propagator_density                      !! Density of states
+    ! Accessors for physical quantities that derive from the propagators
     procedure  :: current            => propagator_current                      !! Spectral currents
+    procedure  :: density            => propagator_density                      !! Density of states
+    procedure  :: decompose          => propagator_decompose                    !! Singlet/triplet decomposition
   end type
 
   ! Type constructor
@@ -68,8 +69,9 @@ module propagator_m
   end interface
 contains
   pure function propagator_construct_zero() result(this)
-    ! Constructs a state corresponding to a normal metal, which has all the Riccati parameters set to zero.
-    type(propagator) :: this
+    !! Constructs a state corresponding to a normal metal, which has all
+    !! the Riccati parameters set to zero without proximity effects.
+    type(propagator) :: this                 !! Constructed object
 
     ! There is no need to explicitly set the Riccati parameters to zero, 
     ! as the type(spin) constructors will do it automatically by default.
@@ -95,11 +97,12 @@ contains
   end function
 
   pure function propagator_construct_bcs(energy, gap) result(this)
-    ! Constructs a state corresponding to a BCS superconductor at some given energy, which may have an imaginary
-    ! term representing inelastic scattering. The second argument 'gap' is the superconducting order parameter Δ.
-    type(propagator)        :: this      ! Propagator object that will be constructed
-    complex(wp), intent(in) :: energy    ! Quasiparticle energy (including inelastic scattering contribution)
-    complex(wp), intent(in) :: gap       ! Superconducting order parameter (including superconducting phase)
+    !! Constructs a state corresponding to a BCS superconductor at some given energy,
+    !! which may have an imaginary term representing inelastic scattering. The second
+    !! argument 'gap' is used to provide the superconducting order parameter Δ.
+    type(propagator)        :: this      !! Constructed object
+    complex(wp), intent(in) :: energy    !! Quasiparticle energy (including inelastic scattering contribution)
+    complex(wp), intent(in) :: gap       !! Superconducting order parameter (including superconducting phase)
 
     real(wp)                :: p
     complex(wp)             :: t, u
@@ -125,14 +128,15 @@ contains
     this % Nt = inverse( pauli0 - this%gt * this%g  )
   end function
 
-  pure function propagator_retarded(this) result(r)
-    !! Calculates the 4×4 retarded propagator (G^R).
+  pure function propagator_retarded(this) result(GR)
+    !! Calculates the 4×4 retarded propagator G^R.
     class(propagator), intent(in) :: this   !! Propagator object
-    type(nambu)                   :: r      !! Propagator matrix
+    type(nambu)                   :: GR     !! Propagator matrix
 
+    ! Construct the propagator from the Riccati parameters
     associate(g => this % g, gt => this % gt, &
               N => this % N, Nt => this % Nt, &
-              I => pauli0,   M  => r % matrix )
+              I => pauli0,   M  => GR % matrix)
       M(1:2,1:2) = (+2.0_wp) * N  - I
       M(1:2,3:4) = (+2.0_wp) * N  * g
       M(3:4,1:2) = (-2.0_wp) * Nt * gt
@@ -140,15 +144,16 @@ contains
     end associate
   end function
 
-  pure function propagator_retarded_gradient(this) result(r)
-    !! Calculates the 4×4 retarded propagator gradient (dG^R/dz).
+  pure function propagator_retarded_gradient(this) result(dGR)
+    !! Calculates the 4×4 retarded propagator gradient ∇G^R.
     class(propagator), intent(in) :: this   !! Propagator object
-    type(nambu)                   :: r      !! Propagator gradient
+    type(nambu)                   :: dGR    !! Propagator gradient
 
+    ! Construct the propagator from the Riccati parameters
     associate(g  => this % g,  gt  => this % gt,  &
               dg => this % dg, dgt => this % dgt, &
               N  => this % N,  Nt  => this % Nt,  &
-              I  => pauli0,    M   => r % matrix  )
+              I  => pauli0,    M   => dGR % matrix)
       M(1:2,1:2) = (+2.0_wp) * N  * (dg*gt  +  g*dgt) * N
       M(1:2,3:4) = (+2.0_wp) * N  * (dg  + g *dgt*g ) * Nt
       M(3:4,1:2) = (-2.0_wp) * Nt * (dgt + gt*dg *gt) * N
@@ -156,22 +161,90 @@ contains
     end associate
   end function
 
-  pure function propagator_advanced(this) result(r)
-    !! Calculates the 4×4 advanced propagator (G^A).
+  pure function propagator_advanced(this) result(GA)
+    !! Calculates the 4×4 advanced propagator G^A.
     class(propagator), intent(in) :: this   !! Propagator object
-    type(nambu)                   :: r      !! Propagator matrix
+    type(nambu)                   :: GA     !! Propagator matrix
+    type(nambu)                   :: GR
 
-    r = this % retarded()
-    r = nambuv(4) * transpose(conjg(-r % matrix)) * nambuv(4)
+    ! Calculate the retarded propagator
+    GR = this % retarded()
+
+    ! Use the identity GA = -τ₃GR†τ₃
+    GA = nambuv(4) * transpose(conjg(-GR % matrix)) * nambuv(4)
   end function
 
-  pure function propagator_advanced_gradient(this) result(r)
-    !! Calculates the 4×4 advanced propagator gradient (dG^A/dz).
+  pure function propagator_advanced_gradient(this) result(dGA)
+    !! Calculates the 4×4 advanced propagator gradient ∇G^A.
     class(propagator), intent(in) :: this   !! Propagator object
-    type(nambu)                   :: r      !! Propagator gradient
+    type(nambu)                   :: dGA    !! Propagator gradient
+    type(nambu)                   :: dGR
 
-    r = this % retarded_gradient()
-    r = nambuv(4) * transpose(conjg(-r % matrix)) * nambuv(4)
+    ! Calculate the retarded propagator gradient
+    dGR = this % retarded_gradient()
+
+    ! Use the identity GA = -τ₃GR†τ₃
+    dGA = nambuv(4) * transpose(conjg(-dGR % matrix)) * nambuv(4)
+  end function
+
+  pure function propagator_keldysh(this) result(GK)
+    !! Calculates the 4×4 Keldysh propagator G^K.
+    class(propagator), intent(in) :: this     !! Propagator object
+    type(nambu)                   :: GK       !! Propagator matrix
+    type(nambu)                   :: GR, GA, H
+
+    ! Calculate equilibrium propagators and the distribution
+    GR = this % retarded()
+    GA = this % advanced()
+    H  = this % distribution()
+
+    ! Use this to calculate the nonequilibrium propagator
+    GK = GR*H - H*GA
+  end function
+
+  pure function propagator_keldysh_gradient(this) result(dGK)
+    !! Calculates the 4×4 Keldysh propagator gradient ∇G^K.
+    class(propagator), intent(in) :: this     !! Propagator object
+    type(nambu)                   :: dGK      !! Propagator gradient
+    type(nambu)                   :: GR,  GA,  H
+    type(nambu)                   :: dGR, dGA, dH
+
+    ! Calculate equilibrium propagators and the distribution
+    GR  = this % retarded()
+    GA  = this % advanced()
+    H   = this % distribution()
+
+    ! Calculate the gradients of the matrix functions above
+    dGR = this % retarded_gradient()
+    dGA = this % advanced_gradient()
+    dH  = this % distribution_gradient()
+
+    ! Use this to calculate the nonequilibrium propagator gradient
+    dGK = (dGR*H - H*dGA) + (GR*dH - dH*GA)
+  end function
+
+  pure function propagator_distribution(this) result(H)
+    !! Calculates the 4×4 distribution function matrix H.
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: H      !! Distribution matrix
+    integer                       :: i
+
+    ! Construct the distribution matrix from its Pauli-decomposition
+    do i=0,7
+      H = H + nambuv(i) * this % h(i)
+    end do
+  end function
+
+  pure function propagator_distribution_gradient(this) result(dH)
+    !! Calculates the 4×4 distribution function gradient ∇H.
+    class(propagator), intent(in) :: this   !! Propagator object
+    type(nambu)                   :: dH     !! Distribution gradient
+    integer                       :: i
+
+    ! Construct the distribution matrix from its Pauli-decomposition
+    do i=0,7
+      dH = dH + nambuv(i) * this % dh(i)
+    end do
   end function
 
   pure subroutine propagator_import_rvector(a, b)
@@ -179,6 +252,7 @@ contains
     type(propagator), intent(out) :: a
     real(wp),         intent(in)  :: b(32)
 
+    ! Unpack the vector elements
     a%g   = b( 1: 8) 
     a%gt  = b( 9:16) 
     a%dg  = b(17:24) 
@@ -210,13 +284,15 @@ contains
 
   pure subroutine propagator_decompose(this, f, ft, df, dft)
     !! Performs a singlet/triplet decomposition of the anomalous retarded propagators (f, f~)
-    !! and their derivatives (df/dz, df~/dz). Each of these are returned as a complex 4-vector,
+    !! and their derivatives (∇f, ∇f~). Each of these are returned as a complex 4-vector,
     !! where f(0) corresponds to the singlet component and f(1:3) to the triplet component.
+    !!
+    !! @NOTE: This function can only be used safely in equilibrium systems.
     class(propagator),                     intent(in)  :: this  !! Propagator object
     complex(wp), dimension(0:3), optional, intent(out) :: f     !! Anomalous propagator (f )
     complex(wp), dimension(0:3), optional, intent(out) :: ft    !! Anomalous propagator (f~)
-    complex(wp), dimension(0:3), optional, intent(out) :: df    !! Anomalous propagator gradient (df /dz)
-    complex(wp), dimension(0:3), optional, intent(out) :: dft   !! Anomalous propagator gradient (df~/dz)
+    complex(wp), dimension(0:3), optional, intent(out) :: df    !! Anomalous propagator gradient (∇f )
+    complex(wp), dimension(0:3), optional, intent(out) :: dft   !! Anomalous propagator gradient (∇f~)
     type(spin),  dimension(0:3)                        :: P, Pt !  Pauli vectors used for the calculation
     type(nambu)                                        :: G     !  4×4 retarded propagator (G^R)
 
@@ -255,7 +331,7 @@ contains
   end subroutine
 
   pure function propagator_density(this) result(r)
-    ! Calculates the local density of states.
+    !! Calculates the local density of states.
     class(propagator), intent(in) :: this
     real(wp)                      :: r
 
@@ -265,6 +341,9 @@ contains
   pure function propagator_current(this) result(r)
     !! Calculates the spectral current at zero temperature. The result is a 4-vector,
     !! where element 0 is the charge current, and elements 1:3 are the spin currents.
+    !!
+    !! @NOTE:
+    !!   This version of the equation is only valid in equilibrium systems.
     !!
     !! @TODO: 
     !!   The equation below should be changed from:
