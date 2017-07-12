@@ -55,7 +55,7 @@ module propagator_m
     procedure  :: supercurrent       => propagator_supercurrent                 !! Spectral supercurrents
     procedure  :: lossycurrent       => propagator_lossycurrent                 !! Spectral dissipative currents
     procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
-    procedure  :: correlation        => propagator_correlation                  !! Spectral correlation
+    procedure  :: correlation        => propagator_correlation                  !! Spectral correlations
 
     procedure  :: current            => propagator_current                      !! Spectral currents
     procedure  :: density            => propagator_density                      !! Density of states
@@ -73,8 +73,9 @@ module propagator_m
   end interface
 contains
   pure function propagator_construct_zero() result(this)
-    !! Constructs a state corresponding to a normal metal, which has all
-    !! the Riccati parameters set to zero without proximity effects.
+    !! Constructs a state corresponding to a normal metal, which has all 
+    !! the Riccati parameters set to zero without proximity effects. The
+    !! distribution function defaults to equilibrium at zero temperature.
     type(propagator) :: this                !! Constructed object
 
     ! There is no need to explicitly set the Riccati parameters to zero, 
@@ -87,6 +88,7 @@ contains
 
   pure function propagator_construct_riccati(g, gt) result(this)
     !! Construct an arbitrary state by explicitly providing the Riccati parameters.
+    !! The distribution function defaults to equilibrium at zero temperature.
     type(propagator)                 :: this !! Constructed object
     type(spin), intent(in)           :: g    !! Riccati parameter γ
     type(spin), intent(in)           :: gt   !! Riccati parameter γ~
@@ -104,6 +106,7 @@ contains
     !! Constructs a state corresponding to a BCS superconductor at some given energy,
     !! which may have an imaginary term representing inelastic scattering. The second
     !! argument 'gap' is used to provide the superconducting order parameter Δ.
+    !! The distribution function defaults to equilibrium at zero temperature.
     type(propagator)        :: this      !! Constructed object
     complex(wp), intent(in) :: energy    !! Quasiparticle energy (including inelastic scattering contribution)
     complex(wp), intent(in) :: gap       !! Superconducting order parameter (including superconducting phase)
@@ -448,6 +451,10 @@ contains
 
   pure function propagator_density(this) result(r)
     !! Calculates the local density of states.
+    !!
+    !! @TODO:
+    !!   This function is staged for future removal.
+    !!
     class(propagator), intent(in) :: this
     real(wp)                      :: r
 
@@ -460,6 +467,9 @@ contains
     !!
     !! @NOTE:
     !!   This version of the equation is only valid in equilibrium systems.
+    !!
+    !! @TODO:
+    !!   This function is staged for future removal.
     !!
     !! @TODO: 
     !!   The equation below should be changed from:
