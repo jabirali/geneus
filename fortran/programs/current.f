@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-03-22
 !> Category: Programs
 !>
 !> This program calculates the charge and spin currents in a Josephson junction as a function of the

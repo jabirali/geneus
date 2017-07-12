@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-10-01
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.

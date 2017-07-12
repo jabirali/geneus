@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-07-20
 !> Category: Materials
 !>
 !> This module defines the data type 'ferromagnet', which models the physical state of a ferromagnet. The type is a

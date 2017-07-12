@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-08-23
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-flip and spin-orbit scattering.

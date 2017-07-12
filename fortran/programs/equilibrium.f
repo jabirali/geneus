@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-03-08
 !> Category: Programs
 !>
 !> This program calculates various physical observables for a superconducting thin-film structure

@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-07-11
 !> Category: Materials
 !>
 !> This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range

@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-07-10
 !> Category: Foundation
 !>
 !> This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads

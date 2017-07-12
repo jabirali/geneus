@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-03-08
 !> Category: Materials
 !>
 !> This module defines a data type 'structure', which is useful for constructing and using multilayer hybrid structures. It

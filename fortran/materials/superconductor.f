@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-07-17
 !> Category: Materials
 !>
 !> This module defines the data type 'superconductor', which models the physical state of a superconductor. The type is

@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-03-24
 !> Category: Programs
 !>
 !> This program calculates the critical temperature of an arbitrary superconducting hybrid structure

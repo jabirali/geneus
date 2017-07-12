@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-07-29
 !> Category: Materials
 !>
 !> This module defines the data type 'material',  which models the state of a physical material for a discretized range of

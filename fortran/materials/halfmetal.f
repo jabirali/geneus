@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2016-03-08
 !> Category: Materials
 !>
 !> This module defines the data type 'halfmetal', which models the physical state of a strong or halfmetallic ferromagnet.

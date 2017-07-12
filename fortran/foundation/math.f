@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-09-23
 !> Category: Foundation
 !>
 !> This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision

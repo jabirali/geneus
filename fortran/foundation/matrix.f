@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-04-26
 !> Category: Foundation
 !>
 !> This file defines functions that perform some common matrix operations.

@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2015-07-10
 !> Category: System
 !>
 !> This file renames the ISO input/output units to the standard UNIX names, and defines the ANSI escape codes for colored output.

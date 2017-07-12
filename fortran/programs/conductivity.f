@@ -1,5 +1,4 @@
 !> Author:   Jabir Ali Ouassou
-!> Date:     2017-02-15
 !> Category: Programs
 !>
 !> This program calculates the charge conductivity of an S/X/N superconducting thin-film structure.
