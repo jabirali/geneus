@@ -97,7 +97,7 @@ contains
     this % g  = g
     this % gt = gt
 
-    ! Update normalization matrices
+    ! Update the normalization matrices
     this % N  = inverse( pauli0 - g*gt )
     this % Nt = inverse( pauli0 - gt*g )
   end function
@@ -130,7 +130,7 @@ contains
     this % g  = a * ((0.0_wp,1.0_wp) * pauli2)
     this % gt = b * ((0.0_wp,1.0_wp) * pauli2)
 
-    ! Update normalization matrices
+    ! Update the normalization matrices
     this % N  = inverse( pauli0 - this%g  * this%gt )
     this % Nt = inverse( pauli0 - this%gt * this%g  )
   end function
@@ -154,7 +154,7 @@ contains
   pure function propagator_retarded_gradient(this, gauge) result(dGR)
     !! Calculates the 4×4 retarded propagator gradient ∇G^R. If an optional
     !! gauge field is specified, it returns the gauge-covariant gradient.
-    class(propagator), intent(in)     :: this   !! Propagator object
+    class(propagator),     intent(in) :: this   !! Propagator object
     type(nambu), optional, intent(in) :: gauge  !! Optional gauge field
     type(nambu)                       :: dGR    !! Retarded propagator gradient
 

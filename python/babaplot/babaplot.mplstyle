@@ -25,26 +25,26 @@ legend.frameon:              False
 
 
 # Dimensions
-figure.figsize:              3.35, 2.25
+figure.figsize:              6.7, 4.5
 #figure.autolayout:          True
-xtick.major.size:            4.00
-xtick.minor.size:            0.00
-ytick.major.size:            4.00
-ytick.minor.size:            0.00
-xtick.major.width:           0.75
-xtick.minor.width:           0.75
-ytick.major.width:           0.75
-ytick.minor.width:           0.75
-xtick.major.pad:             2.00
-ytick.major.pad:             2.00
-axes.labelpad:               3.00
-axes.linewidth:              0.75
-lines.linewidth:             1.25
-legend.borderaxespad:       -1.60
-#legend.borderaxespad:        0.00
-legend.handlelength:         1.50
-legend.handletextpad:        0.50
-legend.columnspacing:        1.00
+xtick.major.size:            8.0
+xtick.minor.size:            0.0
+ytick.major.size:            8.0
+ytick.minor.size:            0.0
+xtick.major.width:           1.5
+xtick.minor.width:           1.5
+ytick.major.width:           1.5
+ytick.minor.width:           1.5
+xtick.major.pad:             4.0
+ytick.major.pad:             4.0
+axes.labelpad:               6.0
+axes.linewidth:              1.5
+lines.linewidth:             2.5
+legend.borderaxespad:       -1.6
+#legend.borderaxespad:       0.0
+legend.handlelength:         1.5
+legend.handletextpad:        1.0
+legend.columnspacing:        1.0
 
 # Subplots
 #figure.subplot.left:   			 0.050
@@ -73,17 +73,17 @@ axes.labelcolor:             000000
 # Fonts
 mathtext.fontset:            stix
 font.family:                 STIXGeneral
-font.size:                   10
+font.size:                   20
 axes.labelsize:              small
 axes.titlesize:              small
 figure.titlesize:            small
-legend.fontsize:             small
+legend.fontsize:             x-small
 xtick.labelsize:             x-small
 ytick.labelsize:             x-small
 
 
 # Export
-savefig.dpi:                 600
+savefig.dpi:                 150
 savefig.bbox:                tight
 
 # Formatter
