@@ -502,14 +502,14 @@ contains
         else
           deallocate(this % misalignment_b)
         end if
-      case ('spinorbit_wire')
+      case ('nanowire')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
           allocate(this % spinorbit)
           this % spinorbit = spinorbit(this)
         end if
         this % spinorbit % field(3) = this % spinorbit % field(3) + (-tmp)*pauli1
-      case ('spinorbit_film')
+      case ('rashba')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
           allocate(this % spinorbit)
@@ -517,7 +517,7 @@ contains
         end if
         this % spinorbit % field(1) = this % spinorbit % field(1) + (-tmp)*pauli2
         this % spinorbit % field(2) = this % spinorbit % field(2) + (+tmp)*pauli1
-      case ('spinorbit_bulk')
+      case ('dresselhaus')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
           allocate(this % spinorbit)
