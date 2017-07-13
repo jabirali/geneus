@@ -41,6 +41,7 @@ module structure_m
     procedure :: write_density       => structure_write_density
     procedure :: write_supercurrent  => structure_write_supercurrent
     procedure :: write_lossycurrent  => structure_write_lossycurrent
+    procedure :: write_accumulation  => structure_write_accumulation
     procedure :: write_decomposition => structure_write_decomposition
     procedure :: write_magnetization => structure_write_magnetization
     procedure :: write_gap           => structure_write_gap
@@ -617,6 +618,55 @@ contains
         do m=1,size(ptr % location)
           x = a + (b-a) * ptr % location(m)
           write(unit,'(*(es20.12e3,:,"	"))') x, ptr % lossycurrent(:,m)
+        end do
+      end if
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_write_accumulation(this, file)
+    !! Writes the accumulations as a function of position to a given output file.
+    class(structure), target  :: this
+    character(*)              :: file
+    integer                   :: unit
+    real(wp)                  :: a, b
+
+    ! Open output file
+    unit = output(file)
+
+    ! Initialize variables
+    b = 0
+
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Charge            ', &
+                                '  Spin-x            ', &
+                                '  Spin-y            ', &
+                                '  Spin-z            ', &
+                                '  Heat              ', &
+                                '  Heat-x            ', &
+                                '  Heat-y            ', &
+                                '  Heat-z            '
+
+    ! Traverse all materials
+    call this % map(write_accumulation)
+
+    ! Close output file
+    close(unit = unit)
+  contains
+    subroutine write_accumulation(ptr)
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: m
+
+      if (allocated(ptr % accumulation)) then
+        ! Calculate the endpoints of this layer
+        a = b
+        b = b + 1/sqrt(ptr % thouless)
+
+        ! Write out the currents in this layer
+        do m=1,size(ptr % location)
+          x = a + (b-a) * ptr % location(m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % accumulation(:,m)
         end do
       end if
     end subroutine

@@ -66,7 +66,6 @@ module conductor_m
     procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the propagators
     procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the propagators
     procedure                 :: update_density          => conductor_update_density          ! Calculates the density of states
-    procedure                 :: update_current          => conductor_update_current          ! Calculates the currents
     procedure                 :: update_decomposition    => conductor_update_decomposition    ! Calculates the singlet/triplet decomposition
     procedure                 :: update_magnetization    => conductor_update_magnetization    ! Calculates the induced magnetization
 
@@ -401,38 +400,17 @@ contains
   end subroutine
 
   impure subroutine conductor_update_posthook(this)
-    ! Code to execute after running the update method of a class(conductor) object.
-    class(conductor), intent(inout) :: this
-
-    ! Calculate the density of states
-    call this%update_density
-
-    ! Calculate the induced magnetization
-    call this%update_magnetization
-
-    ! Calculate the currents
-    call this%update_current
-
-    ! Calculate the current decomposition
-    call this%update_decomposition
-
-    ! Call the spinorbit posthook
-    if (allocated(this%spinorbit)) then
-      call this%spinorbit%update_posthook
-    end if
-  end subroutine
-
-  impure subroutine conductor_update_current(this)
-    !! Calculate the charge, spin, heat, and spin-heat currents in the material.
+    !! Code to execute after running the update method of a class(conductor) object.
+    !! In particular, this function calculates supercurrents, dissipative currents,
+    !! accumulations, and density of states, and store the results in the object.
     use :: calculus_m
     use :: matrix_m
     use :: nambu_m
 
-    class(conductor), intent(inout) :: this
-    real(wp),         allocatable   :: superspectral(:,:)
-    real(wp),         allocatable   :: lossyspectral(:,:)
-    type(nambu),      allocatable   :: gauge
-    integer                         :: n, m, k
+    class(conductor), intent(inout)       :: this
+    type(nambu), allocatable              :: gauge
+    real(wp), allocatable, dimension(:,:) :: I, J, Q
+    integer                               :: n, m, k
 
     ! Allocate memory for the results
     if (.not. allocated(this % supercurrent)) then
@@ -441,10 +419,14 @@ contains
     if (.not. allocated(this % lossycurrent)) then
       allocate(this % lossycurrent(0:7,size(this % location)))
     end if
+    if (.not. allocated(this % accumulation)) then
+      allocate(this % accumulation(0:7,size(this % location)))
+    end if
 
     ! Allocate memory for the workspace
-    allocate(superspectral(size(this % energy),0:7))
-    allocate(lossyspectral(size(this % energy),0:7))
+    allocate(I(size(this % energy),0:7))
+    allocate(J(size(this % energy),0:7))
+    allocate(Q(size(this % energy),0:7))
 
     ! Calculate the gauge contribution
     if (allocated(this % spinorbit)) then
@@ -454,13 +436,9 @@ contains
     end if
 
     ! Simplify the namespace
-    associate(E => this % energy,       &
-              z => this % location,     &
-              G => this % propagator,   &
-              S => this % supercurrent, &
-              R => this % lossycurrent, &
-              I => superspectral,       &
-              J => lossyspectral        )
+    associate(E => this % energy,    &
+              z => this % location,  &
+              G => this % propagator )
 
       ! Iterate over positions
       do n = 1,size(z)
@@ -468,26 +446,43 @@ contains
         do m = 1,size(E)
           I(m,:) = G(m,n) % supercurrent(gauge)
           J(m,:) = G(m,n) % lossycurrent(gauge)
+          Q(m,:) = G(m,n) % accumulation()
         end do
 
-        ! Heat and spin-heat currents also depend on energy
+        ! Heat and spin-heat observables are weighted by energy
         do k = 4,7
           I(:,k) = E * I(:,k)
           J(:,k) = E * J(:,k)
+          Q(:,k) = E * Q(:,k)
         end do
 
         ! Integrate the spectral currents to find the total currents
         do k = 0,7
-          S(k,n) = integrate(E, I(:,k), E(1), E(size(E)))
-          R(k,n) = integrate(E, J(:,k), E(1), E(size(E)))
+          this % supercurrent(k,n) = integrate(E, I(:,k), E(1), E(size(E)))
+          this % lossycurrent(k,n) = integrate(E, J(:,k), E(1), E(size(E)))
+          this % accumulation(k,n) = integrate(E, Q(:,k), E(1), E(size(E)))
         end do
       end do
     end associate
 
     ! Deallocate workspace memory
-    deallocate(superspectral)
-    deallocate(lossyspectral)
-    deallocate(gauge)
+    deallocate(I, J, Q)
+
+    ! Calculate the density of states
+    ! @TODO: Deprecated
+    call this%update_density
+
+    ! Calculate the induced magnetization
+    ! @TODO: Deprecated
+    call this%update_magnetization
+
+    ! Calculate the current decomposition
+    call this%update_decomposition
+
+    ! Call the spinorbit posthook
+    if (allocated(this%spinorbit)) then
+      call this%spinorbit%update_posthook
+    end if
   end subroutine
 
   impure subroutine conductor_update_decomposition(this)

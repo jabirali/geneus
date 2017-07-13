@@ -38,6 +38,7 @@ module material_m
     real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
     real(wp),                     allocatable :: supercurrent(:,:)                          ! Charge, spin, heat, and spin-heat supercurrents
     real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
+    real(wp),                     allocatable :: accumulation(:,:)                          ! Charge, spin, heat, and spin-heat accumulation
     real(wp),                     allocatable :: decomposition(:,:)                         ! Decomposition of the charge current into singlets and triplets
     real(wp),                     allocatable :: magnetization(:,:)                         ! Discretized values for the induced magnetization    [unit: N₀gμ/2]
 
