@@ -406,7 +406,7 @@ contains
     ! Calculate the induced magnetization
     call this%update_magnetization
 
-    ! Calculate the charge and spin currents
+    ! Calculate the currents
     call this%update_current
 
     ! Calculate the current decomposition

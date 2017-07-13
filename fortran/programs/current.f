@@ -85,7 +85,7 @@ program main
     call stack % converge(threshold = tolerance, prehook = prehook, posthook = posthook)
 
     ! Save the charge current to array
-    current(n) = stack % a % current(0,1)
+    current(n) = stack % a % supercurrent(0,1)
   end do
 
   ! Calculate the critical current
@@ -114,8 +114,8 @@ contains
 
     character(len=5) :: filename
     write(filename,'(f5.3)') phase(n)
-    call stack % write_current('current.' // filename // '.dat')
-    call stack % write_gap(    'gap.'     // filename // '.dat')
+    call stack % write_supercurrent('current.' // filename // '.dat')
+    call stack % write_gap(         'gap.'     // filename // '.dat')
   end subroutine
 
   impure subroutine finalize

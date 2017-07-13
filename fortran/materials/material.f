@@ -33,10 +33,11 @@ module material_m
     ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
     real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
-    type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator (retarded component)
+    type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator
     type(propagator),             allocatable :: backup(:,:)                                ! Backup values for the propagator
-    real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states        [unit: N₀]
-    real(wp),                     allocatable :: current(:,:)                               ! Discretized values for the charge and spin currents
+    real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
+    real(wp),                     allocatable :: supercurrent(:,:)                          ! Charge, spin, heat, and spin-heat supercurrents
+    real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: decomposition(:,:)                         ! Decomposition of the charge current into singlets and triplets
     real(wp),                     allocatable :: magnetization(:,:)                         ! Discretized values for the induced magnetization    [unit: N₀gμ/2]
 
@@ -59,7 +60,7 @@ module material_m
     procedure(init),                 deferred :: init                                                   ! Initializes  the propagators
     procedure                                 :: update                => material_update               ! Recalculates the propagators
     procedure                                 :: update_density        => material_update_density       ! Calculates the density of states
-    procedure                                 :: update_current        => material_update_current       ! Calculates the electric and spin currents
+    procedure                                 :: update_current        => material_update_current       ! Calculates the currents
     procedure                                 :: update_decomposition  => material_update_decomposition ! Calculates the singlet/triplet decomposition
     procedure                                 :: update_magnetization  => material_update_magnetization ! Calculates the induced magnetization
     procedure(update),               deferred :: update_prehook                                         ! Executed before calculating the propagators
@@ -308,44 +309,60 @@ contains
   end subroutine
 
   impure subroutine material_update_current(this)
-    !! Calculate the charge and spin currents in the material.
-    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
+    !! Calculate the charge, spin, heat, and spin-heat currents in the material.
     use :: calculus_m
 
     class(material), intent(inout) :: this
-    real(wp),        allocatable   :: spectral(:,:)
-    real(wp)                       :: prefactor
-    integer                        :: n, m
+    real(wp),        allocatable   :: superspectral(:,:)
+    real(wp),        allocatable   :: lossyspectral(:,:)
+    integer                        :: n, m, k
 
-    if (size(this%energy) > 1) then
-      ! Allocate memory if necessary
-      if (.not. allocated(this%current)) then
-        allocate(this%current(0:3,size(this%location)))
-      end if
+    ! Allocate memory for the results
+    if (.not. allocated(this % supercurrent)) then
+      allocate(this % supercurrent(0:7,size(this % location)))
+    end if
+    if (.not. allocated(this % lossycurrent)) then
+      allocate(this % lossycurrent(0:7,size(this % location)))
+    end if
 
-      ! Allocate workspace memory
-      allocate(spectral(size(this%energy),0:3))
+    ! Allocate memory for the workspace
+    allocate(superspectral(size(this % energy),0:7))
+    allocate(lossyspectral(size(this % energy),0:7))
 
-      ! Iterate over the stored propagators
-      do n = 1,size(this%location)
-        do m = 1,size(this%energy)
-          ! This factor converts from a zero-temperature to finite-temperature spectral current
-          prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+    ! Simplify the namespace
+    associate(E => this % energy,       &
+              z => this % location,     &
+              G => this % propagator,   &
+              S => this % supercurrent, &
+              R => this % lossycurrent, &
+              I => superspectral,       &
+              J => lossyspectral        )
 
-          ! Calculate the contribution to the spectral currents at this position in the material
-          spectral(m,:) = prefactor * this % propagator(m,n) % current()
+      ! Iterate over positions
+      do n = 1,size(z)
+        ! Calculate the spectral currents at this position
+        do m = 1,size(E)
+          I(m,:) = G(m,n) % supercurrent()
+          J(m,:) = G(m,n) % lossycurrent()
         end do
 
-        ! Interpolate and integrate the results, and update the current vector
-        this%current(0,n) = integrate(this%energy, spectral(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%current(1,n) = integrate(this%energy, spectral(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%current(2,n) = integrate(this%energy, spectral(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%current(3,n) = integrate(this%energy, spectral(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
-      end do
+        ! Heat and spin-heat currents also depend on energy
+        do k = 4,7
+          I(:,k) = E * I(:,k)
+          J(:,k) = E * J(:,k)
+        end do
 
-      ! Deallocate workspace memory
-      deallocate(spectral)
-    end if
+        ! Integrate the spectral currents to find the total currents
+        do k = 0,7
+          S(k,n) = integrate(E, I(:,k), E(1), E(size(E)))
+          R(k,n) = integrate(E, J(:,k), E(1), E(size(E)))
+        end do
+      end do
+    end associate
+
+    ! Deallocate workspace memory
+    deallocate(superspectral)
+    deallocate(lossyspectral)
   end subroutine
 
   impure subroutine material_update_decomposition(this)

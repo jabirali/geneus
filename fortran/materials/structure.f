@@ -19,6 +19,7 @@ module structure_m
 
   ! Type declaration
   type, public :: structure
+    ! Endpoints of the contained linked list
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
   contains
@@ -38,7 +39,8 @@ module structure_m
     procedure :: selfconsistency     => structure_selfconsistency
     procedure :: converge            => structure_converge
     procedure :: write_density       => structure_write_density
-    procedure :: write_current       => structure_write_current
+    procedure :: write_supercurrent  => structure_write_supercurrent
+    procedure :: write_lossycurrent  => structure_write_lossycurrent
     procedure :: write_decomposition => structure_write_decomposition
     procedure :: write_magnetization => structure_write_magnetization
     procedure :: write_gap           => structure_write_gap
@@ -437,8 +439,8 @@ contains
     subroutine check(m)
       class(material), pointer, intent(in) :: m
       ! Determine the charge current extrema
-      maximum = max(maximum, maxval(m % current(0,:)))
-      minimum = min(minimum, minval(m % current(0,:)))
+      maximum = max(maximum, maxval(m % supercurrent(0,:) + m % lossycurrent(0,:)))
+      minimum = min(minimum, minval(m % supercurrent(0,:) + m % lossycurrent(0,:)))
     end subroutine
   end function
 
@@ -522,8 +524,8 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_write_current(this, file)
-    !! Writes the charge and spin currents as a function of position to a given output file.
+  impure subroutine structure_write_supercurrent(this, file)
+    !! Writes the supercurrents as a function of position to a given output file.
     class(structure), target  :: this
     character(*)              :: file
     integer                   :: unit
@@ -540,20 +542,24 @@ contains
                                 '  Charge current    ', &
                                 '  Spin-x current    ', &
                                 '  Spin-y current    ', &
-                                '  Spin-z current    '
+                                '  Spin-z current    ', &
+                                '  Heat current      ', &
+                                '  Heat-x current    ', &
+                                '  Heat-y current    ', &
+                                '  Heat-z current    '
 
     ! Traverse all materials
-    call this % map(write_current)
+    call this % map(write_supercurrent)
 
     ! Close output file
     close(unit = unit)
   contains
-    subroutine write_current(ptr)
+    subroutine write_supercurrent(ptr)
       class(material), pointer, intent(in) :: ptr
       real(wp)                             :: x
       integer                              :: m
 
-      if (allocated(ptr % current)) then
+      if (allocated(ptr % supercurrent)) then
         ! Calculate the endpoints of this layer
         a = b
         b = b + 1/sqrt(ptr % thouless)
@@ -561,7 +567,56 @@ contains
         ! Write out the currents in this layer
         do m=1,size(ptr % location)
           x = a + (b-a) * ptr % location(m)
-          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % current(:,m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % supercurrent(:,m)
+        end do
+      end if
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_write_lossycurrent(this, file)
+    !! Writes the lossy currents as a function of position to a given output file.
+    class(structure), target  :: this
+    character(*)              :: file
+    integer                   :: unit
+    real(wp)                  :: a, b
+
+    ! Open output file
+    unit = output(file)
+
+    ! Initialize variables
+    b = 0
+
+    ! Write out the header line
+    write(unit,'(*(a,:,"	"))') '# Position          ', &
+                                '  Charge current    ', &
+                                '  Spin-x current    ', &
+                                '  Spin-y current    ', &
+                                '  Spin-z current    ', &
+                                '  Heat current      ', &
+                                '  Heat-x current    ', &
+                                '  Heat-y current    ', &
+                                '  Heat-z current    '
+
+    ! Traverse all materials
+    call this % map(write_lossycurrent)
+
+    ! Close output file
+    close(unit = unit)
+  contains
+    subroutine write_lossycurrent(ptr)
+      class(material), pointer, intent(in) :: ptr
+      real(wp)                             :: x
+      integer                              :: m
+
+      if (allocated(ptr % lossycurrent)) then
+        ! Calculate the endpoints of this layer
+        a = b
+        b = b + 1/sqrt(ptr % thouless)
+
+        ! Write out the currents in this layer
+        do m=1,size(ptr % location)
+          x = a + (b-a) * ptr % location(m)
+          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % lossycurrent(:,m)
         end do
       end if
     end subroutine

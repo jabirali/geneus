@@ -27,7 +27,6 @@ module spinorbit_m
     procedure                   :: diffusion_equation   => spinorbit_diffusion_equation      ! Defines the Usadel diffusion equation
     procedure                   :: interface_equation_a => spinorbit_interface_equation_a    ! Boundary condition at the left  interface
     procedure                   :: interface_equation_b => spinorbit_interface_equation_b    ! Boundary condition at the right interface
-    procedure                   :: update_current       => spinorbit_update_current          ! Calculate the gauge-dependent terms in the charge and spin currents
     procedure                   :: update_decomposition => spinorbit_update_decomposition    ! Calculate the gauge-dependent terms in the charge current decomposition
     procedure                   :: update_prehook       => spinorbit_update_prehook          ! Code to execute before calculating the propagators
     procedure                   :: update_posthook      => spinorbit_update_posthook         ! Code to execute after  calculating the propagators
@@ -71,8 +70,7 @@ contains
     ! Code to execute after running the update method of a class(material) object.
     class(spinorbit), intent(inout) :: this
 
-    ! Add gauge-covariant terms to the currents
-    call this % update_current
+    ! Add gauge-covariant terms to observables
     call this % update_decomposition
   end subroutine
 
@@ -142,59 +140,6 @@ contains
     r2  = r2  - (0.0_wp,1.0_wp) * (Az  * g2  + g2  * Azt)
     rt2 = rt2 + (0.0_wp,1.0_wp) * (Azt * gt2 + gt2 * Az )
 
-    end associate
-  end subroutine
-
-  impure subroutine spinorbit_update_current(this)
-    !! Calculate the spin-orbit coupling terms in the charge and spin currents, 
-    !! i.e. determine how the SU(2) gauge field affects the relevant currents.
-    !! @TODO: The tanh(...) has to be generalized for nonequilibrium calculations.
-    class(spinorbit), intent(inout)  :: this
-    real(wp),         allocatable    :: spectral(:,:)
-    real(wp)                         :: prefactor
-    type(nambu)                      :: G, A, K
-    integer                          :: n, m
-
-    associate(location    => this % material % location,    &
-              energy      => this % material % energy,      &
-              propagators => this % material % propagator,  &
-              temperature => this % material % temperature, &
-              current     => this % material % current      )
-
-      ! Allocate workspace memory
-      allocate(spectral(size(energy),0:3))
-
-      ! Construct the 4×4 spin-orbit matrix
-      A = diag(+this%Az%matrix, -this%Azt%matrix)
-
-      ! Iterate over the stored propagators
-      do n = 1,size(location)
-        do m = 1,size(energy)
-          ! This factor converts from a zero-temperature to finite-temperature spectral current
-          prefactor = 4 * tanh(0.8819384944310228_wp * energy(m)/temperature)
-
-          ! Construct the 4×4 propagator matrix at this position and energy
-          G = propagators(m,n) % retarded()
-
-          ! Calculate the 4×4 kernel used to calculate the spectral currents
-          K = prefactor * (G*A*G)
-
-          ! Calculate the spectral charge and spin currents at this position
-          spectral(m,0) = im(trace(nambuv(4)*K))
-          spectral(m,1) = im(trace(nambuv(5)*K))
-          spectral(m,2) = im(trace(nambuv(6)*K))
-          spectral(m,3) = im(trace(nambuv(7)*K))
-        end do
-
-        ! Interpolate and integrate the results, and update the current vector
-        current(0,n) = current(0,n) + integrate(energy, spectral(:,0), energy(1), energy(size(energy)))
-        current(1,n) = current(1,n) + integrate(energy, spectral(:,1), energy(1), energy(size(energy)))
-        current(2,n) = current(2,n) + integrate(energy, spectral(:,2), energy(1), energy(size(energy)))
-        current(3,n) = current(3,n) + integrate(energy, spectral(:,3), energy(1), energy(size(energy)))
-      end do
-
-      ! Deallocate workspace memory
-      deallocate(spectral)
     end associate
   end subroutine
 
