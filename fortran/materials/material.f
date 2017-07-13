@@ -26,7 +26,7 @@ module material_m
     real(wp)                                  :: conductance_a         =  0.30_wp           ! Normalized conductance at the left  interface
     real(wp)                                  :: conductance_b         =  0.30_wp           ! Normalized conductance at the right interface
     real(wp)                                  :: thouless              =  1.00_wp           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(wp)                                  :: temperature           =  0.01_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
+    real(wp)                                  :: temperature           =  0.00_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
     real(wp)                                  :: scattering_inelastic  =  0.01_wp           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
     integer                                   :: order                 =  1                 ! If this number is positive, it denotes which material in a multilayer structure is processed first
 
@@ -80,8 +80,8 @@ module material_m
       ! This interface is used for the deferred procedure init.
       import material, wp
 
-      class(material), intent(inout) :: this
-      complex(wp),     intent(in)    :: gap
+      class(material),       intent(inout) :: this
+      complex(wp), optional, intent(in)    :: gap
     end subroutine
   end interface
 
@@ -326,6 +326,7 @@ contains
         call evaluate(val, this%scattering_inelastic)
       case("temperature")
         call evaluate(val, this%temperature)
+        call this % init()
       case("order")
         call evaluate(val, this%order)
         if (this%order > 16) then

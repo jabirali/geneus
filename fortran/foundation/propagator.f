@@ -278,8 +278,8 @@ contains
 
   pure subroutine propagator_import_rvector(a, b)
     ! Defines assignment from a real vector to a propagator object.
-    type(propagator), intent(out) :: a
-    real(wp),         intent(in)  :: b(32)
+    type(propagator), intent(inout) :: a
+    real(wp),         intent(in)    :: b(32)
 
     ! Unpack the vector elements
     a%g   = b( 1: 8) 

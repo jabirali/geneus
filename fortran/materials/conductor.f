@@ -129,15 +129,36 @@ contains
 
   pure subroutine conductor_init(this, gap)
     ! Define the default initializer.
-    class(conductor), intent(inout) :: this
-    complex(wp),      intent(in)    :: gap
-    integer                         :: n, m
+    class(conductor),      intent(inout) :: this
+    complex(wp), optional, intent(in)    :: gap
+    integer                              :: n, m
 
+    ! Initialize the Riccati parameters
+    if (present(gap)) then
+      do m = 1,size(this%location)
+        do n = 1,size(this%energy)
+            this % propagator(n,m) = propagator( cx(this%energy(n),this%scattering_inelastic), gap )
+        end do
+      end do
+    end if
+
+    ! Initialize the distribution function
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        this%propagator(n,m) = propagator( cx(this%energy(n),this%scattering_inelastic), gap )
+        this % propagator(n,m) % h = &
+          [(fermi(n) + fermi(n))/2, 0.0_wp, 0.0_wp, 0.0_wp, &
+           (fermi(n) - fermi(n))/2, 0.0_wp, 0.0_wp, 0.0_wp  ]
       end do
     end do
+  contains
+    pure function fermi(n) result(h)
+      integer, intent(in) :: n
+      real(wp)            :: h
+
+      associate(E => this % energy(n), T => this % temperature)
+        h = tanh(0.8819384944310228_wp * E/T)
+      end associate
+    end function
   end subroutine
 
   !--------------------------------------------------------------------------------!

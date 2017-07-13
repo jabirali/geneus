@@ -66,7 +66,7 @@ contains
   pure subroutine superconductor_init(this, gap)
     ! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
-    complex(wp),           intent(in)    :: gap
+    complex(wp), optional, intent(in)    :: gap
 
     ! Call the superclass initializer
     call this%conductor%init(gap)

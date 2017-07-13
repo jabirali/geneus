@@ -58,15 +58,12 @@ contains
 
   pure subroutine halfmetal_init(this, gap)
     ! Initializes the propagators to a non-superconducting state.
-    class(halfmetal), intent(inout) :: this
-    complex(wp),      intent(in)    :: gap
-    integer                         :: n, m
+    class(halfmetal),      intent(inout) :: this
+    complex(wp), optional, intent(in)    :: gap
+    integer                              :: n, m
 
-    do m = 1,size(this%location)
-      do n = 1,size(this%energy)
-        this%propagator(n,m) = propagator()
-      end do
-    end do
+    ! Call the superclass initializer
+    call this%conductor%init((0.0_wp,0.0_wp))
   end subroutine
 
   !--------------------------------------------------------------------------------!
