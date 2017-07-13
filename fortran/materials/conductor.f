@@ -65,6 +65,10 @@ module conductor_m
     procedure                 :: interface_equation_b    => conductor_interface_equation_b    ! Boundary condition at the right interface
     procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the propagators
     procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the propagators
+    procedure                 :: update_density          => conductor_update_density          ! Calculates the density of states
+    procedure                 :: update_current          => conductor_update_current          ! Calculates the currents
+    procedure                 :: update_decomposition    => conductor_update_decomposition    ! Calculates the singlet/triplet decomposition
+    procedure                 :: update_magnetization    => conductor_update_magnetization    ! Calculates the induced magnetization
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation (conductor terms)
@@ -417,6 +421,180 @@ contains
       call this%spinorbit%update_posthook
     end if
   end subroutine
+
+  impure subroutine conductor_update_current(this)
+    !! Calculate the charge, spin, heat, and spin-heat currents in the material.
+    use :: calculus_m
+    use :: matrix_m
+    use :: nambu_m
+
+    class(conductor), intent(inout) :: this
+    real(wp),         allocatable   :: superspectral(:,:)
+    real(wp),         allocatable   :: lossyspectral(:,:)
+    type(nambu),      allocatable   :: gauge
+    integer                         :: n, m, k
+
+    ! Allocate memory for the results
+    if (.not. allocated(this % supercurrent)) then
+      allocate(this % supercurrent(0:7,size(this % location)))
+    end if
+    if (.not. allocated(this % lossycurrent)) then
+      allocate(this % lossycurrent(0:7,size(this % location)))
+    end if
+
+    ! Allocate memory for the workspace
+    allocate(superspectral(size(this % energy),0:7))
+    allocate(lossyspectral(size(this % energy),0:7))
+
+    ! Calculate the gauge contribution
+    if (allocated(this % spinorbit)) then
+      allocate(gauge)
+      gauge = diag(+this % spinorbit % Az % matrix,&
+                   -this % spinorbit % Azt % matrix)
+    end if
+
+    ! Simplify the namespace
+    associate(E => this % energy,       &
+              z => this % location,     &
+              G => this % propagator,   &
+              S => this % supercurrent, &
+              R => this % lossycurrent, &
+              I => superspectral,       &
+              J => lossyspectral        )
+
+      ! Iterate over positions
+      do n = 1,size(z)
+        ! Calculate the spectral currents at this position
+        do m = 1,size(E)
+          I(m,:) = G(m,n) % supercurrent(gauge)
+          J(m,:) = G(m,n) % lossycurrent(gauge)
+        end do
+
+        ! Heat and spin-heat currents also depend on energy
+        do k = 4,7
+          I(:,k) = E * I(:,k)
+          J(:,k) = E * J(:,k)
+        end do
+
+        ! Integrate the spectral currents to find the total currents
+        do k = 0,7
+          S(k,n) = integrate(E, I(:,k), E(1), E(size(E)))
+          R(k,n) = integrate(E, J(:,k), E(1), E(size(E)))
+        end do
+      end do
+    end associate
+
+    ! Deallocate workspace memory
+    deallocate(superspectral)
+    deallocate(lossyspectral)
+    deallocate(gauge)
+  end subroutine
+
+  impure subroutine conductor_update_decomposition(this)
+    !! Calculate the singlet/triplet decomposition of the charge current in the material.
+    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
+    use :: calculus_m
+
+    class(conductor), intent(inout) :: this
+    complex(wp)                     :: f(0:3), df(0:3), ft(0:3), dft(0:3)
+    real(wp),         allocatable   :: spectral(:,:)
+    real(wp)                        :: prefactor(0:3)
+    integer                         :: n, m
+
+    if (size(this%energy) > 1) then
+      ! Allocate memory if necessary
+      if (.not. allocated(this%decomposition)) then
+        allocate(this%decomposition(0:3,size(this%location)))
+      end if
+
+      ! Allocate workspace memory
+      allocate(spectral(size(this%energy),0:3))
+
+      ! Iterate over the stored propagators
+      do n = 1,size(this%location)
+        do m = 1,size(this%energy)
+          ! This factor converts from a zero-temperature to finite-temperature spectral current, and
+          ! adds the signs that distinguish between the (positive) singlet and (negative) triplet current
+          prefactor = [+1,-1,-1,-1] * 8 * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+
+          ! Perform the singlet/triplet decomposition of the retarded propagator and its gradient
+          call this % propagator(m,n) % decompose(f = f, ft = ft, df = df, dft = dft)
+
+          ! Calculate the contribution to the spectral charge current
+          spectral(m,:) = prefactor * re(f*dft - ft*df)
+        end do
+
+        ! Interpolate and integrate the results, and update the current vector
+        this%decomposition(0,n) = integrate(this%energy, spectral(:,0), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(1,n) = integrate(this%energy, spectral(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(2,n) = integrate(this%energy, spectral(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%decomposition(3,n) = integrate(this%energy, spectral(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
+      end do
+
+      ! Deallocate workspace memory
+      deallocate(spectral)
+    end if
+  end subroutine
+
+
+  impure subroutine conductor_update_magnetization(this)
+    !! Calculate the induced magnetization in the material.
+    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
+    use :: calculus_m
+
+    class(conductor), intent(inout) :: this
+    real(wp),         allocatable   :: magnetization(:,:)
+    real(wp)                        :: prefactor
+    integer                         :: n, m
+
+    if (size(this % energy) > 1) then
+      ! Allocate memory if necessary
+      if (.not. allocated(this%magnetization)) then
+        allocate(this%magnetization(1:3,size(this%location)))
+      end if
+
+      ! Allocate workspace memory
+      allocate(magnetization(size(this%energy),1:3))
+
+      ! Iterate over the stored propagators
+      do n = 1,size(this%location)
+        do m = 1,size(this%energy)
+          ! This factor converts from a zero-temperature to finite-temperature magnetization
+          prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
+
+          ! Calculate the contribution to the spectral magnetization at this position
+          magnetization(m,:) = prefactor * re(trace(pauli(1:3) * this % propagator(m,n) % N))
+        end do
+
+        ! Interpolate and integrate the results, and update the magnetization vector
+        this%magnetization(1,n) = integrate(this%energy, magnetization(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%magnetization(2,n) = integrate(this%energy, magnetization(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
+        this%magnetization(3,n) = integrate(this%energy, magnetization(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
+      end do
+
+      ! Deallocate workspace memory
+      deallocate(magnetization)
+    end if
+  end subroutine
+
+  pure subroutine conductor_update_density(this)
+    ! Calculate the density of states in the material.
+    class(conductor), intent(inout) :: this
+    integer                         :: n, m
+
+    ! Allocate memory if necessary
+    if (.not. allocated(this%density)) then
+      allocate(this%density(size(this%energy),size(this%location)))
+    end if
+
+    ! Calculate the density of states at each position and energy
+    do m=1,size(this%location)
+      do n=1,size(this%energy)
+        this % density(n,m) = this % propagator(n,m) % density()
+      end do
+    end do
+  end subroutine
+
 
   !--------------------------------------------------------------------------------!
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
