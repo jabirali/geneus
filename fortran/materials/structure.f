@@ -540,14 +540,8 @@ contains
 
         ! Write superconducting correlations
         if (allocated(this % correlation)) then
-          select type (ptr)
-            class is (superconductor)
-              write(this % correlation,'(*(es20.12e3,:,"	"))') &
-                z, abs(ptr%get_gap(p)), atan2(im(ptr%get_gap(p)),re(ptr%get_gap(p)))/pi
-            class default
-              write(this % correlation,'(*(es20.12e3,:,"	"))') &
-                z, 0.0_wp, 0.0_wp
-          end select
+          write(this % correlation,'(*(es20.12e3,:,"	"))') &
+            z, abs(ptr % correlation(m)), arg(ptr % correlation(m))
         end if
 
         ! Write density of states

@@ -133,42 +133,21 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_gap(this)
-    !! Calculate the superconducting gap Δ(z) from the propagators using a selfconsistency equation.
-    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
+    !! Interpolate the superconducting correlations Δ(z) to a higher resolution,
+    !! to make the calculations more stable near strong ferromagnetic materials.
     use :: calculus_m
 
-    class(superconductor), intent(inout)        :: this       ! Superconductor object that will be updated
-    complex(wp), dimension(size(this%energy))   :: gap_e      ! Used to calculate the order parameter (as a function of energy)
-    complex(wp), dimension(size(this%location)) :: gap_z      ! Used to calculate the order parameter (as a function of position)
-    complex(wp), dimension(0:3)                 :: f, ft      ! Singlet/triplet decomposition of the anomalous propagators
-    real(wp)                                    :: coupling   ! The BCS coupling that gives rise to superconductivity
-    real(wp)                                    :: diff       ! Change of the gap between two iterations
-    integer                                     :: n, m       ! Loop variables
-
-    ! Calculate the appropriate coupling from the cutoff energy
-    coupling = 1/acosh(this%energy(size(this%energy)))
-
-    ! Iterate over the stored propagators
-    do n = 1,size(this%location)
-      do m = 1,size(this%energy)
-        ! Perform a singlet/triplet decomposition of the anomalous propagators
-        call this % propagator(m,n) % decompose(f = f, ft = ft)
-
-        ! Calculate the gap equation integrand and store it in an array
-        gap_e(m)  = ((f(0) - conjg(ft(0)))/2) * coupling * tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
-      end do
-
-      ! Interpolate and integrate the results, and update the superconducting order parameter
-      gap_z(n) = integrate(this%energy, gap_e, this%energy(1), this%energy(ubound(this%energy,1)))
-    end do
+    class(superconductor), intent(inout)        :: this       !! Superconductor object
+    real(wp)                                    :: diff       !! Change between iterations
+    integer                                     :: n, m       !! Loop variables
 
     ! Interpolate the gap as a function of position to a higher resolution
-    this % gap_function = interpolate(this % location, gap_z, this % gap_location)
+    this % gap_function = interpolate(this % location, this % correlation, this % gap_location)
 
     ! Save the calculated gap as backup
     associate( b => this % gap_history, m => lbound(this % gap_history,2), n => ubound(this % gap_history,2) )
       b(:,m:n-1) = b(:,m+1:n)
-      b(:,  n  ) = gap_z
+      b(:,  n  ) = this % correlation
       diff       = mean(abs(b(:,n) - b(:,n-1)))
     end associate
 

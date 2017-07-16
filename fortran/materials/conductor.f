@@ -123,6 +123,13 @@ contains
     ! Initialize propagators
     allocate(this%propagator(size(this%energy),size(this%location)))
     call this%init( (0.0_wp,0.0_wp) )
+
+    ! Allocate memory for physical observables
+    allocate(this % correlation(size(this % location)))
+    allocate(this % supercurrent(0:7,size(this % location)))
+    allocate(this % lossycurrent(0:7,size(this % location)))
+    allocate(this % accumulation(0:7,size(this % location)))
+    allocate(this % density(size(this % energy), size(this % location), 0:7))
   end function
 
   pure subroutine conductor_init(this, gap)
@@ -421,40 +428,28 @@ contains
   impure subroutine conductor_update_posthook(this)
     !! Code to execute after running the update method of a class(conductor) object.
     !! In particular, this function calculates supercurrents, dissipative currents,
-    !! accumulations, and density of states, and store the results in the object.
+    !! accumulations, and density of states, and stores the results in the object.
     use :: calculus_m
     use :: matrix_m
     use :: nambu_m
 
-    class(conductor), intent(inout)       :: this
-    type(nambu), allocatable              :: gauge
-    real(wp), allocatable, dimension(:,:) :: I, J, Q
-    integer                               :: n, m, k
-
-    ! Allocate memory for the results
-    if (.not. allocated(this % density)) then
-      allocate(this % density(size(this % energy), size(this % location), 0:7))
-    end if
-    if (.not. allocated(this % supercurrent)) then
-      allocate(this % supercurrent(0:7,size(this % location)))
-    end if
-    if (.not. allocated(this % lossycurrent)) then
-      allocate(this % lossycurrent(0:7,size(this % location)))
-    end if
-    if (.not. allocated(this % accumulation)) then
-      allocate(this % accumulation(0:7,size(this % location)))
-    end if
+    class(conductor), intent(inout)          :: this
+    type(nambu), allocatable                 :: gauge
+    real(wp),    allocatable, dimension(:,:) :: I, J, Q
+    complex(wp), allocatable, dimension(:)   :: S
+    integer                                  :: n, m, k
 
     ! Allocate memory for the workspace
-    allocate(I(size(this % energy),0:7))
-    allocate(J(size(this % energy),0:7))
-    allocate(Q(size(this % energy),0:7))
+    allocate(S(size(this % energy)))
+    allocate(I(size(this % energy), 0:7))
+    allocate(J(size(this % energy), 0:7))
+    allocate(Q(size(this % energy), 0:7))
 
     ! Calculate the gauge contribution
     if (allocated(this % spinorbit)) then
       allocate(gauge)
-      gauge = diag(+this % spinorbit % Az % matrix,&
-                   -this % spinorbit % Azt % matrix)
+      gauge = diag(+this % spinorbit % Az  % matrix,&
+                   -this % spinorbit % Azt % matrix )
     end if
 
     ! Simplify the namespace
@@ -467,30 +462,35 @@ contains
       do n = 1,size(z)
         ! Calculate the spectral properties at this position
         do m = 1,size(E)
+          S(m)     = G(m,n) % correlation()
+          Q(m,:)   = G(m,n) % accumulation()
           I(m,:)   = G(m,n) % supercurrent(gauge)
           J(m,:)   = G(m,n) % lossycurrent(gauge)
-          Q(m,:)   = G(m,n) % accumulation()
           D(m,n,:) = G(m,n) % density()
         end do
 
-        ! Heat and spin-heat observables are weighted by energy
+        ! Superconducting correlations depend on the cutoff
+        S = S/acosh(E(size(E)))
+
+        ! Heat and spin-heat observables depend on the energy
         do k = 4,7
+          Q(:,k) = E * Q(:,k)
           I(:,k) = E * I(:,k)
           J(:,k) = E * J(:,k)
-          Q(:,k) = E * Q(:,k)
         end do
 
-        ! Integrate the spectral currents to find the total currents
+        ! Integrate the spectral observables to find the total observables
+        this % correlation(n) = integrate(E, S, E(1), E(size(E)))
         do k = 0,7
+          this % accumulation(k,n) = integrate(E, Q(:,k), E(1), E(size(E)))
           this % supercurrent(k,n) = integrate(E, I(:,k), E(1), E(size(E)))
           this % lossycurrent(k,n) = integrate(E, J(:,k), E(1), E(size(E)))
-          this % accumulation(k,n) = integrate(E, Q(:,k), E(1), E(size(E)))
         end do
       end do
     end associate
 
     ! Deallocate workspace memory
-    deallocate(I, J, Q)
+    deallocate(S, Q, I, J)
 
     ! Calculate the current decomposition
     call this%update_decomposition

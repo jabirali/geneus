@@ -26,7 +26,7 @@ module math_m
   private
 
   ! Declare which routines to export
-  public :: unitvector, re, im, cx
+  public :: unitvector, re, im, cx, arg
 
   ! Declare floating-point precisions
   integer,  parameter, public :: sp  = real32              !! Single precision
@@ -68,6 +68,15 @@ contains
     else
       z = cmplx(x,0,kind=wp)
     end if
+  end function
+
+  pure elemental function arg(z) result(t)
+    !! Returns the complex argument θ of a complex number z=r·exp(iθ). 
+    !! @NOTE: this function returns the normalized angle θ/π.
+    complex(wp), intent(in) :: z   !! Complex number
+    complex(wp)             :: t   !! Complex argument
+
+    t = atan2(im(z), re(z))/pi
   end function
 
   pure function unitvector(v) result(r)

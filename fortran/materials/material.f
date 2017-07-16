@@ -35,11 +35,12 @@ module material_m
     real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
     type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator
     type(propagator),             allocatable :: backup(:,:)                                ! Backup values for the propagator
-    real(wp),                     allocatable :: density(:,:,:)                             ! Discretized values for the density of states
+    real(wp),                     allocatable :: density(:,:,:)                             ! Spin-resolved density of states
     real(wp),                     allocatable :: supercurrent(:,:)                          ! Charge, spin, heat, and spin-heat supercurrents
     real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: accumulation(:,:)                          ! Charge, spin, heat, and spin-heat accumulation
     real(wp),                     allocatable :: decomposition(:,:)                         ! Decomposition of the charge current into singlets and triplets
+    complex(wp),                  allocatable :: correlation(:)                             ! Superconducting pair-correlations
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
     class(material),                  pointer :: material_a      => null()                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
