@@ -22,6 +22,14 @@ module structure_m
     ! Endpoints of the contained linked list
     class(material), pointer :: a => null()
     class(material), pointer :: b => null()
+
+    ! Output units for physical observables
+    integer, allocatable :: supercurrent
+    integer, allocatable :: lossycurrent
+    integer, allocatable :: accumulation
+    integer, allocatable :: decomposition
+    integer, allocatable :: correlation
+    integer, allocatable :: density
   contains
     procedure :: push                => structure_push
     procedure :: conf                => structure_conf
@@ -38,12 +46,7 @@ module structure_m
     procedure :: temperature         => structure_temperature
     procedure :: selfconsistency     => structure_selfconsistency
     procedure :: converge            => structure_converge
-    procedure :: write_density       => structure_write_density
-    procedure :: write_supercurrent  => structure_write_supercurrent
-    procedure :: write_lossycurrent  => structure_write_lossycurrent
-    procedure :: write_accumulation  => structure_write_accumulation
-    procedure :: write_decomposition => structure_write_decomposition
-    procedure :: write_gap           => structure_write_gap
+    procedure :: write               => structure_write
   end type
 
   ! Type constructor
@@ -341,6 +344,9 @@ contains
         call this % update(bootstrap = bootstrap_)
 
         ! Write the results to files
+        call this % write
+
+        ! Extra actions defined by the user
         if (present(posthook)) then
           call posthook
         end if
@@ -474,291 +480,89 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_write_density(this, file)
-    !! Writes the density of states as a function of position and energy to a given output file.
+  impure subroutine structure_write(this)
+    !! Writes physical observables to output files.
     class(structure), target  :: this
-    character(*)              :: file
-    integer                   :: unit
     real(wp)                  :: a, b
-
-    ! Open output file
-    unit = output(file)
 
     ! Initialize variables
     b = 0
 
-    ! Write out the header line
-    write(unit,'(*(a,:,"	"))') '# Position          ', &
-                                '  Energy            ', &
-                                '  Density of states '
-
     ! Traverse all materials
-    call this % map(write_density)
+    call this % map(writer)
 
-    ! Close output file
-    close(unit = unit)
+    ! Flush output to files
+    if (allocated(this % accumulation))   flush(this % accumulation)
+    if (allocated(this % supercurrent))   flush(this % supercurrent)
+    if (allocated(this % lossycurrent))   flush(this % lossycurrent)
+    if (allocated(this % decomposition))  flush(this % decomposition)
+    if (allocated(this % correlation))    flush(this % correlation)
+    if (allocated(this % density))        flush(this % density)
   contains
-    subroutine write_density(ptr)
+    subroutine writer(ptr)
       class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: x
+      real(wp)                             :: p, z
       integer                              :: n, m
 
-      if (allocated(ptr % density)) then
-        ! Calculate the endpoints of this layer
-        a = b
-        b = b + 1/sqrt(ptr % thouless)
-
-        ! Write out the density of states in this layer
-        do m=1,size(ptr % location)
-          x = a + (b-a) * ptr % location(m)
-          do n=size(ptr % energy),1,-1
-            ! Negative energies
-            write(unit,'(*(es20.12e3,:,"	"))') x, -ptr % energy(n), ptr % density(n,m)
-          end do
-          do n=1,size(ptr % energy),+1
-            ! Positive energies
-            write(unit,'(*(es20.12e3,:,"	"))') x, +ptr % energy(n), ptr % density(n,m)
-          end do
-        end do
-      end if
-    end subroutine
-  end subroutine
-
-  impure subroutine structure_write_supercurrent(this, file)
-    !! Writes the supercurrents as a function of position to a given output file.
-    class(structure), target  :: this
-    character(*)              :: file
-    integer                   :: unit
-    real(wp)                  :: a, b
-
-    ! Open output file
-    unit = output(file)
-
-    ! Initialize variables
-    b = 0
-
-    ! Write out the header line
-    write(unit,'(*(a,:,"	"))') '# Position          ', &
-                                '  Charge current    ', &
-                                '  Spin-x current    ', &
-                                '  Spin-y current    ', &
-                                '  Spin-z current    ', &
-                                '  Heat current      ', &
-                                '  Heat-x current    ', &
-                                '  Heat-y current    ', &
-                                '  Heat-z current    '
-
-    ! Traverse all materials
-    call this % map(write_supercurrent)
-
-    ! Close output file
-    close(unit = unit)
-  contains
-    subroutine write_supercurrent(ptr)
-      class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: x
-      integer                              :: m
-
-      if (allocated(ptr % supercurrent)) then
-        ! Calculate the endpoints of this layer
-        a = b
-        b = b + 1/sqrt(ptr % thouless)
-
-        ! Write out the currents in this layer
-        do m=1,size(ptr % location)
-          x = a + (b-a) * ptr % location(m)
-          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % supercurrent(:,m)
-        end do
-      end if
-    end subroutine
-  end subroutine
-
-  impure subroutine structure_write_lossycurrent(this, file)
-    !! Writes the lossy currents as a function of position to a given output file.
-    class(structure), target  :: this
-    character(*)              :: file
-    integer                   :: unit
-    real(wp)                  :: a, b
-
-    ! Open output file
-    unit = output(file)
-
-    ! Initialize variables
-    b = 0
-
-    ! Write out the header line
-    write(unit,'(*(a,:,"	"))') '# Position          ', &
-                                '  Charge current    ', &
-                                '  Spin-x current    ', &
-                                '  Spin-y current    ', &
-                                '  Spin-z current    ', &
-                                '  Heat current      ', &
-                                '  Heat-x current    ', &
-                                '  Heat-y current    ', &
-                                '  Heat-z current    '
-
-    ! Traverse all materials
-    call this % map(write_lossycurrent)
-
-    ! Close output file
-    close(unit = unit)
-  contains
-    subroutine write_lossycurrent(ptr)
-      class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: x
-      integer                              :: m
-
-      if (allocated(ptr % lossycurrent)) then
-        ! Calculate the endpoints of this layer
-        a = b
-        b = b + 1/sqrt(ptr % thouless)
-
-        ! Write out the currents in this layer
-        do m=1,size(ptr % location)
-          x = a + (b-a) * ptr % location(m)
-          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % lossycurrent(:,m)
-        end do
-      end if
-    end subroutine
-  end subroutine
-
-  impure subroutine structure_write_accumulation(this, file)
-    !! Writes the accumulations as a function of position to a given output file.
-    class(structure), target  :: this
-    character(*)              :: file
-    integer                   :: unit
-    real(wp)                  :: a, b
-
-    ! Open output file
-    unit = output(file)
-
-    ! Initialize variables
-    b = 0
-
-    ! Write out the header line
-    write(unit,'(*(a,:,"	"))') '# Position          ', &
-                                '  Charge            ', &
-                                '  Spin-x            ', &
-                                '  Spin-y            ', &
-                                '  Spin-z            ', &
-                                '  Heat              ', &
-                                '  Heat-x            ', &
-                                '  Heat-y            ', &
-                                '  Heat-z            '
-
-    ! Traverse all materials
-    call this % map(write_accumulation)
-
-    ! Close output file
-    close(unit = unit)
-  contains
-    subroutine write_accumulation(ptr)
-      class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: x
-      integer                              :: m
-
-      if (allocated(ptr % accumulation)) then
-        ! Calculate the endpoints of this layer
-        a = b
-        b = b + 1/sqrt(ptr % thouless)
-
-        ! Write out the currents in this layer
-        do m=1,size(ptr % location)
-          x = a + (b-a) * ptr % location(m)
-          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % accumulation(:,m)
-        end do
-      end if
-    end subroutine
-  end subroutine
-
-  impure subroutine structure_write_decomposition(this, file)
-    !! Writes the singlet/triplet decomposition of the charge current to a given output file.
-    class(structure), target  :: this
-    character(*)              :: file
-    integer                   :: unit
-    real(wp)                  :: a, b
-
-    ! Open output file
-    unit = output(file)
-
-    ! Initialize variables
-    b = 0
-
-    ! Write out the header line
-    write(unit,'(*(a,:,"	"))') '# Position          ', &
-                                '  Singlet           ', &
-                                '  Triplet-x         ', &
-                                '  Triplet-y         ', &
-                                '  Triplet-z         '
-
-    ! Traverse all materials
-    call this % map(write_decomposition)
-
-    ! Close output file
-    close(unit = unit)
-  contains
-    subroutine write_decomposition(ptr)
-      class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: x
-      integer                              :: m
-
-      if (allocated(ptr % decomposition)) then
-        ! Calculate the endpoints of this layer
-        a = b
-        b = b + 1/sqrt(ptr % thouless)
-
-        ! Write out the currents in this layer
-        do m=1,size(ptr % location)
-          x = a + (b-a) * ptr % location(m)
-          write(unit,'(*(es20.12e3,:,"	"))') x, ptr % decomposition(:,m)
-        end do
-      end if
-    end subroutine
-  end subroutine
-
-  impure subroutine structure_write_gap(this, file)
-    !! Writes the superconducting gap as a function of position to a given output file.
-    class(structure), target  :: this
-    character(*)              :: file
-    integer                   :: unit
-    real(wp)                  :: a, b
-
-    ! Open output file
-    unit = output(file)
-
-    ! Initialize variables
-    b = 0
-
-    ! Write out the header line
-    write(unit,'(*(a,:,"	"))') '# Position          ', &
-                                '  Gap magnitude     ', &
-                                '  Gap phase         '
-    ! Traverse all materials
-    call this % map(write_gap)
-
-    ! Close output file
-    close(unit = unit)
-  contains
-    subroutine write_gap(ptr)
-      class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: x
-      real(wp)                             :: p
-      integer                              :: m
-
-      ! Calculate the endpoints of this layer
+      ! Calculate the endpoints
       a = b
       b = b + 1/sqrt(ptr % thouless)
 
-      ! Write out the gap in this layer
+      ! Loop over all positions
       do m=1,size(ptr % location)
+        ! Calculate current position
         p = ptr % location(m)
-        x = a + (b-a)*p
-        select type (ptr)
-          class is (superconductor)
-            write(unit,'(*(es20.12e3,:,"	"))') x, abs(ptr%get_gap(p)), atan2(im(ptr%get_gap(p)),re(ptr%get_gap(p)))/pi
-          class default
-            write(unit,'(*(es20.12e3,:,"	"))') x, 0.0_wp, 0.0_wp
-        end select
+        z = a + (b-a)*p
+
+        ! Write accumulations
+        if (this % accumulation /= 0) then
+          write(this % accumulation, '(*(es20.12e3,:,"	"))') &
+            z, ptr % accumulation(:,m)
+        end if
+
+        ! Write supercurrents
+        if (allocated(this % supercurrent)) then
+          write(this % supercurrent, '(*(es20.12e3,:,"	"))') &
+            z, ptr % supercurrent(:,m)
+        end if
+
+        ! Write dissipative currents
+        if (allocated(this % lossycurrent)) then
+          write(this % lossycurrent, '(*(es20.12e3,:,"	"))') &
+            z, ptr % lossycurrent(:,m)
+        end if
+
+        ! Write decomposition
+        if (allocated(this % decomposition)) then
+          write(this % decomposition, '(*(es20.12e3,:,"	"))') &
+            z, ptr % decomposition(:,m)
+        end if
+
+        ! Write superconducting correlations
+        if (allocated(this % correlation)) then
+          select type (ptr)
+            class is (superconductor)
+              write(this % correlation,'(*(es20.12e3,:,"	"))') &
+                z, abs(ptr%get_gap(p)), atan2(im(ptr%get_gap(p)),re(ptr%get_gap(p)))/pi
+            class default
+              write(this % correlation,'(*(es20.12e3,:,"	"))') &
+                z, 0.0_wp, 0.0_wp
+          end select
+        end if
+
+        ! Write density of states
+        if (allocated(this % density)) then
+          ! Negative energies
+          do n=size(ptr % energy),1,-1
+            write(this % density,'(*(es20.12e3,:,"	"))') &
+              z, -ptr % energy(n), ptr % density(n,m)
+          end do
+          ! Positive energies
+          do n=1,size(ptr % energy),+1
+            write(this % density,'(*(es20.12e3,:,"	"))') &
+              z, +ptr % energy(n), ptr % density(n,m)
+          end do
+        end if
       end do
     end subroutine
   end subroutine

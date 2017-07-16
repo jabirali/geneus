@@ -114,8 +114,8 @@ contains
 
     character(len=5) :: filename
     write(filename,'(f5.3)') phase(n)
-    call stack % write_supercurrent('current.' // filename // '.dat')
-    call stack % write_gap(         'gap.'     // filename // '.dat')
+!   call stack % write_supercurrent('current.' // filename // '.dat')
+!   call stack % write_gap(         'gap.'     // filename // '.dat')
   end subroutine
 
   impure subroutine finalize

@@ -25,11 +25,19 @@ program main
   ! Construct the superconducting structure
   stack = structure()
 
+  ! Redefine output files
+  stack % supercurrent  = output('supercurrent.dat')
+  stack % lossycurrent  = output('lossycurrent.dat')
+  stack % accumulation  = output('accumulation.dat')
+  stack % decomposition = output('decomposition.dat')
+  stack % correlation   = output('correlation.dat')
+  stack % density       = output('density.dat')
+
   ! Non-selfconsistent bootstrap procedure
   call stack % converge(threshold = threshold, bootstrap = .true.)
 
   ! Selfconsistent convergence procedure
-  call stack % converge(threshold = tolerance, posthook = posthook)
+  call stack % converge(threshold = tolerance)
 
   ! Write out the final results
   call finalize
@@ -41,18 +49,6 @@ program main
   !--------------------------------------------------------------------------------!
 
 contains
-  impure subroutine posthook
-    ! Write results to output files.
-    use :: structure_m
-
-    call stack % write_density('density.dat')
-    call stack % write_supercurrent('supercurrent.dat')
-    call stack % write_lossycurrent('lossycurrent.dat')
-    call stack % write_accumulation('accumulation.dat')
-    call stack % write_decomposition('decomposition.dat')
-    call stack % write_gap('gap.dat')
-  end subroutine
-
   impure subroutine finalize
     ! Write out the final results.
     use :: stdio_m

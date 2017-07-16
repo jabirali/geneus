@@ -213,7 +213,7 @@ contains
     use :: structure_m
 
     ! Density of states
-    call stack % write_density('density.dat')
+    ! call stack % write_density('density.dat')
   end subroutine
 
   impure subroutine stage(str)
