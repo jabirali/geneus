@@ -50,7 +50,6 @@ contains
     call stack % write_lossycurrent('lossycurrent.dat')
     call stack % write_accumulation('accumulation.dat')
     call stack % write_decomposition('decomposition.dat')
-    call stack % write_magnetization('magnetization.dat')
     call stack % write_gap('gap.dat')
   end subroutine
 

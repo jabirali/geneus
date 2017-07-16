@@ -67,7 +67,6 @@ module conductor_m
     procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the propagators
     procedure                 :: update_density          => conductor_update_density          ! Calculates the density of states
     procedure                 :: update_decomposition    => conductor_update_decomposition    ! Calculates the singlet/triplet decomposition
-    procedure                 :: update_magnetization    => conductor_update_magnetization    ! Calculates the induced magnetization
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation (conductor terms)
@@ -493,10 +492,6 @@ contains
     ! @TODO: Deprecated
     call this%update_density
 
-    ! Calculate the induced magnetization
-    ! @TODO: Deprecated
-    call this%update_magnetization
-
     ! Calculate the current decomposition
     call this%update_decomposition
 
@@ -549,48 +544,6 @@ contains
 
       ! Deallocate workspace memory
       deallocate(spectral)
-    end if
-  end subroutine
-
-
-  impure subroutine conductor_update_magnetization(this)
-    !! Calculate the induced magnetization in the material.
-    !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
-    use :: calculus_m
-
-    class(conductor), intent(inout) :: this
-    real(wp),         allocatable   :: magnetization(:,:)
-    real(wp)                        :: prefactor
-    integer                         :: n, m
-
-    if (size(this % energy) > 1) then
-      ! Allocate memory if necessary
-      if (.not. allocated(this%magnetization)) then
-        allocate(this%magnetization(1:3,size(this%location)))
-      end if
-
-      ! Allocate workspace memory
-      allocate(magnetization(size(this%energy),1:3))
-
-      ! Iterate over the stored propagators
-      do n = 1,size(this%location)
-        do m = 1,size(this%energy)
-          ! This factor converts from a zero-temperature to finite-temperature magnetization
-          prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
-
-          ! Calculate the contribution to the spectral magnetization at this position
-          magnetization(m,:) = prefactor * re(trace(pauli(1:3)  * this % propagator(m,n) % N &
-                                             -conjg(pauli(1:3)) * this % propagator(m,n) % Nt))
-        end do
-
-        ! Interpolate and integrate the results, and update the magnetization vector
-        this%magnetization(1,n) = integrate(this%energy, magnetization(:,1), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%magnetization(2,n) = integrate(this%energy, magnetization(:,2), this%energy(1), this%energy(ubound(this%energy,1)))
-        this%magnetization(3,n) = integrate(this%energy, magnetization(:,3), this%energy(1), this%energy(ubound(this%energy,1)))
-      end do
-
-      ! Deallocate workspace memory
-      deallocate(magnetization)
     end if
   end subroutine
 

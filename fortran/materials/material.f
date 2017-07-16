@@ -40,7 +40,6 @@ module material_m
     real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: accumulation(:,:)                          ! Charge, spin, heat, and spin-heat accumulation
     real(wp),                     allocatable :: decomposition(:,:)                         ! Decomposition of the charge current into singlets and triplets
-    real(wp),                     allocatable :: magnetization(:,:)                         ! Discretized values for the induced magnetization    [unit: N₀gμ/2]
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
     class(material),                  pointer :: material_a      => null()                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
