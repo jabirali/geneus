@@ -491,14 +491,23 @@ contains
     ! Traverse all materials
     call this % map(writer)
 
-    ! Flush output to files
-    if (allocated(this % accumulation))   flush(this % accumulation)
-    if (allocated(this % supercurrent))   flush(this % supercurrent)
-    if (allocated(this % lossycurrent))   flush(this % lossycurrent)
-    if (allocated(this % decomposition))  flush(this % decomposition)
-    if (allocated(this % correlation))    flush(this % correlation)
-    if (allocated(this % density))        flush(this % density)
+    ! Sync data to output files
+    call sync(this % accumulation)
+    call sync(this % supercurrent)
+    call sync(this % lossycurrent)
+    call sync(this % decomposition)
+    call sync(this % correlation)
+    call sync(this % density)
   contains
+    subroutine sync(unit)
+      integer, allocatable, intent(in) :: unit
+
+      if (allocated(unit)) then
+        flush(unit)
+        rewind(unit)
+      end if
+    end subroutine
+
     subroutine writer(ptr)
       class(material), pointer, intent(in) :: ptr
       real(wp)                             :: p, z
