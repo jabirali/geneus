@@ -579,7 +579,8 @@ contains
           prefactor = tanh(0.8819384944310228_wp * this%energy(m)/this%temperature)
 
           ! Calculate the contribution to the spectral magnetization at this position
-          magnetization(m,:) = prefactor * re(trace(pauli(1:3) * this % propagator(m,n) % N))
+          magnetization(m,:) = prefactor * re(trace(pauli(1:3)  * this % propagator(m,n) % N &
+                                             -conjg(pauli(1:3)) * this % propagator(m,n) % Nt))
         end do
 
         ! Interpolate and integrate the results, and update the magnetization vector
