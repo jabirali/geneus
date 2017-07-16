@@ -555,12 +555,12 @@ contains
           ! Negative energies
           do n=size(ptr % energy),1,-1
             write(this % density,'(*(es20.12e3,:,"	"))') &
-              z, -ptr % energy(n), ptr % density(n,m)
+              z, -ptr % energy(n), ptr % density(n,m,4:7)
           end do
           ! Positive energies
           do n=1,size(ptr % energy),+1
             write(this % density,'(*(es20.12e3,:,"	"))') &
-              z, +ptr % energy(n), ptr % density(n,m)
+              z, +ptr % energy(n), ptr % density(n,m,0:3)
           end do
         end if
       end do

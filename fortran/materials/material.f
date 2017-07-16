@@ -35,7 +35,7 @@ module material_m
     real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
     type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator
     type(propagator),             allocatable :: backup(:,:)                                ! Backup values for the propagator
-    real(wp),                     allocatable :: density(:,:)                               ! Discretized values for the density of states
+    real(wp),                     allocatable :: density(:,:,:)                             ! Discretized values for the density of states
     real(wp),                     allocatable :: supercurrent(:,:)                          ! Charge, spin, heat, and spin-heat supercurrents
     real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: accumulation(:,:)                          ! Charge, spin, heat, and spin-heat accumulation

@@ -498,7 +498,7 @@ contains
     !! Calculate the sum of an array of nambu matrices.
     class(nambu), intent(in) :: this(:)
     type(nambu)              :: r
-    integer                 :: n
+    integer                  :: n
 
     do n=1,size(this)
       r % matrix = r % matrix + this(n) % matrix

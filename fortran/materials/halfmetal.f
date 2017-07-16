@@ -213,24 +213,27 @@ contains
 
     ! Allocate memory if necessary
     if (.not. allocated(this%density)) then
-      allocate(this%density(size(this%energy),size(this%location)))
+      allocate(this%density(size(this%energy),size(this%location),0:7))
     end if
 
-    ! Calculate the density of states at each position and energy
-    ! TODO: Generalize this to work for strong ferromagnets too.
-    if (this % polarization > 0) then
-      do m=1,size(this%location)
-        do n=1,size(this%energy)
-          this % density(n,m) = 2 * re(this % propagator(n,m) % N % matrix(1,1)) - 1
-        end do
-      end do
-    else 
-      do m=1,size(this%location)
-        do n=1,size(this%energy)
-          this % density(n,m) = 2 * re(this % propagator(n,m) % N % matrix(2,2)) - 1
-        end do
-      end do
-    end if
+    ! Placeholder code
+    this % density = inf
+   
+    ! ! Calculate the density of states at each position and energy
+    ! ! TODO: Generalize this to work for strong ferromagnets too.
+    ! if (this % polarization > 0) then
+    !   do m=1,size(this%location)
+    !     do n=1,size(this%energy)
+    !       this % density(n,m) = 2 * re(this % propagator(n,m) % N % matrix(1,1)) - 1
+    !     end do
+    !   end do
+    ! else 
+    !   do m=1,size(this%location)
+    !     do n=1,size(this%energy)
+    !       this % density(n,m) = 2 * re(this % propagator(n,m) % N % matrix(2,2)) - 1
+    !     end do
+    !   end do
+    ! end if
   end subroutine
 
 

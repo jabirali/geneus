@@ -56,9 +56,7 @@ module propagator_m
     procedure  :: lossycurrent       => propagator_lossycurrent                 !! Spectral dissipative currents
     procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
     procedure  :: correlation        => propagator_correlation                  !! Spectral correlations
-
-    procedure  :: current            => propagator_current                      !! Spectral currents
-    procedure  :: density            => propagator_density                      !! Density of states
+    procedure  :: density            => propagator_density                      !! Spin-resolved density of states
     procedure  :: decompose          => propagator_decompose                    !! Singlet/triplet decomposition
   end type
 
@@ -401,6 +399,24 @@ contains
     r = trace((0.0_wp,-1.0_wp) * pauli2 * (f+conjg(ft)))/8
   end function
 
+  pure function propagator_density(this) result(D)
+    !! Calculates the spin-resolved local density of states.
+    class(propagator), intent(in) :: this
+    real(wp), dimension(0:7)      :: D
+    type(spin)                    :: g, gt
+ 
+    ! Extract the normal retarded propagator
+    associate(GR => this % retarded())
+      g  = +GR % matrix(1:2,1:2) 
+      gt = -GR % matrix(3:4,3:4) 
+    end associate
+
+    ! Calculate the spin-resolved density of states,
+    ! for both positive and negative energy values
+    D(0:3) = re(trace(pauli * g))/2
+    D(4:7) = re(trace(pauli * gt))/2
+  end function
+
   pure subroutine propagator_decompose(this, f, ft, df, dft)
     !! Performs a singlet/triplet decomposition of the anomalous retarded propagators (f, f~)
     !! and their derivatives (∇f, ∇f~). Each of these are returned as a complex 4-vector,
@@ -448,43 +464,4 @@ contains
       end if
     end if
   end subroutine
-
-  pure function propagator_density(this) result(r)
-    !! Calculates the local density of states.
-    !!
-    !! @TODO:
-    !!   This function is staged for future removal.
-    !!
-    class(propagator), intent(in) :: this
-    real(wp)                      :: r
-
-    r = re(trace(this % N)) - 1
-  end function
-
-  pure function propagator_current(this) result(r)
-    !! Calculates the spectral current at zero temperature. The result is a 4-vector,
-    !! where element 0 is the charge current, and elements 1:3 are the spin currents.
-    !!
-    !! @NOTE:
-    !!   This version of the equation is only valid in equilibrium systems.
-    !!
-    !! @TODO:
-    !!   This function is staged for future removal.
-    !!
-    !! @TODO: 
-    !!   The equation below should be changed from:
-    !!     r = 8 * re(trace(pauli * k))
-    !!   to the more logical form:
-    !!     r = 2 * re(trace(pauli * k))
-    !!   This would change the current unit to J₀=eN₀∆₀²ξ²A/L, without a factor 1/4.
-    class(propagator), intent(in) :: this
-    real(wp)                      :: r(0:3)
-    type(spin)                    :: k
-
-    associate(g  => this % g,  dg  => this % dg,  N  => this % N, &
-              gt => this % gt, dgt => this % dgt, Nt => this % Nt )
-      k = N*(dg*gt-g*dgt)*N - conjg(Nt*(dgt*g-gt*dg)*Nt)
-      r = 8 * re(trace(pauli * k))
-    end associate
-  end function
 end module

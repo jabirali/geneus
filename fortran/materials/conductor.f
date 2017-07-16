@@ -65,7 +65,6 @@ module conductor_m
     procedure                 :: interface_equation_b    => conductor_interface_equation_b    ! Boundary condition at the right interface
     procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the propagators
     procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the propagators
-    procedure                 :: update_density          => conductor_update_density          ! Calculates the density of states
     procedure                 :: update_decomposition    => conductor_update_decomposition    ! Calculates the singlet/triplet decomposition
 
     ! These methods contain the equations that describe electrical conductors
@@ -433,6 +432,9 @@ contains
     integer                               :: n, m, k
 
     ! Allocate memory for the results
+    if (.not. allocated(this % density)) then
+      allocate(this % density(size(this % energy), size(this % location), 0:7))
+    end if
     if (.not. allocated(this % supercurrent)) then
       allocate(this % supercurrent(0:7,size(this % location)))
     end if
@@ -456,17 +458,19 @@ contains
     end if
 
     ! Simplify the namespace
-    associate(E => this % energy,    &
-              z => this % location,  &
-              G => this % propagator )
+    associate(E => this % energy,     &
+              z => this % location,   &
+              G => this % propagator, &
+              D => this % density     )
 
       ! Iterate over positions
       do n = 1,size(z)
-        ! Calculate the spectral currents at this position
+        ! Calculate the spectral properties at this position
         do m = 1,size(E)
-          I(m,:) = G(m,n) % supercurrent(gauge)
-          J(m,:) = G(m,n) % lossycurrent(gauge)
-          Q(m,:) = G(m,n) % accumulation()
+          I(m,:)   = G(m,n) % supercurrent(gauge)
+          J(m,:)   = G(m,n) % lossycurrent(gauge)
+          Q(m,:)   = G(m,n) % accumulation()
+          D(m,n,:) = G(m,n) % density()
         end do
 
         ! Heat and spin-heat observables are weighted by energy
@@ -487,10 +491,6 @@ contains
 
     ! Deallocate workspace memory
     deallocate(I, J, Q)
-
-    ! Calculate the density of states
-    ! @TODO: Deprecated
-    call this%update_density
 
     ! Calculate the current decomposition
     call this%update_decomposition
@@ -545,24 +545,6 @@ contains
       ! Deallocate workspace memory
       deallocate(spectral)
     end if
-  end subroutine
-
-  pure subroutine conductor_update_density(this)
-    ! Calculate the density of states in the material.
-    class(conductor), intent(inout) :: this
-    integer                         :: n, m
-
-    ! Allocate memory if necessary
-    if (.not. allocated(this%density)) then
-      allocate(this%density(size(this%energy),size(this%location)))
-    end if
-
-    ! Calculate the density of states at each position and energy
-    do m=1,size(this%location)
-      do n=1,size(this%energy)
-        this % density(n,m) = this % propagator(n,m) % density()
-      end do
-    end do
   end subroutine
 
 
