@@ -74,7 +74,7 @@ contains
     !! Returns the complex argument θ of a complex number z=r·exp(iθ). 
     !! @NOTE: this function returns the normalized angle θ/π.
     complex(wp), intent(in) :: z   !! Complex number
-    complex(wp)             :: t   !! Complex argument
+    real(wp)                :: t   !! Complex argument
 
     t = atan2(im(z), re(z))/pi
   end function
