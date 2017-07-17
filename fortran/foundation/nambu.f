@@ -73,23 +73,24 @@ module nambu_m
     procedure, pass(this), private :: expr_iscalar => nambu_expr_iscalar   !! Exponentiation by an integer        (right)
   end type
 
-  ! Matrix inverse
+  ! Public interfaces
   interface inverse
+    !! Matrix inverse
     module procedure nambu_inv
   end interface
 
-  ! Matrix trace
   interface trace
+    !! Matrix trace
     module procedure nambu_trace
   end interface
 
-  ! Matrix sums
   interface sum
+    !! Matrix sum
     module procedure nambu_sum
   end interface
 
-  ! Complex conjugation
   interface conjg
+    !! Complex conjugation
     module procedure nambu_conjg
   end interface
 contains

@@ -79,37 +79,38 @@ module spin_m
     procedure, pass(this), private :: expr_iscalar => spin_expr_iscalar   !! Exponentiation by an integer        (right)
   end type
 
-  ! Matrix inverse
+  ! Public interfaces
   interface inverse
+    !! Matrix inverse
     module procedure spin_inv
   end interface
 
-  ! Matrix trace
   interface trace
+    !! Matrix trace
     module procedure spin_trace
   end interface
 
-  ! Matrix sums
   interface sum
+    !! Matrix sum
     module procedure spin_sum
   end interface
 
-  ! Complex conjugation
   interface conjg
+    !! Complex conjugation
     module procedure spin_conjg
   end interface
 
-  ! Matrix norm
   interface norm2
+    !! Matrix norm
     module procedure spin_norm
   end interface
 
   ! Exported constants
-  type(spin), parameter :: pauli0     = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli1     = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli2     = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli3     = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
-  type(spin), parameter :: pauli(0:3) = [pauli0, pauli1, pauli2, pauli3]
+  type(spin), parameter                 :: pauli0 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), ( 1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter                 :: pauli1 = spin(reshape([ ( 0, 0), ( 1, 0), ( 1, 0), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter                 :: pauli2 = spin(reshape([ ( 0, 0), ( 0,-1), ( 0, 1), ( 0, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter                 :: pauli3 = spin(reshape([ ( 1, 0), ( 0, 0), ( 0, 0), (-1, 0) ], [2,2], order=[2,1]))
+  type(spin), parameter, dimension(0:3) :: pauli  = [pauli0, pauli1, pauli2, pauli3]
 contains
 
   !--------------------------------------------------------------------------------!
