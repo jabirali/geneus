@@ -98,9 +98,9 @@ contains
     !!
     use :: fparser
 
-    character(*), intent(in) :: expression   !! Scalar-valued function of position 'z'
-    real(wp),     intent(in) :: domain(:)    !! Domain of the independent variable 'z'
-    real(wp),    allocatable :: value(:)     !! Result of evaluating the field at each point of the domain
+    character(*),           intent(in)  :: expression   !! Scalar-valued function of position 'z'
+    real(wp), dimension(:), intent(in)  :: domain       !! Domain of the independent variable 'z'
+    real(wp), dimension(:), allocatable :: value        !! Result of evaluating the field at each point of the domain
     integer                  :: n
 
     ! Make sure the expression is non-empty
@@ -131,9 +131,9 @@ contains
     !!
     use :: fparser
 
-    character(*), intent(in)  :: expression  !! Vector-valued mathematical expression
-    real(wp),     intent(out) :: value(3)    !! Result of parsing the expression
-    integer                   :: sep(4)
+    character(*),           intent(in)  :: expression  !! Vector-valued mathematical expression
+    real(wp), dimension(3), intent(out) :: value       !! Result of parsing the expression
+    integer,  dimension(4)              :: sep
 
     ! Find the vector delimiters
     sep(1) = scan(expression, '[', back=.false.)
@@ -175,10 +175,11 @@ contains
     !!
     use :: fparser
 
-    character(*), intent(in) :: expression   !! Vector-valued function of position 'z'
-    real(wp),     intent(in) :: domain(:)    !! Domain of the independent variable 'z'
-    real(wp),    allocatable :: value(:,:)   !! Result of evaluating the field at each point of the domain
-    integer                  :: n, sep(4)
+    character(*),             intent(in)  :: expression   !! Vector-valued function of position 'z'
+    real(wp), dimension(:),   intent(in)  :: domain       !! Domain of the independent variable 'z'
+    real(wp), dimension(:,:), allocatable :: value        !! Result of evaluating the field at each point of the domain
+    integer,  dimension(4)                :: sep
+    integer                               :: n
 
     ! Allocate memory for the output
     allocate(value(3,size(domain)))
