@@ -27,7 +27,6 @@ module structure_m
     integer, allocatable :: supercurrent
     integer, allocatable :: lossycurrent
     integer, allocatable :: accumulation
-    integer, allocatable :: decomposition
     integer, allocatable :: correlation
     integer, allocatable :: density
   contains
@@ -495,7 +494,6 @@ contains
     call sync(this % accumulation)
     call sync(this % supercurrent)
     call sync(this % lossycurrent)
-    call sync(this % decomposition)
     call sync(this % correlation)
     call sync(this % density)
   contains
@@ -539,12 +537,6 @@ contains
         if (allocated(this % lossycurrent)) then
           write(this % lossycurrent, '(*(es20.12e3,:,"	"))') &
             z, ptr % lossycurrent(:,m)
-        end if
-
-        ! Write decomposition
-        if (allocated(this % decomposition)) then
-          write(this % decomposition, '(*(es20.12e3,:,"	"))') &
-            z, ptr % decomposition(:,m)
         end if
 
         ! Write superconducting correlations

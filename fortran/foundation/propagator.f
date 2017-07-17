@@ -57,7 +57,6 @@ module propagator_m
     procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
     procedure  :: correlation        => propagator_correlation                  !! Spectral correlations
     procedure  :: density            => propagator_density                      !! Spin-resolved density of states
-    procedure  :: decompose          => propagator_decompose                    !! Singlet/triplet decomposition
   end type
 
   ! Type constructor
@@ -416,52 +415,4 @@ contains
     D(0:3) = re(trace(pauli * g))/2
     D(4:7) = re(trace(pauli * gt))/2
   end function
-
-  pure subroutine propagator_decompose(this, f, ft, df, dft)
-    !! Performs a singlet/triplet decomposition of the anomalous retarded propagators (f, f~)
-    !! and their derivatives (∇f, ∇f~). Each of these are returned as a complex 4-vector,
-    !! where f(0) corresponds to the singlet component and f(1:3) to the triplet component.
-    !!
-    !! @NOTE: This function can only be used safely in equilibrium systems.
-    class(propagator),                     intent(in)  :: this  !! Propagator object
-    complex(wp), dimension(0:3), optional, intent(out) :: f     !! Anomalous propagator (f )
-    complex(wp), dimension(0:3), optional, intent(out) :: ft    !! Anomalous propagator (f~)
-    complex(wp), dimension(0:3), optional, intent(out) :: df    !! Anomalous propagator gradient (∇f )
-    complex(wp), dimension(0:3), optional, intent(out) :: dft   !! Anomalous propagator gradient (∇f~)
-    type(spin),  dimension(0:3)                        :: P, Pt !  Pauli vectors used for the calculation
-    type(nambu)                                        :: G     !  4×4 retarded propagator (G^R)
-
-    ! Calculate the Pauli matrices necessary to invert f=[f·σ]iσ₂
-    P  = ((0.0_wp,-0.5_wp) * pauli2) * pauli
-    Pt = conjg(P)
-
-
-    ! Calculate and decompose the propagator
-    if (present(f) .or. present(ft)) then
-      ! Extract the retarded propagator
-      G  = this % retarded()
-
-      ! Perform the singlet/triplet decomposition
-      if (present(f )) then
-        f   = trace(spin(+G % matrix(1:2, 3:4)) * P )
-      end if
-      if (present(ft)) then
-        ft  = trace(spin(-G % matrix(3:4, 1:2)) * Pt)
-      end if
-    end if
-
-    ! Calculate and decompose the propagator gradient
-    if (present(df) .or. present(dft)) then
-      ! Extract the retarded propagator gradient
-      G  = this % retarded_gradient()
-
-      ! Perform the singlet/triplet decomposition
-      if (present(df )) then
-        df   = trace(spin(+G % matrix(1:2, 3:4)) * P )
-      end if
-      if (present(dft)) then
-        dft  = trace(spin(-G % matrix(3:4, 1:2)) * Pt)
-      end if
-    end if
-  end subroutine
 end module

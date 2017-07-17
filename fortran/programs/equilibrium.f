@@ -29,7 +29,6 @@ program main
   stack % supercurrent  = output('supercurrent.dat')
   stack % lossycurrent  = output('lossycurrent.dat')
   stack % accumulation  = output('accumulation.dat')
-  stack % decomposition = output('decomposition.dat')
   stack % correlation   = output('correlation.dat')
   stack % density       = output('density.dat')
 

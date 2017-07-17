@@ -39,7 +39,6 @@ module material_m
     real(wp),                     allocatable :: supercurrent(:,:)                          ! Charge, spin, heat, and spin-heat supercurrents
     real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: accumulation(:,:)                          ! Charge, spin, heat, and spin-heat accumulation
-    real(wp),                     allocatable :: decomposition(:,:)                         ! Decomposition of the charge current into singlets and triplets
     complex(wp),                  allocatable :: correlation(:)                             ! Superconducting pair-correlations
 
     ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
