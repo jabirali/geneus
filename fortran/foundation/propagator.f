@@ -274,7 +274,7 @@ contains
   end function
 
   pure subroutine propagator_import_rvector(a, b)
-    ! Defines assignment from a real vector to a propagator object.
+    !! Defines assignment from a real vector to a propagator object.
     type(propagator), intent(inout) :: a
     real(wp),         intent(in)    :: b(32)
 
@@ -290,7 +290,7 @@ contains
   end subroutine
 
   pure subroutine propagator_export_cmatrix(a, b)
-    ! Defines assignment from a propagator object to a complex matrix.
+    !! Defines assignment from a propagator object to a complex matrix.
     complex(wp),      intent(out) :: a(4,4)
     type(propagator), intent(in)  :: b
 
@@ -298,7 +298,7 @@ contains
   end subroutine
 
   pure subroutine propagator_export_rvector(a, b)
-    ! Defines assignment from a propagator object to a real vector.
+    !! Defines assignment from a propagator object to a real vector.
     real(wp),         intent(out) :: a(32)
     type(propagator), intent(in)  :: b
 
