@@ -11,7 +11,6 @@ module spinscattering_m
   use :: material_m
   use :: math_m
   use :: spin_m
-  use :: matrix_m
   use :: propagator_m
   private
 

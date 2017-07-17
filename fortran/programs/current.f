@@ -9,7 +9,6 @@
 
 program main
   use :: structure_m
-  use :: calculus_m
   use :: stdio_m
   use :: math_m
 

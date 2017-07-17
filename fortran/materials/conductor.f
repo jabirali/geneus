@@ -106,8 +106,6 @@ contains
 
   function conductor_construct() result(this)
     ! Constructs a conductor object initialized to a superconducting state.
-    use :: calculus_m
-
     type(conductor) :: this
 
     ! Initialize locations
@@ -429,8 +427,6 @@ contains
     !! Code to execute after running the update method of a class(conductor) object.
     !! In particular, this function calculates supercurrents, dissipative currents,
     !! accumulations, and density of states, and stores the results in the object.
-    use :: calculus_m
-    use :: matrix_m
     use :: nambu_m
 
     class(conductor), intent(inout)          :: this
@@ -504,8 +500,6 @@ contains
   impure subroutine conductor_update_decomposition(this)
     !! Calculate the singlet/triplet decomposition of the charge current in the material.
     !! @TODO: The tanh(...) has to be generalized for future nonequilibrium calculations.
-    use :: calculus_m
-
     class(conductor), intent(inout) :: this
     complex(wp)                     :: f(0:3), df(0:3), ft(0:3), dft(0:3)
     real(wp),         allocatable   :: spectral(:,:)

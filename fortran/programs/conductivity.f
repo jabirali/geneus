@@ -13,7 +13,6 @@ program main
   use :: stdio_m
   use :: math_m
   use :: nambu_m
-  use :: matrix_m
 
   !--------------------------------------------------------------------------------!
   !                           INITIALIZATION PROCEDURE                             !

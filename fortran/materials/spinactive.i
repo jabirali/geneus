@@ -103,8 +103,6 @@ pure function spinactive_current(G0, G1, M, M0, M1, P, Q, R) result(I)
   !! Calculate the matrix current at an interface with spin-active properties. The equations
   !! implemented here should be valid for an arbitrary interface polarization, and up to 2nd
   !! order in the transmission probabilities and spin-mixing angles of the interface. 
-  use :: matrix_m
-
   complex(wp), dimension(4,4), intent(in) :: G0, G1      !! Propagator matrices
   complex(wp), dimension(4,4), intent(in) :: M0, M1, M   !! Magnetization matrices 
   real(wp),                    intent(in) :: P,  Q,  R   !! Interface parameters

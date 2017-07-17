@@ -5,16 +5,9 @@
 !> common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
 !> To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
 !> the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).
-!>
-!> @TODO
-!>   Encapsulation will be complete if the type(propagator) methods for calculating singlet and triplet projections can
-!>   be modified to explicitly use a projection trace(pauli*f) instead of operating directly on spin%matrix components.
-!>   When this encapsulation has been acheived, the matrix itself can be declared private, and only accessed through an
-!>   overloaded assignment operator. After that, we should be able to safely flip the order of the matrix dimensions.
 
 module spin_m
   use :: math_m
-  use :: matrix_m
   private
 
   ! Public interface

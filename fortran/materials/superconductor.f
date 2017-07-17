@@ -49,7 +49,6 @@ contains
 
   function superconductor_construct() result(this)
     ! Constructs a superconducting material that is initialized to a superconducting state.
-    use :: calculus_m
     type(superconductor) :: this
 
     ! Call the superclass constructor
@@ -135,8 +134,6 @@ contains
   impure subroutine superconductor_update_gap(this)
     !! Interpolate the superconducting correlations Δ(z) to a higher resolution,
     !! to make the calculations more stable near strong ferromagnetic materials.
-    use :: calculus_m
-
     class(superconductor), intent(inout)        :: this       !! Superconductor object
     real(wp)                                    :: diff       !! Change between iterations
     integer                                     :: n, m       !! Loop variables
@@ -177,8 +174,6 @@ contains
     !!   that utilize the 3rd derivative or perform multiple successive boosts. However, 
     !!   my experience so far is that these are less stable than Steffensen's method,
     !!   and often converged more slowly. These methods have therefore been discarded.
-
-    use :: calculus_m
 
     class(superconductor), intent(inout)        :: this
     complex(wp), dimension(size(this%location)) :: g

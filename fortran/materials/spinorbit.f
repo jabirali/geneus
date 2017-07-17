@@ -5,8 +5,6 @@
 
 module spinorbit_m
   use :: material_m
-  use :: calculus_m
-  use :: matrix_m
   use :: math_m
   use :: nambu_m
   use :: spin_m
