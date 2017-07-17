@@ -114,7 +114,7 @@ contains
 
     ! Calculate the superconducting gap and phase
     u = abs(gap)/energy
-    p = atan2(im(gap), re(gap))
+    p = arg(gap)
 
     ! Calculate the θ-parameter
     t = (log(1+u)-log(1-u))/2
@@ -412,7 +412,7 @@ contains
 
     ! Calculate the spin-resolved density of states,
     ! for both positive and negative energy values
-    D(0:3) = re(trace(pauli * g))/2
+    D(0:3) = re(trace(pauli * g ))/2
     D(4:7) = re(trace(pauli * gt))/2
   end function
 end module

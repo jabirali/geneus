@@ -59,13 +59,10 @@ contains
 
   pure elemental function arg(z) result(t)
     !! Returns the complex argument θ of a complex number z=r·exp(iθ). 
-    !!
-    !! @NOTE: 
-    !!   This function returns the normalized argument θ/π.
     complex(wp), intent(in) :: z   !! Complex number
     real(wp)                :: t   !! Complex argument
 
-    t = atan2(im(z), re(z))/pi
+    t = atan2(im(z), re(z))
   end function
 
   pure function unitvector(v) result(r)

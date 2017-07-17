@@ -542,7 +542,7 @@ contains
         ! Write superconducting correlations
         if (allocated(this % correlation)) then
           write(this % correlation,'(*(es20.12e3,:,"	"))') &
-            z, abs(ptr % correlation(m)), arg(ptr % correlation(m))
+            z, abs(ptr % correlation(m)), arg(ptr % correlation(m))/pi
         end if
 
         ! Write density of states
