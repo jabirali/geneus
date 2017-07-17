@@ -4,56 +4,8 @@
 !> This file defines functions that perform some common calculus operations.
 
 module calculus_m
-  use :: math_m
-  private
-
-  ! Declare which routines to export
-  public :: mean, differentiate, integrate, interpolate, linspace
-
-  interface linspace
-    !! Public interface for routines that initialize arrays that span certain number ranges.
-    module procedure linspace_array_re
-  end interface
-
-  interface mean
-    !! Public interface for routines that calculate the mean value.
-    module procedure mean_array_re, mean_array_cx 
-  end interface
-
-  interface differentiate
-    !! Public interface for various differentiation routines.
-    module procedure differentiate_array_re, differentiate_array_cx
-  end interface
-
-  ! Declare public interfaces
-  interface integrate
-    !! Public interface for various integration routines.
-    module procedure integrate_array_re, integrate_array_cx, &
-                     integrate_range_re, integrate_range_cx
-  end interface
-
-  interface interpolate
-    !! Public interface for various interpolation routines.
-    module procedure interpolate_array_re, interpolate_array_cx, &
-                     interpolate_point_re, interpolate_point_cx
-  end interface 
+  use :: basic_m
 contains
-
-  !--------------------------------------------------------------------------------
-  ! Specific implementations of the `linspace` interface
-  !--------------------------------------------------------------------------------
-
-  pure subroutine linspace_array_re(array, first, last)
-    !! Populates an existing array with elements from `first` to `last`, inclusive.
-    real(wp), dimension(:), intent(out) :: array   !! Output array to populate
-    real(wp),               intent(in)  :: first   !! Value of first element
-    real(wp),               intent(in)  :: last    !! Value of last  element
-    integer                             :: n
-
-    do n=1,size(array)
-      array(n) = first + ((last-first)*(n-1))/(size(array)-1)
-    end do
-  end subroutine
 
   !--------------------------------------------------------------------------------
   ! Specific implementations of the `mean` interface
@@ -215,7 +167,7 @@ contains
     real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     real(wp),                     intent(in)  :: p   !! Interpolation point p
     real(wp)                                  :: r   !! Interpolation result y(p)
-    real(wp)                                  :: rs(1) 
+    real(wp), dimension(1)                    :: rs
 
     ! Perform the interpolation
     rs = interpolate_array_re(x, y, [p])
@@ -230,7 +182,7 @@ contains
     complex(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     real(wp),                        intent(in)  :: p   !! Interpolation point p
     complex(wp)                                  :: r   !! Interpolation result y(p)
-    complex(wp)                                  :: rs(1) 
+    complex(wp), dimension(1)                    :: rs
 
     ! Perform the interpolation
     rs = cx( interpolate_array_re(x, re(y), [p]),&
@@ -239,4 +191,20 @@ contains
     ! Extract the scalar result
     r = rs(1)
   end function
+
+  !--------------------------------------------------------------------------------
+  ! Specific implementations of the `linspace` interface
+  !--------------------------------------------------------------------------------
+
+  pure subroutine linspace_array_re(array, first, last)
+    !! Populates an existing array with elements from `first` to `last`, inclusive.
+    real(wp), dimension(:), intent(out) :: array   !! Output array to populate
+    real(wp),               intent(in)  :: first   !! Value of first element
+    real(wp),               intent(in)  :: last    !! Value of last  element
+    integer                             :: n
+
+    do n=1,size(array)
+      array(n) = first + ((last-first)*(n-1))/(size(array)-1)
+    end do
+  end subroutine
 end module

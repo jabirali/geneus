@@ -403,13 +403,13 @@ contains
     !! Calculates the spin-resolved local density of states.
     class(propagator), intent(in) :: this
     real(wp), dimension(0:7)      :: D
+    type(nambu)                   :: GR
     type(spin)                    :: g, gt
  
     ! Extract the normal retarded propagator
-    associate(GR => this % retarded())
-      g  = +GR % matrix(1:2,1:2) 
-      gt = -GR % matrix(3:4,3:4) 
-    end associate
+    GR = this % retarded()
+    g  = +GR % matrix(1:2,1:2) 
+    gt = -GR % matrix(3:4,3:4) 
 
     ! Calculate the spin-resolved density of states,
     ! for both positive and negative energy values

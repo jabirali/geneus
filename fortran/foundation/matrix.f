@@ -4,32 +4,7 @@
 !> This file defines functions that perform some common matrix operations.
 
 module matrix_m
-  use :: math_m
-  private
-
-  ! Declare which routines to export
-  public :: trace, diag, inverse, identity, commutator, anticommutator
-
-  ! Define common identity matrices
-  real(wp), parameter, public :: identity2(2,2) = reshape([1,0,0,1],[2,2])                         !! 2×2 identity matrix
-  real(wp), parameter, public :: identity3(3,3) = reshape([1,0,0,0,1,0,0,0,1],[3,3])               !! 3×3 identity matrix
-  real(wp), parameter, public :: identity4(4,4) = reshape([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[4,4]) !! 4×4 identity matrix
-
-  ! Declare public interfaces
-  interface trace
-    !! Public interface for functions that calculate a matrix trace.
-    module procedure matrix_trace
-  end interface
-
-  interface inverse
-    !! Public interface for functions that calculate a matrix inverse.
-    module procedure matrix_inverse
-  end interface
-  
-  interface diag
-    !! Public interface for functions that either extract a matrix diagonal, or construct a diagonal matrix
-    module procedure matrix_diag, vector_diag
-  end interface
+  use :: basic_m
 contains
   pure function identity(n) result(R)
     !! Constructs an n×n identity matrix.

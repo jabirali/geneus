@@ -181,7 +181,7 @@ contains
     class(nambu), intent(inout) :: this
     real(wp),     intent(in)    :: other
 
-    this%matrix = other * identity4
+    this%matrix = other * identity(4)
   end subroutine
 
   pure subroutine nambu_assr_cscalar(this, other)
@@ -189,7 +189,7 @@ contains
     class(nambu), intent(inout) :: this
     complex(wp),  intent(in)    :: other
 
-    this%matrix = other * identity4
+    this%matrix = other * identity(4)
   end subroutine
 
   pure subroutine nambu_assr_cmatrix(this, other)
@@ -347,7 +347,7 @@ contains
     real(wp),     intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = other*identity4 + this%matrix
+    r%matrix = other*identity(4) + this%matrix
   end function
 
   pure function nambu_addr_rscalar(this, other) result(r)
@@ -356,7 +356,7 @@ contains
     real(wp),     intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = this%matrix + other*identity4
+    r%matrix = this%matrix + other*identity(4)
   end function
 
   pure function nambu_addl_cscalar(other, this) result(r)
@@ -365,7 +365,7 @@ contains
     complex(wp),  intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = other*identity4 + this%matrix
+    r%matrix = other*identity(4) + this%matrix
   end function
 
   pure function nambu_addr_cscalar(this, other) result(r)
@@ -374,7 +374,7 @@ contains
     complex(wp),  intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = this%matrix + other*identity4
+    r%matrix = this%matrix + other*identity(4)
   end function
 
   pure function nambu_addl_cmatrix(other, this) result(r)
@@ -416,7 +416,7 @@ contains
     real(wp),     intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = other*identity4 - this%matrix
+    r%matrix = other*identity(4) - this%matrix
   end function
 
   pure function nambu_subr_rscalar(this, other) result(r)
@@ -425,7 +425,7 @@ contains
     real(wp),     intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = this%matrix - other*identity4
+    r%matrix = this%matrix - other*identity(4)
   end function
 
   pure function nambu_subl_cscalar(other, this) result(r)
@@ -434,7 +434,7 @@ contains
     complex(wp),  intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = other*identity4 - this%matrix
+    r%matrix = other*identity(4) - this%matrix
   end function
 
   pure function nambu_subr_cscalar(this, other) result(r)
@@ -443,7 +443,7 @@ contains
     complex(wp),  intent(in) :: other
     type(nambu)              :: r
 
-    r%matrix = this%matrix - other*identity4
+    r%matrix = this%matrix - other*identity(4)
   end function
 
   pure function nambu_subl_cmatrix(other, this) result(r)
