@@ -1,7 +1,9 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: System
 !>
-!> This file renames the ISO input/output units to the standard UNIX names, and defines the ANSI escape codes for colored output.
+!> This file renames the ISO input/output units to the standard UNIX names, 
+!> defines the ANSI escape codes for colored output, and defines a number of 
+!> auxiliary subroutines for e.g. writing out error and warning messages.
 
 module stdio_m
   use, intrinsic :: iso_fortran_env
@@ -29,7 +31,7 @@ module stdio_m
   end interface
 contains
   impure subroutine message(msg)
-    ! This subroutine provides a way to report a status message.
+    !! This subroutine provides a way to report a status message.
     character(*), intent(in) :: msg
 
     write(stderr,'(a)') color_green  // ' >> INFO: '    // color_none // msg
@@ -37,7 +39,7 @@ contains
   end subroutine
 
   impure subroutine warning(msg)
-    ! This subroutine provides a way to report a warning message.
+    !! This subroutine provides a way to report a warning message.
     character(*), intent(in) :: msg
 
     write(stderr,'(a)') color_yellow // ' >> WARNING: ' // color_none // msg
@@ -45,7 +47,7 @@ contains
   end subroutine
 
   impure subroutine error(msg)
-    ! This subroutine provides a way to report an error message and halt the program.
+    !! This subroutine provides a way to report an error message and halt the program.
     character(*), intent(in) :: msg
 
     write(stderr,'(a)') color_red    // ' >> ERROR: '   // color_none // msg
