@@ -19,64 +19,64 @@ module material_m
   ! Type declarations
   type, public, abstract :: material
     ! These parameters determine the basic physical behaviour of a diffusive material
-    logical                                   :: transparent_a         =  .false.           ! Whether the left  interface is completely transparent
-    logical                                   :: transparent_b         =  .false.           ! Whether the right interface is completely transparent
-    logical                                   :: reflecting_a          =  .false.           ! Whether the left  interface is completely reflecting
-    logical                                   :: reflecting_b          =  .false.           ! Whether the right interface is completely reflecting
-    real(wp)                                  :: conductance_a         =  0.30_wp           ! Normalized conductance at the left  interface
-    real(wp)                                  :: conductance_b         =  0.30_wp           ! Normalized conductance at the right interface
-    real(wp)                                  :: thouless              =  1.00_wp           ! Thouless energy of the material (ratio of the diffusion constant to the squared material length)
-    real(wp)                                  :: temperature           =  0.00_wp           ! Temperature of the system (relative to the critical temperature of a bulk superconductor)
-    real(wp)                                  :: scattering_inelastic  =  0.01_wp           ! Imaginary energy term (this models inelastic scattering processes and stabilizes the BVP solver)
-    integer                                   :: order                 =  1                 ! If this number is positive, it denotes which material in a multilayer structure is processed first
+    logical                                   :: transparent_a         =  .false.           !! Transparent interface (left)
+    logical                                   :: transparent_b         =  .false.           !! Transparent interface (right)
+    logical                                   :: reflecting_a          =  .false.           !! Reflecting  interface (left)
+    logical                                   :: reflecting_b          =  .false.           !! Reflecting  interface (right)
+    real(wp)                                  :: conductance_a         =  0.30_wp           !! Interface conductance (left)
+    real(wp)                                  :: conductance_b         =  0.30_wp           !! Interface conductance (right)
+    real(wp)                                  :: thouless              =  1.00_wp           !! Thouless energy (ħD/Δ₀L²)
+    real(wp)                                  :: temperature           =  0.00_wp           !! Temperature (T/Tc)
+    real(wp)                                  :: scattering            =  0.01_wp           !! Inelastic scattering (η/Δ₀)
 
-    ! The physical state of the material is modeled as a discretized range of energies, positions, and quasiclassical propagators
-    real(wp),                     allocatable :: energy(:)                                  ! Discretized domain for the energies
-    real(wp),                     allocatable :: location(:)                                ! Discretized domain for the positions
-    type(propagator),             allocatable :: propagator(:,:)                            ! Discretized values for the propagator
-    type(propagator),             allocatable :: backup(:,:)                                ! Backup values for the propagator
-    real(wp),                     allocatable :: density(:,:,:)                             ! Spin-resolved density of states
-    real(wp),                     allocatable :: supercurrent(:,:)                          ! Charge, spin, heat, and spin-heat supercurrents
-    real(wp),                     allocatable :: lossycurrent(:,:)                          ! Charge, spin, heat, and spin-heat dissipative currents
-    real(wp),                     allocatable :: accumulation(:,:)                          ! Charge, spin, heat, and spin-heat accumulation
-    complex(wp),                  allocatable :: correlation(:)                             ! Superconducting pair-correlations
+    ! The physical state is modeled as a discretized range of energies, positions, and quasiclassical propagators
+    real(wp),                     allocatable :: energy(:)                                  !! Energy domain
+    real(wp),                     allocatable :: location(:)                                !! Position domain
+    type(propagator),             allocatable :: propagator(:,:)                            !! Propagator values
+    type(propagator),             allocatable :: backup(:,:)                                !! Propagator backups
+    real(wp),                     allocatable :: density(:,:,:)                             !! Spin-resolved density of states
+    real(wp),                     allocatable :: supercurrent(:,:)                          !! Charge, spin, heat, and spin-heat supercurrents
+    real(wp),                     allocatable :: lossycurrent(:,:)                          !! Charge, spin, heat, and spin-heat dissipative currents
+    real(wp),                     allocatable :: accumulation(:,:)                          !! Charge, spin, heat, and spin-heat accumulation
+    complex(wp),                  allocatable :: correlation(:)                             !! Superconducting pair-correlations
 
-    ! Hybrid structures are modeled by a double-linked material list, where these two pointers define the neighbours of the current node
-    class(material),                  pointer :: material_a      => null()                  ! Material connected to this one at the left  interface (default: null pointer, meaning vacuum)
-    class(material),                  pointer :: material_b      => null()                  ! Material connected to this one at the right interface (default: null pointer, meaning vacuum)
+    ! Hybrid structures are modeled as double-linked lists, where these pointers define the neighbours of the current node
+    integer                                   :: order           =  1                       !! Numerical priority of this layer in simulations
+    class(material),                  pointer :: material_a      => null()                  !! Material to the left  (default: vacuum)
+    class(material),                  pointer :: material_b      => null()                  !! Material to the right (default: vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
-    integer                                   :: scaling         =  128                     ! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
-    integer                                   :: method          =  4                       ! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
-    integer                                   :: control         =  2                       ! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
-    integer                                   :: information     =  0                       ! How much information that should be written to standard out (range: [-1,2])
-    real(wp)                                  :: tolerance       =  1e-10_wp                ! Error tolerance (determines the maximum allowed defect or global error)
-    real(wp)                                  :: difference      =  1e+10_wp                ! Maximal difference between this and the previous state (calculated from the Riccati parameters)
+    integer                                   :: scaling         =  128                     !! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
+    integer                                   :: method          =  4                       !! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
+    integer                                   :: control         =  2                       !! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
+    integer                                   :: information     =  0                       !! How much information that should be written to standard out (range: [-1,2])
+    real(wp)                                  :: tolerance       =  1e-10_wp                !! Error tolerance (determines the maximum allowed defect or global error)
+    real(wp)                                  :: difference      =  1e+10_wp                !! Maximal calculated difference between this and the previous state
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
-    character(len=128)                        :: type_string     =  'MATERIAL'              ! The type string should describe the specific class(material) subtype
+    character(len=128)                        :: type_string     =  'MATERIAL'              !! The type string should describe the specific class(material) subtype
   contains
     ! These methods define how to update the physical state of the material
-    procedure(init),                 deferred :: init                                                   ! Initializes  the propagators
-    procedure                                 :: update                => material_update               ! Recalculates the propagators
-    procedure(update),               deferred :: update_prehook                                         ! Executed before calculating the propagators
-    procedure(update),               deferred :: update_posthook                                        ! Executed after  calculating the propagators
+    procedure(init),                 deferred :: init                                       !! Initializes  the propagators
+    procedure                                 :: update          => material_update         !! Recalculates the propagators
+    procedure(update),               deferred :: update_prehook                             !! Executed before calculating the propagators
+    procedure(update),               deferred :: update_posthook                            !! Executed after  calculating the propagators
 
     ! These methods define the physical equations used by the update methods
-    procedure(diffusion_equation),   deferred :: diffusion_equation                                     ! Diffusion equation that describes the material
-    procedure(interface_equation_a), deferred :: interface_equation_a                                   ! Boundary condition at the left  interface
-    procedure(interface_equation_b), deferred :: interface_equation_b                                   ! Boundary condition at the right interface
+    procedure(diffusion_equation),   deferred :: diffusion_equation                         !! Diffusion equation that describes the material
+    procedure(interface_equation_a), deferred :: interface_equation_a                       !! Boundary condition at the left  interface
+    procedure(interface_equation_b), deferred :: interface_equation_b                       !! Boundary condition at the right interface
 
     ! These methods define miscellaneous utility functions
-    procedure                                 :: conf            => material_conf                       ! Configures material parameters
-    procedure                                 :: save            => material_save                       ! Saves the state of the material
-    procedure                                 :: load            => material_load                       ! Loads the state of the material
+    procedure                                 :: conf            => material_conf           !! Configures material parameters
+    procedure                                 :: save            => material_save           !! Saves the state of the material
+    procedure                                 :: load            => material_load           !! Loads the state of the material
   end type
 
   ! Interface declarations
   abstract interface
     pure subroutine init(this, gap)
-      ! This interface is used for the deferred procedure init.
+      !! This interface is used for the deferred procedure init.
       import material, wp
 
       class(material),       intent(inout) :: this
@@ -86,7 +86,7 @@ module material_m
 
   abstract interface
     impure subroutine update(this)
-      ! This interface is used for the deferred procedures update_prehook and update_posthook.
+      !! This interface is used for the deferred procedures update_prehook and update_posthook.
       import material
 
       class(material), intent(inout) :: this
@@ -95,7 +95,7 @@ module material_m
 
   abstract interface
     pure subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
-      ! This interface is used for the deferred procedure diffusion_equation.
+      !! This interface is used for the deferred procedure diffusion_equation.
       import material, spin, wp
 
       class(material), intent(in)    :: this
@@ -108,7 +108,7 @@ module material_m
 
   abstract interface
     pure subroutine interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
-      ! This interface is used for the deferred procedure interface_equation_a.
+      !! This interface is used for the deferred procedure interface_equation_a.
       import material, propagator, spin, wp
 
       class(material),          intent(in)    :: this
@@ -120,7 +120,7 @@ module material_m
 
   abstract interface
     pure subroutine interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
-      ! This interface is used for the deferred procedure interface_equation_b.
+      !! This interface is used for the deferred procedure interface_equation_b.
       import material, propagator, spin, wp
 
       class(material),          intent(in)    :: this
@@ -136,19 +136,19 @@ contains
   !--------------------------------------------------------------------------------!
 
   impure subroutine material_update(this, bootstrap)
-    ! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
+    !! This subroutine updates the current estimate for the state of the material by numerically solving the diffusion equation.
     use bvp_m
 
-    class(material),   intent(inout) :: this                       ! Material that will be updated
-    logical, optional, intent(in)    :: bootstrap                  ! This flag prevents update posthooks
-    type(bvp_sol)                    :: sol                        ! Workspace for the bvp_solver procedures
-    type(propagator)                 :: a                          ! State at this energy at the left  interface
-    type(propagator)                 :: b                          ! State at this energy at the right interface
-    complex(wp)                      :: e                          ! Complex energy relative to the Thouless energy
-    real(wp)                         :: u(32,size(this%location))  ! Representation of the retarded propagators
-    real(wp)                         :: d(32,size(this%location))  ! Work array used to calculate the change in u(·,·)
-    integer                          :: n                          ! Outer loop variable (current energy)
-    integer                          :: m                          ! Inner loop variable (current location)
+    class(material),   intent(inout) :: this                       !! Material that will be updated
+    logical, optional, intent(in)    :: bootstrap                  !! This flag prevents update posthooks
+    type(bvp_sol)                    :: sol                        !  Workspace for the bvp_solver procedures
+    type(propagator)                 :: a                          !  State at this energy at the left  interface
+    type(propagator)                 :: b                          !  State at this energy at the right interface
+    complex(wp)                      :: e                          !  Complex energy relative to the Thouless energy
+    real(wp)                         :: u(32,size(this%location))  !  Representation of the retarded propagators
+    real(wp)                         :: d(32,size(this%location))  !  Work array used to calculate the change in u(·,·)
+    integer                          :: n                          !  Outer loop variable (current energy)
+    integer                          :: m                          !  Inner loop variable (current location)
 
     ! Call the prehook method
     call this%update_prehook
@@ -187,7 +187,7 @@ contains
         end if
 
         ! Calculate the complex energy (relative to the Thouless energy)
-        e = cx(this%energy(n)/this%thouless, this%scattering_inelastic/this%thouless)
+        e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
 
         ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
@@ -248,7 +248,7 @@ contains
     call this%update_posthook
   contains
     pure subroutine ode(z, u, f)
-      ! Definition of the differential equation u'=f(z,u).
+      !! Definition of the differential equation u'=f(z,u).
       real(wp), intent(in)  :: z
       real(wp), intent(in)  :: u(32)
       real(wp), intent(out) :: f(32)
@@ -271,7 +271,7 @@ contains
     end subroutine
 
     pure subroutine bc(ua, ub, bca, bcb)
-      ! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
+      !! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
       real(wp), intent(in)  :: ua(32)
       real(wp), intent(in)  :: ub(32)
       real(wp), intent(out) :: bca(16)
@@ -321,8 +321,8 @@ contains
       case("length")
         call evaluate(val, tmp)
         this%thouless = 1/(eps+tmp**2)
-      case("scattering_inelastic")
-        call evaluate(val, this%scattering_inelastic)
+      case("scattering")
+        call evaluate(val, this%scattering)
       case("temperature")
         call evaluate(val, this%temperature)
         call this % init()
@@ -339,7 +339,7 @@ contains
   end subroutine
 
   impure subroutine material_save(this)
-    ! Save a backup of the current material state.
+    !! Save a backup of the current material state.
     class(material), intent(inout) :: this
 
     if (.not. allocated(this%backup)) then
@@ -349,7 +349,7 @@ contains
   end subroutine
 
   impure subroutine material_load(this)
-    ! Load a backup of a previous material state.
+    !! Load a backup of a previous material state.
     class(material), intent(inout) :: this
     integer                        :: info
 

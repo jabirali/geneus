@@ -139,7 +139,7 @@ contains
     if (present(gap)) then
       do m = 1,size(this%location)
         do n = 1,size(this%energy)
-            this % propagator(n,m) = propagator( cx(this%energy(n),this%scattering_inelastic), gap )
+            this % propagator(n,m) = propagator( cx(this%energy(n),this%scattering), gap )
         end do
       end do
     end if
