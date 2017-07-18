@@ -18,7 +18,7 @@ module material_m
 
   ! Type declarations
   type, public, abstract :: material
-    ! These parameters determine the basic physical behaviour of a diffusive material
+    ! Physical properties of a diffusive material
     logical                                   :: transparent_a         =  .false.           !! Transparent interface (left)
     logical                                   :: transparent_b         =  .false.           !! Transparent interface (right)
     real(wp)                                  :: conductance_a         =  0.30_wp           !! Interface conductance (left)
@@ -27,43 +27,45 @@ module material_m
     real(wp)                                  :: temperature           =  0.00_wp           !! Temperature (T/Tc)
     real(wp)                                  :: scattering            =  0.01_wp           !! Inelastic scattering (η/Δ₀)
 
-    ! The physical state is modeled as a discretized range of energies, positions, and quasiclassical propagators
+    ! Physical state modelled using quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  !! Energy domain
     real(wp),                     allocatable :: location(:)                                !! Position domain
     type(propagator),             allocatable :: propagator(:,:)                            !! Propagator values
     type(propagator),             allocatable :: backup(:,:)                                !! Propagator backups
+
+    ! Physical observables derived from the propagators above
     real(wp),                     allocatable :: density(:,:,:)                             !! Spin-resolved density of states
     real(wp),                     allocatable :: supercurrent(:,:)                          !! Charge, spin, heat, and spin-heat supercurrents
     real(wp),                     allocatable :: lossycurrent(:,:)                          !! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: accumulation(:,:)                          !! Charge, spin, heat, and spin-heat accumulation
     complex(wp),                  allocatable :: correlation(:)                             !! Superconducting pair-correlations
 
-    ! Hybrid structures are modeled as double-linked lists, where these pointers define the neighbours of the current node
-    integer                                   :: order           =  1                       !! Numerical priority of this layer in simulations
+    ! Hybrid structures are modeled as double-linked lists
+    integer                                   :: order           =  1                       !! Simulation priority of this material
     class(material),                  pointer :: material_a      => null()                  !! Material to the left  (default: vacuum)
     class(material),                  pointer :: material_b      => null()                  !! Material to the right (default: vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
-    integer                                   :: scaling         =  128                     !! Maximal allowed increase in the mesh resolution (range: 2^N, N>1)
-    integer                                   :: method          =  4                       !! Order of the Runge—Kutta method used by the solver (range: 2, 4, 6)
-    integer                                   :: control         =  2                       !! Error control method (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
-    integer                                   :: information     =  0                       !! How much information that should be written to standard out (range: [-1,2])
-    real(wp)                                  :: tolerance       =  1e-10_wp                !! Error tolerance (determines the maximum allowed defect or global error)
-    real(wp)                                  :: difference      =  1e+10_wp                !! Maximal calculated difference between this and the previous state
+    integer                                   :: scaling         =  128                     !! Maximal mesh increase (range: 2^N, N>1)
+    integer                                   :: method          =  4                       !! Runge—Kutta order (range: 2, 4, 6)
+    integer                                   :: control         =  2                       !! Error control (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
+    real(wp)                                  :: tolerance       =  1e-10_wp                !! Error tolerance (maximum defect or global error)
+    integer                                   :: information     =  0                       !! Debug information (range: [-1,2])
+    real(wp)                                  :: difference      =  1e+10_wp                !! Difference between iterations
 
     ! The following variables are used for input/output purposes, and should be modified by class(material) constructors
-    character(len=128)                        :: type_string     =  'MATERIAL'              !! The type string should describe the specific class(material) subtype
+    character(len=128)                        :: type_string     =  'MATERIAL'              !! Name of this material
   contains
     ! These methods define how to update the physical state of the material
-    procedure(init),                 deferred :: init                                       !! Initializes  the propagators
-    procedure                                 :: update          => material_update         !! Recalculates the propagators
-    procedure(update),               deferred :: update_prehook                             !! Executed before calculating the propagators
-    procedure(update),               deferred :: update_posthook                            !! Executed after  calculating the propagators
+    procedure(init),                 deferred :: init                                       !! Initializes  propagators
+    procedure                                 :: update          => material_update         !! Recalculates propagators
+    procedure(update),               deferred :: update_prehook                             !! Executed before update
+    procedure(update),               deferred :: update_posthook                            !! Executed after  update
 
     ! These methods define the physical equations used by the update methods
-    procedure(diffusion_equation),   deferred :: diffusion_equation                         !! Diffusion equation that describes the material
-    procedure(interface_equation_a), deferred :: interface_equation_a                       !! Boundary condition at the left  interface
-    procedure(interface_equation_b), deferred :: interface_equation_b                       !! Boundary condition at the right interface
+    procedure(diffusion_equation),   deferred :: diffusion_equation                         !! Diffusion equation
+    procedure(interface_equation_a), deferred :: interface_equation_a                       !! Boundary condition (left)
+    procedure(interface_equation_b), deferred :: interface_equation_b                       !! Boundary condition (right)
 
     ! These methods define miscellaneous utility functions
     procedure                                 :: conf            => material_conf           !! Configures material parameters
