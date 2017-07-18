@@ -14,27 +14,27 @@ module superconductor_m
   ! Type declaration
   type, public, extends(conductor) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(wp), allocatable :: gap_history(:,:)     ! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
-    complex(wp), allocatable :: gap_function(:)      ! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
-    real(wp),    allocatable :: gap_location(:)      ! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    integer                  :: selfconsistency = 2  ! What kind of selfconsistency scheme to use (0 = none, 1 = fixpoint-iteration, 2 = Steffensen's method)
-    integer                  :: iteration            ! Used to count where in the selfconsistent iteration cycle we are
+    complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
+    complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
+    real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
+    integer                  :: selfconsistency = 2  !! What kind of selfconsistency scheme to use (0 = none, 1 = fixpoint-iteration, 2 = Steffensen's method)
+    integer                  :: iteration            !! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
-    procedure                :: init                => superconductor_init                ! Initializes the propagators
-    procedure                :: diffusion_equation  => superconductor_diffusion_equation  ! Defines the Usadel diffusion equation
-    procedure                :: update_gap          => superconductor_update_gap          ! Calculates the superconducting order parameter
-    procedure                :: update_boost        => superconductor_update_boost        ! Boosts the convergence of the order parameter (Steffensen's method)
-    procedure                :: update_prehook      => superconductor_update_prehook      ! Updates the internal variables before calculating the propagators
-    procedure                :: update_posthook     => superconductor_update_posthook     ! Updates the superconducting order parameter from  the propagators
+    procedure                :: init                => superconductor_init                !! Initialize propagators
+    procedure                :: diffusion_equation  => superconductor_diffusion_equation  !! Diffusion equation
+    procedure                :: update_gap          => superconductor_update_gap          !! Calculate the superconducting order parameter
+    procedure                :: update_boost        => superconductor_update_boost        !! Boost the convergence of the order parameter (Steffensen's method)
+    procedure                :: update_prehook      => superconductor_update_prehook      !! Update the internal variables before calculating the propagators
+    procedure                :: update_posthook     => superconductor_update_posthook     !! Update the superconducting order parameter from  the propagators
 
     ! These methods are used to access and mutate the parameters
-    procedure                :: set_gap             => superconductor_set_gap             ! Updates the superconducting order parameter from a given scalar
-    procedure                :: get_gap             => superconductor_get_gap             ! Returns the superconducting order parameter at a given position
+    procedure                :: set_gap             => superconductor_set_gap             !! Update the superconducting order parameter from a given scalar
+    procedure                :: get_gap             => superconductor_get_gap             !! Return the superconducting order parameter at a given position
 
     ! These methods define miscellaneous utility functions
-    procedure                :: load                => superconductor_load                ! Loads the state of a superconductor
-    procedure                :: conf                => superconductor_conf                ! Configures material parameters
+    procedure                :: load                => superconductor_load                !! Load the state of a superconductor
+    procedure                :: conf                => superconductor_conf                !! Configure material parameters
   end type
 
   ! Type constructor
@@ -48,7 +48,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   function superconductor_construct() result(this)
-    ! Constructs a superconducting material that is initialized to a superconducting state.
+    !! Constructs a superconducting material that is initialized to a superconducting state.
     type(superconductor) :: this
 
     ! Call the superclass constructor
@@ -63,7 +63,7 @@ contains
   end function
 
   pure subroutine superconductor_init(this, gap)
-    ! Redefine the default initializer.
+    !! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
     complex(wp), optional, intent(in)    :: gap
 
@@ -79,7 +79,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
-    ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
+    !! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
     complex(wp),           intent(in)    :: e
     real(wp),              intent(in)    :: z
@@ -100,7 +100,7 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_prehook(this)
-    ! Code to execute before running the update method of a class(superconductor) object.
+    !! Code to execute before running the update method of a class(superconductor) object.
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass prehook
@@ -114,7 +114,7 @@ contains
   end subroutine
 
   impure subroutine superconductor_update_posthook(this)
-    ! Updates the superconducting order parameter based on the propagators of the system.
+    !! Updates the superconducting order parameter based on the propagators of the system.
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass posthook
@@ -233,7 +233,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine superconductor_set_gap(this, gap)
-    ! Updates the superconducting order parameter from a scalar.
+    !! Updates the superconducting order parameter from a scalar.
     class(superconductor), intent(inout) :: this
     complex(wp),           intent(in)    :: gap
 
@@ -243,7 +243,7 @@ contains
   end subroutine
 
   pure function superconductor_get_gap(this, location) result(gap)
-    ! Returns the superconducting order parameter at the given location.
+    !! Returns the superconducting order parameter at the given location.
     class(superconductor), intent(in) :: this
     real(wp),              intent(in) :: location
     complex(wp)                       :: gap
@@ -301,7 +301,7 @@ contains
   end subroutine
 
   impure subroutine superconductor_load(this)
-    ! Load a backup of a previous material state.
+    !! Load a backup of a previous material state.
     use :: material_m
     class(superconductor), intent(inout) :: this
 

@@ -15,18 +15,18 @@ module spinorbit_m
 
   ! Type declarations
   type :: spinorbit
-    class(material), pointer    :: material  => null()                                       ! Pointer to the material modelled by this instance
-    type(spin), dimension(3)    :: field                                                     ! Spin-orbit coupling field, i.e. SU(2) gauge field
+    class(material), pointer    :: material  => null()                                       !! Pointer to the material modelled by this instance
+    type(spin), dimension(3)    :: field                                                     !! Spin-orbit coupling field, i.e. SU(2) gauge field
 
     ! These variables are used by internal subroutines
-    type(spin)                  :: Ax,  Ay,  Az,  A2                                         ! Spin-orbit coupling matrices (the components and square)
-    type(spin)                  :: Axt, Ayt, Azt, A2t                                        ! Spin-orbit coupling matrices (tilde-conjugated versions)
+    type(spin)                  :: Ax,  Ay,  Az,  A2                                         !! Spin-orbit coupling matrices (the components and square)
+    type(spin)                  :: Axt, Ayt, Azt, A2t                                        !! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
-    procedure                   :: diffusion_equation   => spinorbit_diffusion_equation      ! Defines the Usadel diffusion equation
-    procedure                   :: interface_equation_a => spinorbit_interface_equation_a    ! Boundary condition at the left  interface
-    procedure                   :: interface_equation_b => spinorbit_interface_equation_b    ! Boundary condition at the right interface
-    procedure                   :: update_prehook       => spinorbit_update_prehook          ! Code to execute before calculating the propagators
-    procedure                   :: update_posthook      => spinorbit_update_posthook         ! Code to execute after  calculating the propagators
+    procedure                   :: diffusion_equation   => spinorbit_diffusion_equation      !! Defines the Usadel diffusion equation
+    procedure                   :: interface_equation_a => spinorbit_interface_equation_a    !! Boundary condition at the left  interface
+    procedure                   :: interface_equation_b => spinorbit_interface_equation_b    !! Boundary condition at the right interface
+    procedure                   :: update_prehook       => spinorbit_update_prehook          !! Code to execute before calculating the propagators
+    procedure                   :: update_posthook      => spinorbit_update_posthook         !! Code to execute after  calculating the propagators
   end type
 
   ! Type constructors

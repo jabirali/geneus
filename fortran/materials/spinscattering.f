@@ -19,12 +19,12 @@ module spinscattering_m
 
   ! Type declarations
   type :: spinscattering
-    class(material), pointer    :: material  => null()                   ! Pointer to the material modelled by this instance
-    real(wp)                    :: spinflip  =  0.0_wp                   ! Spin-flip  scattering coefficient (definition: 1/8Δτ)
-    real(wp)                    :: spinorbit =  0.0_wp                   ! Spin-orbit scattering coefficient (definition: 1/8Δτ)
-    complex(wp), dimension(4,4) :: sigma1, sigma2, sigma3, tau3          ! Pauli matrices that are used internally in this object
+    class(material), pointer    :: material  => null()                   !! Pointer to the material modelled by this instance
+    real(wp)                    :: spinflip  =  0.0_wp                   !! Spin-flip  scattering coefficient (definition: 1/8Δτ)
+    real(wp)                    :: spinorbit =  0.0_wp                   !! Spin-orbit scattering coefficient (definition: 1/8Δτ)
+    complex(wp), dimension(4,4) :: sigma1, sigma2, sigma3, tau3          !! Pauli matrices that are used internally in this object
   contains
-    procedure :: diffusion_equation => spinscattering_diffusion_equation ! Defines the Usadel diffusion equation (scattering terms)
+    procedure :: diffusion_equation => spinscattering_diffusion_equation !! Defines the Usadel diffusion equation (scattering terms)
   end type
 
   ! Type constructors

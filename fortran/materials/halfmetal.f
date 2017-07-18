@@ -22,17 +22,17 @@ module halfmetal_m
 
   ! Type declarations
   type, public, extends(conductor) :: halfmetal
-    real(wp)            :: polarization = 0.0_wp                                  ! Spin-polarization of the ferromagnet
-    type(spin), private :: P                                                      ! Polarization matrix
+    real(wp)            :: polarization = 0.0_wp                                  !! Spin-polarization of the ferromagnet
+    type(spin), private :: P                                                      !! Polarization matrix
   contains
-    procedure           :: init                 => halfmetal_init                 ! Initializes the propagators
-    procedure           :: conf                 => halfmetal_conf                 ! Configures the material parameters
-    procedure           :: diffusion_equation   => halfmetal_diffusion_equation   ! Defines the Usadel diffusion equation
-    procedure           :: interface_equation_a => halfmetal_interface_equation_a ! Boundary condition at the left  interface
-    procedure           :: interface_equation_b => halfmetal_interface_equation_b ! Boundary condition at the right interface
-    procedure           :: update_prehook       => halfmetal_update_prehook       ! Code to execute before calculating the propagators
-    procedure           :: update_posthook      => halfmetal_update_posthook      ! Code to execute after  calculating the propagators
-    procedure           :: update_density       => halfmetal_update_density       ! Calculates the density of states
+    procedure           :: init                 => halfmetal_init                 !! Initializes the propagators
+    procedure           :: conf                 => halfmetal_conf                 !! Configures the material parameters
+    procedure           :: diffusion_equation   => halfmetal_diffusion_equation   !! Defines the Usadel diffusion equation
+    procedure           :: interface_equation_a => halfmetal_interface_equation_a !! Boundary condition at the left  interface
+    procedure           :: interface_equation_b => halfmetal_interface_equation_b !! Boundary condition at the right interface
+    procedure           :: update_prehook       => halfmetal_update_prehook       !! Code to execute before calculating the propagators
+    procedure           :: update_posthook      => halfmetal_update_posthook      !! Code to execute after  calculating the propagators
+    procedure           :: update_density       => halfmetal_update_density       !! Calculates the density of states
   end type
 
   ! Type constructors
@@ -46,7 +46,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   impure function halfmetal_construct() result(this)
-    ! Constructs a halfmetal object.
+    !! Construct a halfmetal object.
     type(halfmetal) :: this
 
     ! Call the superclass constructor
@@ -57,7 +57,7 @@ contains
   end function
 
   pure subroutine halfmetal_init(this, gap)
-    ! Initializes the propagators to a non-superconducting state.
+    !! Initialize propagators to a non-superconducting state.
     class(halfmetal),      intent(inout) :: this
     complex(wp), optional, intent(in)    :: gap
     integer                              :: n, m
@@ -71,7 +71,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine halfmetal_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
-    ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
+    !! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(halfmetal), intent(in)    :: this
     complex(wp),      intent(in)    :: e
     real(wp),         intent(in)    :: z
@@ -98,7 +98,7 @@ contains
   end subroutine
 
   pure subroutine halfmetal_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
-    ! Calculate residuals from the boundary conditions at the left interface.
+    !! Calculate residuals from the boundary conditions at the left interface.
     class(halfmetal), intent(in)    :: this
     type(propagator), intent(in)    :: a
     type(spin),       intent(in)    :: g, gt, dg, dgt
@@ -122,7 +122,7 @@ contains
   end subroutine
 
   pure subroutine halfmetal_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
-    ! Calculate residuals from the boundary conditions at the right interface.
+    !! Calculate residuals from the boundary conditions at the right interface.
     class(halfmetal), intent(in)    :: this
     type(propagator), intent(in)    :: b
     type(spin),       intent(in)    :: g, gt, dg, dgt
@@ -146,7 +146,7 @@ contains
   end subroutine
 
   impure subroutine halfmetal_update_prehook(this)
-    ! Code to execute before running the update method of a class(halfmetal) object.
+    !! Code to execute before running the update method of a class(halfmetal) object.
     class(halfmetal), intent(inout) :: this
 
     ! Verify that a polarization is defined
@@ -176,7 +176,7 @@ contains
   end subroutine
 
   impure subroutine halfmetal_update_posthook(this)
-    ! Code to execute after running the update method of a class(halfmetal) object.
+    !! Code to execute after running the update method of a class(halfmetal) object.
     class(halfmetal), intent(inout) :: this
     real(wp)                        :: error
     integer                         :: n, m
@@ -207,7 +207,7 @@ contains
   end subroutine
 
   pure subroutine halfmetal_update_density(this)
-    ! Calculate the density of states in the halfmetal.
+    !! Calculate the density of states in the halfmetal.
     class(halfmetal), intent(inout) :: this
     integer                         :: n, m
 

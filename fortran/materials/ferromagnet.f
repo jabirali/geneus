@@ -13,16 +13,16 @@ module ferromagnet_m
 
   ! Type declaration
   type, public, extends(conductor)   :: ferromagnet
-    real(wp),   allocatable          :: exchange(:,:)                                         ! Magnetic exchange field as a function of position
-    type(spin), allocatable, private :: h(:), ht(:)                                           ! Used by internal subroutines to handle exchange fields
+    real(wp),   allocatable          :: exchange(:,:)                                         !! Magnetic exchange field as a function of position
+    type(spin), allocatable, private :: h(:), ht(:)                                           !! Used by internal subroutines to handle exchange fields
   contains
     ! These methods contain the equations that describe ferromagnets
-    procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  ! Differential equation that describes the ferromagnet
-    procedure                        :: update_prehook     => ferromagnet_update_prehook      ! Code to execute before calculating the propagators
-    procedure                        :: update_posthook    => ferromagnet_update_posthook     ! Code to execute after  calculating the propagators
+    procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  !! Differential equation that describes the ferromagnet
+    procedure                        :: update_prehook     => ferromagnet_update_prehook      !! Code to execute before calculating the propagators
+    procedure                        :: update_posthook    => ferromagnet_update_posthook     !! Code to execute after  calculating the propagators
 
     ! These methods define miscellaneous utility functions
-    procedure                        :: conf               => ferromagnet_conf                ! Configures material parameters
+    procedure                        :: conf               => ferromagnet_conf                !! Configures material parameters
   end type
 
   ! Type constructor
@@ -36,7 +36,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   function ferromagnet_construct() result(this)
-    ! Constructs a ferromagnetic material that is initialized as a weak superconductor.
+    !! Constructs a ferromagnetic material that is initialized as a weak superconductor.
     type(ferromagnet) :: this
 
     ! Call the superclass constructor
@@ -48,7 +48,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
-    ! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
+    !! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(ferromagnet), intent(in)    :: this
     complex(wp),        intent(in)    :: e
     real(wp),           intent(in)    :: z
@@ -87,7 +87,7 @@ contains
   end subroutine
 
   impure subroutine ferromagnet_update_prehook(this)
-    ! Updates the exchange field terms in the diffusion equation.
+    !! Updates the exchange field terms in the diffusion equation.
     class(ferromagnet), intent(inout) :: this ! Ferromagnet object that will be updated
     integer                           :: n    ! Loop variable
 
@@ -121,7 +121,7 @@ contains
   end subroutine
 
   impure subroutine ferromagnet_update_posthook(this)
-    ! Code to execute after running the update method of a class(ferromagnet) object.
+    !! Code to execute after running the update method of a class(ferromagnet) object.
     class(ferromagnet), intent(inout) :: this
 
     ! Call the superclass posthook
