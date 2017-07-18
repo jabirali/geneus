@@ -135,23 +135,29 @@ contains
 
   impure subroutine structure_conf(this, key, val)
     !! Configures the last material pushed to the multilayer stack.
+    !!
+    !! @TODO
+    !!   Add global config options for the entire stack.
     class(structure), intent(inout) :: this
     character(*),     intent(in)    :: key
     character(*),     intent(in)    :: val
     character(24)                   :: str
 
-    ! Configure the material
-    if (associated(this % b)) then
-      call this % b % conf(key, val)
-    else
-      ! @TODO: Implement generic configuration of the stack here,
-      !        e.g. the ability to toggle various output routines.
-      call error('Attempted to configure a non-existant material!')
-    end if
-
     ! Status information
     write(str,    *) key // ':'
     write(stdout, *) str // val
+
+    ! Configuration procedure
+    if (.not. associated(this % b)) then
+      ! Global configuration since no materials exist
+      select case(key)
+        case default
+          call warning("Unknown structure option '" // key // "' ignored.")
+      end select
+    else
+      ! Local configuration of only the last material
+      call this % b % conf(key, val)
+    end if
   end subroutine
 
   impure subroutine structure_map(this, routine)

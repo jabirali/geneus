@@ -340,7 +340,7 @@ contains
           call error("The order of the material must be be minimum 0.")
         end if
       case default
-        call warning("Unknown option '" // key // "' ignored.")
+        call warning("Unknown material option '" // key // "' ignored.")
     end select
   end subroutine
 
