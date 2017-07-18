@@ -13,7 +13,7 @@ module ferromagnet_m
 
   ! Type declaration
   type, public, extends(conductor)   :: ferromagnet
-    real(wp),   allocatable          :: exchange(:,:)                                         !! Magnetic exchange field as a function of position
+    real(wp),   allocatable          :: magnetization(:,:)                                    !! Magnetic exchange field as a function of position
     type(spin), allocatable, private :: h(:), ht(:)                                           !! Used by internal subroutines to handle exchange fields
   contains
     ! These methods contain the equations that describe ferromagnets
@@ -95,24 +95,24 @@ contains
     call this%conductor%update_prehook
 
     ! Rename the internal variables
-    if (allocated(this%exchange)) then
+    if (allocated(this%magnetization)) then
       ! Allocate space for internal variables
       if (.not. allocated(this%h)) then
-        allocate(this%h (size(this%exchange,2)))
-        allocate(this%ht(size(this%exchange,2)))
+        allocate(this%h (size(this%magnetization,2)))
+        allocate(this%ht(size(this%magnetization,2)))
       end if
 
       ! Update the internal variables
-      associate(exchange => this % exchange, h => this % h, ht => this % ht)
-        do n = 1,size(exchange,2)
-          h(n)  = ((0.0_wp,-1.0_wp)/this%thouless) * (exchange(1,n)*pauli1 + exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
-          ht(n) = ((0.0_wp,+1.0_wp)/this%thouless) * (exchange(1,n)*pauli1 - exchange(2,n)*pauli2 + exchange(3,n)*pauli3)
+      associate(M => this % magnetization, h => this % h, ht => this % ht)
+        do n = 1,size(M,2)
+          h(n)  = ((0.0_wp,-1.0_wp)/this%thouless) * (M(1,n)*pauli1 + M(2,n)*pauli2 + M(3,n)*pauli3)
+          ht(n) = ((0.0_wp,+1.0_wp)/this%thouless) * (M(1,n)*pauli1 - M(2,n)*pauli2 + M(3,n)*pauli3)
         end do
       end associate
     end if
 
     ! Modify the type string
-    if (allocated(this%exchange)) then
+    if (allocated(this%magnetization)) then
       this%type_string = color_red // 'FERROMAGNET' // color_none
       if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
       if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
@@ -151,11 +151,11 @@ contains
           call linspace(location, 0.0_wp, 1.0_wp)
 
           ! Initialize the magnetic exchange field
-          call evaluate(val, location, this % exchange)
+          call evaluate(val, location, this % magnetization)
 
           ! Deallocate the field if it is negligible
-          if (norm2(this % exchange) < sqrt(eps)) then
-            deallocate(this % exchange)
+          if (norm2(this % magnetization) < sqrt(eps)) then
+            deallocate(this % magnetization)
           end if
 
           ! Deallocate the location array
