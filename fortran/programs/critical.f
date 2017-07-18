@@ -46,7 +46,7 @@ program main
   stack = structure()
 
   ! Use fixpoint-iteration for selfconsistent calculations
-  call stack % selfconsistency(1)
+  call stack % cmap('selfconsistency', 1)
 
   ! Initialize the stack to a barely superconducting state
   call stack % init(cx(initgap))
@@ -65,7 +65,7 @@ program main
 
   do n = 1,bisections
     ! Set the temperature of the materials
-    call stack % temperature(critical)
+    call stack % cmap('temperature', critical)
 
     ! Load the saved material states
     call stack % load

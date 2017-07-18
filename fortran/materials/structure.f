@@ -33,6 +33,7 @@ module structure_m
     ! Basic construction and management
     procedure :: push                => structure_push                !! Construct a single layer
     procedure :: conf                => structure_conf                !! Configure a single layer
+    procedure :: cmap                => structure_cmap                !! Configure all layers
     procedure :: map                 => structure_map                 !! Apply a subroutine to all layers
 
     ! Manipulation of the physical state
@@ -47,10 +48,8 @@ module structure_m
     procedure :: difference          => structure_difference          !! Check how much the physical state changes
     procedure :: materials           => structure_materials           !! Check the number of enabled materials
     procedure :: superconductors     => structure_superconductors     !! Check the number of enables superconductors
-    procedure :: gap                 => structure_gap                 !! Check the minimum superconducting gap
     procedure :: chargeviolation     => structure_chargeviolation     !! Check the violation of charge conservation
-    procedure :: temperature         => structure_temperature         !! Set the temperature of the stack
-    procedure :: selfconsistency     => structure_selfconsistency     !! Set the selfconsistency scheme
+    procedure :: gap                 => structure_gap                 !! Check the minimum superconducting gap
   end type
 
   ! Type constructor
@@ -158,6 +157,38 @@ contains
       ! Local configuration of only the last material
       call this % b % conf(key, val)
     end if
+  end subroutine
+
+  impure subroutine structure_cmap(this, key, val)
+    !! Maps a configuration option onto each element of the multilayer stack.
+    class(structure), intent(inout) :: this
+    character(*),     intent(in)    :: key
+    class(*),         intent(in)    :: val
+    character(1024)                 :: str
+
+    ! Parse the config option
+    str = ''
+    select type(val)
+      type is (character(*))
+        str = val
+      type is (logical)
+        write(str, '(l1)') val
+      type is (integer)
+        write(str, '(i0)') val
+      type is (real(wp))
+        write(str, '(g0)') val
+    end select
+
+    ! Map it onto each material
+    call this % map(conf)
+  contains
+    impure subroutine conf(m)
+      class(material), pointer, intent(in) :: m
+      integer                              :: i
+
+      ! Configure the material
+      call m % conf(key, trim(adjustl(str)))
+    end subroutine
   end subroutine
 
   impure subroutine structure_map(this, routine)
@@ -460,36 +491,6 @@ contains
     end subroutine
   end function
 
-  impure subroutine structure_selfconsistency(this, scheme)
-    !! Controls the selfconsistency scheme used for superconductors in the stack.
-    class(structure), target  :: this
-    integer                   :: scheme
-
-    call this % map(set)
-  contains
-    subroutine set(m)
-      class(material), pointer, intent(in) :: m
-      select type (m)
-        class is (superconductor)
-          m % selfconsistency = scheme
-      end select
-    end subroutine
-  end subroutine
-
-  impure subroutine structure_temperature(this, temperature)
-    !! Modifies the temperature of the multilayer stack.
-    class(structure), target  :: this
-    real(wp)                  :: temperature
-
-    ! Update the temperature of all materials
-    call this % map(set)
-  contains
-    subroutine set(m)
-      class(material), pointer, intent(in) :: m
-      m % temperature = temperature
-    end subroutine
-  end subroutine
-
   impure subroutine structure_write(this)
     !! Writes physical observables to output files.
     class(structure), target  :: this
@@ -533,7 +534,7 @@ contains
         z = a + (b-a)*p
 
         ! Write accumulations
-        if (this % accumulation /= 0) then
+        if (allocated(this % accumulation)) then
           write(this % accumulation, '(*(es20.12e3,:,"	"))') &
             z, ptr % accumulation(:,m)
         end if
