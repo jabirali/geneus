@@ -23,10 +23,8 @@ module material_m
     real(wp)                                  :: thouless              =  1.00_wp           !! Thouless energy (ħD/L²)
     real(wp)                                  :: temperature           =  0.00_wp           !! Material temperature (T/Tc)
     real(wp)                                  :: scattering            =  0.01_wp           !! Inelastic scattering (η/Δ₀)
-    real(wp)                                  :: conductance_a         =  0.30_wp           !! Interface conductance (left)
-    real(wp)                                  :: conductance_b         =  0.30_wp           !! Interface conductance (right)
-    logical                                   :: transparent_a         =  .false.           !! Transparent interface (left)
-    logical                                   :: transparent_b         =  .false.           !! Transparent interface (right)
+    real(wp)                                  :: conductance_a         =  0.00_wp           !! Interface conductance (left)
+    real(wp)                                  :: conductance_b         =  0.00_wp           !! Interface conductance (right)
 
     ! Physical state modelled using quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  !! Energy domain

@@ -192,17 +192,15 @@ contains
       type(spin),                intent(in)    :: g, gt, dg, dgt
       type(spin),                intent(inout) :: r, rt
 
-      if (associated(this%material_a)) then
-        if (this%transparent_a) then
-          ! Interface is transparent
-          call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
-        else
-          ! Interface is tunneling
-          call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
-        end if
-      else
-        ! Interface is vacuum
+      if (.not. associated(this%material_a)) then
+        ! Assuming vacuum interface (no material connected)
         call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
+      else if (this%conductance_a <= 0) then
+        ! Assuming transparent interface (no conductance specified)
+        call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
+      else
+        ! Assuming tunneling interface (Kupriyanov-Lukichev)
+        call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
       end if
 
       if (allocated(this%spinorbit)) then
@@ -223,17 +221,15 @@ contains
     type(spin),                intent(in)    :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
-    if (associated(this%material_b)) then
-      if (this%transparent_b) then
-        ! Interface is transparent
-        call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
-      else
-        ! Interface is tunneling
-        call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
-      end if
-    else
-      ! Interface is vacuum
+    if (.not. associated(this%material_b)) then
+      ! Assuming vacuum interface (no material connected)
       call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
+    else if (this%conductance_b <= 0) then
+      ! Assuming transparent interface (no conductance specified)
+      call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
+    else
+      ! Assuming tunneling interface (Kupriyanov-Lukichev)
+      call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
     end if
 
     if (allocated(this%spinorbit)) then
@@ -472,10 +468,6 @@ contains
     real(wp)                        :: tmp
 
     select case(key)
-      case ('transparent_a')
-        call evaluate(val, this % transparent_a)
-      case ('transparent_b')
-        call evaluate(val, this % transparent_b)
       case ('conductance_a')
         call evaluate(val, this % conductance_a)
       case ('conductance_b')
