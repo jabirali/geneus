@@ -33,8 +33,8 @@ module structure_m
     ! Basic construction and management
     procedure :: push                => structure_push                !! Construct a single layer
     procedure :: conf                => structure_conf                !! Configure a single layer
-    procedure :: cmap                => structure_cmap                !! Configure all layers
-    procedure :: map                 => structure_map                 !! Apply a subroutine to all layers
+    procedure :: cmap                => structure_cmap                !! Configure  all layers
+    procedure :: fmap                => structure_fmap                !! Manipulate all layers
 
     ! Manipulation of the physical state
     procedure :: init                => structure_init                !! Reset the physical state
@@ -180,7 +180,7 @@ contains
     end select
 
     ! Map it onto each material
-    call this % map(conf)
+    call this % fmap(conf)
   contains
     impure subroutine conf(m)
       class(material), pointer, intent(in) :: m
@@ -191,7 +191,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_map(this, routine)
+  impure subroutine structure_fmap(this, routine)
     !! Maps a subroutine onto each element of the multilayer stack.
     class(structure), target  :: this
     class(material),  pointer :: ptr
@@ -246,7 +246,7 @@ contains
     found = .false.
 
     ! Check the gaps
-    call this % map(find)
+    call this % fmap(find)
 
     ! If no superconductor was found, raise an error
     if (.not. found) then
@@ -269,7 +269,7 @@ contains
     complex(wp)               :: gap
 
     ! Initialize all material states
-    call this % map(init)
+    call this % fmap(init)
   contains
     subroutine init(m)
       class(material), pointer, intent(in) :: m
@@ -282,7 +282,7 @@ contains
     class(structure), target  :: this
 
     ! Save all material states
-    call this % map(save)
+    call this % fmap(save)
   contains
     subroutine save(m)
       class(material), pointer, intent(in) :: m
@@ -295,7 +295,7 @@ contains
     class(structure), target  :: this
 
     ! Load all material states
-    call this % map(load)
+    call this % fmap(load)
   contains
     subroutine load(m)
       class(material), pointer, intent(in) :: m
@@ -311,7 +311,7 @@ contains
 
     ! Update materials in order
     do order = 1,16
-      call this % map(update)
+      call this % fmap(update)
     end do
   contains
     subroutine update(m)
@@ -420,7 +420,7 @@ contains
     num = 0
 
     ! Count the number of materials
-    call this % map(count)
+    call this % fmap(count)
   contains
     subroutine count(ptr)
       class(material), pointer, intent(in) :: ptr
@@ -437,7 +437,7 @@ contains
     num = 0
 
     ! Count the number of superconductors
-    call this % map(count)
+    call this % fmap(count)
   contains
     subroutine count(ptr)
       class(material), pointer, intent(in) :: ptr
@@ -455,7 +455,7 @@ contains
     real(wp)                  :: difference
 
     ! Traverse all materials
-    call this % map(check)
+    call this % fmap(check)
   contains
     subroutine check(m)
       class(material), pointer, intent(in) :: m
@@ -478,7 +478,7 @@ contains
     maximum = -inf
 
     ! Traverse all materials to find the most extreme currents
-    call this % map(check)
+    call this % fmap(check)
 
     ! Calculate the difference between these extreme values
     difference = maximum - minimum
@@ -500,7 +500,7 @@ contains
     b = 0
 
     ! Traverse all materials
-    call this % map(writer)
+    call this % fmap(writer)
 
     ! Sync data to output files
     call sync(this % accumulation)
