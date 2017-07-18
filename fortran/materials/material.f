@@ -5,6 +5,14 @@
 !> positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
 !> intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
 !> type defines the essential data structures and program structure, while the derived subtypes will define actual physics.
+!>
+!> @TODO
+!>   It might be cleaner to refactor this class by moving interface_vacuum and interface_transparent here, since these
+!>   are more a general description of materials than something specific to conductors. The Kupryanov-Lukichev boundary
+!>   conditions should however stay in the conductor class, since these describe "physics and mot math". Furthermore, 
+!>   it may be useful to move the diffusion_equation terms of the kind -2·dg·Nt·gt·dg to this class, since they're 
+!>   technically a part of the Riccati parametrization itself and not something describing any particular material.
+!>   With these modifications, the class can be made concrete instead of abstract, removing the need for interfaces.
 
 module material_m
   use :: stdio_m
