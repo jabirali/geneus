@@ -64,11 +64,11 @@ program main
   !--------------------------------------------------------------------------------!
 
   do n = 1,bisections
-    ! Set the temperature of the materials
-    call stack % cmap('temperature', critical)
-
     ! Load the saved material states
     call stack % load
+
+    ! Set the temperature of the materials
+    call stack % cmap('temperature', critical)
 
     ! Update the material states
     call stack % converge(iterations = iterations, prehook = prehook)

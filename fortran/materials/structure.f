@@ -61,7 +61,7 @@ module structure_m
   abstract interface
     subroutine mappable(ptr)
       use :: material_m
-      class(material), pointer, intent(in) :: ptr
+      class(material), pointer :: ptr
     end subroutine
   end interface
 
@@ -94,10 +94,10 @@ contains
     write(stdout,*)
     write(stdout,*) '[' // string // ']'
   contains
-    impure subroutine material_allocate(ptr, str)
+    subroutine material_allocate(ptr, str)
       !! Allocates memory for a new material layer.
-      class(material), pointer, intent(inout) :: ptr
-      character(*),             intent(in)    :: str
+      class(material), pointer :: ptr
+      character(*)             :: str
 
       select case(str)
         case('halfmetal')
@@ -113,9 +113,9 @@ contains
       end select
     end subroutine
 
-    impure subroutine material_construct(ptr)
+    subroutine material_construct(ptr)
       !! Constructs and initializes a new material layer.
-      class(material), pointer, intent(inout) :: ptr
+      class(material), pointer :: ptr
 
       select type(ptr)
         type is (halfmetal)
@@ -182,9 +182,9 @@ contains
     ! Map it onto each material
     call this % fmap(conf)
   contains
-    impure subroutine conf(m)
-      class(material), pointer, intent(in) :: m
-      integer                              :: i
+    subroutine conf(m)
+      class(material), pointer :: m
+      integer                  :: i
 
       ! Configure the material
       call m % conf(key, trim(adjustl(str)))
@@ -254,7 +254,7 @@ contains
     end if
   contains
     subroutine find(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
       select type(m)
         class is (superconductor)
           gap = min(gap, sum(abs(m%gap_function))/max(1,size(m%gap_function)))
@@ -272,7 +272,7 @@ contains
     call this % fmap(init)
   contains
     subroutine init(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
       call m % init(gap)
     end subroutine
   end subroutine
@@ -285,7 +285,7 @@ contains
     call this % fmap(save)
   contains
     subroutine save(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
       call m % save
     end subroutine
   end subroutine
@@ -298,7 +298,7 @@ contains
     call this % fmap(load)
   contains
     subroutine load(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
       call m % load
     end subroutine
   end subroutine
@@ -315,7 +315,7 @@ contains
     end do
   contains
     subroutine update(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
 
       if (m % order == order) then
         call m % update(bootstrap)
@@ -423,7 +423,7 @@ contains
     call this % fmap(count)
   contains
     subroutine count(ptr)
-      class(material), pointer, intent(in) :: ptr
+      class(material), pointer :: ptr
       num = num + 1
     end subroutine
   end function
@@ -440,7 +440,7 @@ contains
     call this % fmap(count)
   contains
     subroutine count(ptr)
-      class(material), pointer, intent(in) :: ptr
+      class(material), pointer :: ptr
       select type (ptr)
         class is (superconductor)
           num = num + 1
@@ -453,11 +453,14 @@ contains
     class(structure), target  :: this
     real(wp)                  :: difference
 
+    ! Initialization
+    difference = 0
+
     ! Traverse all materials
     call this % fmap(check)
   contains
     subroutine check(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
       ! Accumulate the difference
       difference = max(difference, m % difference)
     end subroutine
@@ -483,7 +486,7 @@ contains
     difference = maximum - minimum
   contains
     subroutine check(m)
-      class(material), pointer, intent(in) :: m
+      class(material), pointer :: m
       ! Determine the charge current extrema
       maximum = max(maximum, maxval(m % supercurrent(0,:) + m % lossycurrent(0,:)))
       minimum = min(minimum, minval(m % supercurrent(0,:) + m % lossycurrent(0,:)))
@@ -518,9 +521,9 @@ contains
     end subroutine
 
     subroutine writer(ptr)
-      class(material), pointer, intent(in) :: ptr
-      real(wp)                             :: p, z
-      integer                              :: n, m
+      class(material), pointer :: ptr
+      real(wp)                 :: p, z
+      integer                  :: n, m
 
       ! Calculate the endpoints
       a = b
