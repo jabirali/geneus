@@ -24,52 +24,50 @@ module conductor_m
   ! Type declarations
   type, public, extends(material) :: conductor
     ! These parameters control the physical characteristics of the material
-    real(wp)                         :: spinmixing_a            =  0.00_wp                    ! Normalized spin-mixing at the left  interface
-    real(wp)                         :: spinmixing_b            =  0.00_wp                    ! Normalized spin-mixing at the right interface
-    real(wp)                         :: polarization_a          =  0.00_wp                    ! Spin-polarization at the left  interface
-    real(wp)                         :: polarization_b          =  0.00_wp                    ! Spin-polarization at the right interface
-    real(wp)                         :: secondorder_a           =  0.00_wp                    ! Second-order spin-mixing at the left  interface
-    real(wp)                         :: secondorder_b           =  0.00_wp                    ! Second-order spin-mixing at the right interface
+    real(wp)                         :: polarization_a          =  0.00_wp                    !! Interfacial spin-polarization (left)
+    real(wp)                         :: polarization_b          =  0.00_wp                    !! Interfacial spin-polarization (right)
+    real(wp)                         :: spinmixing_a            =  0.00_wp                    !! Interfacial 1st-order spin-mixing (left)
+    real(wp)                         :: spinmixing_b            =  0.00_wp                    !! Interfacial 1st-order spin-mixing (right)
+    real(wp)                         :: secondorder_a           =  0.00_wp                    !! Interfacial 2nd-order spin-mixing (left)
+    real(wp)                         :: secondorder_b           =  0.00_wp                    !! Interfacial 2nd-order spin-mixing (right)
 
     ! These parameters represent the physical fields in the material
-    real(wp)                          :: depairing              =  0.00_wp                    ! Magnetic orbital depairing
-    type(spinscattering), allocatable :: spinscattering                                       ! Spin-dependent scattering
-    type(spinorbit),      allocatable :: spinorbit                                            ! Spin-orbit coupling
-    real(wp),             allocatable :: magnetization_a(:)                                   ! Magnetization of the left  interface (unit vector) (used for transmissions)
-    real(wp),             allocatable :: magnetization_b(:)                                   ! Magnetization of the right interface (unit vector) (used for transmissions)
-    real(wp),             allocatable :: misalignment_a(:)                                    ! Magnetization of the left  interface (unit vector) (used for reflections)
-    real(wp),             allocatable :: misalignment_b(:)                                    ! Magnetization of the right interface (unit vector) (used for reflections)
+    real(wp)                          :: depairing              =  0.00_wp                    !! Magnetic orbital depairing
+    type(spinscattering), allocatable :: spinscattering                                       !! Spin-dependent scattering
+    type(spinorbit),      allocatable :: spinorbit                                            !! Spin-orbit coupling
+    real(wp),             allocatable :: magnetization_a(:)                                   !! Interfacial magnetization (transmissions) (left)
+    real(wp),             allocatable :: magnetization_b(:)                                   !! Interfacial magnetization (transmissions) (right)
+    real(wp),             allocatable :: misalignment_a(:)                                    !! Interfacial magnetization (reflections)   (left)
+    real(wp),             allocatable :: misalignment_b(:)                                    !! Interfacial magnetization (reflections)   (right)
 
     ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(wp)                      :: M_a(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
-    complex(wp)                      :: M_b(4,4)                =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for transmissions through the interface)
-    complex(wp)                      :: M0_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
-    complex(wp)                      :: M0_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
-    complex(wp)                      :: M1_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
-    complex(wp)                      :: M1_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
+    complex(wp)                      :: M_a(4,4)                =  0.00_wp                    !! Interface magnetization matrix (used for transmissions through the interface)
+    complex(wp)                      :: M_b(4,4)                =  0.00_wp                    !! Interface magnetization matrix (used for transmissions through the interface)
+    complex(wp)                      :: M0_a(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on this  side of the interface)
+    complex(wp)                      :: M0_b(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on this  side of the interface)
+    complex(wp)                      :: M1_a(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on other side of the interface)
+    complex(wp)                      :: M1_b(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on other side of the interface)
   contains
     ! These methods are required by the class(material) abstract interface
-    procedure                 :: init                    => conductor_init                    ! Initializes the propagators
-    procedure                 :: interface_equation_a    => conductor_interface_equation_a    ! Boundary condition at the left  interface
-    procedure                 :: interface_equation_b    => conductor_interface_equation_b    ! Boundary condition at the right interface
-    procedure                 :: update_prehook          => conductor_update_prehook          ! Code to execute before calculating the propagators
-    procedure                 :: update_posthook         => conductor_update_posthook         ! Code to execute after  calculating the propagators
+    procedure                 :: init                    => conductor_init                    !! Initializes propagators
+    procedure                 :: interface_equation_a    => conductor_interface_equation_a    !! Boundary condition (left)
+    procedure                 :: interface_equation_b    => conductor_interface_equation_b    !! Boundary condition (right)
+    procedure                 :: update_prehook          => conductor_update_prehook          !! Code to execute before updates
+    procedure                 :: update_posthook         => conductor_update_posthook         !! Code to execute after  updates
 
     ! These methods contain the equations that describe electrical conductors
-    procedure                 :: diffusion_equation      => conductor_diffusion_equation      ! Defines the Usadel diffusion equation (conductor terms)
-    procedure                 :: interface_transparent_a => conductor_interface_transparent_a ! Defines the left  boundary condition  (transparent interface)
-    procedure                 :: interface_transparent_b => conductor_interface_transparent_b ! Defines the right boundary condition  (transparent interface)
-    procedure                 :: interface_vacuum_a      => conductor_interface_vacuum_a      ! Defines the left  boundary condition  (vacuum interface)
-    procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      ! Defines the right boundary condition  (vacuum interface)
-    procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      ! Defines the left  boundary condition  (tunnel interface)
-    procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      ! Defines the right boundary condition  (tunnel interface)
-
-    ! These methods contain the equations that describe spin-active tunneling  interfaces
-    procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms)
-    procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms)
+    procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation (conductor terms)
+    procedure                 :: interface_transparent_a => conductor_interface_transparent_a !! Boundary condition (transparent interface) (left)  
+    procedure                 :: interface_transparent_b => conductor_interface_transparent_b !! Boundary condition (transparent interface) (right) 
+    procedure                 :: interface_vacuum_a      => conductor_interface_vacuum_a      !! Boundary condition (vacuum interface)      (left)  
+    procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      !! Boundary condition (vacuum interface)      (right) 
+    procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      !! Boundary condition (tunneling interface)   (left)  
+    procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      !! Boundary condition (tunneling interface)   (right) 
+    procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   !! Boundary condition (spin-active interface) (left)
+    procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   !! Boundary condition (spin-active interface) (right)
 
     ! These methods define miscellaneous utility functions
-    procedure                 :: conf                    => conductor_conf                    ! Configures material parameters
+    procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
   end type
 
   ! Type constructors
@@ -88,7 +86,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   function conductor_construct() result(this)
-    ! Constructs a conductor object initialized to a superconducting state.
+    !! Constructs a conductor object initialized to a superconducting state.
     type(conductor) :: this
 
     ! Initialize locations
@@ -114,7 +112,7 @@ contains
   end function
 
   pure subroutine conductor_init(this, gap)
-    ! Define the default initializer.
+    !! Define the default initializer.
     class(conductor),      intent(inout) :: this
     complex(wp), optional, intent(in)    :: gap
     integer                              :: n, m
@@ -152,7 +150,7 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine conductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
-    ! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
+    !! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(conductor), intent(in)    :: this
     complex(wp),      intent(in)    :: e
     real(wp),         intent(in)    :: z
@@ -186,36 +184,36 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
-      ! Calculate residuals from the boundary conditions at the left interface.
-      class(conductor),          intent(in)    :: this
-      type(propagator),          intent(in)    :: a
-      type(spin),                intent(in)    :: g, gt, dg, dgt
-      type(spin),                intent(inout) :: r, rt
+    !! Calculate residuals from the boundary conditions at the left interface.
+    class(conductor),          intent(in)    :: this
+    type(propagator),          intent(in)    :: a
+    type(spin),                intent(in)    :: g, gt, dg, dgt
+    type(spin),                intent(inout) :: r, rt
 
-      if (.not. associated(this%material_a)) then
-        ! Assuming vacuum interface (no material connected)
-        call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
-      else if (this%conductance_a <= 0) then
-        ! Assuming transparent interface (no conductance specified)
-        call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
-      else
-        ! Assuming tunneling interface (Kupriyanov-Lukichev)
-        call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
-      end if
+    if (.not. associated(this%material_a)) then
+      ! Assuming vacuum interface (no material connected)
+      call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
+    else if (this%conductance_a <= 0) then
+      ! Assuming transparent interface (no conductance specified)
+      call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
+    else
+      ! Assuming tunneling interface (Kupriyanov-Lukichev)
+      call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
+    end if
 
-      if (allocated(this%spinorbit)) then
-        ! Interface has spin-orbit coupling
-        call this%spinorbit%interface_equation_a(g, gt, dg, dgt, r, rt)
-      end if
+    if (allocated(this%spinorbit)) then
+      ! Interface has spin-orbit coupling
+      call this%spinorbit%interface_equation_a(g, gt, dg, dgt, r, rt)
+    end if
 
-      if (allocated(this%magnetization_a)) then
-        ! Interface is spin-active
-        call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
-      end if
+    if (allocated(this%magnetization_a)) then
+      ! Interface is spin-active
+      call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
+    end if
   end subroutine
 
   pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
-    ! Calculate residuals from the boundary conditions at the right interface.
+    !! Calculate residuals from the boundary conditions at the right interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: b
     type(spin),                intent(in)    :: g, gt, dg, dgt
@@ -244,7 +242,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Defines a vacuum boundary condition for the left interface.
+    !! Defines a vacuum boundary condition for the left interface.
     class(conductor), intent(in)    :: this
     type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
     type(spin),       intent(inout) :: r1, rt1
@@ -254,7 +252,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Defines a vacuum boundary condition for the right interface.
+    !! Defines a vacuum boundary condition for the right interface.
     class(conductor), intent(in)    :: this
     type(spin),       intent(in)    :: g2, gt2, dg2, dgt2
     type(spin),       intent(inout) :: r2, rt2
@@ -264,7 +262,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Defines a transparent boundary condition for the left interface.
+    !! Defines a transparent boundary condition for the left interface.
     class(conductor), intent(in)    :: this
     type(propagator), intent(in)    :: a
     type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
@@ -282,7 +280,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Defines a transparent boundary condition for the right interface.
+    !! Defines a transparent boundary condition for the right interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: b
     type(spin),                intent(in)    :: g2, gt2, dg2, dgt2
@@ -300,7 +298,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
-    ! Defines a tunneling boundary condition for the left interface.
+    !! Defines a tunneling boundary condition for the left interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: a
     type(spin),                intent(inout) :: r1, rt1
@@ -325,7 +323,7 @@ contains
   end subroutine
 
   pure subroutine conductor_interface_tunnel_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
-    ! Defines a tunneling boundary condition for the right interface.
+    !! Defines a tunneling boundary condition for the right interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: b
     type(spin),                intent(inout) :: r2, rt2
@@ -350,7 +348,7 @@ contains
   end subroutine
 
   impure subroutine conductor_update_prehook(this)
-    ! Code to execute before running the update method of a class(conductor) object.
+    !! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
 
     ! Usually, we normalize the spin-mixing conductance and other interface parameters to the tunneling conductance. But in
