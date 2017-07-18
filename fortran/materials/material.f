@@ -53,6 +53,7 @@ module material_m
     class(material),                  pointer :: material_b      => null()                  !! Material to the right (default: vacuum)
 
     ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
+    integer                                   :: selfconsistency =  2                       !! Selfconsistency scheme (0 = none, 1 = fixpoint iteration, 2 = Steffensen's method)
     integer                                   :: scaling         =  128                     !! Maximal mesh increase (range: 2^N, N>1)
     integer                                   :: method          =  4                       !! Runge—Kutta order (range: 2, 4, 6)
     integer                                   :: control         =  2                       !! Error control (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
@@ -338,6 +339,11 @@ contains
           call error("The order of the material must be be maximum 16.")
         else if (this%order < 0) then
           call error("The order of the material must be be minimum 0.")
+        end if
+      case("selfconsistency")
+        call evaluate(val, this%selfconsistency)
+        if (this % selfconsistency < 0 .or. this % selfconsistency > 2) then
+          call error("The selfconsistency scheme should be in the range [0,2].")
         end if
       case default
         call warning("Unknown material option '" // key // "' ignored.")

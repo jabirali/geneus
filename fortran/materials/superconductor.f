@@ -17,7 +17,6 @@ module superconductor_m
     complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    integer                  :: selfconsistency = 2  !! What kind of selfconsistency scheme to use (0 = none, 1 = fixpoint-iteration, 2 = Steffensen's method)
     integer                  :: iteration            !! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods contain the equations that describe superconductors
@@ -71,7 +70,9 @@ contains
     call this%conductor%init(gap)
 
     ! Update the superconducting gap
-    call this%set_gap(gap)
+    if (present(gap)) then
+      call this%set_gap(gap)
+    end if
   end subroutine
 
   !--------------------------------------------------------------------------------!
@@ -276,11 +277,6 @@ contains
     character(*),          intent(in)    :: val
 
     select case(key)
-      case("selfconsistency")
-        call evaluate(val, this%selfconsistency)
-        if (this % selfconsistency < 0 .or. this % selfconsistency > 2) then
-          call error("The selfconsistency scheme should be in the range [0,2].")
-        end if
       case ("gap")
         block
           integer  :: index
