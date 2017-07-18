@@ -51,9 +51,9 @@ contains
     class(spinorbit), intent(inout) :: this 
 
     ! Spin-orbit coupling terms in the equations for the Riccati parameter γ
-    this%Ax  = this%field(1)/sqrt(this%material%thouless)
-    this%Ay  = this%field(2)/sqrt(this%material%thouless)
-    this%Az  = this%field(3)/sqrt(this%material%thouless)
+    this%Ax  = this%material%length * this%field(1)
+    this%Ay  = this%material%length * this%field(2)
+    this%Az  = this%material%length * this%field(3)
     this%A2  = this%Ax**2 + this%Ay**2 + this%Az**2
 
     ! Spin-orbit coupling terms in the equations for the Riccati parameter γ~

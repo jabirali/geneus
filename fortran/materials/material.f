@@ -19,13 +19,14 @@ module material_m
   ! Type declarations
   type, public, abstract :: material
     ! Physical properties of a diffusive material
-    logical                                   :: transparent_a         =  .false.           !! Transparent interface (left)
-    logical                                   :: transparent_b         =  .false.           !! Transparent interface (right)
+    real(wp)                                  :: length                =  1.00_wp           !! Material length (L/ξ)
+    real(wp)                                  :: thouless              =  1.00_wp           !! Thouless energy (ħD/L²)
+    real(wp)                                  :: temperature           =  0.00_wp           !! Material temperature (T/Tc)
+    real(wp)                                  :: scattering            =  0.01_wp           !! Inelastic scattering (η/Δ₀)
     real(wp)                                  :: conductance_a         =  0.30_wp           !! Interface conductance (left)
     real(wp)                                  :: conductance_b         =  0.30_wp           !! Interface conductance (right)
-    real(wp)                                  :: thouless              =  1.00_wp           !! Thouless energy (ħD/Δ₀L²)
-    real(wp)                                  :: temperature           =  0.00_wp           !! Temperature (T/Tc)
-    real(wp)                                  :: scattering            =  0.01_wp           !! Inelastic scattering (η/Δ₀)
+    logical                                   :: transparent_a         =  .false.           !! Transparent interface (left)
+    logical                                   :: transparent_b         =  .false.           !! Transparent interface (right)
 
     ! Physical state modelled using quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  !! Energy domain
@@ -187,7 +188,7 @@ contains
         end if
 
         ! Calculate the complex energy (relative to the Thouless energy)
-        e = cx(this%energy(n)/this%thouless, this%scattering/this%thouless)
+        e = cx(this%energy(n), this%scattering)/this%thouless
 
         ! Update the matrices used to evaluate boundary conditions
         if (associated(this%material_a)) then
@@ -315,12 +316,11 @@ contains
     class(material), intent(inout) :: this
     character(*),    intent(in)    :: key
     character(*),    intent(in)    :: val
-    real(wp)                       :: tmp
 
     select case(key)
       case("length")
-        call evaluate(val, tmp)
-        this%thouless = 1/(eps+tmp**2)
+        call evaluate(val, this%length)
+        this%thouless = 1/(this%length**2 + eps)
       case("scattering")
         call evaluate(val, this%scattering)
       case("temperature")

@@ -513,7 +513,7 @@ contains
 
       ! Calculate the endpoints
       a = b
-      b = b + 1/sqrt(ptr % thouless)
+      b = b + ptr % length
 
       ! Loop over all positions
       do m=1,size(ptr % location)
