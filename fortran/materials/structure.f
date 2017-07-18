@@ -448,7 +448,6 @@ contains
     end subroutine
   end function
 
-
   impure function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
     class(structure), target  :: this
