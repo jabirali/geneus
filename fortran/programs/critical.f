@@ -4,8 +4,8 @@
 !> This program calculates the critical temperature of an arbitrary superconducting hybrid structure
 !> for a given set of physical parameters. In order to obtain the critical temperature as a function
 !> of these parameters, the program has to be invoked multiple times with different input parameters.
-!> The structure is constructed based on the configuration file 'materials.conf', which the program
-!> expects to find in the runtime directory, and the results are written to the file 'critical.dat'. 
+!> The structure is constructed based on a configuration file which should be provided as the first 
+!> command-line argument, and the results are then written to the output file 'critical.dat'. 
 
 program main
   use :: structure_m
@@ -49,7 +49,7 @@ program main
   call stack % selfconsistency(1)
 
   ! Initialize the stack to a barely superconducting state
-  call stack % init(cx(initgap,0.0_wp))
+  call stack % init(cx(initgap))
 
   ! Bootstrap the material states at zero temperature
   call stack % converge(threshold = threshold, iterations = bootstraps, bootstrap = .true.)
