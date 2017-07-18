@@ -20,32 +20,37 @@ module structure_m
   ! Type declaration
   type, public :: structure
     ! Endpoints of the contained linked list
-    class(material), pointer :: a => null()
-    class(material), pointer :: b => null()
+    class(material), pointer :: a => null()   !! First material
+    class(material), pointer :: b => null()   !! Last  material
 
     ! Output units for physical observables
-    integer, allocatable :: supercurrent
-    integer, allocatable :: lossycurrent
-    integer, allocatable :: accumulation
-    integer, allocatable :: correlation
-    integer, allocatable :: density
+    integer, allocatable :: supercurrent      !! Output unit (allocate to write supercurrents to file)
+    integer, allocatable :: lossycurrent      !! Output unit (allocate to write lossycurrents to file)
+    integer, allocatable :: accumulation      !! Output unit (allocate to write accumulations to file)
+    integer, allocatable :: correlation       !! Output unit (allocate to write correlations  to file)
+    integer, allocatable :: density           !! Output unit (allocate to write density of states to file)
   contains
-    procedure :: push                => structure_push
-    procedure :: conf                => structure_conf
-    procedure :: map                 => structure_map
-    procedure :: gap                 => structure_gap
-    procedure :: init                => structure_init
-    procedure :: save                => structure_save
-    procedure :: load                => structure_load
-    procedure :: update              => structure_update
-    procedure :: materials           => structure_materials
-    procedure :: superconductors     => structure_superconductors
-    procedure :: difference          => structure_difference
-    procedure :: chargeviolation     => structure_chargeviolation
-    procedure :: temperature         => structure_temperature
-    procedure :: selfconsistency     => structure_selfconsistency
-    procedure :: converge            => structure_converge
-    procedure :: write               => structure_write
+    ! Basic construction and management
+    procedure :: push                => structure_push                !! Construct a single layer
+    procedure :: conf                => structure_conf                !! Configure a single layer
+    procedure :: map                 => structure_map                 !! Apply a subroutine to all layers
+
+    ! Manipulation of the physical state
+    procedure :: init                => structure_init                !! Reset the physical state
+    procedure :: save                => structure_save                !! Save the physical state
+    procedure :: load                => structure_load                !! Load the physical state
+    procedure :: update              => structure_update              !! Update the physical state
+    procedure :: converge            => structure_converge            !! Update until convergence
+    procedure :: write               => structure_write               !! Write out observables
+
+    ! Auxiliary helper functions
+    procedure :: difference          => structure_difference          !! Check how much the physical state changes
+    procedure :: materials           => structure_materials           !! Check the number of enabled materials
+    procedure :: superconductors     => structure_superconductors     !! Check the number of enables superconductors
+    procedure :: gap                 => structure_gap                 !! Check the minimum superconducting gap
+    procedure :: chargeviolation     => structure_chargeviolation     !! Check the violation of charge conservation
+    procedure :: temperature         => structure_temperature         !! Set the temperature of the stack
+    procedure :: selfconsistency     => structure_selfconsistency     !! Set the selfconsistency scheme
   end type
 
   ! Type constructor
