@@ -57,6 +57,10 @@ module propagator_m
     procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
     procedure  :: correlation        => propagator_correlation                  !! Spectral correlations
     procedure  :: density            => propagator_density                      !! Spin-resolved density of states
+
+    ! Miscellaneous utiliy functions for working with propagator objects
+    procedure  :: save               => propagator_save                         !! Export Riccati parameters
+    procedure  :: load               => propagator_load                         !! Import Riccati parameters
   end type
 
   ! Type constructor
@@ -415,4 +419,36 @@ contains
     D(0:3) = re(trace(pauli * g ))/2
     D(4:7) = re(trace(pauli * gt))/2
   end function
+
+  pure elemental subroutine propagator_save(this, other)
+    !! Defines a function for exporting Riccati parameters.
+    class(propagator), intent(inout) :: this
+    class(propagator), intent(inout) :: other
+
+    ! Copy all the Riccati parameters
+    other % g    = this % g
+    other % gt   = this % gt
+    other % dg   = this % dg
+    other % dgt  = this % dgt
+    other % d2g  = this % d2g
+    other % d2gt = this % d2gt
+    other % N    = this % N
+    other % Nt   = this % Nt
+  end subroutine
+
+  pure elemental subroutine propagator_load(this, other)
+    !! Defines a function for importing Riccati parameters.
+    class(propagator), intent(inout) :: this
+    class(propagator), intent(inout) :: other
+
+    ! Copy all the Riccati parameters
+    this % g    = other % g
+    this % gt   = other % gt
+    this % dg   = other % dg
+    this % dgt  = other % dgt
+    this % d2g  = other % d2g
+    this % d2gt = other % d2gt
+    this % N    = other % N
+    this % Nt   = other % Nt
+  end subroutine
 end module

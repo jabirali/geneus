@@ -354,10 +354,13 @@ contains
     !! Save a backup of the current material state.
     class(material), intent(inout) :: this
 
+    ! Make sure the backup exists
     if (.not. allocated(this%backup)) then
       allocate(this%backup(size(this%propagator,1),size(this%propagator,2)))
     end if
-    this%backup = this%propagator
+
+    ! Make a backup of the propagators
+    call this % propagator % save(this % backup)
   end subroutine
 
   impure subroutine material_load(this)
@@ -367,7 +370,7 @@ contains
 
     ! Load the saved propagators
     if (allocated(this%backup)) then
-      this%propagator = this%backup
+      call this % propagator % load(this % backup)
     end if
 
     ! Disable status messages

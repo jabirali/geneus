@@ -45,7 +45,7 @@ program main
   ! Construct the material stack
   stack = structure()
 
-  ! Use fixpoint-iteration for selfconsistent calculations
+  ! Use the fixpoint method for selfconsistency iterations
   call stack % cmap('selfconsistency', 1)
 
   ! Initialize the stack to a barely superconducting state
@@ -64,11 +64,11 @@ program main
   !--------------------------------------------------------------------------------!
 
   do n = 1,bisections
-    ! Load the saved material states
-    call stack % load
-
     ! Set the temperature of the materials
     call stack % cmap('temperature', critical)
+
+    ! Load the saved material states
+    call stack % load
 
     ! Update the material states
     call stack % converge(iterations = iterations, prehook = prehook)
