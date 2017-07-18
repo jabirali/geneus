@@ -21,8 +21,6 @@ module material_m
     ! These parameters determine the basic physical behaviour of a diffusive material
     logical                                   :: transparent_a         =  .false.           !! Transparent interface (left)
     logical                                   :: transparent_b         =  .false.           !! Transparent interface (right)
-    logical                                   :: reflecting_a          =  .false.           !! Reflecting  interface (left)
-    logical                                   :: reflecting_b          =  .false.           !! Reflecting  interface (right)
     real(wp)                                  :: conductance_a         =  0.30_wp           !! Interface conductance (left)
     real(wp)                                  :: conductance_b         =  0.30_wp           !! Interface conductance (right)
     real(wp)                                  :: thouless              =  1.00_wp           !! Thouless energy (ħD/Δ₀L²)

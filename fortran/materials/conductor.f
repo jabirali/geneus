@@ -9,16 +9,7 @@
 !>   Move the the spinactive field into separate subobjects spinactive_a and spinactive_b of a type(spinactive). This
 !>   type can be moved into a module spinactive_m, together with the associated methods diffusion_spinorbit etc. We can
 !>   then have separate modules spinorbit_m and spinactive_m that the current module depends on, leading to greater 
-!>   encapsulation and separation. The spinreflect.i contents should also be merged into the same type and module.
-!>
-!> @TODO
-!>   Rename spinorbit_film/spinorbit_wire/spinorbit_bulk to rashba and dresselhaus, since these are the more common
-!>   names used in the litterature, and this will make it easier for other people to learn to use the code in the future.
-!>   The best way to define the Rashba coupling is likely to use a vector, i.e. "rashba = [ax,ay,az]", where we can use 
-!>   A=α(σ×e) to get the A-field. We can then add another option "nanowire = T" or "dimensions = 1", so spinorbit_prehook
-!>   knows it should prune away the e_x and e_y components of the A-field if true. For backwards compatibility, we should
-!>   perhaps interpret "rashba = az" as "rashba = [ax,ay,az]" if no brackets are detected in the value string. Think
-!>   of something smart for the dresselhaus coupling as well; check e.g. Tom's thesis regarding nanowire dresselhaus.
+!>   encapsulation and separation. The spinreflect.i contents are removed, but may be reintroduced if necessary.
 
 module conductor_m
   use :: stdio_m
@@ -56,8 +47,6 @@ module conductor_m
     complex(wp)                      :: M0_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on this  side of the interface)
     complex(wp)                      :: M1_a(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
     complex(wp)                      :: M1_b(4,4)               =  0.00_wp                    ! Interface magnetization matrix (Spin-Nambu space) (used for reflections on other side of the interface)
-    complex(wp),             private :: S1_a, S1_b                                            ! Spin-mixing prefactor proportional to sin(ϕ)
-    complex(wp),             private :: S2_a, S2_b                                            ! Spin-mixing prefactor proportional to sin(ϕ/2)²
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    ! Initializes the propagators
@@ -79,10 +68,6 @@ module conductor_m
     procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   ! Defines the left  boundary condition (spin-active terms)
     procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   ! Defines the right boundary condition (spin-active terms)
 
-    ! These methods contain the equations that describe spin-active reflecting interfaces
-    procedure                 :: interface_spinreflect_a => spinreflect_interface_equation_a  ! Defines the left  boundary condition (spin-active terms)
-    procedure                 :: interface_spinreflect_b => spinreflect_interface_equation_b  ! Defines the right boundary condition (spin-active terms)
-
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    ! Configures material parameters
   end type
@@ -97,7 +82,6 @@ contains
   !--------------------------------------------------------------------------------!
 
   include 'spinactive.i'
-  include 'spinreflect.i'
 
   !--------------------------------------------------------------------------------!
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
@@ -212,9 +196,6 @@ contains
         if (this%transparent_a) then
           ! Interface is transparent
           call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
-        else if (this%reflecting_a) then
-          ! Interface is reflecting
-          call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
         else
           ! Interface is tunneling
           call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
@@ -231,13 +212,7 @@ contains
 
       if (allocated(this%magnetization_a)) then
         ! Interface is spin-active
-        if (this%reflecting_a) then
-          ! Must be a reflecting interface
-          call this%interface_spinreflect_a(g, gt, dg, dgt, r, rt)
-        else
-          ! May be a tunneling interface
-          call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
-        end if
+        call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
       end if
   end subroutine
 
@@ -252,9 +227,6 @@ contains
       if (this%transparent_b) then
         ! Interface is transparent
         call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
-      else if (this%reflecting_b) then
-        ! Interface is reflecting
-        call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
       else
         ! Interface is tunneling
         call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
@@ -271,13 +243,7 @@ contains
 
     if (allocated(this%magnetization_b)) then
       ! Interface is spin-active
-      if (this%reflecting_b) then
-        ! Must be a reflecting interface
-        call this%interface_spinreflect_b(g, gt, dg, dgt, r, rt)
-      else
-        ! May be a tunneling interface
-        call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
-      end if
+      call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
     end if
   end subroutine
 
@@ -412,9 +378,6 @@ contains
     ! Prepare variables associated with spin-active tunneling  interfaces
     call spinactive_update_prehook(this)
 
-    ! Prepare variables associated with spin-active reflecting interfaces
-    call spinreflect_update_prehook(this)
-
     ! Modify the type string
     this%type_string = color_yellow // 'CONDUCTOR' // color_none
     if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
@@ -513,10 +476,6 @@ contains
         call evaluate(val, this % transparent_a)
       case ('transparent_b')
         call evaluate(val, this % transparent_b)
-      case ('reflecting_a')
-        call evaluate(val, this % reflecting_a)
-      case ('reflecting_b')
-        call evaluate(val, this % reflecting_b)
       case ('conductance_a')
         call evaluate(val, this % conductance_a)
       case ('conductance_b')

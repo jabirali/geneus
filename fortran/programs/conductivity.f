@@ -66,7 +66,7 @@ program main
   end select
 
   ! Make sure we're using supported boundary conditions
-  if (layer % transparent_b .or. layer % reflecting_b .or. layer % secondorder_b /= 0) then
+  if (layer % transparent_b .or. layer % secondorder_b /= 0) then
     call warning('Only first-order tunneling boundary conditions is currently supported by this program.')
   end if
 
