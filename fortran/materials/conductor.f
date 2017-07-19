@@ -129,18 +129,25 @@ contains
     ! Initialize the distribution function
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
+        ! Finite temperature and voltage
         this % propagator(n,m) % h = &
-          [(fermi(n) + fermi(n))/2, 0.0_wp, 0.0_wp, 0.0_wp, &
-           (fermi(n) - fermi(n))/2, 0.0_wp, 0.0_wp, 0.0_wp  ]
+          [(fermi(n,+1) + fermi(n,-1))/2, 0.0_wp, 0.0_wp, 0.0_wp, &
+           (fermi(n,+1) - fermi(n,-1))/2, 0.0_wp, 0.0_wp, 0.0_wp  ]
+
+        ! Transverse applied voltage
+        if (this % transverse) then
+          this % propagator(n,m) % h(4:7) = 0
+        end if
       end do
     end do
   contains
-    pure function fermi(n) result(h)
+    pure function fermi(n, m) result(h)
       integer, intent(in) :: n
+      integer, intent(in) :: m
       real(wp)            :: h
 
-      associate(E => this % energy(n), T => this % temperature)
-        h = tanh(0.8819384944310228_wp * E/T)
+      associate (E => this % energy(n), V => m * this % voltage, T => this % temperature)
+        h = tanh(0.8819384944310228_wp * (E+V)/T)
       end associate
     end function
   end subroutine

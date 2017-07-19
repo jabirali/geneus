@@ -29,10 +29,12 @@ module material_m
     ! Physical properties of a diffusive material
     real(wp)                                  :: length                =  1.00_wp           !! Material length (L/ξ)
     real(wp)                                  :: thouless              =  1.00_wp           !! Thouless energy (ħD/L²)
-    real(wp)                                  :: temperature           =  0.00_wp           !! Material temperature (T/Tc)
+    real(wp)                                  :: temperature           =  0.01_wp           !! Material temperature (T/Tc)
+    real(wp)                                  :: voltage               =  0.00_wp           !! Applied voltage (eV/Δ₀)
     real(wp)                                  :: scattering            =  0.01_wp           !! Inelastic scattering (η/Δ₀)
     real(wp)                                  :: conductance_a         =  0.00_wp           !! Interface conductance (left)
     real(wp)                                  :: conductance_b         =  0.00_wp           !! Interface conductance (right)
+    logical                                   :: transverse            =  .false.           !! Transversely applied potentials
 
     ! Physical state modelled using quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                  !! Energy domain
@@ -332,6 +334,12 @@ contains
         call evaluate(val, this%scattering)
       case("temperature")
         call evaluate(val, this%temperature)
+        call this % init()
+      case("voltage")
+        call evaluate(val, this%voltage)
+        call this % init()
+      case("transverse")
+        call evaluate(val, this%transverse)
         call this % init()
       case("order")
         call evaluate(val, this%order)
