@@ -15,7 +15,7 @@ module propagator_m
   private
 
   ! Public interface
-  public propagator, assignment(=)
+  public propagator
 
   ! Type declaration
   type propagator
@@ -66,11 +66,6 @@ module propagator_m
   ! Type constructor
   interface propagator
     module procedure propagator_construct_zero, propagator_construct_riccati, propagator_construct_bcs
-  end interface
-
-  ! Assignment operator
-  interface assignment(=)
-    module procedure propagator_import_rvector, propagator_export_rvector, propagator_export_cmatrix
   end interface
 contains
   pure function propagator_construct_zero() result(this)
@@ -276,41 +271,6 @@ contains
       end associate
     end if
   end function
-
-  pure subroutine propagator_import_rvector(a, b)
-    !! Defines assignment from a real vector to a propagator object.
-    type(propagator), intent(inout) :: a
-    real(wp),         intent(in)    :: b(32)
-
-    ! Unpack the vector elements
-    a%g   = b( 1: 8) 
-    a%gt  = b( 9:16) 
-    a%dg  = b(17:24) 
-    a%dgt = b(25:32) 
-
-    ! Update normalization matrices
-    a % N  = inverse( pauli0 - a%g  * a%gt )
-    a % Nt = inverse( pauli0 - a%gt * a%g  )
-  end subroutine
-
-  pure subroutine propagator_export_cmatrix(a, b)
-    !! Defines assignment from a propagator object to a complex matrix.
-    complex(wp),      intent(out) :: a(4,4)
-    type(propagator), intent(in)  :: b
-
-    a = b % retarded()
-  end subroutine
-
-  pure subroutine propagator_export_rvector(a, b)
-    !! Defines assignment from a propagator object to a real vector.
-    real(wp),         intent(out) :: a(32)
-    type(propagator), intent(in)  :: b
-
-    a( 1: 8) = b%g
-    a( 9:16) = b%gt
-    a(17:24) = b%dg
-    a(25:32) = b%dgt
-  end subroutine
 
   pure function propagator_supercurrent(this, gauge) result(J)
     !! Calculates the spectral supercurrents in the junction. The result is returned in the

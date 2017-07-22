@@ -42,7 +42,9 @@ contains
     real(wp)                                  :: sf, so
 
     ! Calculate the 4×4 propagator matrix
-    p = propagator(g, gt)
+    associate(m => propagator(g, gt))
+      p = m % retarded()
+    end associate
 
     ! Calculate the spin-flip and spin-orbit coefficients
     sf = this%spinflip  / (2 * this%material%thouless)

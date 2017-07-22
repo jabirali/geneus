@@ -63,8 +63,10 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
 
   ! Calculate the 4×4 matrix propagators
   associate(g0 => a % g, gt0 => a % gt)
-    GM0 = propagator(g0, gt0)
-    GM1 = propagator(g1, gt1)
+    associate(GR0 => propagator(g0, gt0), GR1 => propagator(g1, gt1))
+      GM0 = GR0 % retarded()
+      GM1 = GR1 % retarded()
+    end associate
   end associate
 
   ! Calculate the 4×4 matrix current
@@ -86,8 +88,10 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
 
   ! Calculate the 4×4 matrix propagators
   associate(g3 => b % g, gt3 => b % gt)
-    GM2 = propagator(g2, gt2)
-    GM3 = propagator(g3, gt3)
+    associate(GR2 => propagator(g2, gt2), GR3 => propagator(g3, gt3))
+      GM2 = GR2 % retarded()
+      GM3 = GR3 % retarded()
+    end associate
   end associate
 
   ! Calculate the 4×4 matrix current
