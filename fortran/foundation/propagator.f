@@ -296,7 +296,7 @@ contains
 
     ! Pauli-decompose the current
     do n=0,7
-      J(n) = re(trace((nambuv(4) * nambuv(n)) * I))/4
+      J(n) = re(trace((nambuv(4) * nambuv(n)) * I))/8
     end do
   end function
 
@@ -322,7 +322,7 @@ contains
 
     ! Pauli-decompose the current
     do n=0,7
-      J(n) = re(trace((nambuv(4) * nambuv(n)) * I))/4
+      J(n) = re(trace((nambuv(4) * nambuv(n)) * I))/8
     end do
   end function
 
@@ -339,7 +339,7 @@ contains
 
     ! Pauli-decompose it
     do n=0,7
-      Q(n) = -re(trace(nambuv(n) * GK))/4
+      Q(n) = -re(trace(nambuv(n) * GK))/8
     end do
   end function
 

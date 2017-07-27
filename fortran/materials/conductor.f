@@ -129,25 +129,37 @@ contains
     ! Initialize the distribution function
     do m = 1,size(this%location)
       do n = 1,size(this%energy)
-        ! Finite temperature and voltage
+        ! Finite nonequilibrium potentials
         this % propagator(n,m) % h = &
-          [(fermi(n,+1) + fermi(n,-1))/2, 0.0_wp, 0.0_wp, 0.0_wp, &
-           (fermi(n,+1) - fermi(n,-1))/2, 0.0_wp, 0.0_wp, 0.0_wp  ]
+          [                                                      &
+            f(n,+1,+1) + f(n,+1,-1) + f(n,-1,+1) + f(n,-1,-1),   &
+            0.0_wp,                                              &
+            0.0_wp,                                              &
+            f(n,+1,+1) - f(n,+1,-1) + f(n,-1,+1) - f(n,-1,-1),   &
+            f(n,+1,+1) + f(n,+1,-1) - f(n,-1,+1) - f(n,-1,-1),   &
+            0.0_wp,                                              &
+            0.0_wp,                                              &
+            f(n,+1,+1) - f(n,+1,-1) - f(n,-1,+1) + f(n,-1,-1)    &
+          ]
 
-        ! Transverse applied voltage
+        ! Transverse applied potentials
         if (this % transverse) then
           this % propagator(n,m) % h(4:7) = 0
         end if
       end do
     end do
   contains
-    pure function fermi(n, m) result(h)
-      integer, intent(in) :: n
-      integer, intent(in) :: m
+    pure function f(n, c, s) result(h)
+      ! Fermi distribution for a given energy (n), charge parity (c=±1), and spin (s=±1).
+      integer, intent(in) :: n, c, s
       real(wp)            :: h
 
-      associate (E => this % energy(n), V => m * this % voltage, T => this % temperature)
-        h = tanh(0.8819384944310228_wp * (E+V)/T)
+      associate (E  => this % energy(n),           &
+                 V  => this % voltage     * c,     &
+                 Vs => this % spinvoltage * c * s, &
+                 T  => this % temperature,         &
+                 Ts => this % spintemperature * s  )
+        h = tanh(0.8819384944310228_wp * (E+V+Vs)/(T+Ts))/4
       end associate
     end function
   end subroutine

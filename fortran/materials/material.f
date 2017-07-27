@@ -38,6 +38,8 @@ module material_m
     logical                                   :: transverse            =  .false.              !! Transverse potential gradients?
     real(wp)                                  :: voltage               =  0.00_wp              !! Voltage (eV/Δ₀)
     real(wp)                                  :: temperature           =  0.01_wp              !! Temperature (T/Tc)
+    real(wp)                                  :: spinvoltage           =  0.00_wp              !! Spin-voltage (eVs/Δ₀)
+    real(wp)                                  :: spintemperature       =  0.00_wp              !! Spin-temperature (Ts/Tc)
 
     ! Physical state modelled using quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                     !! Energy domain
@@ -398,11 +400,8 @@ contains
         call pack(this % propagator(n,m), d(:,m))
       end do
 
-      ! If the difference between iterations is small, use the results from the previous
-      ! iteration as an initial guess. If not, use the results form the previous energy.
-      if (this % difference < 0.05_wp) then
-        u = d
-      end if
+      ! Use the results from the previous iteration as an initial guess
+      u = d
 
       ! Update the Jacobian matrix at each position
       do m=1,size(this%location)
@@ -559,6 +558,12 @@ contains
         call this % init()
       case("voltage")
         call evaluate(val, this%voltage)
+        call this % init()
+      case("spinvoltage")
+        call evaluate(val, this%spinvoltage)
+        call this % init()
+      case("spintemperature")
+        call evaluate(val, this%spintemperature)
         call this % init()
       case("transverse")
         call evaluate(val, this%transverse)
