@@ -185,14 +185,7 @@ contains
     type(spin),                intent(inout) :: r, rt
 
     type(propagator)                         :: b
-    type(nambu)                              :: I
-
-    ! Transparent interface: minimize the propagator deviation
-    if (this % transparent_a) then
-      r  = g  - a % g
-      rt = gt - a % gt
-      return
-    end if
+    complex(wp), dimension(1:4,1:4)          :: I
 
     ! Construct a propagator from the Riccati parameters
     b = propagator(g, gt)
@@ -203,8 +196,8 @@ contains
     end if
 
     ! Calculate the deviation from the boundary condition
-    r  = dg  - (pauli0 - g*gt) * (I % matrix(1:2,3:4) - I % matrix(1:2,1:2)*g)
-    rt = dgt - (pauli0 - gt*g) * (I % matrix(3:4,1:2) - I % matrix(3:4,3:4)*gt)
+    r  = dg  - (pauli0 - g*gt) * (I(1:2,3:4) - I(1:2,1:2)*g)
+    rt = dgt - (pauli0 - gt*g) * (I(3:4,1:2) - I(3:4,3:4)*gt)
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
@@ -222,13 +215,6 @@ contains
 
     type(propagator)                         :: a
     type(nambu)                              :: I
-
-    ! Transparent interface: minimize the propagator deviation
-    if (this % transparent_b) then
-      r  = g  - b % g
-      rt = gt - b % gt
-      return
-    end if
 
     ! Construct a propagator from the Riccati parameters
     a = propagator(g, gt)

@@ -326,9 +326,25 @@ contains
       dg2  = ub(17:24)
       dgt2 = ub(25:32)
 
-      ! Calculate residuals from the boundary conditions
-      call this%diffusion_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
-      call this%diffusion_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
+      ! Calculate residuals from the boundary conditions (left)
+      if (this % transparent_a) then
+        ! Transparent interface
+        r1  = g1  - a % g
+        rt1 = gt1 - a % gt
+      else
+        ! Customized interface
+        call this % diffusion_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
+      end if
+
+      ! Calculate residuals from the boundary conditions (right)
+      if (this % transparent_b) then
+        ! Transparent interface
+        r2  = g2  - b % g
+        rt2 = gt2 - b % gt
+      else
+        ! Customized interface
+        call this % diffusion_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
+      end if
 
       ! Pack the results into state vectors
       bca(1: 8) = r1
