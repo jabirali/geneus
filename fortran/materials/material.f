@@ -124,25 +124,23 @@ module material_m
   end interface
 
   abstract interface
-    pure subroutine diffusion_equation_a(this, a, g, gt, dg, dgt, r, rt)
+    pure subroutine diffusion_equation_a(this, p, a, r, rt)
       !! This interface is used for the deferred procedure diffusion_equation_a.
       import material, propagator, spin, wp
 
       class(material),          intent(in)    :: this
-      type(propagator),         intent(in)    :: a
-      type(spin),               intent(in)    :: g, gt, dg, dgt
+      type(propagator),         intent(in)    :: p, a
       type(spin),               intent(inout) :: r, rt
     end subroutine
   end interface
 
   abstract interface
-    pure subroutine diffusion_equation_b(this, b, g, gt, dg, dgt, r, rt)
+    pure subroutine diffusion_equation_b(this, p, b, r, rt)
       !! This interface is used for the deferred procedure diffusion_equation_b.
       import material, propagator, spin, wp
 
       class(material),          intent(in)    :: this
-      type(propagator),         intent(in)    :: b
-      type(spin),               intent(in)    :: g, gt, dg, dgt
+      type(propagator),         intent(in)    :: p, b
       type(spin),               intent(inout) :: r, rt
     end subroutine
   end interface
@@ -311,46 +309,41 @@ contains
       real(wp), intent(out) :: bca(16)
       real(wp), intent(out) :: bcb(16)
 
-      type(spin)            :: g1, gt1, dg1, dgt1, r1, rt1
-      type(spin)            :: g2, gt2, dg2, dgt2, r2, rt2
+      type(propagator)      :: pa, pb
+      type(spin)            :: ra, rta
+      type(spin)            :: rb, rtb
 
       ! State at the left end of the material
-      g1   = ua( 1: 8)
-      gt1  = ua( 9:16)
-      dg1  = ua(17:24)
-      dgt1 = ua(25:32)
+      call unpack(pa, ua)
 
       ! State at the right end of the material
-      g2   = ub( 1: 8)
-      gt2  = ub( 9:16)
-      dg2  = ub(17:24)
-      dgt2 = ub(25:32)
+      call unpack(pb, ub)
 
       ! Calculate residuals from the boundary conditions (left)
       if (this % transparent_a) then
         ! Transparent interface
-        r1  = g1  - a % g
-        rt1 = gt1 - a % gt
+        ra  = pa % g  - a % g
+        rta = pa % gt - a % gt
       else
         ! Customized interface
-        call this % diffusion_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
+        call this % diffusion_equation_a(pa, a, ra, rta)
       end if
 
       ! Calculate residuals from the boundary conditions (right)
       if (this % transparent_b) then
         ! Transparent interface
-        r2  = g2  - b % g
-        rt2 = gt2 - b % gt
+        rb  = pb % g  - b % g
+        rtb = pb % gt - b % gt
       else
         ! Customized interface
-        call this % diffusion_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
+        call this % diffusion_equation_b(pb, b, rb, rtb)
       end if
 
       ! Pack the results into state vectors
-      bca(1: 8) = r1
-      bca(9:16) = rt1
-      bcb(1: 8) = r2
-      bcb(9:16) = rt2
+      bca(1: 8) = ra
+      bca(9:16) = rta
+      bcb(1: 8) = rb
+      bcb(9:16) = rtb
     end subroutine
 
     pure subroutine pack(a, b)

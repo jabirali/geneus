@@ -4,6 +4,7 @@
 !> This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.
 
 module spinorbit_m
+  use :: propagator_m
   use :: material_m
   use :: math_m
   use :: nambu_m
@@ -106,36 +107,40 @@ contains
     end associate
   end subroutine
 
-  pure subroutine spinorbit_diffusion_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine spinorbit_diffusion_equation_a(this, p, r, rt)
     !! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
     class(spinorbit), target, intent(in)    :: this
-    type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
-    type(spin),               intent(inout) :: r1, rt1
+    type(propagator),         intent(in)    :: p
+    type(spin),               intent(inout) :: r, rt
 
     ! Rename the spin-orbit coupling matrices
-    associate(Az  => this % Az,&
-              Azt => this % Azt)
+    associate(Az  => this % Az,  &
+              Azt => this % Azt, &
+              g   => p % g,      &
+              gt  => p % gt      )
 
     ! Update the residuals
-    r1  = r1  - (0.0_wp,1.0_wp) * (Az  * g1  + g1  * Azt)
-    rt1 = rt1 + (0.0_wp,1.0_wp) * (Azt * gt1 + gt1 * Az )
+    r  = r  - (0.0_wp,1.0_wp) * (Az  * g  + g  * Azt)
+    rt = rt + (0.0_wp,1.0_wp) * (Azt * gt + gt * Az )
 
     end associate
   end subroutine
 
-  pure subroutine spinorbit_diffusion_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine spinorbit_diffusion_equation_b(this, p, r, rt)
     !! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
     class(spinorbit), target, intent(in)    :: this
-    type(spin),               intent(in)    :: g2, gt2, dg2, dgt2
-    type(spin),               intent(inout) :: r2, rt2
+    type(propagator),         intent(in)    :: p
+    type(spin),               intent(inout) :: r, rt
 
     ! Rename the spin-orbit coupling matrices
-    associate(Az   => this % Az,&
-              Azt  => this % Azt)
+    associate(Az   => this % Az,  &
+              Azt  => this % Azt, &
+              g   => p % g,       &
+              gt  => p % gt       )
 
     ! Update the residuals
-    r2  = r2  - (0.0_wp,1.0_wp) * (Az  * g2  + g2  * Azt)
-    rt2 = rt2 + (0.0_wp,1.0_wp) * (Azt * gt2 + gt2 * Az )
+    r  = r  - (0.0_wp,1.0_wp) * (Az  * g  + g  * Azt)
+    rt = rt + (0.0_wp,1.0_wp) * (Azt * gt + gt * Az )
 
     end associate
   end subroutine

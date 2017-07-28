@@ -97,38 +97,36 @@ contains
     end associate
   end subroutine
 
-  pure subroutine halfmetal_diffusion_equation_a(this, a, g, gt, dg, dgt, r, rt)
+  pure subroutine halfmetal_diffusion_equation_a(this, p, a, r, rt)
     !! Calculate residuals from the boundary conditions at the left interface.
     class(halfmetal), intent(in)    :: this
-    type(propagator), intent(in)    :: a
-    type(spin),       intent(in)    :: g, gt, dg, dgt
+    type(propagator), intent(in)    :: p, a
     type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use regular spin-active boundary conditions
-    call this % conductor % diffusion_equation_a(a, g, gt, dg, dgt, r, rt)
+    call this % conductor % diffusion_equation_a(p, a, r, rt)
 
     ! Off-diagonal components: use boundary conditions g,gt=0
-    r  % matrix(1,2)  = g  % matrix(1,2)
-    r  % matrix(2,1)  = g  % matrix(2,1)
-    rt % matrix(1,2)  = gt % matrix(1,2)
-    rt % matrix(2,1)  = gt % matrix(2,1)
+    r  % matrix(1,2)  = p % g  % matrix(1,2)
+    r  % matrix(2,1)  = p % g  % matrix(2,1)
+    rt % matrix(1,2)  = p % gt % matrix(1,2)
+    rt % matrix(2,1)  = p % gt % matrix(2,1)
   end subroutine
 
-  pure subroutine halfmetal_diffusion_equation_b(this, b, g, gt, dg, dgt, r, rt)
+  pure subroutine halfmetal_diffusion_equation_b(this, p, b, r, rt)
     !! Calculate residuals from the boundary conditions at the right interface.
     class(halfmetal), intent(in)    :: this
-    type(propagator), intent(in)    :: b
-    type(spin),       intent(in)    :: g, gt, dg, dgt
+    type(propagator), intent(in)    :: p, b
     type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use regular spin-active boundary conditions
-    call this % conductor % diffusion_equation_b(b, g, gt, dg, dgt, r, rt)
+    call this % conductor % diffusion_equation_b(p, b, r, rt)
 
     ! Off-diagonal components: use boundary conditions g,gt=0
-    r  % matrix(1,2)  = g  % matrix(1,2)
-    r  % matrix(2,1)  = g  % matrix(2,1)
-    rt % matrix(1,2)  = gt % matrix(1,2)
-    rt % matrix(2,1)  = gt % matrix(2,1)
+    r  % matrix(1,2)  = p % g  % matrix(1,2)
+    r  % matrix(2,1)  = p % g  % matrix(2,1)
+    rt % matrix(1,2)  = p % gt % matrix(1,2)
+    rt % matrix(2,1)  = p % gt % matrix(2,1)
   end subroutine
 
   impure subroutine halfmetal_update_prehook(this)

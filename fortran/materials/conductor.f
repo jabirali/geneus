@@ -179,60 +179,56 @@ contains
     end if
   end subroutine
 
-  pure subroutine conductor_diffusion_equation_a(this, a, g, gt, dg, dgt, r, rt)
+  pure subroutine conductor_diffusion_equation_a(this, p, a, r, rt)
     !! Calculate residuals from the boundary conditions at the left interface.
     class(conductor),          intent(in)    :: this
-    type(propagator),          intent(in)    :: a
-    type(spin),                intent(in)    :: g, gt, dg, dgt
+    type(propagator),          intent(in)    :: p, a
     type(spin),                intent(inout) :: r, rt
-
-    type(propagator)                         :: b
     complex(wp), dimension(1:4,1:4)          :: I
-
-    ! Construct a propagator from the Riccati parameters
-    b = propagator(g, gt)
 
     ! Calculate a matrix current from the propagators
     if (associated(this % material_a)) then
-      I = (-0.50_wp) * this % spinactive_a % diffusion_current(b % retarded(), a % retarded())
+      I = (-0.50_wp) * this % spinactive_a % diffusion_current(p % retarded(), a % retarded())
+    else 
+      I = 0
     end if
 
     ! Calculate the deviation from the boundary condition
-    r  = dg  - (pauli0 - g*gt) * (I(1:2,3:4) - I(1:2,1:2)*g)
-    rt = dgt - (pauli0 - gt*g) * (I(3:4,1:2) - I(3:4,3:4)*gt)
+    associate(g => p % g, gt => p % gt, dg => p % dg, dgt => p % dgt)
+      r  = dg  - (pauli0 - g*gt) * (I(1:2,3:4) - I(1:2,1:2)*g)
+      rt = dgt - (pauli0 - gt*g) * (I(3:4,1:2) - I(3:4,3:4)*gt)
+    end associate
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
       ! Interface has spin-orbit coupling
-      call this%spinorbit%diffusion_equation_a(g, gt, dg, dgt, r, rt)
+      call this%spinorbit%diffusion_equation_a(p, r, rt)
     end if
   end subroutine
 
-  pure subroutine conductor_diffusion_equation_b(this, b, g, gt, dg, dgt, r, rt)
+  pure subroutine conductor_diffusion_equation_b(this, p, b, r, rt)
     !! Calculate residuals from the boundary conditions at the right interface.
     class(conductor),          intent(in)    :: this
-    type(propagator),          intent(in)    :: b
-    type(spin),                intent(in)    :: g, gt, dg, dgt
+    type(propagator),          intent(in)    :: p, b
     type(spin),                intent(inout) :: r, rt
-
-    type(propagator)                         :: a
-    type(nambu)                              :: I
-
-    ! Construct a propagator from the Riccati parameters
-    a = propagator(g, gt)
+    complex(wp), dimension(1:4,1:4)          :: I
 
     ! Calculate a matrix current from the propagators
     if (associated(this % material_b)) then
-      I = (+0.50_wp) * this % spinactive_b % diffusion_current(a % retarded(), b % retarded())
+      I = (+0.50_wp) * this % spinactive_b % diffusion_current(p % retarded(), b % retarded())
+    else 
+      I = 0
     end if
 
     ! Calculate the deviation from the boundary condition
-    r  = dg  - (pauli0 - g*gt) * (I % matrix(1:2,3:4) - I % matrix(1:2,1:2)*g)
-    rt = dgt - (pauli0 - gt*g) * (I % matrix(3:4,1:2) - I % matrix(3:4,3:4)*gt)
+    associate(g => p % g, gt => p % gt, dg => p % dg, dgt => p % dgt)
+      r  = dg  - (pauli0 - g*gt) * (I(1:2,3:4) - I(1:2,1:2)*g)
+      rt = dgt - (pauli0 - gt*g) * (I(3:4,1:2) - I(3:4,3:4)*gt)
+    end associate
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
-      call this%spinorbit%diffusion_equation_b(g, gt, dg, dgt, r, rt)
+      call this%spinorbit%diffusion_equation_b(p, r, rt)
     end if
   end subroutine
 
