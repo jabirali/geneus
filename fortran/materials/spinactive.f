@@ -2,6 +2,12 @@
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-active interfaces.
+!> 
+!> @TODO 
+!>   Reimplement shortcut-evaluation of the current for nonmagnetic interfaces.
+!> 
+!> @TODO
+!>   Reimplement lookup of magnetic misalignments on the other side of the interface.
 
 module spinactive_m
   use :: propagator_m
@@ -96,8 +102,6 @@ contains
     !! Calculate the matrix current at an interface with spin-active properties. The equations
     !! implemented here should be valid for an arbitrary interface polarization, and up to 2nd
     !! order in the transmission probabilities and spin-mixing angles of the interface. 
-    !! 
-    !! @TODO: Reimplement shortcut-evaluation of the current for nonmagnetic interfaces.
     class(spinactive), intent(in) :: this
     type(nambu),       intent(in) :: G0, G1      !! Propagator matrices
     type(nambu)                   :: S0, S1      !! Matrix expressions

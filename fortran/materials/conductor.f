@@ -25,12 +25,14 @@ module conductor_m
 
   ! Type declarations
   type, public, extends(material) :: conductor
-    ! These parameters represent the physical fields in the material
+    ! Physical fields in the material
     real(wp)                          :: depairing              =  0.00_wp                    !! Magnetic orbital depairing
-    type(spinactive),     allocatable :: spinactive_a                                         !! Spin-active interface
-    type(spinactive),     allocatable :: spinactive_b                                         !! Spin-active interface
     type(spinscattering), allocatable :: spinscattering                                       !! Spin-dependent scattering
     type(spinorbit),      allocatable :: spinorbit                                            !! Spin-orbit coupling
+
+    ! Physical fields at the interfaces
+    type(spinactive),     allocatable :: spinactive_a                                         !! Spin-active interface (left)
+    type(spinactive),     allocatable :: spinactive_b                                         !! Spin-active interface (right)
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    !! Initializes propagators
@@ -190,7 +192,7 @@ contains
     ! Construct a propagator from the Riccati parameters
     b = propagator(g, gt)
 
-    ! Calculate a matrix current from 
+    ! Calculate a matrix current from the propagators
     if (associated(this % material_a)) then
       I = (-0.50_wp) * this % spinactive_a % diffusion_current(b % retarded(), a % retarded())
     end if
@@ -219,7 +221,7 @@ contains
     ! Construct a propagator from the Riccati parameters
     a = propagator(g, gt)
 
-    ! Calculate a matrix current from 
+    ! Calculate a matrix current from the propagators
     if (associated(this % material_b)) then
       I = (+0.50_wp) * this % spinactive_b % diffusion_current(a % retarded(), b % retarded())
     end if
