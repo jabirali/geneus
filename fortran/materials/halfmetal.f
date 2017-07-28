@@ -104,8 +104,8 @@ contains
     type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: r, rt
 
-    ! Diagonal components: use spin-active boundary conditions
-    call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
+    ! Diagonal components: use regular spin-active boundary conditions
+    call this % conductor % diffusion_equation_a(a, g, gt, dg, dgt, r, rt)
 
     ! Off-diagonal components: use boundary conditions g,gt=0
     r  % matrix(1,2)  = g  % matrix(1,2)
@@ -121,8 +121,8 @@ contains
     type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: r, rt
 
-    ! Diagonal components: use spin-active boundary conditions
-    call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
+    ! Diagonal components: use regular spin-active boundary conditions
+    call this % conductor % diffusion_equation_b(b, g, gt, dg, dgt, r, rt)
 
     ! Off-diagonal components: use boundary conditions g,gt=0
     r  % matrix(1,2)  = g  % matrix(1,2)

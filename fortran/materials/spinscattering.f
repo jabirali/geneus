@@ -40,11 +40,11 @@ contains
     type(spin),            intent(inout)      :: d2g, d2gt
     complex(wp),           dimension(4,4)     :: p, u, v
     real(wp)                                  :: sf, so
+    type(propagator)                          :: GR
 
     ! Calculate the 4×4 propagator matrix
-    associate(m => propagator(g, gt))
-      p = m % retarded()
-    end associate
+    GR = propagator(g, gt)
+    p  = GR % retarded()
 
     ! Calculate the spin-flip and spin-orbit coefficients
     sf = this%spinflip  / (2 * this%material%thouless)

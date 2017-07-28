@@ -19,10 +19,9 @@ module conductor_m
   use :: propagator_m
   use :: material_m
   use :: spinorbit_m
+  use :: spinactive_m
   use :: spinscattering_m
   private
-
-  include 'spinactive_type.i'
 
   ! Type declarations
   type, public, extends(material) :: conductor
@@ -42,8 +41,6 @@ module conductor_m
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation (conductor terms)
-    procedure                 :: diffusion_spinactive_a  => spinactive_diffusion_equation_a   !! Boundary condition (tunneling interface)   (left)
-    procedure                 :: diffusion_spinactive_b  => spinactive_diffusion_equation_b   !! Boundary condition (tunneling interface)   (right)
 
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
@@ -54,11 +51,6 @@ module conductor_m
     module procedure conductor_construct
   end interface
 contains
-  !--------------------------------------------------------------------------------!
-  !                      INCLUDE EXTERNAL MODULE PROCEDURES                        !
-  !--------------------------------------------------------------------------------!
-
-  include 'spinactive.i'
 
   !--------------------------------------------------------------------------------!
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
@@ -200,7 +192,7 @@ contains
     end if
 
     ! Else: calculate the interface gradient from a matrix current
-    call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
+    call this%spinactive_a%diffusion_equation_a(a, g, gt, dg, dgt, r, rt)
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
@@ -224,7 +216,7 @@ contains
     end if
 
     ! Else: calculate the interface gradient from a matrix current
-    call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
+    call this%spinactive_b%diffusion_equation_b(b, g, gt, dg, dgt, r, rt)
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
@@ -255,7 +247,8 @@ contains
     end if
 
     ! Prepare variables associated with spin-active tunneling  interfaces
-    call spinactive_update_prehook(this)
+    call this % spinactive_a % update_prehook
+    call this % spinactive_b % update_prehook
 
     ! Modify the type string
     this%type_string = color_yellow // 'CONDUCTOR' // color_none
