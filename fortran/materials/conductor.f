@@ -201,7 +201,6 @@ contains
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
-      ! Interface has spin-orbit coupling
       call this%spinorbit%diffusion_equation_a(p, r, rt)
     end if
   end subroutine
