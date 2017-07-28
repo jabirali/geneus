@@ -32,6 +32,8 @@ module material_m
     real(wp)                                  :: scattering            =  0.01_wp              !! Inelastic scattering (η/Δ₀)
     real(wp)                                  :: conductance_a         =  0.00_wp              !! Interface conductance (left)
     real(wp)                                  :: conductance_b         =  0.00_wp              !! Interface conductance (right)
+    logical                                   :: transparent_a         =  .false.              !! Interface transparency (left)
+    logical                                   :: transparent_b         =  .false.              !! Interface transparency (right)
 
     ! Material properties that affect the nonequilibrium state
     logical                                   :: equilibrium           =  .true.               !! Equilibrium?

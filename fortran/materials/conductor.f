@@ -228,7 +228,7 @@ contains
     type(spin),                intent(inout) :: r, rt
 
     ! Transparent interface: minimize the propagator deviation
-    if (this % conductance_a <= 0) then
+    if (this % conductance_b <= 0) then
       r  = g  - b % g
       rt = gt - b % gt
       return
