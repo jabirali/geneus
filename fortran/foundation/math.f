@@ -22,7 +22,7 @@ module math_m
   public :: inf, eps, pi
 
   ! Basic routines
-  public :: unitvector, re, im, cx, arg
+  public :: unitvector, nonzero, re, im, cx, arg
 
   ! Matrix routines
   public :: trace, diag, inverse, identity, commutator, anticommutator

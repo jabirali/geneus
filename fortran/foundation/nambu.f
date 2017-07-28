@@ -93,13 +93,18 @@ module nambu_m
     !! Complex conjugation
     module procedure nambu_conjg
   end interface
+
+  interface nambuv
+    !! Construct basis matrices
+    module procedure nambuv_scalar, nambuv_vector
+  end interface
 contains
 
   !--------------------------------------------------------------------------------!
   !                            SPECIFIC CONSTRUCTORS                               !
   !--------------------------------------------------------------------------------!
 
-  pure function nambuv(n) result(r)
+  pure function nambuv_scalar(n) result(r)
     !! Constructs basis matrix number n in spin-nambu space.
     integer, intent(in) :: n
     type(nambu)         :: r
@@ -138,6 +143,14 @@ contains
         r % matrix(1:2,1:2) = +pauli3 % matrix
         r % matrix(3:4,3:4) = -pauli3 % matrix
     end select
+  end function
+
+  pure function nambuv_vector(v) result(r)
+    !! Constructs a matrix representation of a vector.
+    real(wp), dimension(1:3), intent(in) :: v
+    type(nambu)                          :: r
+
+    r = v(1)*nambuv(1) + v(2)*nambuv(2) + v(3)*nambuv(3)
   end function
 
   pure function nambu_cons_rscalar(other) result(this)

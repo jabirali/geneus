@@ -73,4 +73,12 @@ contains
 
     r = v/(norm2(v)+eps)
   end function
+
+  pure function nonzero(v) result(r)
+    !! Checks whether or not the argument has a finite norm.
+    real(wp), dimension(:), intent(in) :: v   !! Vector
+    logical                            :: r   !! Finite
+
+    r = norm2(v) > eps
+  end function
 end module

@@ -35,18 +35,19 @@ contains
     !! Updates the internal variables associated with spin-active interfaces.
     class(spinactive), intent(inout) :: this 
   
-    ! Process transmission properties (both sides of interfaces)
-    call update_magnetization(this % M, this % magnetization)
+    ! Process transmission properties
+    this % M = nambuv(this % magnetization)
   
     ! Default reflection properties match transmission properties
     this % M0 = this % M
     this % M1 = this % M
   
-    ! Process reflection properties (this side of interfaces)
-    call update_magnetization(this % M0, this % misalignment)
-    call update_magnetization(this % M0, this % misalignment)
+    ! Process reflection properties (this side)
+    if (nonzero(this % misalignment)) then
+      this % M0 = nambuv(this % misalignment)
+    end if
   
-    ! ! Process reflection properties (other side of interfaces)
+    ! ! Process reflection properties (other side)
     ! if (associated(this % material_a)) then
     !   select type (other => this % material_a)
     !     class is (conductor)
@@ -60,18 +61,6 @@ contains
     !       call update_magnetization(this % spinactive_b % M1, other % spinactive_a % misalignment)
     !   end select
     ! end if
-  contains
-    pure subroutine update_magnetization(matrix, vector)
-      !! Updates a magnetization matrix based on the content of an allocatable magnetization vector. 
-      !! If the magnetization vector is not allocated, then the magnetization matrix is not updated.
-      real(wp),    intent(in)    :: vector(:)
-      type(nambu), intent(inout) :: matrix
-  
-      if (norm2(vector) > eps) then
-        matrix % matrix(1:2,1:2) = vector(1) * pauli1 + vector(2) * pauli2 + vector(3) * pauli3
-        matrix % matrix(3:4,3:4) = vector(1) * pauli1 - vector(2) * pauli2 + vector(3) * pauli3
-      end if
-    end subroutine
   end subroutine
   
   pure subroutine spinactive_diffusion_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
