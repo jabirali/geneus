@@ -184,6 +184,9 @@ contains
     type(spin),                intent(in)    :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
+    type(propagator)                         :: b
+    type(nambu)                              :: I
+
     ! Transparent interface: minimize the propagator deviation
     if (this % transparent_a) then
       r  = g  - a % g
@@ -191,8 +194,17 @@ contains
       return
     end if
 
-    ! Else: calculate the interface gradient from a matrix current
-    call this%spinactive_a%diffusion_equation_a(a, g, gt, dg, dgt, r, rt)
+    ! Construct a propagator from the Riccati parameters
+    b = propagator(g, gt)
+
+    ! Calculate a matrix current from 
+    if (associated(this % material_a)) then
+      I = (-0.50_wp) * this % spinactive_a % diffusion_current(b % retarded(), a % retarded())
+    end if
+
+    ! Calculate the deviation from the boundary condition
+    r  = dg  - (pauli0 - g*gt) * (I % matrix(1:2,3:4) - I % matrix(1:2,1:2)*g)
+    rt = dgt - (pauli0 - gt*g) * (I % matrix(3:4,1:2) - I % matrix(3:4,3:4)*gt)
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
@@ -208,6 +220,9 @@ contains
     type(spin),                intent(in)    :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
+    type(propagator)                         :: a
+    type(nambu)                              :: I
+
     ! Transparent interface: minimize the propagator deviation
     if (this % transparent_b) then
       r  = g  - b % g
@@ -215,8 +230,17 @@ contains
       return
     end if
 
-    ! Else: calculate the interface gradient from a matrix current
-    call this%spinactive_b%diffusion_equation_b(b, g, gt, dg, dgt, r, rt)
+    ! Construct a propagator from the Riccati parameters
+    a = propagator(g, gt)
+
+    ! Calculate a matrix current from 
+    if (associated(this % material_b)) then
+      I = (+0.50_wp) * this % spinactive_b % diffusion_current(a % retarded(), b % retarded())
+    end if
+
+    ! Calculate the deviation from the boundary condition
+    r  = dg  - (pauli0 - g*gt) * (I % matrix(1:2,3:4) - I % matrix(1:2,1:2)*g)
+    rt = dgt - (pauli0 - gt*g) * (I % matrix(3:4,1:2) - I % matrix(3:4,3:4)*gt)
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
