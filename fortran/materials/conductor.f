@@ -82,8 +82,8 @@ contains
     allocate(this % density(size(this % energy), size(this % location), 0:7))
 
     ! Allocate boundary condition objects
-    allocate(this % spinactive_a)
-    allocate(this % spinactive_b)
+    this % spinactive_a = spinactive(this, 'a')
+    this % spinactive_b = spinactive(this, 'b')
   end function
 
   pure subroutine conductor_init(this, gap)
@@ -251,19 +251,6 @@ contains
   impure subroutine conductor_update_prehook(this)
     !! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
-
-    ! Usually, we normalize the spin-mixing conductance and other interface parameters to the tunneling conductance. But in
-    ! the case of a vacuum interface, we wish to normalize them to the normal-state conductance instead. Since the tunneling
-    ! conductance is normalized to the normal conductance, we can achieve this by defining the tunneling conductance to one.
-    ! Setting the polarization to zero also disables all but the spin-mixing terms in the spin-active boundary condition.
-    if (.not. associated(this % material_a)) then
-      this % spinactive_a % conductance  = 1.0
-      this % spinactive_a % polarization = 0.0
-    end if
-    if (.not. associated(this % material_b)) then
-      this % spinactive_b % conductance  = 1.0
-      this % spinactive_b % polarization = 0.0
-    end if
 
     ! Prepare variables associated with spin-orbit coupling
     if (allocated(this%spinorbit)) then

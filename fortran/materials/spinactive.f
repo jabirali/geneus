@@ -2,9 +2,6 @@
 !> Category: Materials
 !>
 !> This submodule is included by conductor.f, and contains the equations which model spin-active interfaces.
-!>
-!> @TODO: Rewrite using the new nambu.f library, replacing e.g. diag(m·σ,m·σ*) with m*nambuv(1:3).
-!>        Also, we may then for brevity replace matmul(G,matmul(M,G)) with G*M*G, and so on.
 
 module spinactive_m
   use :: propagator_m
@@ -12,16 +9,26 @@ module spinactive_m
   use :: math_m
   use :: spin_m
   use :: nambu_m
+  private
+
+  ! Public interface
+  public spinactive, spinactive_construct
 
   ! Type declarations
-  type, public :: spinactive
-    real(wp)                 :: conductance   = 0.0      !! Interfacial conductance
+  type :: spinactive
+    ! Metadata about the object
+    class(material), pointer :: material  => null()      !! Pointer to the material modelled by this instance
+    character                :: side      =  ' '         !! Whether this is a left (a) or right (b) interface
+
+    ! Physical parameters of the interface
+    real(wp)                 :: conductance   = 1.0      !! Interfacial conductance
     real(wp)                 :: polarization  = 0.0      !! Interfacial spin-polarization
     real(wp)                 :: spinmixing    = 0.0      !! Interfacial 1st-order spin-mixing
     real(wp)                 :: secondorder   = 0.0      !! Interfacial 2nd-order spin-mixing
     real(wp), dimension(1:3) :: magnetization = [0,0,1]  !! Interfacial magnetization direction
     real(wp), dimension(1:3) :: misalignment  = [0,0,0]  !! Interfacial magnetization misalignment
   
+    ! Matrices used internally by the object
     type(nambu), private     :: M                        !! Magnetization matrix (transmission)
     type(nambu), private     :: M0                       !! Magnetization matrix (reflection, this  side)
     type(nambu), private     :: M1                       !! Magnetization matrix (reflection, other side)
@@ -29,8 +36,31 @@ module spinactive_m
     procedure :: diffusion_current    => spinactive_diffusion_current
     procedure :: update_prehook       => spinactive_update_prehook
   end type
+
+  ! Type constructors
+  interface spinactive
+    module procedure spinactive_construct
+  end interface
 contains
-  pure subroutine spinactive_update_prehook(this)
+  function spinactive_construct(parent, side) result(this)
+    !! Constructs a spinorbit object with a given parent material.
+    type(spinactive), allocatable :: this
+    character                     :: side
+    class(material),       target :: parent
+
+    ! Allocate the object
+    if (.not. allocated(this)) then
+      allocate(this)
+    end if
+
+    ! Save a pointer to the parent object
+    this % material => parent
+
+    ! Save which side of the interface this is
+    this % side = side
+  end function
+
+  impure subroutine spinactive_update_prehook(this)
     !! Updates the internal variables associated with spin-active interfaces.
     class(spinactive), intent(inout) :: this 
   
@@ -66,8 +96,9 @@ contains
     !! Calculate the matrix current at an interface with spin-active properties. The equations
     !! implemented here should be valid for an arbitrary interface polarization, and up to 2nd
     !! order in the transmission probabilities and spin-mixing angles of the interface. 
-    !! @TODO: Shortcut-evaluation for nonmagnetic interfaces.
-    class(spinactive), intent(in) :: this  !! Bouundary object
+    !! 
+    !! @TODO: Reimplement shortcut-evaluation of the current for nonmagnetic interfaces.
+    class(spinactive), intent(in) :: this
     type(nambu),       intent(in) :: G0, G1      !! Propagator matrices
     type(nambu)                   :: S0, S1      !! Matrix expressions
     type(nambu)                   :: I           !! Matrix current
@@ -101,7 +132,7 @@ contains
         + spinactive_current2_reflection()
     end if
 
-    ! Scale the answers based on conductance
+    ! Scale the final result based on conductance
     I = (this % conductance/2) * I
   contains
     pure function spinactive_current1_transmission(G) result(F)
@@ -139,23 +170,21 @@ contains
   
     pure function spinactive_current2_reflection() result(I)
       !! Calculate the 2nd-order spin-mixing terms in the matrix current.
-      type(nambu) :: I
+      type(nambu) :: I, U
   
       associate(R => this % secondorder, Q => this % spinmixing, M0 => this % M0)
-        associate(U => M0*G0*M0)
-          I = (0.25*R*Q) * (G0*U - U*G0)
-        end associate
+        U = M0*G0*M0
+        I = (0.25*R*Q) * (G0*U - U*G0)
       end associate
     end function
   
     pure function spinactive_current2_crossterms() result(I)
       !! Calculate the 2nd-order cross-terms in the matrix current.
-      type(nambu) :: I
+      type(nambu) :: I, U
   
       associate(R => this % secondorder, M0 => this % M0)
-        associate(U => S0*G0*M0 + M0*G0*S0 + S1)
-          I = ((0.00,0.25)*R) * (G0*U - U*G0)
-        end associate
+        U = S0*G0*M0 + M0*G0*S0 + S1
+        I = ((0.00,0.25)*R) * (G0*U - U*G0)
       end associate
     end function
   end function
