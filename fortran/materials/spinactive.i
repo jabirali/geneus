@@ -53,7 +53,7 @@ contains
   end subroutine
 end subroutine
 
-pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
+pure subroutine spinactive_diffusion_equation_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
   !! Calculate the spin-active terms in the left boundary condition, and update the residuals.
   class(conductor), target,   intent(in)    :: this
   type(propagator),           intent(in)    :: a
@@ -74,11 +74,11 @@ pure subroutine spinactive_interface_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
     * spinactive_current(GM1, GM0, this%M_a, this%M0_a, this%M1_a, this%polarization_a, this%spinmixing_a, this%secondorder_a)
 
   ! Calculate the deviation from the boundary condition
-  r1  = r1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
-  rt1 = rt1 + (pauli0 - gt1*g1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
+  r1  = dg1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
+  rt1 = dgt1 + (pauli0 - gt1*g1) * (I(3:4,1:2) - I(3:4,3:4)*gt1)
 end subroutine
 
-pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
+pure subroutine spinactive_diffusion_equation_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
   !! Calculate the spin-active terms in the right boundary condition, and update the residuals.
   class(conductor), target,   intent(in)    :: this
   type(propagator),           intent(in)    :: b
@@ -99,8 +99,8 @@ pure subroutine spinactive_interface_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
     * spinactive_current(GM2, GM3, this%M_b, this%M0_b, this%M1_b, this%polarization_b, this%spinmixing_b, this%secondorder_b)
 
   ! Calculate the deviation from the boundary condition
-  r2  = r2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
-  rt2 = rt2 - (pauli0 - gt2*g2) * (I(3:4,1:2) - I(3:4,3:4)*gt2)
+  r2  = dg2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)
+  rt2 = dgt2 - (pauli0 - gt2*g2) * (I(3:4,1:2) - I(3:4,3:4)*gt2)
 end subroutine
 
 pure function spinactive_current(G0, G1, M, M0, M1, P, Q, R) result(I)
@@ -113,16 +113,18 @@ pure function spinactive_current(G0, G1, M, M0, M1, P, Q, R) result(I)
   complex(wp), dimension(4,4)             :: S0, S1      !! Matrix expressions
   complex(wp), dimension(4,4)             :: I           !! Matrix current
 
-  ! Calculate the 1st-order contributions to the matrix current.  Note that we manually
-  ! subtract the Kupriyanov-Lukichev term from the result, so that this function can be
-  ! called after the spin-inactive boundary conditions without double-counting terms.
+  ! Shortcut-evaluation for nonmagnetic interfaces
+  if (abs(Q) == 0 .and. abs(P) == 0) then
+    I = commutator(G0, G1)
+    return
+  end if
 
   ! Evaluate the 1st-order matrix functions
   S0 = spinactive_current1_transmission(G1)
   S1 = spinactive_current1_reflection()
 
   ! Evaluate the 1st-order matrix current
-  I  = commutator(G0, S0 + S1 - G1)
+  I  = commutator(G0, S0 + S1)
 
   ! Calculate the 2nd-order contributions to the matrix current. Note that we make a
   ! number of simplifications in this implementation. In particular, we assume that 
@@ -146,13 +148,13 @@ contains
     !! Calculate the 1st-order transmission terms in the matrix current commutator.
     complex(wp), dimension(4,4), intent(in) :: G
     complex(wp), dimension(4,4)             :: F
-
     real(wp) :: Pr, Pp, Pm
+
     Pr = sqrt(1 - P**2)
     Pp = 1 + Pr
     Pm = 1 - Pr
 
-    F  = G + (P/Pp) * anticommutator(M,G) + (Pm/Pp) * matmul(M,matmul(G,M))
+    F = G + (P/Pp) * anticommutator(M,G) + (Pm/Pp) * matmul(M,matmul(G,M))
   end function
 
   pure function spinactive_current1_reflection() result(F)

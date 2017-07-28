@@ -81,8 +81,8 @@ module material_m
 
     ! These methods define the physical equations used by the update methods
     procedure(diffusion_equation),   deferred :: diffusion_equation                            !! Diffusion equation
-    procedure(interface_equation_a), deferred :: interface_equation_a                          !! Boundary condition (left)
-    procedure(interface_equation_b), deferred :: interface_equation_b                          !! Boundary condition (right)
+    procedure(diffusion_equation_a), deferred :: diffusion_equation_a                          !! Boundary condition (left)
+    procedure(diffusion_equation_b), deferred :: diffusion_equation_b                          !! Boundary condition (right)
 
     ! These methods define miscellaneous utility functions
     procedure                                 :: conf            => material_conf              !! Configures material parameters
@@ -124,8 +124,8 @@ module material_m
   end interface
 
   abstract interface
-    pure subroutine interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
-      !! This interface is used for the deferred procedure interface_equation_a.
+    pure subroutine diffusion_equation_a(this, a, g, gt, dg, dgt, r, rt)
+      !! This interface is used for the deferred procedure diffusion_equation_a.
       import material, propagator, spin, wp
 
       class(material),          intent(in)    :: this
@@ -136,8 +136,8 @@ module material_m
   end interface
 
   abstract interface
-    pure subroutine interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
-      !! This interface is used for the deferred procedure interface_equation_b.
+    pure subroutine diffusion_equation_b(this, b, g, gt, dg, dgt, r, rt)
+      !! This interface is used for the deferred procedure diffusion_equation_b.
       import material, propagator, spin, wp
 
       class(material),          intent(in)    :: this
@@ -327,8 +327,8 @@ contains
       dgt2 = ub(25:32)
 
       ! Calculate residuals from the boundary conditions
-      call this%interface_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
-      call this%interface_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
+      call this%diffusion_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
+      call this%diffusion_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
 
       ! Pack the results into state vectors
       bca(1: 8) = r1
@@ -512,8 +512,8 @@ contains
       bcb(1:8) = ub(1:8) - b(1:8)
 
       ! Calculate residuals from the boundary conditions
-      ! call this%interface_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
-      ! call this%interface_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
+      ! call this%diffusion_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
+      ! call this%diffusion_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
     end subroutine
 
     pure subroutine pack(a, b)

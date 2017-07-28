@@ -50,21 +50,19 @@ module conductor_m
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    !! Initializes propagators
-    procedure                 :: interface_equation_a    => conductor_interface_equation_a    !! Boundary condition (left)
-    procedure                 :: interface_equation_b    => conductor_interface_equation_b    !! Boundary condition (right)
+    procedure                 :: diffusion_equation_a    => conductor_diffusion_equation_a    !! Boundary condition (left)
+    procedure                 :: diffusion_equation_b    => conductor_diffusion_equation_b    !! Boundary condition (right)
     procedure                 :: update_prehook          => conductor_update_prehook          !! Code to execute before updates
     procedure                 :: update_posthook         => conductor_update_posthook         !! Code to execute after  updates
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation (conductor terms)
-    procedure                 :: interface_transparent_a => conductor_interface_transparent_a !! Boundary condition (transparent interface) (left)  
-    procedure                 :: interface_transparent_b => conductor_interface_transparent_b !! Boundary condition (transparent interface) (right) 
-    procedure                 :: interface_vacuum_a      => conductor_interface_vacuum_a      !! Boundary condition (vacuum interface)      (left)  
-    procedure                 :: interface_vacuum_b      => conductor_interface_vacuum_b      !! Boundary condition (vacuum interface)      (right) 
-    procedure                 :: interface_tunnel_a      => conductor_interface_tunnel_a      !! Boundary condition (tunneling interface)   (left)  
-    procedure                 :: interface_tunnel_b      => conductor_interface_tunnel_b      !! Boundary condition (tunneling interface)   (right) 
-    procedure                 :: interface_spinactive_a  => spinactive_interface_equation_a   !! Boundary condition (spin-active interface) (left)
-    procedure                 :: interface_spinactive_b  => spinactive_interface_equation_b   !! Boundary condition (spin-active interface) (right)
+    procedure                 :: diffusion_transparent_a => conductor_diffusion_transparent_a !! Boundary condition (transparent interface) (left)  
+    procedure                 :: diffusion_transparent_b => conductor_diffusion_transparent_b !! Boundary condition (transparent interface) (right) 
+    procedure                 :: diffusion_vacuum_a      => conductor_diffusion_vacuum_a      !! Boundary condition (vacuum interface)      (left)  
+    procedure                 :: diffusion_vacuum_b      => conductor_diffusion_vacuum_b      !! Boundary condition (vacuum interface)      (right) 
+    procedure                 :: diffusion_spinactive_a  => spinactive_diffusion_equation_a   !! Boundary condition (tunneling interface)   (left)
+    procedure                 :: diffusion_spinactive_b  => spinactive_diffusion_equation_b   !! Boundary condition (tunneling interface)   (right)
 
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
@@ -202,7 +200,7 @@ contains
     end if
   end subroutine
 
-  pure subroutine conductor_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
+  pure subroutine conductor_diffusion_equation_a(this, a, g, gt, dg, dgt, r, rt)
     !! Calculate residuals from the boundary conditions at the left interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: a
@@ -211,27 +209,22 @@ contains
 
     if (.not. associated(this%material_a)) then
       ! Assuming vacuum interface (no material connected)
-      call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
+      call this%diffusion_vacuum_a(g, gt, dg, dgt, r, rt)
     else if (this%conductance_a <= 0) then
       ! Assuming transparent interface (no conductance specified)
-      call this%interface_transparent_a(a, g, gt, dg, dgt, r, rt)
+      call this%diffusion_transparent_a(a, g, gt, dg, dgt, r, rt)
     else
-      ! Assuming tunneling interface (Kupriyanov-Lukichev)
-      call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
+      ! Interface is spin-active
+      call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
     end if
 
     if (allocated(this%spinorbit)) then
       ! Interface has spin-orbit coupling
-      call this%spinorbit%interface_equation_a(g, gt, dg, dgt, r, rt)
-    end if
-
-    if (allocated(this%magnetization_a)) then
-      ! Interface is spin-active
-      call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
+      call this%spinorbit%diffusion_equation_a(g, gt, dg, dgt, r, rt)
     end if
   end subroutine
 
-  pure subroutine conductor_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
+  pure subroutine conductor_diffusion_equation_b(this, b, g, gt, dg, dgt, r, rt)
     !! Calculate residuals from the boundary conditions at the right interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: b
@@ -240,27 +233,22 @@ contains
 
     if (.not. associated(this%material_b)) then
       ! Assuming vacuum interface (no material connected)
-      call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
+      call this%diffusion_vacuum_b(g, gt, dg, dgt, r, rt)
     else if (this%conductance_b <= 0) then
       ! Assuming transparent interface (no conductance specified)
-      call this%interface_transparent_b(b, g, gt, dg, dgt, r, rt)
+      call this%diffusion_transparent_b(b, g, gt, dg, dgt, r, rt)
     else
-      ! Assuming tunneling interface (Kupriyanov-Lukichev)
-      call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
+      ! Interface is spin-active
+      call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
     end if
 
     if (allocated(this%spinorbit)) then
       ! Interface has spin-orbit coupling
-      call this%spinorbit%interface_equation_b(g, gt, dg, dgt, r, rt)
-    end if
-
-    if (allocated(this%magnetization_b)) then
-      ! Interface is spin-active
-      call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
+      call this%spinorbit%diffusion_equation_b(g, gt, dg, dgt, r, rt)
     end if
   end subroutine
 
-  pure subroutine conductor_interface_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine conductor_diffusion_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     !! Defines a vacuum boundary condition for the left interface.
     class(conductor), intent(in)    :: this
     type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
@@ -270,7 +258,7 @@ contains
     rt1 = dgt1
   end subroutine
 
-  pure subroutine conductor_interface_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine conductor_diffusion_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     !! Defines a vacuum boundary condition for the right interface.
     class(conductor), intent(in)    :: this
     type(spin),       intent(in)    :: g2, gt2, dg2, dgt2
@@ -280,7 +268,7 @@ contains
     rt2 = dgt2
   end subroutine
 
-  pure subroutine conductor_interface_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine conductor_diffusion_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
     !! Defines a transparent boundary condition for the left interface.
     class(conductor), intent(in)    :: this
     type(propagator), intent(in)    :: a
@@ -298,7 +286,7 @@ contains
     end associate
   end subroutine
 
-  pure subroutine conductor_interface_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine conductor_diffusion_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
     !! Defines a transparent boundary condition for the right interface.
     class(conductor),          intent(in)    :: this
     type(propagator),          intent(in)    :: b
@@ -312,56 +300,6 @@ contains
     ! Calculate the deviation between the materials
     r2  = g2  - g3
     rt2 = gt2 - gt3
-
-    end associate
-  end subroutine
-
-  pure subroutine conductor_interface_tunnel_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
-    !! Defines a tunneling boundary condition for the left interface.
-    class(conductor),          intent(in)    :: this
-    type(propagator),          intent(in)    :: a
-    type(spin),                intent(inout) :: r1, rt1
-    type(spin),                intent(in)    :: g1, gt1, dg1, dgt1
-    type(spin)                               :: N0, Nt0
-
-    ! Rename the Riccati parameters in the material to the left
-    associate(g0   => a%g, &
-              gt0  => a%gt,&
-              dg0  => a%dg,&
-              dgt0 => a%dgt)
-
-    ! Calculate the normalization matrices
-    N0  = inverse( pauli0 - g0*gt0 )
-    Nt0 = inverse( pauli0 - gt0*g0 )
-
-    ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
-    r1  = dg1  - this%conductance_a*( pauli0 - g1*gt0 )*N0*(  g1  - g0  )
-    rt1 = dgt1 - this%conductance_a*( pauli0 - gt1*g0 )*Nt0*( gt1 - gt0 )
-
-    end associate
-  end subroutine
-
-  pure subroutine conductor_interface_tunnel_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
-    !! Defines a tunneling boundary condition for the right interface.
-    class(conductor),          intent(in)    :: this
-    type(propagator),          intent(in)    :: b
-    type(spin),                intent(inout) :: r2, rt2
-    type(spin),                intent(in)    :: g2, gt2, dg2, dgt2
-    type(spin)                               :: N3, Nt3
-
-    ! Rename the Riccati parameters in the material to the right
-    associate(g3   => b%g, &
-              gt3  => b%gt,&
-              dg3  => b%dg,&
-              dgt3 => b%dgt)
-
-    ! Calculate the normalization matrices
-    N3  = inverse( pauli0 - g3*gt3 )
-    Nt3 = inverse( pauli0 - gt3*g3 )
-
-    ! Calculate the deviation from the Kuprianov--Lukichev boundary condition
-    r2  = dg2  - this%conductance_b*( pauli0 - g2*gt3 )*N3*(  g3  - g2  )
-    rt2 = dgt2 - this%conductance_b*( pauli0 - gt2*g3 )*Nt3*( gt3 - gt2 )
 
     end associate
   end subroutine

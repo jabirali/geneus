@@ -23,8 +23,8 @@ module spinorbit_m
     type(spin)                  :: Axt, Ayt, Azt, A2t                                        !! Spin-orbit coupling matrices (tilde-conjugated versions)
   contains
     procedure                   :: diffusion_equation   => spinorbit_diffusion_equation      !! Defines the Usadel diffusion equation
-    procedure                   :: interface_equation_a => spinorbit_interface_equation_a    !! Boundary condition at the left  interface
-    procedure                   :: interface_equation_b => spinorbit_interface_equation_b    !! Boundary condition at the right interface
+    procedure                   :: diffusion_equation_a => spinorbit_diffusion_equation_a    !! Boundary condition at the left  interface
+    procedure                   :: diffusion_equation_b => spinorbit_diffusion_equation_b    !! Boundary condition at the right interface
     procedure                   :: update_prehook       => spinorbit_update_prehook          !! Code to execute before calculating the propagators
     procedure                   :: update_posthook      => spinorbit_update_posthook         !! Code to execute after  calculating the propagators
   end type
@@ -106,7 +106,7 @@ contains
     end associate
   end subroutine
 
-  pure subroutine spinorbit_interface_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
+  pure subroutine spinorbit_diffusion_equation_a(this, g1, gt1, dg1, dgt1, r1, rt1)
     !! Calculate the spin-orbit coupling terms in the left boundary condition, and update the residuals.
     class(spinorbit), target, intent(in)    :: this
     type(spin),               intent(in)    :: g1, gt1, dg1, dgt1
@@ -123,7 +123,7 @@ contains
     end associate
   end subroutine
 
-  pure subroutine spinorbit_interface_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
+  pure subroutine spinorbit_diffusion_equation_b(this, g2, gt2, dg2, dgt2, r2, rt2)
     !! Calculate the spin-orbit coupling terms in the right boundary condition, and update the residuals.
     class(spinorbit), target, intent(in)    :: this
     type(spin),               intent(in)    :: g2, gt2, dg2, dgt2

@@ -28,8 +28,8 @@ module halfmetal_m
     procedure           :: init                 => halfmetal_init                 !! Initializes the propagators
     procedure           :: conf                 => halfmetal_conf                 !! Configures the material parameters
     procedure           :: diffusion_equation   => halfmetal_diffusion_equation   !! Defines the Usadel diffusion equation
-    procedure           :: interface_equation_a => halfmetal_interface_equation_a !! Boundary condition at the left  interface
-    procedure           :: interface_equation_b => halfmetal_interface_equation_b !! Boundary condition at the right interface
+    procedure           :: diffusion_equation_a => halfmetal_diffusion_equation_a !! Boundary condition at the left  interface
+    procedure           :: diffusion_equation_b => halfmetal_diffusion_equation_b !! Boundary condition at the right interface
     procedure           :: update_prehook       => halfmetal_update_prehook       !! Code to execute before calculating the propagators
     procedure           :: update_posthook      => halfmetal_update_posthook      !! Code to execute after  calculating the propagators
     procedure           :: update_density       => halfmetal_update_density       !! Calculates the density of states
@@ -97,7 +97,7 @@ contains
     end associate
   end subroutine
 
-  pure subroutine halfmetal_interface_equation_a(this, a, g, gt, dg, dgt, r, rt)
+  pure subroutine halfmetal_diffusion_equation_a(this, a, g, gt, dg, dgt, r, rt)
     !! Calculate residuals from the boundary conditions at the left interface.
     class(halfmetal), intent(in)    :: this
     type(propagator), intent(in)    :: a
@@ -107,11 +107,10 @@ contains
     ! Diagonal components: use spin-active boundary conditions
     if (associated(this%material_a)) then
       ! Interface is tunneling
-      call this%interface_tunnel_a(a, g, gt, dg, dgt, r, rt)
-      call this%interface_spinactive_a(a, g, gt, dg, dgt, r, rt)
+      call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
     else
       ! Interface is vacuum
-      call this%interface_vacuum_a(g, gt, dg, dgt, r, rt)
+      call this%diffusion_vacuum_a(g, gt, dg, dgt, r, rt)
     end if
 
     ! Off-diagonal components: use boundary conditions g,gt=0
@@ -121,7 +120,7 @@ contains
     rt % matrix(2,1)  = gt % matrix(2,1)
   end subroutine
 
-  pure subroutine halfmetal_interface_equation_b(this, b, g, gt, dg, dgt, r, rt)
+  pure subroutine halfmetal_diffusion_equation_b(this, b, g, gt, dg, dgt, r, rt)
     !! Calculate residuals from the boundary conditions at the right interface.
     class(halfmetal), intent(in)    :: this
     type(propagator), intent(in)    :: b
@@ -131,11 +130,10 @@ contains
     ! Diagonal components: use spin-active boundary conditions
     if (associated(this%material_b)) then
       ! Interface is tunneling
-      call this%interface_tunnel_b(b, g, gt, dg, dgt, r, rt)
-      call this%interface_spinactive_b(b, g, gt, dg, dgt, r, rt)
+      call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
     else
       ! Interface is vacuum
-      call this%interface_vacuum_b(g, gt, dg, dgt, r, rt)
+      call this%diffusion_vacuum_b(g, gt, dg, dgt, r, rt)
     end if
 
     ! Off-diagonal components: use boundary conditions g,gt=0
