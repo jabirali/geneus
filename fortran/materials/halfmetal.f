@@ -105,13 +105,7 @@ contains
     type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use spin-active boundary conditions
-    if (associated(this%material_a)) then
-      ! Interface is tunneling
-      call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
-    else
-      ! Interface is vacuum
-      call this%diffusion_vacuum_a(g, gt, dg, dgt, r, rt)
-    end if
+    call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
 
     ! Off-diagonal components: use boundary conditions g,gt=0
     r  % matrix(1,2)  = g  % matrix(1,2)
@@ -128,13 +122,7 @@ contains
     type(spin),       intent(inout) :: r, rt
 
     ! Diagonal components: use spin-active boundary conditions
-    if (associated(this%material_b)) then
-      ! Interface is tunneling
-      call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
-    else
-      ! Interface is vacuum
-      call this%diffusion_vacuum_b(g, gt, dg, dgt, r, rt)
-    end if
+    call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
 
     ! Off-diagonal components: use boundary conditions g,gt=0
     r  % matrix(1,2)  = g  % matrix(1,2)

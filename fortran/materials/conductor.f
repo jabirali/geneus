@@ -57,10 +57,6 @@ module conductor_m
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation (conductor terms)
-    procedure                 :: diffusion_transparent_a => conductor_diffusion_transparent_a !! Boundary condition (transparent interface) (left)  
-    procedure                 :: diffusion_transparent_b => conductor_diffusion_transparent_b !! Boundary condition (transparent interface) (right) 
-    procedure                 :: diffusion_vacuum_a      => conductor_diffusion_vacuum_a      !! Boundary condition (vacuum interface)      (left)  
-    procedure                 :: diffusion_vacuum_b      => conductor_diffusion_vacuum_b      !! Boundary condition (vacuum interface)      (right) 
     procedure                 :: diffusion_spinactive_a  => spinactive_diffusion_equation_a   !! Boundary condition (tunneling interface)   (left)
     procedure                 :: diffusion_spinactive_b  => spinactive_diffusion_equation_b   !! Boundary condition (tunneling interface)   (right)
 
@@ -207,17 +203,17 @@ contains
     type(spin),                intent(in)    :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
-    if (.not. associated(this%material_a)) then
-      ! Assuming vacuum interface (no material connected)
-      call this%diffusion_vacuum_a(g, gt, dg, dgt, r, rt)
-    else if (this%conductance_a <= 0) then
-      ! Assuming transparent interface (no conductance specified)
-      call this%diffusion_transparent_a(a, g, gt, dg, dgt, r, rt)
-    else
-      ! Interface is spin-active
-      call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
+    ! Transparent interface: minimize the propagator deviation
+    if (this % conductance_a <= 0) then
+      r  = g  - a % g
+      rt = gt - a % gt
+      return
     end if
 
+    ! Else: calculate the interface gradient from a matrix current
+    call this%diffusion_spinactive_a(a, g, gt, dg, dgt, r, rt)
+
+    ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
       ! Interface has spin-orbit coupling
       call this%spinorbit%diffusion_equation_a(g, gt, dg, dgt, r, rt)
@@ -231,77 +227,20 @@ contains
     type(spin),                intent(in)    :: g, gt, dg, dgt
     type(spin),                intent(inout) :: r, rt
 
-    if (.not. associated(this%material_b)) then
-      ! Assuming vacuum interface (no material connected)
-      call this%diffusion_vacuum_b(g, gt, dg, dgt, r, rt)
-    else if (this%conductance_b <= 0) then
-      ! Assuming transparent interface (no conductance specified)
-      call this%diffusion_transparent_b(b, g, gt, dg, dgt, r, rt)
-    else
-      ! Interface is spin-active
-      call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
+    ! Transparent interface: minimize the propagator deviation
+    if (this % conductance_a <= 0) then
+      r  = g  - b % g
+      rt = gt - b % gt
+      return
     end if
 
+    ! Else: calculate the interface gradient from a matrix current
+    call this%diffusion_spinactive_b(b, g, gt, dg, dgt, r, rt)
+
+    ! Gauge-dependent terms in the case of spin-orbit coupling
     if (allocated(this%spinorbit)) then
-      ! Interface has spin-orbit coupling
       call this%spinorbit%diffusion_equation_b(g, gt, dg, dgt, r, rt)
     end if
-  end subroutine
-
-  pure subroutine conductor_diffusion_vacuum_a(this, g1, gt1, dg1, dgt1, r1, rt1)
-    !! Defines a vacuum boundary condition for the left interface.
-    class(conductor), intent(in)    :: this
-    type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
-    type(spin),       intent(inout) :: r1, rt1
-
-    r1  = dg1
-    rt1 = dgt1
-  end subroutine
-
-  pure subroutine conductor_diffusion_vacuum_b(this, g2, gt2, dg2, dgt2, r2, rt2)
-    !! Defines a vacuum boundary condition for the right interface.
-    class(conductor), intent(in)    :: this
-    type(spin),       intent(in)    :: g2, gt2, dg2, dgt2
-    type(spin),       intent(inout) :: r2, rt2
-
-    r2  = dg2
-    rt2 = dgt2
-  end subroutine
-
-  pure subroutine conductor_diffusion_transparent_a(this, a, g1, gt1, dg1, dgt1, r1, rt1)
-    !! Defines a transparent boundary condition for the left interface.
-    class(conductor), intent(in)    :: this
-    type(propagator), intent(in)    :: a
-    type(spin),       intent(in)    :: g1, gt1, dg1, dgt1
-    type(spin),       intent(inout) :: r1, rt1
-
-    ! Rename the Riccati parameters in the material to the left
-    associate(g0  => a%g,&
-              gt0 => a%gt)
-
-    ! Calculate the deviation between the materials
-    r1  = g1  - g0
-    rt1 = gt1 - gt0
-
-    end associate
-  end subroutine
-
-  pure subroutine conductor_diffusion_transparent_b(this, b, g2, gt2, dg2, dgt2, r2, rt2)
-    !! Defines a transparent boundary condition for the right interface.
-    class(conductor),          intent(in)    :: this
-    type(propagator),          intent(in)    :: b
-    type(spin),                intent(in)    :: g2, gt2, dg2, dgt2
-    type(spin),                intent(inout) :: r2, rt2
-
-    ! Rename the Riccati parameters in the material to the right
-    associate(g3  => b%g,&
-              gt3 => b%gt)
-
-    ! Calculate the deviation between the materials
-    r2  = g2  - g3
-    rt2 = gt2 - gt3
-
-    end associate
   end subroutine
 
   impure subroutine conductor_update_prehook(this)
