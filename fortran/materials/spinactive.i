@@ -12,41 +12,41 @@ pure subroutine spinactive_update_prehook(this)
   class(conductor), intent(inout) :: this 
 
   ! Process transmission properties (both sides of interfaces)
-  call update_magnetization(this % M_a, this % magnetization_a)
-  call update_magnetization(this % M_b, this % magnetization_b)
+  call update_magnetization(this % spinactive_a % M, this % spinactive_a % magnetization)
+  call update_magnetization(this % spinactive_b % M, this % spinactive_b % magnetization)
 
   ! Default reflection properties match transmission properties
-  this % M0_a = this % M_a
-  this % M0_b = this % M_b
-  this % M1_a = this % M_a
-  this % M1_b = this % M_b
+  this % spinactive_a % M0 = this % spinactive_a % M
+  this % spinactive_b % M0 = this % spinactive_b % M
+  this % spinactive_a % M1 = this % spinactive_a % M
+  this % spinactive_b % M1 = this % spinactive_b % M
 
   ! Process reflection properties (this side of interfaces)
-  call update_magnetization(this % M0_a, this % misalignment_a)
-  call update_magnetization(this % M0_b, this % misalignment_b)
+  call update_magnetization(this % spinactive_a % M0, this % spinactive_a % misalignment)
+  call update_magnetization(this % spinactive_b % M0, this % spinactive_b % misalignment)
 
   ! Process reflection properties (other side of interfaces)
   if (associated(this % material_a)) then
     select type (other => this % material_a)
       class is (conductor)
-        call update_magnetization(this % M1_a, other % misalignment_b)
+        call update_magnetization(this % spinactive_a % M1, other % spinactive_b % misalignment)
     end select
   end if
 
   if (associated(this % material_b)) then
     select type (other => this % material_b)
       class is (conductor)
-        call update_magnetization(this % M1_b, other % misalignment_a)
+        call update_magnetization(this % spinactive_b % M1, other % spinactive_a % misalignment)
     end select
   end if
 contains
   pure subroutine update_magnetization(matrix, vector)
     !! Updates a magnetization matrix based on the content of an allocatable magnetization vector. 
     !! If the magnetization vector is not allocated, then the magnetization matrix is not updated.
-    real(wp), allocatable, intent(in)    :: vector(:)
-    complex(wp),           intent(inout) :: matrix(4,4)
+    real(wp),    intent(in)    :: vector(:)
+    complex(wp), intent(inout) :: matrix(4,4)
 
-    if (allocated(vector)) then
+    if (norm2(vector) > eps) then
       matrix(1:2,1:2) = vector(1) * pauli1 + vector(2) * pauli2 + vector(3) * pauli3
       matrix(3:4,3:4) = vector(1) * pauli1 - vector(2) * pauli2 + vector(3) * pauli3
     end if
@@ -70,8 +70,9 @@ pure subroutine spinactive_diffusion_equation_a(this, a, g1, gt1, dg1, dgt1, r1,
   end associate
 
   ! Calculate the 4×4 matrix current
-  I = 0.25 * this%conductance_a &
-    * spinactive_current(GM1, GM0, this%M_a, this%M0_a, this%M1_a, this%polarization_a, this%spinmixing_a, this%secondorder_a)
+  I = 0.25 * this%spinactive_a%conductance &
+    * spinactive_current(GM1, GM0, this%spinactive_a%M, this%spinactive_a%M0, this%spinactive_a%M1, &
+      this%spinactive_a%polarization, this%spinactive_a%spinmixing, this%spinactive_a%secondorder)
 
   ! Calculate the deviation from the boundary condition
   r1  = dg1  + (pauli0 - g1*gt1) * (I(1:2,3:4) - I(1:2,1:2)*g1)
@@ -95,8 +96,9 @@ pure subroutine spinactive_diffusion_equation_b(this, b, g2, gt2, dg2, dgt2, r2,
   end associate
 
   ! Calculate the 4×4 matrix current
-  I = 0.25 * this%conductance_b &
-    * spinactive_current(GM2, GM3, this%M_b, this%M0_b, this%M1_b, this%polarization_b, this%spinmixing_b, this%secondorder_b)
+  I = 0.25 * this%spinactive_b%conductance &
+    * spinactive_current(GM2, GM3, this%spinactive_b%M, this%spinactive_b%M0, this%spinactive_b%M1, &
+    this%spinactive_b%polarization, this%spinactive_b%spinmixing, this%spinactive_b%secondorder)
 
   ! Calculate the deviation from the boundary condition
   r2  = dg2  - (pauli0 - g2*gt2) * (I(1:2,3:4) - I(1:2,1:2)*g2)

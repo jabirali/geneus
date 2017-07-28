@@ -147,12 +147,12 @@ contains
     this % P % matrix(2,2) = 2/(1 + eps - this%polarization)
 
     ! Update the left  interface parameters
-    this % magnetization_a = [0,0,1]
-    this % polarization_a  = this % polarization
+    this % spinactive_a % magnetization = [0,0,1]
+    this % spinactive_a % polarization  = this % polarization
 
     ! Update the right interface parameters
-    this % magnetization_b = [0,0,1]
-    this % polarization_b  = this % polarization
+    this % spinactive_b % magnetization = [0,0,1]
+    this % spinactive_b % polarization  = this % polarization
 
     ! Call the superclass prehook
     call this%conductor%update_prehook
@@ -238,17 +238,7 @@ contains
 
     select case(key)
       case ('polarization')
-        read(val,*) this % polarization
-      case ('conductance_a')
-        call evaluate(val, this % conductance_a)
-      case ('conductance_b')
-        call evaluate(val, this % conductance_b)
-      case ('resistance_a')
-        call evaluate(val, tmp)
-        this % conductance_a = 1/tmp
-      case ('resistance_b')
-        call evaluate(val, tmp)
-        this % conductance_b = 1/tmp
+        call evaluate(val, this % polarization)
       case default
         call this % conductor % conf(key, val)
     end select

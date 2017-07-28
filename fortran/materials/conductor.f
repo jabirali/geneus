@@ -15,38 +15,23 @@ module conductor_m
   use :: stdio_m
   use :: math_m
   use :: spin_m
+  use :: nambu_m
   use :: propagator_m
   use :: material_m
   use :: spinorbit_m
   use :: spinscattering_m
   private
 
+  include 'spinactive_type.i'
+
   ! Type declarations
   type, public, extends(material) :: conductor
-    ! These parameters control the physical characteristics of the material
-    real(wp)                         :: polarization_a          =  0.00_wp                    !! Interfacial spin-polarization (left)
-    real(wp)                         :: polarization_b          =  0.00_wp                    !! Interfacial spin-polarization (right)
-    real(wp)                         :: spinmixing_a            =  0.00_wp                    !! Interfacial 1st-order spin-mixing (left)
-    real(wp)                         :: spinmixing_b            =  0.00_wp                    !! Interfacial 1st-order spin-mixing (right)
-    real(wp)                         :: secondorder_a           =  0.00_wp                    !! Interfacial 2nd-order spin-mixing (left)
-    real(wp)                         :: secondorder_b           =  0.00_wp                    !! Interfacial 2nd-order spin-mixing (right)
-
     ! These parameters represent the physical fields in the material
     real(wp)                          :: depairing              =  0.00_wp                    !! Magnetic orbital depairing
+    type(spinactive),     allocatable :: spinactive_a                                         !! Spin-active interface
+    type(spinactive),     allocatable :: spinactive_b                                         !! Spin-active interface
     type(spinscattering), allocatable :: spinscattering                                       !! Spin-dependent scattering
     type(spinorbit),      allocatable :: spinorbit                                            !! Spin-orbit coupling
-    real(wp),             allocatable :: magnetization_a(:)                                   !! Interfacial magnetization (transmissions) (left)
-    real(wp),             allocatable :: magnetization_b(:)                                   !! Interfacial magnetization (transmissions) (right)
-    real(wp),             allocatable :: misalignment_a(:)                                    !! Interfacial magnetization (reflections)   (left)
-    real(wp),             allocatable :: misalignment_b(:)                                    !! Interfacial magnetization (reflections)   (right)
-
-    ! These variables are used by internal subroutines to handle spin-active interfaces
-    complex(wp)                      :: M_a(4,4)                =  0.00_wp                    !! Interface magnetization matrix (used for transmissions through the interface)
-    complex(wp)                      :: M_b(4,4)                =  0.00_wp                    !! Interface magnetization matrix (used for transmissions through the interface)
-    complex(wp)                      :: M0_a(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on this  side of the interface)
-    complex(wp)                      :: M0_b(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on this  side of the interface)
-    complex(wp)                      :: M1_a(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on other side of the interface)
-    complex(wp)                      :: M1_b(4,4)               =  0.00_wp                    !! Interface magnetization matrix (used for reflections on other side of the interface)
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    !! Initializes propagators
@@ -103,6 +88,10 @@ contains
     allocate(this % lossycurrent(0:7,size(this % location)))
     allocate(this % accumulation(0:7,size(this % location)))
     allocate(this % density(size(this % energy), size(this % location), 0:7))
+
+    ! Allocate boundary condition objects
+    allocate(this % spinactive_a)
+    allocate(this % spinactive_b)
   end function
 
   pure subroutine conductor_init(this, gap)
@@ -204,7 +193,7 @@ contains
     type(spin),                intent(inout) :: r, rt
 
     ! Transparent interface: minimize the propagator deviation
-    if (this % conductance_a <= 0) then
+    if (this % transparent_a) then
       r  = g  - a % g
       rt = gt - a % gt
       return
@@ -228,7 +217,7 @@ contains
     type(spin),                intent(inout) :: r, rt
 
     ! Transparent interface: minimize the propagator deviation
-    if (this % conductance_b <= 0) then
+    if (this % transparent_b) then
       r  = g  - b % g
       rt = gt - b % gt
       return
@@ -252,12 +241,12 @@ contains
     ! conductance is normalized to the normal conductance, we can achieve this by defining the tunneling conductance to one.
     ! Setting the polarization to zero also disables all but the spin-mixing terms in the spin-active boundary condition.
     if (.not. associated(this % material_a)) then
-      this % conductance_a  = 1.0
-      this % polarization_a = 0.0
+      this % spinactive_a % conductance  = 1.0
+      this % spinactive_a % polarization = 0.0
     end if
     if (.not. associated(this % material_b)) then
-      this % conductance_b  = 1.0
-      this % polarization_b = 0.0
+      this % spinactive_b % conductance  = 1.0
+      this % spinactive_b % polarization = 0.0
     end if
 
     ! Prepare variables associated with spin-orbit coupling
@@ -270,9 +259,9 @@ contains
 
     ! Modify the type string
     this%type_string = color_yellow // 'CONDUCTOR' // color_none
-    if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
-    if (allocated(this%magnetization_a)) this%type_string = trim(this%type_string) // color_purple // ' [SAL]' // color_none
-    if (allocated(this%magnetization_b)) this%type_string = trim(this%type_string) // color_purple // ' [SAR]' // color_none
+    ! if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
+    ! if (norm2(this%spinactive_a%magnetization)>eps) this%type_string = trim(this%type_string)//color_purple //' [SAL]'//color_none
+    ! if (norm2(this%spinactive_b%magnetization)>eps) this%type_string = trim(this%type_string)//color_purple //' [SAR]'//color_none
   end subroutine
 
   impure subroutine conductor_update_posthook(this)
@@ -363,67 +352,39 @@ contains
 
     select case(key)
       case ('conductance_a')
-        call evaluate(val, this % conductance_a)
+        call evaluate(val, this % spinactive_a % conductance)
       case ('conductance_b')
-        call evaluate(val, this % conductance_b)
+        call evaluate(val, this % spinactive_b % conductance)
       case ('resistance_a')
         call evaluate(val, tmp)
-        this % conductance_a = 1/tmp
+        this % spinactive_a % conductance = 1/tmp
       case ('resistance_b')
         call evaluate(val, tmp)
-        this % conductance_b = 1/tmp
+        this % spinactive_b % conductance = 1/tmp
       case ('spinmixing_a')
-        call evaluate(val, this % spinmixing_a)
+        call evaluate(val, this % spinactive_a % spinmixing)
       case ('spinmixing_b')
-        call evaluate(val, this % spinmixing_b)
+        call evaluate(val, this % spinactive_b % spinmixing)
       case ('secondorder_a')
-        call evaluate(val, this % secondorder_a)
+        call evaluate(val, this % spinactive_a % secondorder)
       case ('secondorder_b')
-        call evaluate(val, this % secondorder_b)
+        call evaluate(val, this % spinactive_b % secondorder)
       case ('polarization_a')
-        call evaluate(val, this % polarization_a)
+        call evaluate(val, this % spinactive_a % polarization)
       case ('polarization_b')
-        call evaluate(val, this % polarization_b)
+        call evaluate(val, this % spinactive_b % polarization)
       case ('magnetization_a')
-        if (.not. allocated(this % magnetization_a)) then
-          allocate(this % magnetization_a(3))
-        end if
-        call evaluate(val, this % magnetization_a)
-        if (norm2(this % magnetization_a) > sqrt(eps)) then
-          this % magnetization_a = unitvector(this % magnetization_a)
-        else
-          deallocate(this % magnetization_a)
-        end if
+        call evaluate(val, this % spinactive_a % magnetization)
+        this % spinactive_a % magnetization = unitvector(this % spinactive_a % magnetization)
       case ('magnetization_b')
-        if (.not. allocated(this % magnetization_b)) then
-          allocate(this % magnetization_b(3))
-        end if
-        call evaluate(val, this % magnetization_b)
-        if (norm2(this % magnetization_b) > sqrt(eps)) then
-          this % magnetization_b = unitvector(this % magnetization_b)
-        else
-          deallocate(this % magnetization_b)
-        end if
+        call evaluate(val, this % spinactive_b % magnetization)
+        this % spinactive_b % magnetization = unitvector(this % spinactive_b % magnetization)
       case ('misalignment_a')
-        if (.not. allocated(this % misalignment_a)) then
-          allocate(this % misalignment_a(3))
-        end if
-        call evaluate(val, this % misalignment_a)
-        if (norm2(this % misalignment_a) > sqrt(eps)) then
-          this % misalignment_a = unitvector(this % misalignment_a)
-        else
-          deallocate(this % misalignment_a)
-        end if
+        call evaluate(val, this % spinactive_a % misalignment)
+        this % spinactive_a % misalignment = unitvector(this % spinactive_a % misalignment)
       case ('misalignment_b')
-        if (.not. allocated(this % misalignment_b)) then
-          allocate(this % misalignment_b(3))
-        end if
-        call evaluate(val, this % misalignment_b)
-        if (norm2(this % misalignment_b) > sqrt(eps)) then
-          this % misalignment_b = unitvector(this % misalignment_b)
-        else
-          deallocate(this % misalignment_b)
-        end if
+        call evaluate(val, this % spinactive_b % misalignment)
+        this % spinactive_b % misalignment = unitvector(this % spinactive_b % misalignment)
       case ('nanowire')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then

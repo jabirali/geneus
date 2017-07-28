@@ -30,8 +30,6 @@ module material_m
     real(wp)                                  :: length                =  1.00_wp              !! Material length (L/ξ)
     real(wp)                                  :: thouless              =  1.00_wp              !! Thouless energy (ħD/L²)
     real(wp)                                  :: scattering            =  0.01_wp              !! Inelastic scattering (η/Δ₀)
-    real(wp)                                  :: conductance_a         =  0.00_wp              !! Interface conductance (left)
-    real(wp)                                  :: conductance_b         =  0.00_wp              !! Interface conductance (right)
     logical                                   :: transparent_a         =  .false.              !! Interface transparency (left)
     logical                                   :: transparent_b         =  .false.              !! Interface transparency (right)
 
@@ -570,6 +568,10 @@ contains
       case("transverse")
         call evaluate(val, this%transverse)
         call this % init()
+      case("transparent_a")
+        call evaluate(val, this%transparent_a)
+      case("transparent_b")
+        call evaluate(val, this%transparent_b)
       case("order")
         call evaluate(val, this%order)
         if (this%order > 16) then
