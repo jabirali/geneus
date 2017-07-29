@@ -80,6 +80,17 @@ contains
     type(spin)                      :: h, ht, dh, dht
     type(spin)                      :: N, Nt
 
+    type(propagator) :: p
+
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    p = propagator(g, gt, dg, dgt)
+    p % d2g  = d2g
+    p % d2gt = d2gt
+
+    associate(  g => p % g,     gt => p % gt,  &
+               dg => p % dg,   dgt => p % dgt, &
+              d2g => p % d2g, d2gt => p % d2gt )
+
     ! Ensure that the Riccati parameters are diagonal
     h   = g   % matrix * pauli0 % matrix
     ht  = gt  % matrix * pauli0 % matrix
@@ -95,6 +106,12 @@ contains
       d2g  = (-2.0_wp,0.0_wp)*dh*Nt*ht*dh - (0.0_wp,2.0_wp)*e*P*h
       d2gt = (-2.0_wp,0.0_wp)*dht*N*h*dht - (0.0_wp,2.0_wp)*e*P*ht
     end associate
+
+    end associate
+
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    d2g  = p % d2g
+    d2gt = p % d2gt
   end subroutine
 
   pure subroutine halfmetal_diffusion_equation_a(this, p, a, r, rt)

@@ -8,6 +8,7 @@ module superconductor_m
   use :: stdio_m
   use :: math_m
   use :: spin_m
+  use :: propagator_m
   use :: conductor_m
   private
 
@@ -88,6 +89,18 @@ contains
     type(spin),            intent(inout) :: d2g, d2gt
     complex(wp)                          :: gap, gapt
 
+    type(propagator) :: p
+
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    p = propagator(g, gt, dg, dgt)
+    p % d2g  = d2g
+    p % d2gt = d2gt
+
+    associate(  N => p % N,     Nt => p % Nt,  &
+                g => p % g,     gt => p % gt,  &
+               dg => p % dg,   dgt => p % dgt, &
+              d2g => p % d2g, d2gt => p % d2gt )
+
     ! Lookup the superconducting order parameter
     gap  = this%get_gap(z)/this%thouless
     gapt = conjg(gap)
@@ -98,6 +111,12 @@ contains
     ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
     d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
     d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
+
+    end associate
+
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    d2g  = p % d2g
+    d2gt = p % d2gt
   end subroutine
 
   impure subroutine superconductor_update_prehook(this)

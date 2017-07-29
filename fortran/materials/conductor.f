@@ -153,30 +153,43 @@ contains
     type(spin),       intent(in)    :: g, gt, dg, dgt
     type(spin),       intent(inout) :: d2g, d2gt
     type(spin)                      :: N, Nt
+    type(propagator)                :: p
 
-    ! Calculate the normalization matrices
-    N   = inverse( pauli0 - g*gt )
-    Nt  = inverse( pauli0 - gt*g )
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    p = propagator(g, gt, dg, dgt)
+    p % d2g  = d2g
+    p % d2gt = d2gt
 
-    ! Calculate the second-derivatives of the Riccati parameters
-    d2g  = (-2.0_wp,0.0_wp)*dg*Nt*gt*dg - (0.0_wp,2.0_wp)*e*g
-    d2gt = (-2.0_wp,0.0_wp)*dgt*N*g*dgt - (0.0_wp,2.0_wp)*e*gt
+    associate(  N => p % N,     Nt => p % Nt,  &
+                g => p % g,     gt => p % gt,  &
+               dg => p % dg,   dgt => p % dgt, &
+              d2g => p % d2g, d2gt => p % d2gt )
 
-    ! Calculate the contribution from a spin-orbit coupling
-    if (allocated(this%spinorbit)) then
-      call this%spinorbit%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
-    end if
+      ! Calculate the second-derivatives of the Riccati parameters
+      d2g  = (-2.0_wp,0.0_wp)*dg*Nt*gt*dg - (0.0_wp,2.0_wp)*e*g
+      d2gt = (-2.0_wp,0.0_wp)*dgt*N*g*dgt - (0.0_wp,2.0_wp)*e*gt
 
-    ! Calculate the contribution from spin-dependent scattering
-    if (allocated(this%spinscattering)) then
-      call this%spinscattering%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
-    end if
+      ! Calculate the contribution from a spin-orbit coupling
+      if (allocated(this%spinorbit)) then
+        call this%spinorbit%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
+      end if
 
-    ! Calculate the contribution from orbital magnetic depairing
-    if (this%depairing > 0) then
-      d2g  = d2g  + (this%depairing/this%thouless)*(2.0_wp*N  - pauli0)*g
-      d2gt = d2gt + (this%depairing/this%thouless)*(2.0_wp*Nt - pauli0)*gt
-    end if
+      ! Calculate the contribution from spin-dependent scattering
+      if (allocated(this%spinscattering)) then
+        call this%spinscattering%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
+      end if
+
+      ! Calculate the contribution from orbital magnetic depairing
+      if (this%depairing > 0) then
+        d2g  = d2g  + (this%depairing/this%thouless)*(2.0_wp*N  - pauli0)*g
+        d2gt = d2gt + (this%depairing/this%thouless)*(2.0_wp*Nt - pauli0)*gt
+      end if
+
+    end associate
+
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    d2g  = p % d2g
+    d2gt = p % d2gt
   end subroutine
 
   pure subroutine conductor_diffusion_equation_a(this, p, a, r, rt)

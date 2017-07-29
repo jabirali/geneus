@@ -9,6 +9,7 @@ module ferromagnet_m
   use :: math_m
   use :: spin_m
   use :: conductor_m
+  use :: propagator_m
   private
 
   ! Type declaration
@@ -58,32 +59,50 @@ contains
     real(wp)                          :: d
     integer                           :: n, m
 
-    ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-    call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+    type(propagator)                  :: p
 
-    if (allocated(this%h)) then
-      ! Calculate the index corresponding to the given location
-      m = size(this%h) - 1          ! Number of array intervals
-      n = floor(z*m + 1)            ! Nearest position in array
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    p = propagator(g, gt, dg, dgt)
+    p % d2g  = d2g
+    p % d2gt = d2gt
 
-      ! Extract the exchange field terms at that point
-      if (n <= 1) then
-        ! Left edge of the material
-        h  = this%h(1)
-        ht = this%ht(1)
-      else
-        ! Linear interpolation from known values. The relative displacement d is defined
-        ! as [z - location(n-1)]/[location(n) - location(n-1)], but assuming location(:)
-        ! is a uniform array of values in the range [0,1], the below will be equivalent.
-        d  = z*m - (n-2)
-        h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
-        ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
+    associate(  g => p % g,     gt => p % gt,  &
+               dg => p % dg,   dgt => p % dgt, &
+              d2g => p % d2g, d2gt => p % d2gt )
+
+
+      ! Calculate the second derivatives of the Riccati parameters (conductor terms)
+      call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+
+      if (allocated(this%h)) then
+        ! Calculate the index corresponding to the given location
+        m = size(this%h) - 1          ! Number of array intervals
+        n = floor(z*m + 1)            ! Nearest position in array
+
+        ! Extract the exchange field terms at that point
+        if (n <= 1) then
+          ! Left edge of the material
+          h  = this%h(1)
+          ht = this%ht(1)
+        else
+          ! Linear interpolation from known values. The relative displacement d is defined
+          ! as [z - location(n-1)]/[location(n) - location(n-1)], but assuming location(:)
+          ! is a uniform array of values in the range [0,1], the below will be equivalent.
+          d  = z*m - (n-2)
+          h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
+          ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
+        end if
+
+        ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
+        d2g  = d2g  + h  * g  + g  * ht
+        d2gt = d2gt + ht * gt + gt * h
       end if
 
-      ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
-      d2g  = d2g  + h  * g  + g  * ht
-      d2gt = d2gt + ht * gt + gt * h
-    end if
+    end associate
+
+    ! @TODO: REMOVE PLACEHOLDER CODE
+    d2g  = p % d2g
+    d2gt = p % d2gt
   end subroutine
 
   impure subroutine ferromagnet_update_prehook(this)
