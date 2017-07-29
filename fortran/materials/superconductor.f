@@ -80,43 +80,30 @@ contains
   !                   IMPLEMENTATION OF SUPERCONDUCTOR METHODS                     !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine superconductor_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine superconductor_diffusion_equation(this, p, e, z)
     !! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(superconductor), intent(in)    :: this
     complex(wp),           intent(in)    :: e
     real(wp),              intent(in)    :: z
-    type(spin),            intent(in)    :: g, gt, dg, dgt
-    type(spin),            intent(inout) :: d2g, d2gt
+    type(propagator),      intent(inout) :: p
     complex(wp)                          :: gap, gapt
-
-    type(propagator) :: p
-
-    ! @TODO: REMOVE PLACEHOLDER CODE
-    p = propagator(g, gt, dg, dgt)
-    p % d2g  = d2g
-    p % d2gt = d2gt
 
     associate(  N => p % N,     Nt => p % Nt,  &
                 g => p % g,     gt => p % gt,  &
                dg => p % dg,   dgt => p % dgt, &
               d2g => p % d2g, d2gt => p % d2gt )
 
-    ! Lookup the superconducting order parameter
-    gap  = this%get_gap(z)/this%thouless
-    gapt = conjg(gap)
+      ! Lookup the superconducting order parameter
+      gap  = this%get_gap(z)/this%thouless
+      gapt = conjg(gap)
 
-    ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-    call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+      ! Calculate the second derivatives of the Riccati parameters (conductor terms)
+      call this%conductor%diffusion_equation(p, e, z)
 
-    ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
-    d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
-    d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
-
+      ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
+      d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
+      d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
     end associate
-
-    ! @TODO: REMOVE PLACEHOLDER CODE
-    d2g  = p % d2g
-    d2gt = p % d2gt
   end subroutine
 
   impure subroutine superconductor_update_prehook(this)

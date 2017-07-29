@@ -111,15 +111,14 @@ module material_m
   end interface
 
   abstract interface
-    pure subroutine diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+    pure subroutine diffusion_equation(this, p, e, z)
       !! This interface is used for the deferred procedure diffusion_equation.
-      import material, spin, wp
+      import material, propagator, spin, wp
 
-      class(material), intent(in)    :: this
-      type(spin),      intent(in)    :: g, gt, dg, dgt
-      type(spin),      intent(inout) :: d2g, d2gt
-      complex(wp),     intent(in)    :: e
-      real(wp),        intent(in)    :: z
+      class(material),  intent(in)    :: this
+      type(propagator), intent(inout) :: p
+      complex(wp),      intent(in)    :: e
+      real(wp),         intent(in)    :: z
     end subroutine
   end interface
 
@@ -284,7 +283,8 @@ contains
       real(wp), intent(in)  :: z
       real(wp), intent(in)  :: u(32)
       real(wp), intent(out) :: f(32)
-      type(spin)            :: g, gt, dg, dgt, d2g, d2gt
+      type(spin)            :: g, gt, dg, dgt
+      type(propagator)      :: p
 
       ! Extract the Riccati parameters
       g   = u( 1: 8)
@@ -292,14 +292,17 @@ contains
       dg  = u(17:24)
       dgt = u(25:32)
 
+      ! Construct a propagator object
+      p = propagator(g, gt, dg, dgt)
+
       ! Calculate the second-derivatives of the Riccati parameters
-      call this%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+      call this % diffusion_equation(p, e, z)
 
       ! Pack the results into a state vector
-      f( 1: 8) = dg
-      f( 9:16) = dgt
-      f(17:24) = d2g
-      f(25:32) = d2gt
+      f( 1: 8) = p % dg
+      f( 9:16) = p % dgt
+      f(17:24) = p % d2g
+      f(25:32) = p % d2gt
     end subroutine
 
     pure subroutine bc(ua, ub, bca, bcb)

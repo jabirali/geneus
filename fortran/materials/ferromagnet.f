@@ -48,23 +48,15 @@ contains
   !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine ferromagnet_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine ferromagnet_diffusion_equation(this, p, e, z)
     !! Use the diffusion equation to calculate the second derivatives of the Riccati parameters at point z.
     class(ferromagnet), intent(in)    :: this
     complex(wp),        intent(in)    :: e
     real(wp),           intent(in)    :: z
-    type(spin),         intent(in)    :: g, gt, dg, dgt
-    type(spin),         intent(inout) :: d2g, d2gt
+    type(propagator),   intent(inout) :: p
     type(spin)                        :: h, ht
     real(wp)                          :: d
     integer                           :: n, m
-
-    type(propagator)                  :: p
-
-    ! @TODO: REMOVE PLACEHOLDER CODE
-    p = propagator(g, gt, dg, dgt)
-    p % d2g  = d2g
-    p % d2gt = d2gt
 
     associate(  g => p % g,     gt => p % gt,  &
                dg => p % dg,   dgt => p % dgt, &
@@ -72,7 +64,7 @@ contains
 
 
       ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-      call this%conductor%diffusion_equation(e, z, g, gt, dg, dgt, d2g, d2gt)
+      call this%conductor%diffusion_equation(p, e, z)
 
       if (allocated(this%h)) then
         ! Calculate the index corresponding to the given location
@@ -99,10 +91,6 @@ contains
       end if
 
     end associate
-
-    ! @TODO: REMOVE PLACEHOLDER CODE
-    d2g  = p % d2g
-    d2gt = p % d2gt
   end subroutine
 
   impure subroutine ferromagnet_update_prehook(this)

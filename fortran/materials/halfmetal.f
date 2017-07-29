@@ -70,48 +70,35 @@ contains
   !                     IMPLEMENTATION OF HALFMETAL EQUATIONS                      !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine halfmetal_diffusion_equation(this, e, z, g, gt, dg, dgt, d2g, d2gt)
+  pure subroutine halfmetal_diffusion_equation(this, p, e, z)
     !! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
     class(halfmetal), intent(in)    :: this
     complex(wp),      intent(in)    :: e
     real(wp),         intent(in)    :: z
-    type(spin),       intent(inout) :: d2g, d2gt
-    type(spin),       intent(in)    :: g, gt, dg, dgt
+    type(propagator), intent(inout) :: p
     type(spin)                      :: h, ht, dh, dht
     type(spin)                      :: N, Nt
-
-    type(propagator) :: p
-
-    ! @TODO: REMOVE PLACEHOLDER CODE
-    p = propagator(g, gt, dg, dgt)
-    p % d2g  = d2g
-    p % d2gt = d2gt
 
     associate(  g => p % g,     gt => p % gt,  &
                dg => p % dg,   dgt => p % dgt, &
               d2g => p % d2g, d2gt => p % d2gt )
 
-    ! Ensure that the Riccati parameters are diagonal
-    h   = g   % matrix * pauli0 % matrix
-    ht  = gt  % matrix * pauli0 % matrix
-    dh  = dg  % matrix * pauli0 % matrix
-    dht = dgt % matrix * pauli0 % matrix
+      ! Ensure that the Riccati parameters are diagonal
+      h   = g   % matrix * pauli0 % matrix
+      ht  = gt  % matrix * pauli0 % matrix
+      dh  = dg  % matrix * pauli0 % matrix
+      dht = dgt % matrix * pauli0 % matrix
 
-    ! Calculate the normalization matrices
-    N   = inverse( pauli0 - h*ht )
-    Nt  = inverse( pauli0 - ht*h )
+      ! Calculate the normalization matrices
+      N   = inverse( pauli0 - h*ht )
+      Nt  = inverse( pauli0 - ht*h )
 
-    ! Calculate the second-derivatives of the Riccati parameters
-    associate(P => this % P)
-      d2g  = (-2.0_wp,0.0_wp)*dh*Nt*ht*dh - (0.0_wp,2.0_wp)*e*P*h
-      d2gt = (-2.0_wp,0.0_wp)*dht*N*h*dht - (0.0_wp,2.0_wp)*e*P*ht
+      ! Calculate the second-derivatives of the Riccati parameters
+      associate(P => this % P)
+        d2g  = (-2.0_wp,0.0_wp)*dh*Nt*ht*dh - (0.0_wp,2.0_wp)*e*P*h
+        d2gt = (-2.0_wp,0.0_wp)*dht*N*h*dht - (0.0_wp,2.0_wp)*e*P*ht
+      end associate
     end associate
-
-    end associate
-
-    ! @TODO: REMOVE PLACEHOLDER CODE
-    d2g  = p % d2g
-    d2gt = p % d2gt
   end subroutine
 
   pure subroutine halfmetal_diffusion_equation_a(this, p, a, r, rt)
