@@ -516,13 +516,22 @@ contains
       real(wp), intent(out) :: bca(8)
       real(wp), intent(out) :: bcb(8)
 
-      ! Transparent boundary conditions
-      bca(1:8) = ua(1:8) - a(1:8)
-      bcb(1:8) = ub(1:8) - b(1:8)
+      ! Calculate residuals from the boundary conditions (left)
+      if (this % transparent_a) then
+        ! Transparent interface
+        bca(1:8) = ua(1:8) - a(1:8)
+      ! else
+      ! ! Customized interface
+      !   call this % kinetic_equation_a(ua, a)
+      end if
 
-      ! Calculate residuals from the boundary conditions
-      ! call this%diffusion_equation_a(a, g1, gt1, dg1, dgt1, r1, rt1)
-      ! call this%diffusion_equation_b(b, g2, gt2, dg2, dgt2, r2, rt2)
+      if (this % transparent_b) then
+        ! Transparent interface
+        bcb(1:8) = ub(1:8) - b(1:8)
+      ! else
+      ! ! Customized interface
+      !   call this % kinetic_equation_b(ub, b)
+      end if
     end subroutine
 
     pure subroutine pack(a, b)
