@@ -4,12 +4,6 @@
 !> This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
 !> of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
 !> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
-!>
-!> @TODO
-!>   Move the the spinactive field into separate subobjects spinactive_a and spinactive_b of a type(spinactive). This
-!>   type can be moved into a module spinactive_m, together with the associated methods diffusion_spinorbit etc. We can
-!>   then have separate modules spinorbit_m and spinactive_m that the current module depends on, leading to greater 
-!>   encapsulation and separation. The spinreflect.i contents are removed, but may be reintroduced if necessary.
 
 module conductor_m
   use :: stdio_m
@@ -41,7 +35,7 @@ module conductor_m
     procedure                 :: update_posthook         => conductor_update_posthook         !! Code to execute after  updates
 
     ! These methods contain the equations that describe electrical conductors
-    procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation (conductor terms)
+    procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation
 
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
@@ -162,7 +156,7 @@ contains
 
       ! Calculate the contribution from a spin-orbit coupling
       if (allocated(this % spinorbit)) then
-        call this % spinorbit % diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
+        call this % spinorbit % diffusion_equation(p)
       end if
 
       ! Calculate the contribution from spin-dependent scattering
@@ -308,11 +302,6 @@ contains
 
     ! Deallocate workspace memory
     deallocate(S, Q, I, J)
-
-    ! Call the spinorbit posthook
-    if (allocated(this%spinorbit)) then
-      call this%spinorbit%update_posthook
-    end if
   end subroutine
 
 

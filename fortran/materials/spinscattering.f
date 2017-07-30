@@ -54,36 +54,36 @@ contains
     !! equation, and update the second derivatives of the Riccati parameters.
     class(spinscattering), intent(in)    :: this
     type(propagator),      intent(inout) :: p
-    type(nambu)                          :: g, r
-    type(nambu)                          :: gsf, gso, gdp
-    real(wp)                             :: csf, cso, cdp
+    type(nambu)                          :: G, R
+    type(nambu)                          :: Gsf, Gso, Gdp
+    real(wp)                             :: Csf, Cso, Cdp
 
     ! Construct the propagator matrix
-    g = p % retarded()
+    G = p % retarded()
 
     ! Construct the self-energy matrices
-    associate(n => this % nambuv)
-      gdp = n(4)*g*n(4)
-      gsf = n(1)*g*n(1) + n(2)*g*n(2) + n(3)*g*n(3)
-      gso = n(4)*gsf*n(4)
+    associate(N => this % nambuv)
+      Gdp = N(4)*G*N(4)
+      Gsf = N(1)*G*N(1) + N(2)*G*N(2) + N(3)*G*N(3)
+      Gso = N(4)*Gsf*N(4)
     end associate
 
     ! Calculate the self-energy prefactors
-    cdp = (this % depairing) / (8 * this % material % thouless)
-    csf = (this % spinflip ) / (2 * this % material % thouless)
-    cso = (this % spinorbit) / (2 * this % material % thouless)
+    Cdp = (this % depairing) / (8 * this % material % thouless)
+    Csf = (this % spinflip ) / (2 * this % material % thouless)
+    Cso = (this % spinorbit) / (2 * this % material % thouless)
 
     ! Calculate the self-energy commutators
-    r = cdp*gdp + csf*gsf + cso*gso
-    r = r*g - g*r
+    R = Cdp*Gdp + Csf*Gsf + Cso*Gso
+    R = R*G - G*R
 
     ! Update the second derivatives of the Riccati parameters
-    associate(  u => r % matrix,                  &
+    associate(  U => R % matrix,                  &
                 g => p % g,       gt => p % gt,   &
                dg => p % dg,     dgt => p % dgt,  &
               d2g => p % d2g,   d2gt => p % d2gt  )
-      d2g  = d2g  + (pauli0 - g*gt) * (u(1:2,3:4) - u(1:2,1:2)*g )
-      d2gt = d2gt + (pauli0 - gt*g) * (u(3:4,1:2) - u(3:4,3:4)*gt)
+      d2g  = d2g  + (pauli0 - g*gt) * (U(1:2,3:4) - U(1:2,1:2)*g )
+      d2gt = d2gt + (pauli0 - gt*g) * (U(3:4,1:2) - U(3:4,3:4)*gt)
     end associate
   end subroutine
 end module
