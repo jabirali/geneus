@@ -26,7 +26,6 @@ module conductor_m
   ! Type declarations
   type, public, extends(material) :: conductor
     ! Physical fields in the material
-    real(wp)                          :: depairing              =  0.00_wp                    !! Magnetic orbital depairing
     type(spinscattering), allocatable :: spinscattering                                       !! Spin-dependent scattering
     type(spinorbit),      allocatable :: spinorbit                                            !! Spin-orbit coupling
 
@@ -162,21 +161,14 @@ contains
       d2gt = (-2.0_wp,0.0_wp)*dgt*N*g*dgt - (0.0_wp,2.0_wp)*e*gt
 
       ! Calculate the contribution from a spin-orbit coupling
-      if (allocated(this%spinorbit)) then
-        call this%spinorbit%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
+      if (allocated(this % spinorbit)) then
+        call this % spinorbit % diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
       end if
 
       ! Calculate the contribution from spin-dependent scattering
-      if (allocated(this%spinscattering)) then
-        call this%spinscattering%diffusion_equation(g, gt, dg, dgt, d2g, d2gt)
+      if (allocated(this % spinscattering)) then
+        call this % spinscattering % diffusion_equation(p)
       end if
-
-      ! Calculate the contribution from orbital magnetic depairing
-      if (this%depairing > 0) then
-        d2g  = d2g  + (this%depairing/this%thouless)*(2.0_wp*N  - pauli0)*g
-        d2gt = d2gt + (this%depairing/this%thouless)*(2.0_wp*Nt - pauli0)*gt
-      end if
-
     end associate
   end subroutine
 
@@ -396,8 +388,6 @@ contains
         end if
         this % spinorbit % field(1) = this % spinorbit % field(1) + (+tmp)*pauli1
         this % spinorbit % field(2) = this % spinorbit % field(2) + (-tmp)*pauli2
-      case ('depairing')
-        call evaluate(val, this % depairing)
       case ('gap')
         block
           integer  :: index
@@ -424,6 +414,12 @@ contains
           this % spinscattering = spinscattering(this)
         end if
         call evaluate(val, this % spinscattering % spinorbit)
+      case ('depairing')
+        if (.not. allocated(this % spinscattering)) then
+          allocate(this%spinscattering)
+          this % spinscattering = spinscattering(this)
+        end if
+        call evaluate(val, this % spinscattering % depairing)
       case ('zeroenergy')
         block
           logical :: tmp
