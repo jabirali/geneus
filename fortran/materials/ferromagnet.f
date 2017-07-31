@@ -6,10 +6,8 @@
 
 module ferromagnet_m
   use :: stdio_m
-  use :: math_m
-  use :: spin_m
+  use :: condmat_m
   use :: conductor_m
-  use :: propagator_m
   private
 
   ! Type declaration
@@ -121,9 +119,6 @@ contains
     ! Modify the type string
     if (allocated(this%magnetization)) then
       this%type_string = color_red // 'FERROMAGNET' // color_none
-      ! if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
-      ! if (norm2(this%spinactive_a%magnetization)>eps) this%type_string = trim(this%type_string)//color_purple //' [SAL]'//color_none
-      ! if (norm2(this%spinactive_b%magnetization)>eps) this%type_string = trim(this%type_string)//color_purple //' [SAR]'//color_none
     end if
   end subroutine
 

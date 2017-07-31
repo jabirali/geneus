@@ -4,11 +4,8 @@
 !> This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.
 
 module spinorbit_m
-  use :: propagator_m
+  use :: condmat_m
   use :: material_m
-  use :: math_m
-  use :: nambu_m
-  use :: spin_m
   private
 
   ! Public interface

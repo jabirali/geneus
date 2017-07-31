@@ -6,9 +6,7 @@
 
 module superconductor_m
   use :: stdio_m
-  use :: math_m
-  use :: spin_m
-  use :: propagator_m
+  use :: condmat_m
   use :: conductor_m
   private
 
@@ -115,9 +113,6 @@ contains
 
     ! Modify the type string
     this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
-    ! if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
-    ! if (norm2(this%spinactive_a%magnetization)) this%type_string = trim(this%type_string)//color_purple//' [SAL]'//color_none
-    ! if (norm2(this%spinactive_b%magnetization)) this%type_string = trim(this%type_string)//color_purple//' [SAR]'//color_none
   end subroutine
 
   impure subroutine superconductor_update_posthook(this)

@@ -16,9 +16,7 @@
 
 module material_m
   use :: stdio_m
-  use :: math_m
-  use :: spin_m
-  use :: propagator_m
+  use :: condmat_m
   private
 
   ! Public declarations

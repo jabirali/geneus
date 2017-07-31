@@ -12,9 +12,7 @@
 module spinactive_m
   use :: propagator_m
   use :: material_m
-  use :: math_m
-  use :: spin_m
-  use :: nambu_m
+  use :: condmat_m
   private
 
   ! Public interface

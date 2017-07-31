@@ -13,9 +13,7 @@
 
 module halfmetal_m
   use :: stdio_m
-  use :: math_m
-  use :: spin_m
-  use :: propagator_m
+  use :: condmat_m
   use :: material_m
   use :: conductor_m
   private

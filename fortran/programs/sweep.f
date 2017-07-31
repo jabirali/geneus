@@ -102,14 +102,12 @@ program main
 contains
   impure subroutine prehook
     ! Write out status information.
-    use :: stdio_m
 
     call status_body('Phase difference', phase(n))
   end subroutine
 
   impure subroutine posthook
     ! Write results to output files.
-    use :: structure_m
 
     character(len=5) :: filename
     write(filename,'(f5.3)') phase(n)
@@ -119,7 +117,6 @@ contains
 
   impure subroutine finalize
     ! Write out the final results.
-    use :: stdio_m
 
     ! Status information
     call status_head('CRITICAL CURRENT')

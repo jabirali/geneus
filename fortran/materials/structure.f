@@ -5,8 +5,8 @@
 !> also exports the type definitions and constructors for all class(material) types, although these should rarely be needed.
 
 module structure_m
-  use :: math_m
   use :: stdio_m
+  use :: condmat_m
   use :: material_m
   use :: conductor_m
   use :: superconductor_m
@@ -578,7 +578,6 @@ contains
 
   impure function structure_construct() result(this)
     !! Constructs a multilayer stack from a configuration file.
-    use :: stdio_m
 
     type(structure)          :: this
     character(len=4096)      :: file

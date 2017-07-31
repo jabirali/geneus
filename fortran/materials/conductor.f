@@ -4,13 +4,13 @@
 !> This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
 !> of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
 !> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
+!>
+!> @TODO
+!>   Reimplement flags [SOC], [SAL], [SAR] for marking special properties about a material in a variable field_string.
 
 module conductor_m
   use :: stdio_m
-  use :: math_m
-  use :: spin_m
-  use :: nambu_m
-  use :: propagator_m
+  use :: condmat_m
   use :: material_m
   use :: spinorbit_m
   use :: spinactive_m
@@ -29,13 +29,13 @@ module conductor_m
   contains
     ! These methods are required by the class(material) abstract interface
     procedure                 :: init                    => conductor_init                    !! Initializes propagators
-    procedure                 :: diffusion_equation_a    => conductor_diffusion_equation_a    !! Boundary condition (left)
-    procedure                 :: diffusion_equation_b    => conductor_diffusion_equation_b    !! Boundary condition (right)
     procedure                 :: update_prehook          => conductor_update_prehook          !! Code to execute before updates
     procedure                 :: update_posthook         => conductor_update_posthook         !! Code to execute after  updates
 
     ! These methods contain the equations that describe electrical conductors
     procedure                 :: diffusion_equation      => conductor_diffusion_equation      !! Diffusion equation
+    procedure                 :: diffusion_equation_a    => conductor_diffusion_equation_a    !! Boundary condition (left)
+    procedure                 :: diffusion_equation_b    => conductor_diffusion_equation_b    !! Boundary condition (right)
 
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
@@ -187,8 +187,8 @@ contains
     end associate
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
-    if (allocated(this%spinorbit)) then
-      call this%spinorbit%diffusion_equation_a(p, r, rt)
+    if (allocated(this % spinorbit)) then
+      call this % spinorbit % diffusion_equation_a(p, r, rt)
     end if
   end subroutine
 
@@ -213,8 +213,8 @@ contains
     end associate
 
     ! Gauge-dependent terms in the case of spin-orbit coupling
-    if (allocated(this%spinorbit)) then
-      call this%spinorbit%diffusion_equation_b(p, r, rt)
+    if (allocated(this % spinorbit)) then
+      call this % spinorbit % diffusion_equation_b(p, r, rt)
     end if
   end subroutine
 
@@ -223,26 +223,22 @@ contains
     class(conductor), intent(inout) :: this
 
     ! Prepare variables associated with spin-orbit coupling
-    if (allocated(this%spinorbit)) then
-      call this%spinorbit%update_prehook
+    if (allocated(this % spinorbit)) then
+      call this % spinorbit % update_prehook
     end if
 
-    ! Prepare variables associated with spin-active tunneling  interfaces
+    ! Prepare variables associated with spin-active interfaces
     call this % spinactive_a % update_prehook
     call this % spinactive_b % update_prehook
 
     ! Modify the type string
-    this%type_string = color_yellow // 'CONDUCTOR' // color_none
-    ! if (allocated(this%spinorbit))       this%type_string = trim(this%type_string) // color_cyan   // ' [SOC]' // color_none
-    ! if (norm2(this%spinactive_a%magnetization)>eps) this%type_string = trim(this%type_string)//color_purple //' [SAL]'//color_none
-    ! if (norm2(this%spinactive_b%magnetization)>eps) this%type_string = trim(this%type_string)//color_purple //' [SAR]'//color_none
+    this % type_string = color_yellow // 'CONDUCTOR' // color_none
   end subroutine
 
   impure subroutine conductor_update_posthook(this)
     !! Code to execute after running the update method of a class(conductor) object.
     !! In particular, this function calculates supercurrents, dissipative currents,
     !! accumulations, and density of states, and stores the results in the object.
-    use :: nambu_m
 
     class(conductor), intent(inout)          :: this
     type(nambu), allocatable                 :: gauge

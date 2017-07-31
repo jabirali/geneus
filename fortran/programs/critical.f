@@ -94,7 +94,6 @@ program main
 contains
   impure subroutine prehook
     ! Write out status information.
-    use :: stdio_m
 
     call status_body('Temperature', critical)
     call status_body('Bisection',   n)
@@ -102,7 +101,6 @@ contains
 
   impure subroutine finalize
     ! Write out final results.
-    use :: stdio_m
 
     ! Status information
     call status_head('CRITICAL TEMPERATURE')

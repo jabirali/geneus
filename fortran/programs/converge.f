@@ -50,7 +50,6 @@ program main
 contains
   impure subroutine finalize
     ! Write out the final results.
-    use :: stdio_m
 
     ! Status information
     call status_head('EQUILIBRIUM')

@@ -5,11 +5,8 @@
 !> spin-flip scattering, spin-orbit scattering, and magnetic orbital depairing.
 
 module spinscattering_m
+  use :: condmat_m
   use :: material_m
-  use :: math_m
-  use :: spin_m
-  use :: nambu_m
-  use :: propagator_m
   private
 
   ! Public interface
