@@ -174,11 +174,7 @@ contains
     complex(wp), dimension(1:4,1:4)          :: I
 
     ! Calculate a matrix current from the propagators
-    if (associated(this % material_a)) then
-      I = (-0.50_wp) * this % spinactive_a % diffusion_current(p % retarded(), a % retarded())
-    else 
-      I = 0
-    end if
+    I = (-0.50_wp) * this % spinactive_a % diffusion_current(p % retarded(), a % retarded())
 
     ! Calculate the deviation from the boundary condition
     associate(g => p % g, gt => p % gt, dg => p % dg, dgt => p % dgt)
@@ -200,11 +196,7 @@ contains
     complex(wp), dimension(1:4,1:4)          :: I
 
     ! Calculate a matrix current from the propagators
-    if (associated(this % material_b)) then
-      I = (+0.50_wp) * this % spinactive_b % diffusion_current(p % retarded(), b % retarded())
-    else 
-      I = 0
-    end if
+    I = (+0.50_wp) * this % spinactive_b % diffusion_current(p % retarded(), b % retarded())
 
     ! Calculate the deviation from the boundary condition
     associate(g => p % g, gt => p % gt, dg => p % dg, dgt => p % dgt)

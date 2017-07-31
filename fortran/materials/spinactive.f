@@ -67,6 +67,23 @@ contains
   impure subroutine spinactive_update_prehook(this)
     !! Updates the internal variables associated with spin-active interfaces.
     class(spinactive), intent(inout) :: this 
+    class(material),   pointer       :: other
+
+    ! Figure out what the neighbour material is
+    select case(this % side)
+      case('a')
+        other => this % material % material_a
+      case('b')
+        other => this % material % material_b
+      case default
+        other => null()
+    end select
+
+    ! Set the conductance of vacuum interfaces equal to the material conductance,
+    ! since this makes the normalization of spin-mixing parameters sensible there
+    if (.not. associated(other)) then
+      this % conductance = 1
+    end if
   
     ! Process transmission properties
     this % M = nambuv(this % magnetization)
@@ -76,20 +93,20 @@ contains
     this % M1 = this % M
   
     ! Process reflection properties (this side)
-    if (nonzero(this % misalignment)) then
-      this % M0 = nambuv(this % misalignment)
-    end if
+    ! if (nonzero(this % misalignment)) then
+    !   this % M0 = nambuv(this % misalignment)
+    ! end if
   
     ! ! Process reflection properties (other side)
-    ! if (associated(this % material_a)) then
-    !   select type (other => this % material_a)
+    ! if (associated(this % material % material_a)) then
+    !   select type (other => this % material % material_a)
     !     class is (conductor)
     !       call update_magnetization(this % spinactive_a % M1, other % spinactive_b % misalignment)
     !   end select
     ! end if
   
-    ! if (associated(this % material_b)) then
-    !   select type (other => this % material_b)
+    ! if (associated(this % material % material_b)) then
+    !   select type (other => this % material % material_b)
     !     class is (conductor)
     !       call update_magnetization(this % spinactive_b % M1, other % spinactive_a % misalignment)
     !   end select
