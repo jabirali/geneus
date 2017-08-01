@@ -76,10 +76,11 @@ module math_m
 
   interface interpolate
     !! Public interface for various interpolation routines.
-    module procedure interpolate_point_re, &        ! Interpolate from a real array to a point
-                     interpolate_point_cx, &        ! Interpolate from a complex array to a point
-                     interpolate_array_re, &        ! Interpolate from a real array to an array
-                     interpolate_array_cx           ! Interpolate from a complex array to an array
+    module procedure interpolate_point_re, &        ! Interpolate a scalar function from a real array to a point
+                     interpolate_point_cx, &        ! Interpolate a scalar function from a complex array to a point
+                     interpolate_array_re, &        ! Interpolate a scalar function from a real array to an array
+                     interpolate_array_cx, &        ! Interpolate a scalar function from a complex array to an array
+                     interpolate_point_matrix_re    ! Interpolate a matrix function from a real array array to a point
   end interface 
 
   interface linspace

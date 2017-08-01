@@ -162,7 +162,7 @@ contains
   end function
 
   function interpolate_point_re(x, y, p) result(r)
-    !! Wrapper for interpolate_pchip that accepts scalar arguments.
+    !! Wrapper for interpolate_array_re that accepts scalar arguments.
     real(wp), dimension(:),       intent(in)  :: x   !! Variable x
     real(wp), dimension(size(x)), intent(in)  :: y   !! Function y(x)
     real(wp),                     intent(in)  :: p   !! Interpolation point p
@@ -190,6 +190,37 @@ contains
 
     ! Extract the scalar result
     r = rs(1)
+  end function
+
+  pure function interpolate_point_matrix_re(x, y, p) result(r)
+    !! Perform a Piecewise Cubic Hermitian Interpolation of a matrix function using Catmull-Rom splines.
+    real(wp),    dimension(:),       intent(in) :: x  !! Variable x
+    real(wp),    dimension(:,:,:),   intent(in) :: y  !! Function y(x)
+    real(wp),                        intent(in) :: p  !! Interpolation point p
+    complex(wp), dimension(size(y,1),size(y,2)) :: r  !! Interpolation result y(p)
+
+    integer  :: n, m
+    real(wp) :: t
+
+    ! Find the nearest known point y(x)
+    m = size(x)
+    n = floor(p*(m-1) + 1);
+    
+    ! Perform the interpolation
+    if (n <= 0) then
+      ! Exterior: nearest extrapolation
+      r = y(:,:,1)
+    else if (n >= m) then
+      ! Exterior: nearest extrapolation
+      r = y(:,:,m)
+    else
+      ! Interior: spline interpolation
+      t = (p - x(max(n,1)))/(x(min(n+1,m)) - x(max(n,1)))
+      r = y(:,:,max(n-1,1)) * (     -0.5*t +1.0*t**2 -0.5*t**3)  &
+        + y(:,:,max(n-0,1)) * (+1.0        -2.5*t**2 +1.5*t**3)  &
+        + y(:,:,min(n+1,m)) * (     +0.5*t +2.0*t**2 -1.5*t**3)  &
+        + y(:,:,min(n+2,m)) * (            -0.5*t**2 +0.5*t**3)  
+    end if
   end function
 
   !--------------------------------------------------------------------------------

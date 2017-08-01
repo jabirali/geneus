@@ -478,18 +478,9 @@ contains
       real(wp),                   intent(in)  :: z
       real(wp), dimension(16),    intent(in)  :: u
       real(wp), dimension(16,16), intent(out) :: j
-      integer                                 :: m, n
-
-      ! Calculate the index corresponding to the given location
-      m = size(this % location) - 1
-      n = floor(z*m + 1)
 
       ! Interpolate the Jacobian at this position
-      if (n <= 1) then
-        j(:,:) = ju(:,:,1)
-      else
-        j(:,:) = ju(:,:,n-1) + (ju(:,:,n)-ju(:,:,n-1))*(z*m-(n-2))
-      end if
+      j = interpolate(this % location, ju, z)
     end subroutine
 
     pure subroutine bc(ua, ub, bca, bcb)
