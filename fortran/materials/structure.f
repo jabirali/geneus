@@ -37,7 +37,7 @@ module structure_m
     procedure :: fmap                => structure_fmap                !! Manipulate all layers
 
     ! Manipulation of the physical state
-    procedure :: init                => structure_init                !! Reset the physical state
+    procedure :: initialize          => structure_initialize          !! Reset the physical state
     procedure :: save                => structure_save                !! Save the physical state
     procedure :: load                => structure_load                !! Load the physical state
     procedure :: update              => structure_update              !! Update the physical state
@@ -79,13 +79,13 @@ contains
     ! Construct the material
     if (.not. associated(this % b)) then
       ! This is the first layer in the structure
-      call material_allocate(this % b, string)
-      call material_construct(this % b)
+      call alloc(this % b, string)
+      call this % b % construct
       this % a => this % b
     else
       ! This is not the first layer in the structure
-      call material_allocate(this % b % material_b, string)
-      call material_construct(this % b % material_b)
+      call alloc(this % b % material_b, string)
+      call this % b % material_b % construct
       this % b % material_b % material_a => this % b
       this % b => this % b % material_b
     end if
@@ -94,7 +94,7 @@ contains
     write(stdout,*)
     write(stdout,*) '[' // string // ']'
   contains
-    subroutine material_allocate(ptr, str)
+    subroutine alloc(ptr, str)
       !! Allocates memory for a new material layer.
       class(material), pointer :: ptr
       character(*)             :: str
@@ -110,24 +110,6 @@ contains
           allocate(conductor      :: ptr)
         case default
           call error('Material type "' // trim(str) // '" unknown!')
-      end select
-    end subroutine
-
-    subroutine material_construct(ptr)
-      !! Constructs and initializes a new material layer.
-      class(material), pointer :: ptr
-
-      select type(ptr)
-        type is (halfmetal)
-          ptr = halfmetal()
-        type is (ferromagnet)
-          ptr = ferromagnet()
-        type is (superconductor)
-          ptr = superconductor()
-        type is (conductor)
-          ptr = conductor()
-        class default
-          call error('Attempted to construct an unsupported material type!')
       end select
     end subroutine
   end subroutine
@@ -263,17 +245,17 @@ contains
     end subroutine
   end function
 
-  impure subroutine structure_init(this, gap)
+  impure subroutine structure_initialize(this, gap)
     !! Initializes the state of the entire multilayer stack.
     class(structure), target  :: this
     complex(wp)               :: gap
 
     ! Initialize all material states
-    call this % fmap(init)
+    call this % fmap(initialize)
   contains
-    subroutine init(m)
+    subroutine initialize(m)
       class(material), pointer :: m
-      call m % init(gap)
+      call m % initialize(gap)
     end subroutine
   end subroutine
 

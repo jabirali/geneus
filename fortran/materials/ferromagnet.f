@@ -15,32 +15,16 @@ module ferromagnet_m
     real(wp),   allocatable          :: magnetization(:,:)                                    !! Magnetic exchange field as a function of position
     type(spin), allocatable, private :: h(:), ht(:)                                           !! Used by internal subroutines to handle exchange fields
   contains
+    ! These methods define the class(material) interface
+    procedure                        :: update_prehook     => ferromagnet_update_prehook      !! Code to execute before calculating the propagators
+
     ! These methods contain the equations that describe ferromagnets
     procedure                        :: diffusion_equation => ferromagnet_diffusion_equation  !! Differential equation that describes the ferromagnet
-    procedure                        :: update_prehook     => ferromagnet_update_prehook      !! Code to execute before calculating the propagators
-    procedure                        :: update_posthook    => ferromagnet_update_posthook     !! Code to execute after  calculating the propagators
 
     ! These methods define miscellaneous utility functions
     procedure                        :: conf               => ferromagnet_conf                !! Configures material parameters
   end type
-
-  ! Type constructor
-  interface ferromagnet
-    module procedure ferromagnet_construct
-  end interface
 contains
-
-  !--------------------------------------------------------------------------------!
-  !                        IMPLEMENTATION OF CONSTRUCTORS                          !
-  !--------------------------------------------------------------------------------!
-
-  function ferromagnet_construct() result(this)
-    !! Constructs a ferromagnetic material that is initialized as a weak superconductor.
-    type(ferromagnet) :: this
-
-    ! Call the superclass constructor
-    this%conductor = conductor()
-  end function
 
   !--------------------------------------------------------------------------------!
   !                    IMPLEMENTATION OF FERROMAGNET METHODS                       !
@@ -62,7 +46,7 @@ contains
 
 
       ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-      call this%conductor%diffusion_equation(p, e, z)
+      call this % conductor % diffusion_equation(p, e, z)
 
       if (allocated(this%h)) then
         ! Calculate the index corresponding to the given location
@@ -120,14 +104,6 @@ contains
     if (allocated(this%magnetization)) then
       this%type_string = color_red // 'FERROMAGNET' // color_none
     end if
-  end subroutine
-
-  impure subroutine ferromagnet_update_posthook(this)
-    !! Code to execute after running the update method of a class(ferromagnet) object.
-    class(ferromagnet), intent(inout) :: this
-
-    ! Call the superclass posthook
-    call this%conductor%update_posthook
   end subroutine
 
   !--------------------------------------------------------------------------------!

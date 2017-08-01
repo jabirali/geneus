@@ -23,7 +23,6 @@ module halfmetal_m
     real(wp)            :: polarization = 0.0_wp                                  !! Spin-polarization of the ferromagnet
     type(spin), private :: P                                                      !! Polarization matrix
   contains
-    procedure           :: init                 => halfmetal_init                 !! Initializes the propagators
     procedure           :: conf                 => halfmetal_conf                 !! Configures the material parameters
     procedure           :: diffusion_equation   => halfmetal_diffusion_equation   !! Defines the Usadel diffusion equation
     procedure           :: diffusion_equation_a => halfmetal_diffusion_equation_a !! Boundary condition at the left  interface
@@ -32,37 +31,7 @@ module halfmetal_m
     procedure           :: update_posthook      => halfmetal_update_posthook      !! Code to execute after  calculating the propagators
     procedure           :: update_density       => halfmetal_update_density       !! Calculates the density of states
   end type
-
-  ! Type constructors
-  interface halfmetal
-    module procedure halfmetal_construct
-  end interface
 contains
-
-  !--------------------------------------------------------------------------------!
-  !                        IMPLEMENTATION OF CONSTRUCTORS                          !
-  !--------------------------------------------------------------------------------!
-
-  impure function halfmetal_construct() result(this)
-    !! Construct a halfmetal object.
-    type(halfmetal) :: this
-
-    ! Call the superclass constructor
-    this%conductor = conductor()
-
-    ! Initialize the propagators
-    call this%init(cx(0.0_wp))
-  end function
-
-  pure subroutine halfmetal_init(this, gap)
-    !! Initialize propagators to a non-superconducting state.
-    class(halfmetal),      intent(inout) :: this
-    complex(wp), optional, intent(in)    :: gap
-    integer                              :: n, m
-
-    ! Call the superclass initializer
-    call this%conductor%init((0.0_wp,0.0_wp))
-  end subroutine
 
   !--------------------------------------------------------------------------------!
   !                     IMPLEMENTATION OF HALFMETAL EQUATIONS                      !

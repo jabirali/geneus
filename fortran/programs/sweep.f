@@ -45,8 +45,8 @@ program main
   stack = structure()
 
   ! Construct the surrounding superconductors
-  sa = superconductor()
-  sb = superconductor()
+  call sa % construct()
+  call sb % construct()
 
   ! Disable the superconductor from updates
   call sa % conf('order','0')
@@ -77,8 +77,8 @@ program main
   ! Calculate the charge current as a function of phase difference
   do n=1,size(phase)
     ! Update the phase
-    call sa % init( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
-    call sb % init( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
+    call sa % initialize( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
+    call sb % initialize( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
 
     ! Update the state
     call stack % converge(threshold = tolerance, prehook = prehook, posthook = posthook)

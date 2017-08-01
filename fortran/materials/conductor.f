@@ -4,9 +4,6 @@
 !> This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
 !> of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
 !> such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.
-!>
-!> @TODO
-!>   Reimplement flags [SOC], [SAL], [SAR] for marking special properties about a material in a variable field_string.
 
 module conductor_m
   use :: stdio_m
@@ -28,7 +25,8 @@ module conductor_m
     type(spinactive),     allocatable :: spinactive_b                                         !! Spin-active interface (right)
   contains
     ! These methods are required by the class(material) abstract interface
-    procedure                 :: init                    => conductor_init                    !! Initializes propagators
+    procedure                 :: construct               => conductor_construct               !! Constructs the object
+    procedure                 :: initialize              => conductor_initialize              !! Initializes propagators
     procedure                 :: update_prehook          => conductor_update_prehook          !! Code to execute before updates
     procedure                 :: update_posthook         => conductor_update_posthook         !! Code to execute after  updates
 
@@ -40,34 +38,29 @@ module conductor_m
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
   end type
-
-  ! Type constructors
-  interface conductor
-    module procedure conductor_construct
-  end interface
 contains
 
   !--------------------------------------------------------------------------------!
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  function conductor_construct() result(this)
+  pure subroutine conductor_construct(this)
     !! Constructs a conductor object initialized to a superconducting state.
-    type(conductor) :: this
+    class(conductor), intent(inout) :: this
 
     ! Initialize locations
-    allocate(this%location(151))
-    call linspace(this%location, 0 + 1e-10_wp, 1 - 1e-10_wp)
+    allocate(this % location(151))
+    call linspace(this % location, 0 + 1e-10_wp, 1 - 1e-10_wp)
 
     ! Initialize energies
-    allocate(this%energy(600))
-    call linspace(this%energy(   :400), 1e-6_wp, 1.50_wp)
-    call linspace(this%energy(400:500), 1.50_wp, 4.50_wp)
-    call linspace(this%energy(500:   ), 4.50_wp, 30.0_wp)
+    allocate(this % energy(600))
+    call linspace(this % energy(   :400), 1e-6_wp, 1.50_wp)
+    call linspace(this % energy(400:500), 1.50_wp, 4.50_wp)
+    call linspace(this % energy(500:   ), 4.50_wp, 30.0_wp)
 
     ! Initialize propagators
-    allocate(this%propagator(size(this%energy),size(this%location)))
-    call this%init( (0.0_wp,0.0_wp) )
+    allocate(this % propagator(size(this % energy), size(this % location)))
+    call this % initialize(cx(0.0_wp))
 
     ! Allocate memory for physical observables
     allocate(this % correlation(size(this % location)))
@@ -77,11 +70,11 @@ contains
     allocate(this % density(size(this % energy), size(this % location), 0:7))
 
     ! Allocate boundary condition objects
-    this % spinactive_a = spinactive(this, 'a')
-    this % spinactive_b = spinactive(this, 'b')
-  end function
+    allocate(this % spinactive_a)
+    allocate(this % spinactive_b)
+  end subroutine
 
-  pure subroutine conductor_init(this, gap)
+  pure subroutine conductor_initialize(this, gap)
     !! Define the default initializer.
     class(conductor),      intent(inout) :: this
     complex(wp), optional, intent(in)    :: gap
@@ -89,16 +82,16 @@ contains
 
     ! Initialize the Riccati parameters
     if (present(gap)) then
-      do m = 1,size(this%location)
-        do n = 1,size(this%energy)
-            this % propagator(n,m) = propagator( cx(this%energy(n),this%scattering), gap )
+      do m = 1,size(this % location)
+        do n = 1,size(this % energy)
+            this % propagator(n,m) = propagator( cx(this % energy(n), this % scattering), gap )
         end do
       end do
     end if
 
     ! Initialize the distribution function
-    do m = 1,size(this%location)
-      do n = 1,size(this%energy)
+    do m = 1,size(this % location)
+      do n = 1,size(this % energy)
         ! Finite nonequilibrium potentials
         this % propagator(n,m) % h = &
           [                                                      &
@@ -213,6 +206,14 @@ contains
   impure subroutine conductor_update_prehook(this)
     !! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
+ 
+    ! Discard the tunneling conductance at vacuum interfaces
+    if (.not. associated(this % material_a)) then
+      this % spinactive_a % conductance = 1
+    end if
+    if (.not. associated(this % material_b)) then
+      this % spinactive_b % conductance = 1
+    end if
 
     ! Prepare variables associated with spin-orbit coupling
     if (allocated(this % spinorbit)) then
@@ -336,12 +337,18 @@ contains
       case ('magnetization_b')
         call evaluate(val, this % spinactive_b % magnetization)
         this % spinactive_b % magnetization = unitvector(this % spinactive_b % magnetization)
-      case ('misalignment_a')
-        call evaluate(val, this % spinactive_a % misalignment)
-        this % spinactive_a % misalignment = unitvector(this % spinactive_a % misalignment)
-      case ('misalignment_b')
-        call evaluate(val, this % spinactive_b % misalignment)
-        this % spinactive_b % misalignment = unitvector(this % spinactive_b % misalignment)
+      case ('misalignment0_a')
+        call evaluate(val, this % spinactive_a % misalignment0)
+        this % spinactive_a % misalignment0 = unitvector(this % spinactive_a % misalignment0)
+      case ('misalignment0_b')
+        call evaluate(val, this % spinactive_b % misalignment0)
+        this % spinactive_b % misalignment0 = unitvector(this % spinactive_b % misalignment0)
+      case ('misalignment1_a')
+        call evaluate(val, this % spinactive_a % misalignment1)
+        this % spinactive_a % misalignment1 = unitvector(this % spinactive_a % misalignment1)
+      case ('misalignment1_b')
+        call evaluate(val, this % spinactive_b % misalignment1)
+        this % spinactive_b % misalignment1 = unitvector(this % spinactive_b % misalignment1)
       case ('nanowire')
         call evaluate(val, tmp)
         if (.not. allocated(this % spinorbit)) then
@@ -377,7 +384,7 @@ contains
             call evaluate(val, gap)
             phase = 0
           end if
-          call this % init( gap = gap*exp((0.0,1.0)*pi*phase) )
+          call this % initialize( gap = gap*exp((0.0,1.0)*pi*phase) )
         end block
       case ('scattering_spinflip')
         if (.not. allocated(this % spinscattering)) then

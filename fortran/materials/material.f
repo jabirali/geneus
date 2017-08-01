@@ -5,14 +5,6 @@
 !> positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
 !> intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
 !> type defines the essential data structures and program structure, while the derived subtypes will define actual physics.
-!>
-!> @TODO
-!>   It might be cleaner to refactor this class by moving interface_vacuum and interface_transparent here, since these
-!>   are more a general description of materials than something specific to conductors. The Kupryanov-Lukichev boundary
-!>   conditions should however stay in the conductor class, since these describe "physics and mot math". Furthermore, 
-!>   it may be useful to move the diffusion_equation terms of the kind -2·dg·Nt·gt·dg to this class, since they're 
-!>   technically a part of the Riccati parametrization itself and not something describing any particular material.
-!>   With these modifications, the class can be made concrete instead of abstract, removing the need for interfaces.
 
 module material_m
   use :: stdio_m
@@ -70,12 +62,13 @@ module material_m
     character(len=128)                        :: type_string     =  'MATERIAL'                 !! Name of this material
   contains
     ! These methods define how to update the physical state of the material
-    procedure(init),                 deferred :: init                                          !! Initializes  propagators
-    procedure                                 :: update           => material_update           !! Calculates propagators
-    procedure                                 :: update_diffusion => material_update_diffusion !! Calculates propagators (in equilibrium)
-    procedure                                 :: update_kinetic   => material_update_kinetic   !! Calculates propagators (nonequilibrium)
-    procedure(update),               deferred :: update_prehook                                !! Executed before update
-    procedure(update),               deferred :: update_posthook                               !! Executed after  update
+    procedure(manipulate),           deferred :: construct                                     !! Construct  object
+    procedure(initialize),           deferred :: initialize                                    !! Initialize object
+    procedure(manipulate),           deferred :: update_prehook                                !! Executed before update
+    procedure(manipulate),           deferred :: update_posthook                               !! Executed after  update
+    procedure                                 :: update           => material_update           !! Calculate propagators
+    procedure                                 :: update_diffusion => material_update_diffusion !! Calculate propagators (in equilibrium)
+    procedure                                 :: update_kinetic   => material_update_kinetic   !! Calculate propagators (nonequilibrium)
 
     ! These methods define the physical equations used by the update methods
     procedure(diffusion_equation),   deferred :: diffusion_equation                            !! Diffusion equation
@@ -90,25 +83,21 @@ module material_m
 
   ! Interface declarations
   abstract interface
-    pure subroutine init(this, gap)
-      !! This interface is used for the deferred procedure init.
+    pure subroutine initialize(this, gap)
+      !! This interface is used for the deferred procedure initialize.
       import material, wp
 
       class(material),       intent(inout) :: this
       complex(wp), optional, intent(in)    :: gap
     end subroutine
-  end interface
 
-  abstract interface
-    impure subroutine update(this)
-      !! This interface is used for the deferred procedures update_prehook and update_posthook.
+    impure subroutine manipulate(this)
+      !! This interface is used for the deferred procedures construct, update_prehook, and update_posthook.
       import material
 
       class(material), intent(inout) :: this
     end subroutine
-  end interface
 
-  abstract interface
     pure subroutine diffusion_equation(this, p, e, z)
       !! This interface is used for the deferred procedure diffusion_equation.
       import material, propagator, spin, wp
@@ -118,9 +107,7 @@ module material_m
       complex(wp),      intent(in)    :: e
       real(wp),         intent(in)    :: z
     end subroutine
-  end interface
 
-  abstract interface
     pure subroutine diffusion_equation_a(this, p, a, r, rt)
       !! This interface is used for the deferred procedure diffusion_equation_a.
       import material, propagator, spin, wp
@@ -129,9 +116,7 @@ module material_m
       type(propagator),         intent(in)    :: p, a
       type(spin),               intent(inout) :: r, rt
     end subroutine
-  end interface
 
-  abstract interface
     pure subroutine diffusion_equation_b(this, p, b, r, rt)
       !! This interface is used for the deferred procedure diffusion_equation_b.
       import material, propagator, spin, wp
@@ -574,19 +559,19 @@ contains
         call evaluate(val, this%scattering)
       case("temperature")
         call evaluate(val, this%temperature)
-        call this % init()
+        call this % initialize()
       case("voltage")
         call evaluate(val, this%voltage)
-        call this % init()
+        call this % initialize()
       case("spinvoltage")
         call evaluate(val, this%spinvoltage)
-        call this % init()
+        call this % initialize()
       case("spintemperature")
         call evaluate(val, this%spintemperature)
-        call this % init()
+        call this % initialize()
       case("transverse")
         call evaluate(val, this%transverse)
-        call this % init()
+        call this % initialize()
       case("transparent_a")
         call evaluate(val, this%transparent_a)
       case("transparent_b")

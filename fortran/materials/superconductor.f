@@ -18,8 +18,11 @@ module superconductor_m
     real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
     integer                  :: iteration            !! Used to count where in the selfconsistent iteration cycle we are
   contains
+    ! These methods define the class(material) interface
+    procedure                :: construct          => superconductor_construct            !! Construct  propagators
+    procedure                :: initialize         => superconductor_initialize           !! Initialize propagators
+
     ! These methods contain the equations that describe superconductors
-    procedure                :: init                => superconductor_init                !! Initialize propagators
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  !! Diffusion equation
     procedure                :: update_gap          => superconductor_update_gap          !! Calculate the superconducting order parameter
     procedure                :: update_boost        => superconductor_update_boost        !! Boost the convergence of the order parameter (Steffensen's method)
@@ -34,43 +37,38 @@ module superconductor_m
     procedure                :: load                => superconductor_load                !! Load the state of a superconductor
     procedure                :: conf                => superconductor_conf                !! Configure material parameters
   end type
-
-  ! Type constructor
-  interface superconductor
-    module procedure superconductor_construct
-  end interface
 contains
 
   !--------------------------------------------------------------------------------!
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  function superconductor_construct() result(this)
+  pure subroutine superconductor_construct(this)
     !! Constructs a superconducting material that is initialized to a superconducting state.
-    type(superconductor) :: this
+    class(superconductor), intent(inout) :: this
 
     ! Call the superclass constructor
-    this%conductor = conductor()
+    call this % conductor % construct
 
     ! Initialize the order parameter
-    allocate(this%gap_history(size(this%location),1:3))
-    allocate(this%gap_location(4096 * size(this%location)))
-    allocate(this%gap_function(size(this%gap_location)))
-    call linspace(this%gap_location, this%location(1), this%location(size(this%location)))
-    call this%init( (1.0_wp,0.0_wp) )
-  end function
+    allocate(this % gap_history(size(this%location),1:3))
+    allocate(this % gap_location(4096 * size(this%location)))
+    allocate(this % gap_function(size(this%gap_location)))
+    call linspace(this % gap_location, this % location(1), this % location(size(this % location)))
+    call this % initialize( (1.0_wp,0.0_wp) )
+  end subroutine
 
-  pure subroutine superconductor_init(this, gap)
+  pure subroutine superconductor_initialize(this, gap)
     !! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
     complex(wp), optional, intent(in)    :: gap
 
     ! Call the superclass initializer
-    call this%conductor%init(gap)
+    call this % conductor % initialize(gap)
 
     ! Update the superconducting gap
     if (present(gap)) then
-      call this%set_gap(gap)
+      call this % set_gap(gap)
     end if
   end subroutine
 
@@ -96,7 +94,7 @@ contains
       gapt = conjg(gap)
 
       ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-      call this%conductor%diffusion_equation(p, e, z)
+      call this % conductor % diffusion_equation(p, e, z)
 
       ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
       d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
@@ -109,10 +107,10 @@ contains
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass prehook
-    call this%conductor%update_prehook
+    call this % conductor % update_prehook
 
     ! Modify the type string
-    this%type_string = color_green // 'SUPERCONDUCTOR' // color_none
+    this % type_string = color_green // 'SUPERCONDUCTOR' // color_none
   end subroutine
 
   impure subroutine superconductor_update_posthook(this)
@@ -120,16 +118,16 @@ contains
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass posthook
-    call this%conductor%update_posthook
+    call this % conductor % update_posthook
 
     ! Update the superconducting gap using fixpoint-iteration
     if (this % selfconsistency >= 1) then
-      call this%update_gap
+      call this % update_gap
     end if
 
     ! Boost the superconducting gap using Steffensen's method
     if (this % selfconsistency >= 2) then
-      call this%update_boost
+      call this % update_boost
     end if
   end subroutine
 
@@ -290,10 +288,10 @@ contains
             call evaluate(val, gap)
             phase = 0
           end if
-          call this % init( gap = gap*exp((0.0,1.0)*pi*phase) )
+          call this % initialize( gap = gap*exp((0.0,1.0)*pi*phase) )
         end block
       case default
-        call this%conductor%conf(key, val)
+        call this % conductor % conf(key, val)
     end select
   end subroutine
 

@@ -49,7 +49,7 @@ program main
   call stack % cmap('selfconsistency', 1)
 
   ! Initialize the stack to a barely superconducting state
-  call stack % init(cx(initgap))
+  call stack % initialize(cx(initgap))
 
   ! Bootstrap the material states at zero temperature
   call stack % converge(threshold = threshold, iterations = bootstraps, bootstrap = .true.)

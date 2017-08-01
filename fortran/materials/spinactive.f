@@ -5,9 +5,6 @@
 !> 
 !> @TODO 
 !>   Reimplement shortcut-evaluation of the current for nonmagnetic interfaces.
-!> 
-!> @TODO
-!>   Reimplement lookup of magnetic misalignments on the other side of the interface.
 
 module spinactive_m
   use :: propagator_m
@@ -16,23 +13,20 @@ module spinactive_m
   private
 
   ! Public interface
-  public spinactive, spinactive_construct
+  public spinactive
 
   ! Type declarations
   type :: spinactive
-    ! Metadata about the object
-    class(material), pointer :: material  => null()      !! Pointer to the material modelled by this instance
-    character                :: side      =  ' '         !! Whether this is a left (a) or right (b) interface
-
     ! Physical parameters of the interface
     real(wp)                 :: conductance   = 1.0      !! Interfacial conductance
     real(wp)                 :: polarization  = 0.0      !! Interfacial spin-polarization
     real(wp)                 :: spinmixing    = 0.0      !! Interfacial 1st-order spin-mixing
     real(wp)                 :: secondorder   = 0.0      !! Interfacial 2nd-order spin-mixing
     real(wp), dimension(1:3) :: magnetization = [0,0,1]  !! Interfacial magnetization direction
-    real(wp), dimension(1:3) :: misalignment  = [0,0,0]  !! Interfacial magnetization misalignment
+    real(wp), dimension(1:3) :: misalignment0 = [0,0,0]  !! Interfacial magnetization misalignment (this  side)
+    real(wp), dimension(1:3) :: misalignment1 = [0,0,0]  !! Interfacial magnetization misalignment (other side)
   
-    ! Matrices used internally by the object
+    ! Fields used internally by the object
     type(nambu), private     :: M                        !! Magnetization matrix (transmission)
     type(nambu), private     :: M0                       !! Magnetization matrix (reflection, this  side)
     type(nambu), private     :: M1                       !! Magnetization matrix (reflection, other side)
@@ -40,77 +34,25 @@ module spinactive_m
     procedure :: diffusion_current    => spinactive_diffusion_current
     procedure :: update_prehook       => spinactive_update_prehook
   end type
-
-  ! Type constructors
-  interface spinactive
-    module procedure spinactive_construct
-  end interface
 contains
-  function spinactive_construct(parent, side) result(this)
-    !! Constructs a spinorbit object with a given parent material.
-    type(spinactive), allocatable :: this
-    character                     :: side
-    class(material),       target :: parent
-
-    ! Allocate the object
-    if (.not. allocated(this)) then
-      allocate(this)
-    end if
-
-    ! Save a pointer to the parent object
-    this % material => parent
-
-    ! Save which side of the interface this is
-    this % side = side
-  end function
-
   impure subroutine spinactive_update_prehook(this)
     !! Updates the internal variables associated with spin-active interfaces.
     class(spinactive), intent(inout) :: this 
-    class(material),   pointer       :: other
-
-    ! Figure out what the neighbour material is
-    select case(this % side)
-      case('a')
-        other => this % material % material_a
-      case('b')
-        other => this % material % material_b
-      case default
-        other => null()
-    end select
-
-    ! Set the conductance of vacuum interfaces equal to the material conductance,
-    ! since this makes the normalization of spin-mixing parameters sensible there
-    if (.not. associated(other)) then
-      this % conductance = 1
-    end if
   
-    ! Process transmission properties
+    ! Transmission magnetization
     this % M = nambuv(this % magnetization)
-  
-    ! Default reflection properties match transmission properties
+
+    ! Reflection magnetization (this side)
     this % M0 = this % M
+    if (nonzero(this % misalignment0)) then
+      this % M0 = nambuv(this % misalignment0)
+    end if
+
+    ! Reflection magnetization (other side)
     this % M1 = this % M
-  
-    ! Process reflection properties (this side)
-    ! if (nonzero(this % misalignment)) then
-    !   this % M0 = nambuv(this % misalignment)
-    ! end if
-  
-    ! ! Process reflection properties (other side)
-    ! if (associated(this % material % material_a)) then
-    !   select type (other => this % material % material_a)
-    !     class is (conductor)
-    !       call update_magnetization(this % spinactive_a % M1, other % spinactive_b % misalignment)
-    !   end select
-    ! end if
-  
-    ! if (associated(this % material % material_b)) then
-    !   select type (other => this % material % material_b)
-    !     class is (conductor)
-    !       call update_magnetization(this % spinactive_b % M1, other % spinactive_a % misalignment)
-    !   end select
-    ! end if
+    if (nonzero(this % misalignment1)) then
+      this % M1 = nambuv(this % misalignment1)
+    end if
   end subroutine
   
   pure function spinactive_diffusion_current(this, G0, G1) result(I)
