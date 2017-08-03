@@ -7,12 +7,31 @@ submodule (material_m) diffusion_m
   use :: bvp_m
 contains
   module procedure diffusion_update
-    !! This subroutine calculates the equilibrium propagators of a material from the diffusion equation.
-    type(bvp_sol)                               :: sol
-    real(wp), dimension(32,size(this%location)) :: u, d
-    type(propagator)                            :: a, b
-    integer                                     :: n, m
-    complex(wp)                                 :: e
+    !! This subroutine calculates the equilibrium propagators of a material from its diffusion equation.
+
+    ! Numerical solver
+    type(bvp_sol)                                 :: solver
+
+    ! Propagators
+    type(propagator), pointer, dimension(:)       :: Gp
+    type(propagator), pointer                     :: Ga, Gb
+    type(propagator), target                      :: G0
+
+    ! State vectors
+    real(wp), dimension(0:31,size(this%location)) :: up, vp
+
+    ! Parameters
+    complex(wp)                                   :: e
+
+    ! Loop variables
+    integer                                       :: n, m
+
+    ! Initialize the state vectors to zero
+    vp = 0
+    up = 0
+
+    ! Instantiate a vacuum propagator
+    G0 = propagator()
 
     ! Loop over energies
     do n=size(this%energy),1,-1
@@ -23,160 +42,152 @@ contains
         flush(stdout)
       end if
 
-      ! Construct the state vector from the Riccati parameters and their derivatives
-      do m=1,size(this%location)
-        call pack(this % propagator(n,m), d(:,m))
-      end do
+      ! Update the propagator pointers (bulk)
+      Gp => this % propagator(n,:)
 
-      ! If the difference between iterations is small, use the results from the previous
-      ! iteration as an initial guess. If not, use the results form the previous energy.
-      if (this % difference < 0.05_wp) then
-        u = d
+      ! Update the propagator pointers (left)
+      if (associated(this % material_a)) then
+        Ga => this % material_a % propagator(n, ubound(this % material_a % propagator,2))
+      else
+        Ga => G0
       end if
+
+      ! Update the propagator pointers (right)
+      if (associated(this % material_b)) then
+        Gb => this % material_b % propagator(n, lbound(this % material_b % propagator,2))
+      else
+        Gb => G0
+      end if
+
+      ! Construct vectors from the previous state
+      do m=1,size(this % location)
+        call pack(Gp(m), vp(:,m))
+      end do
 
       ! Calculate the complex normalized energy
       e = cx(this%energy(n), this%scattering)/this%thouless
 
-      ! Update the boundary conditions (left)
-      a = propagator()
-      if (associated(this % material_a)) then
-        associate(other => this % material_a % propagator)
-          a = other(n,ubound(other,2))
-        end associate
+      ! If the difference between iterations is small, use the results from the previous
+      ! iteration as an initial guess. If not, use the results form the previous energy.
+      if (this % difference < 0.05_wp) then
+        solver = bvp_init(32, 16, this%location, vp, max_num_subintervals=(size(this%location)*this%scaling))
+      else
+        solver = bvp_init(32, 16, this%location, up, max_num_subintervals=(size(this%location)*this%scaling))
       end if
-
-      ! Update the boundary conditions (right)
-      b = propagator()
-      if (associated(this % material_b)) then
-        associate(other => this % material_b % propagator)
-          b = other(n,lbound(other,2))
-        end associate
-      end if
-
-      ! Initialize bvp_solver
-      sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
 
       ! Solve the differential equation
-      sol = bvp_solver(sol, ode, bc, method=this%method, error_control=this%control, &
-                       tol=this%tolerance, trace=this%information, stop_on_fail=.false.)
+      solver = bvp_solver(solver, equation, residual, method=this%method, error_control=this%control, &
+                          tol=this%tolerance, trace=this%information, stop_on_fail=.false.)
 
       ! Check if the calculation succeeded
-      if (sol % info /= 0) then
+      if (solver % info /= 0) then
         call error('Failed to converge! This is usually because of an ill-posed problem.')
       end if
 
-      ! Use the results to update the state
-      call bvp_eval(sol, this % location, u)
-      do m=1,size(this%location)
-        call unpack(this % propagator(n,m), u(:,m))
+      ! Extract the numerical solution
+      call bvp_eval(solver, this % location, up)
+
+      ! Update the convergence monitor
+      this % difference = max(this % difference, maxval(abs(up - vp)))
+
+      ! Update the equilibrium state
+      do m=1,size(this % location)
+        call unpack(Gp(m), up(:,m))
       end do
 
-      ! Update the difference vector
-      d = abs(u - d)
-
-      ! Update the maximal difference since last update
-      this % difference = max(this % difference, maxval(d))
-
-      ! Clean up after bvp_solver
-      call bvp_terminate(sol)
+      ! Deallocate workspace memory
+      call bvp_terminate(solver)
     end do
   contains
-    pure subroutine ode(z, u, f)
+    pure subroutine equation(z, up, fp)
       !! Definition of the differential equation du/dz=f(z,u).
-      real(wp), intent(in)  :: z
-      real(wp), intent(in)  :: u(32)
-      real(wp), intent(out) :: f(32)
-      type(spin)            :: g, gt, dg, dgt
-      type(propagator)      :: p
-
-      ! Extract the Riccati parameters
-      g   = u( 1: 8)
-      gt  = u( 9:16)
-      dg  = u(17:24)
-      dgt = u(25:32)
+      real(wp),                  intent(in)  :: z
+      real(wp), dimension(0:31), intent(in)  :: up
+      real(wp), dimension(0:31), intent(out) :: fp
+      type(propagator)                       :: Gp
 
       ! Construct a propagator object
-      p = propagator(g, gt, dg, dgt)
+      call unpack(Gp, up)
 
       ! Calculate the second-derivatives of the Riccati parameters
-      call this % diffusion_equation(p, e, z)
+      call this % diffusion_equation(Gp, e, z)
 
       ! Pack the results into a state vector
-      f( 1: 8) = p % dg
-      f( 9:16) = p % dgt
-      f(17:24) = p % d2g
-      f(25:32) = p % d2gt
+      fp( 0: 7) = Gp % dg
+      fp( 8:15) = Gp % dgt
+      fp(16:23) = Gp % d2g
+      fp(24:31) = Gp % d2gt
     end subroutine
 
-    pure subroutine bc(ua, ub, bca, bcb)
-      !! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
-      real(wp), intent(in)  :: ua(32)
-      real(wp), intent(in)  :: ub(32)
-      real(wp), intent(out) :: bca(16)
-      real(wp), intent(out) :: bcb(16)
+    pure subroutine residual(ua, ub, ra, rb)
+      !! Definition of the residual equations r(u)=0.
+      real(wp), dimension(0:31), intent(in)  :: ua, ub
+      real(wp), dimension(0:15), intent(out) :: ra, rb
 
-      type(propagator)      :: pa, pb
-      type(spin)            :: ra, rta
-      type(spin)            :: rb, rtb
+      type(spin)       :: r, rt
+      type(propagator) :: Gp
 
-      ! State at the left end of the material
-      call unpack(pa, ua)
+      ! Unpack the state at the left edge
+      call unpack(Gp, ua)
 
-      ! State at the right end of the material
-      call unpack(pb, ub)
-
-      ! Calculate residuals from the boundary conditions (left)
+      ! Calculate residuals from the boundary conditions
       if (this % transparent_a) then
         ! Transparent interface
-        ra  = pa % g  - a % g
-        rta = pa % gt - a % gt
+        r  = Gp % g  - Ga % g
+        rt = Gp % gt - Ga % gt
       else
-        ! Customized interface
-        call this % diffusion_equation_a(pa, a, ra, rta)
+        ! Spin-active interface
+        call this % diffusion_equation_a(Gp, Ga, r, rt)
       end if
 
-      ! Calculate residuals from the boundary conditions (right)
+      ! Construct the residual vector
+      ra(:7) = r
+      ra(8:) = rt
+
+      ! Unpack the state at the right edge
+      call unpack(Gp, ub)
+
+      ! Calculate residuals from the boundary conditions
       if (this % transparent_b) then
         ! Transparent interface
-        rb  = pb % g  - b % g
-        rtb = pb % gt - b % gt
+        r  = Gp % g  - Gb % g
+        rt = Gp % gt - Gb % gt
       else
-        ! Customized interface
-        call this % diffusion_equation_b(pb, b, rb, rtb)
+        ! Spin-active interface
+        call this % diffusion_equation_b(Gp, Gb, r, rt)
       end if
 
-      ! Pack the results into state vectors
-      bca(1: 8) = ra
-      bca(9:16) = rta
-      bcb(1: 8) = rb
-      bcb(9:16) = rtb
+      ! Construct the residual vector
+      rb(:7) = r
+      rb(8:) = rt
     end subroutine
 
-    pure subroutine pack(a, b)
+    pure subroutine pack(G, u)
       !! Defines assignment from a propagator object to a real vector.
-      type(propagator),        intent(in)  :: a
-      real(wp), dimension(32), intent(out) :: b
+      type(propagator),          intent(in)  :: G
+      real(wp), dimension(0:31), intent(out) :: u
 
-      b( 1: 8) = a % g
-      b( 9:16) = a % gt
-      b(17:24) = a % dg
-      b(25:32) = a % dgt
+      ! Pack the propagator matrices
+      u( 0: 7) = G % g
+      u( 8:15) = G % gt
+      u(16:23) = G % dg
+      u(24:31) = G % dgt
     end subroutine
 
-    pure subroutine unpack(a, b)
+    pure subroutine unpack(G, u)
       !! Defines assignment from a real vector to a propagator object.
-      type(propagator),        intent(inout) :: a
-      real(wp), dimension(32), intent(in)    :: b
+      type(propagator),          intent(inout) :: G
+      real(wp), dimension(0:31), intent(in)    :: u
 
       ! Unpack the vector elements
-      a % g   = b( 1: 8) 
-      a % gt  = b( 9:16) 
-      a % dg  = b(17:24) 
-      a % dgt = b(25:32) 
+      G % g   = u( 0: 7) 
+      G % gt  = u( 8:15) 
+      G % dg  = u(16:23) 
+      G % dgt = u(24:31) 
 
       ! Update normalization matrices
-      a % N  = inverse( pauli0 - a%g  * a%gt )
-      a % Nt = inverse( pauli0 - a%gt * a%g  )
+      G % N  = inverse( pauli0 - G%g  * G%gt )
+      G % Nt = inverse( pauli0 - G%gt * G%g  )
     end subroutine
   end procedure
 end submodule

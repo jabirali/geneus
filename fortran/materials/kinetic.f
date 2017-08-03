@@ -1,13 +1,13 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Materials
 !>
-!> This submodule defines procedures for solving the kinetic equations in a diffusive material.
+!> This submodule contains procedures for solving the kinetic equations in a material.
 
 submodule (material_m) kinetic_m
   use :: bvp_m
 contains
   module procedure kinetic_update
-    !! This subroutine calculates the nonequilibrium propagators of a material from the kinetic equations.
+    !! This subroutine calculates the nonequilibrium propagators of a material from its kinetic equations.
 
     ! Numerical solver
     type(bvp_sol)                                      :: solver
@@ -127,10 +127,8 @@ contains
 
     pure subroutine residual(ua, ub, ra, rb)
       !! Definition of the residual equations r(u)=0.
-      real(wp), dimension(0:15), intent(in)  :: ua
-      real(wp), dimension(0:15), intent(in)  :: ub
-      real(wp), dimension(0:7),  intent(out) :: ra
-      real(wp), dimension(0:7),  intent(out) :: rb
+      real(wp), dimension(0:15), intent(in)  :: ua, ub
+      real(wp), dimension(0:7),  intent(out) :: ra, rb
 
       ! Calculate residuals from the boundary conditions (left)
       ra = matmul(Jpa, ua) - matmul(Jaa, va)
