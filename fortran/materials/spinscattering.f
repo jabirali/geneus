@@ -24,6 +24,7 @@ module spinscattering_m
     real(wp)                    :: spinorbit =  0.0_wp                     !! Spin-orbit scattering coefficient (1/8τΔ)
   contains
     procedure :: diffusion_equation => spinscattering_diffusion_equation   !! Diffusion equation
+    procedure :: kinetic_equation   => spinscattering_kinetic_equation     !! Kinetic equation
   end type
 
   ! Type constructors
@@ -81,6 +82,31 @@ contains
               d2g => p % d2g,   d2gt => p % d2gt  )
       d2g  = d2g  + (pauli0 - g*gt) * (U(1:2,3:4) - U(1:2,1:2)*g )
       d2gt = d2gt + (pauli0 - gt*g) * (U(3:4,1:2) - U(3:4,3:4)*gt)
+    end associate
+  end subroutine
+
+  pure subroutine spinscattering_kinetic_equation(this, Gp, R)
+    !! Calculate the self-energies in the kinetic equation.
+    class(spinscattering),        intent(in)    :: this
+    type(propagator),             intent(in)    :: Gp
+    real(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp)                                    :: Csf, Cso, Cdp
+
+    ! Calculate the self-energy prefactors
+    Cdp = (this % depairing) / (4 * this % material % thouless)
+    Csf = (this % spinflip ) / (1 * this % material % thouless)
+    Cso = (this % spinorbit) / (1 * this % material % thouless)
+
+    ! Calculate the self-energy contributions
+    associate(N => this % nambuv)
+      R = R                            &
+        + Csf * Gp % selfenergy2(N(1)) &
+        + Csf * Gp % selfenergy2(N(2)) &
+        + Csf * Gp % selfenergy2(N(3)) &
+        + Cdp * Gp % selfenergy2(N(4)) &
+        + Cso * Gp % selfenergy2(N(5)) &
+        + Cso * Gp % selfenergy2(N(6)) &
+        + Cso * Gp % selfenergy2(N(7))
     end associate
   end subroutine
 end module

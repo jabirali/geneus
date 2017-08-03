@@ -20,7 +20,15 @@ contains
     end do
   end function
 
-  pure function matrix_inverse(A) result(R)
+  pure function matrix_inverse_re(A) result(R)
+    !! Wrapper for matrix_inverse_cx that allows the procedure to be used for real matrices.
+    real(wp), dimension(:,:), intent(in)     :: A   !! Matrix A [n×n]
+    real(wp), dimension(size(A,1),size(A,1)) :: R   !! Matrix R=A¯¹
+
+    R = re(matrix_inverse_cx(cx(A)))
+  end function
+
+  pure function matrix_inverse_cx(A) result(R)
     !! Invert a square n×n matrix using Gauss-Jordan elimination with partial pivoting.
     !! In the special case n=2, the inverse is evaluated using a cofactoring algorithm.
     !! [This implementation is based on Algorithm #2 in "Efficient matrix inversion via 

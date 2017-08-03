@@ -35,6 +35,10 @@ module conductor_m
     procedure                 :: diffusion_equation_a    => conductor_diffusion_equation_a    !! Boundary condition (left)
     procedure                 :: diffusion_equation_b    => conductor_diffusion_equation_b    !! Boundary condition (right)
 
+    procedure                 :: kinetic_equation        => conductor_kinetic_equation        !! Kinetic equation
+    procedure                 :: kinetic_equation_a      => conductor_kinetic_equation_a      !! Boundary condition (left)
+    procedure                 :: kinetic_equation_b      => conductor_kinetic_equation_b      !! Boundary condition (right)
+
     ! These methods define miscellaneous utility functions
     procedure                 :: conf                    => conductor_conf                    !! Configures material parameters
   end type
@@ -201,6 +205,40 @@ contains
     if (allocated(this % spinorbit)) then
       call this % spinorbit % diffusion_equation_b(p, r, rt)
     end if
+  end subroutine
+
+  pure subroutine conductor_kinetic_equation(this, Gp, R, z)
+    !! Calculate the self-energies in the kinetic equation.
+    class(conductor),             intent(in)    :: this
+    type(propagator),             intent(in)    :: Gp
+    real(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp),                     intent(in)    :: z
+    
+    ! There are no normal-metal terms
+    R = 0
+
+    ! Spin-dependent scattering terms
+    if (allocated(this % spinscattering)) then
+      call this % spinscattering % kinetic_equation(Gp, R)
+    end if
+  end subroutine
+
+  pure subroutine conductor_kinetic_equation_a(this, Gp, Ga, Cp, Ca)
+    !! Calculate proportionality matrices for the boundary conditions at the left interface.
+    class(conductor),             intent(in)  :: this
+    type(propagator),             intent(in)  :: Gp,  Ga
+    real(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
+
+    call this % spinactive_a % kinetic_current(Gp, Ga, Cp, Ca)
+  end subroutine
+
+  pure subroutine conductor_kinetic_equation_b(this, Gp, Gb, Cp, Cb)
+    !! Calculate proportionality matrices for the boundary conditions at the right interface.
+    class(conductor),             intent(in)  :: this
+    type(propagator),             intent(in)  :: Gp, Gb
+    real(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
+
+    call this % spinactive_b % kinetic_current(Gp, Gb, Cp, Cb)
   end subroutine
 
   impure subroutine conductor_update_prehook(this)

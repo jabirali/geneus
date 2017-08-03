@@ -24,6 +24,7 @@ module superconductor_m
 
     ! These methods contain the equations that describe superconductors
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  !! Diffusion equation
+    procedure                :: kinetic_equation    => superconductor_kinetic_equation    !! Kinetic equation
     procedure                :: update_gap          => superconductor_update_gap          !! Calculate the superconducting order parameter
     procedure                :: update_boost        => superconductor_update_boost        !! Boost the convergence of the order parameter (Steffensen's method)
     procedure                :: update_prehook      => superconductor_update_prehook      !! Update the internal variables before calculating the propagators
@@ -100,6 +101,32 @@ contains
       d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
       d2gt = d2gt + gapt * pauli2 - gap  * gt * pauli2 * gt
     end associate
+  end subroutine
+
+  pure subroutine superconductor_kinetic_equation(this, Gp, R, z)
+    !! Calculate the self-energies in the kinetic equation.
+    class(superconductor),        intent(in)    :: this
+    type(propagator),             intent(in)    :: Gp
+    real(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp),                     intent(in)    :: z
+    complex(wp)                                 :: gap, gapt
+    type(nambu)                                 :: S
+
+    ! Call the superclass kinetic equation
+    call this % conductor % kinetic_equation(Gp, R, z)
+
+    ! Lookup the superconducting order parameter
+    gap  = (this % get_gap(z))/(this % thouless)
+    gapt = conjg(gap)
+
+    ! Construct the self-energy matrix
+    S % matrix(1,4) = +gap
+    S % matrix(2,3) = -gap
+    S % matrix(3,2) = +gapt
+    S % matrix(4,1) = -gapt
+
+    ! Calculate the self-energy contribution
+    R = R + Gp % selfenergy1(S)
   end subroutine
 
   impure subroutine superconductor_update_prehook(this)

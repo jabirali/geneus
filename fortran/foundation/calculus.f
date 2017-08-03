@@ -194,10 +194,10 @@ contains
 
   pure function interpolate_point_matrix_re(x, y, p) result(r)
     !! Perform a Piecewise Cubic Hermitian Interpolation of a matrix function using Catmull-Rom splines.
-    real(wp),    dimension(:),       intent(in) :: x  !! Variable x
-    real(wp),    dimension(:,:,:),   intent(in) :: y  !! Function y(x)
-    real(wp),                        intent(in) :: p  !! Interpolation point p
-    complex(wp), dimension(size(y,1),size(y,2)) :: r  !! Interpolation result y(p)
+    real(wp), dimension(:),       intent(in) :: x  !! Variable x
+    real(wp), dimension(:,:,:),   intent(in) :: y  !! Function y(x)
+    real(wp),                     intent(in) :: p  !! Interpolation point p
+    real(wp), dimension(size(y,1),size(y,2)) :: r  !! Interpolation result y(p)
 
     integer  :: n, m
     real(wp) :: t

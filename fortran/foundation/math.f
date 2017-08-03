@@ -41,7 +41,8 @@ module math_m
 
   interface inverse
     !! Public interface for functions that calculate a matrix inverse.
-    module procedure matrix_inverse   ! Inverse of a matrix
+    module procedure matrix_inverse_re, &  ! Inverse of a real matrix
+                     matrix_inverse_cx     ! Inverse of a complex matrix
   end interface
   
   interface diag

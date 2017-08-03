@@ -32,6 +32,7 @@ module spinactive_m
     type(nambu), private     :: M1                       !! Magnetization matrix (reflection, other side)
   contains
     procedure :: diffusion_current    => spinactive_diffusion_current
+    procedure :: kinetic_current      => spinactive_kinetic_current
     procedure :: update_prehook       => spinactive_update_prehook
   end type
 contains
@@ -149,4 +150,85 @@ contains
       end associate
     end function
   end function
+
+  pure subroutine spinactive_kinetic_current(this, G0, G1, C0, C1)
+    !! Calculate the kinetic boundary coefficients at an interface with spin-active properties.
+    !! These can be used to calculate the generalized current according to J = C₀H₀ - C₁H₁.
+    class(spinactive),            intent(in)  :: this
+    type(propagator),             intent(in)  :: G0   !! Propagator (this  side)
+    type(propagator),             intent(in)  :: G1   !! Propagator (other side)
+    real(wp), dimension(0:7,0:7), intent(out) :: C0   !! Boundary coefficient (this  side)
+    real(wp), dimension(0:7,0:7), intent(out) :: C1   !! Boundary coefficient (other side)
+
+    type(nambu), dimension(0:7) :: N
+    type(nambu)                 :: GR0, GA0, GK0
+    type(nambu)                 :: GR1, GA1, GK1
+    integer                     :: i, j
+
+    ! Construct the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+ 
+    ! Construct the propagator matrices (this side)
+    GR0 = G0 % retarded()
+    GA0 = G0 % advanced()
+ 
+    ! Construct the propagator matrices (other side)
+    GR1 = G1 % retarded()
+    GA1 = G1 % advanced()
+
+    ! Construct the boundary coefficients
+    do j=0,7
+      do i=0,7
+        ! Calculate the keldysh propagator placeholders
+        GK0 = GR0*N(j) - N(j)*GA0
+        GK1 = GR1*N(j) - N(j)*GA1
+ 
+        ! Calculate the boundary matrix coefficients
+        C0(i,j) = (this % conductance) * re(trace(N(i) * (GK0*R(GA1) - R(GR1)*GK0)))/16
+        C1(i,j) = (this % conductance) * re(trace(N(i) * (GK1*T(GA0) - T(GR0)*GK1)))/16
+      end do
+    end do
+  contains
+    pure function T(U)
+      ! Calculates the contents of the spin-active boundary condition commutators:
+      !   I_a ~ [G_a, T(G_b)],   I_b ~ [T(G_a), G_b]
+      ! This is used for the calculation of the boundary coefficient matrices.
+      ! Note that this version of the function only includes transmission terms.
+
+      type(nambu), intent(in) :: U
+      type(nambu)             :: T
+      real(wp)                :: GMR
+      real(wp)                :: GT1
+
+      associate(M => this % M, P => this % polarization)
+        ! Calculate the normalized interface conductances
+        GMR  = P/(1 + sqrt(1-P**2))
+        GT1  = (1 - sqrt(1-P**2))/(1 + sqrt(1-P**2))
+
+        ! Calculate the transmission function
+        T = U + GMR * (M*U+U*M) + GT1 * M*U*M
+      end associate
+    end function
+
+    pure function R(U)
+      ! Calculates the contents of the spin-active boundary condition commutators:
+      !   I_a ~ [G_a, R(G_b)],   I_b ~ [R(G_a), G_b]
+      ! This is used for the calculation of the boundary coefficient matrices.
+      ! Note that this version of the function also includes reflection terms.
+
+      type(nambu), intent(in) :: U
+      type(nambu)             :: R
+      complex(wp)             :: Gphi
+
+      associate(M => this % M0, Q => this % spinmixing)
+        ! Calculate the normalized interface conductance
+        Gphi = (0,-1) * Q
+
+        ! Calculate the reflection function
+        R = T(U) + Gphi * M
+      end associate
+    end function
+  end subroutine
 end module

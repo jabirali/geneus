@@ -67,13 +67,17 @@ module material_m
     procedure(manipulate),           deferred :: update_prehook                                !! Executed before update
     procedure(manipulate),           deferred :: update_posthook                               !! Executed after  update
     procedure                                 :: update           => material_update           !! Calculate propagators
-    procedure                                 :: update_diffusion => material_update_diffusion !! Calculate propagators (in equilibrium)
-    procedure                                 :: update_kinetic   => material_update_kinetic   !! Calculate propagators (nonequilibrium)
+    procedure                                 :: update_diffusion => diffusion_update          !! Calculate propagators (in equilibrium)
+    procedure                                 :: update_kinetic   => kinetic_update            !! Calculate propagators (nonequilibrium)
 
     ! These methods define the physical equations used by the update methods
     procedure(diffusion_equation),   deferred :: diffusion_equation                            !! Diffusion equation
     procedure(diffusion_equation_a), deferred :: diffusion_equation_a                          !! Boundary condition (left)
     procedure(diffusion_equation_b), deferred :: diffusion_equation_b                          !! Boundary condition (right)
+
+    procedure(kinetic_equation),     deferred :: kinetic_equation                              !! Kinetic equation
+    procedure(kinetic_equation_a),   deferred :: kinetic_equation_a                            !! Boundary condition (left)
+    procedure(kinetic_equation_b),   deferred :: kinetic_equation_b                            !! Boundary condition (right)
 
     ! These methods define miscellaneous utility functions
     procedure                                 :: conf            => material_conf              !! Configures material parameters
@@ -81,9 +85,20 @@ module material_m
     procedure                                 :: load            => material_load              !! Loads the state of the material
   end type
 
-  ! Interface declarations
+  ! Declare submodule procedures
+  interface
+    module subroutine kinetic_update(this)
+      class(material), target, intent(inout) :: this
+    end subroutine
+
+    module subroutine diffusion_update(this)
+      class(material), target, intent(inout) :: this
+    end subroutine
+  end interface
+
+  ! Declare subclass procedures
   abstract interface
-    pure subroutine initialize(this, gap)
+    subroutine initialize(this, gap)
       !! This interface is used for the deferred procedure initialize.
       import material, wp
 
@@ -91,7 +106,7 @@ module material_m
       complex(wp), optional, intent(in)    :: gap
     end subroutine
 
-    impure subroutine manipulate(this)
+    subroutine manipulate(this)
       !! This interface is used for the deferred procedures construct, update_prehook, and update_posthook.
       import material
 
@@ -124,6 +139,34 @@ module material_m
       class(material),          intent(in)    :: this
       type(propagator),         intent(in)    :: p, b
       type(spin),               intent(inout) :: r, rt
+    end subroutine
+
+    pure subroutine kinetic_equation(this, Gp, R, z)
+      !! This interface is used for the deferred procedure kinetic_equation.
+      import material, propagator, spin, nambu, wp
+
+      class(material),              intent(in)    :: this
+      type(propagator),             intent(in)    :: Gp
+      real(wp), dimension(0:7,0:7), intent(inout) :: R
+      real(wp),                     intent(in)    :: z
+    end subroutine
+
+    pure subroutine kinetic_equation_a(this, Gp, Ga, Cp, Ca)
+      !! This interface is used for the deferred procedure kinetic_equation_a.
+      import material, propagator, spin, wp
+
+      class(material),              intent(in)  :: this
+      type(propagator),             intent(in)  :: Gp, Ga
+      real(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
+    end subroutine
+
+    pure subroutine kinetic_equation_b(this, Gp, Gb, Cp, Cb)
+      !! This interface is used for the deferred procedure kinetic_equation_b.
+      import material, propagator, spin, wp
+
+      class(material),              intent(in)  :: this
+      type(propagator),             intent(in)  :: Gp, Gb
+      real(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
     end subroutine
   end interface
 contains
@@ -181,353 +224,6 @@ contains
 
     ! Call the posthook method
     call this % update_posthook
-  end subroutine
-
-  impure subroutine material_update_diffusion(this)
-    !! This subroutine calculates the equilibrium propagators of the material from the diffusion equation.
-    use bvp_m
-
-    class(material),              intent(inout) :: this
-    type(bvp_sol)                               :: sol
-    real(wp), dimension(32,size(this%location)) :: u, d
-    type(propagator)                            :: a, b
-    integer                                     :: n, m
-    complex(wp)                                 :: e
-
-    ! Loop over energies
-    do n=size(this%energy),1,-1
-      ! Status information
-      if (this%information >= 0) then
-        write(stdout,'(6x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
-          '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
-        flush(stdout)
-      end if
-
-      ! Construct the state vector from the Riccati parameters and their derivatives
-      do m=1,size(this%location)
-        call pack(this % propagator(n,m), d(:,m))
-      end do
-
-      ! If the difference between iterations is small, use the results from the previous
-      ! iteration as an initial guess. If not, use the results form the previous energy.
-      if (this % difference < 0.05_wp) then
-        u = d
-      end if
-
-      ! Calculate the complex normalized energy
-      e = cx(this%energy(n), this%scattering)/this%thouless
-
-      ! Update the boundary conditions (left)
-      a = propagator()
-      if (associated(this % material_a)) then
-        associate(other => this % material_a % propagator)
-          a = other(n,ubound(other,2))
-        end associate
-      end if
-
-      ! Update the boundary conditions (right)
-      b = propagator()
-      if (associated(this % material_b)) then
-        associate(other => this % material_b % propagator)
-          b = other(n,lbound(other,2))
-        end associate
-      end if
-
-      ! Initialize bvp_solver
-      sol = bvp_init(32, 16, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
-
-      ! Solve the differential equation
-      sol = bvp_solver(sol, ode, bc, method=this%method, error_control=this%control, &
-                       tol=this%tolerance, trace=this%information, stop_on_fail=.false.)
-
-      ! Check if the calculation succeeded
-      if (sol % info /= 0) then
-        call error('Failed to converge! This is usually because of an ill-posed problem.')
-      end if
-
-      ! Use the results to update the state
-      call bvp_eval(sol, this % location, u)
-      do m=1,size(this%location)
-        call unpack(this % propagator(n,m), u(:,m))
-      end do
-
-      ! Update the difference vector
-      d = abs(u - d)
-
-      ! Update the maximal difference since last update
-      this % difference = max(this % difference, maxval(d))
-
-      ! Clean up after bvp_solver
-      call bvp_terminate(sol)
-    end do
-  contains
-    pure subroutine ode(z, u, f)
-      !! Definition of the differential equation du/dz=f(z,u).
-      real(wp), intent(in)  :: z
-      real(wp), intent(in)  :: u(32)
-      real(wp), intent(out) :: f(32)
-      type(spin)            :: g, gt, dg, dgt
-      type(propagator)      :: p
-
-      ! Extract the Riccati parameters
-      g   = u( 1: 8)
-      gt  = u( 9:16)
-      dg  = u(17:24)
-      dgt = u(25:32)
-
-      ! Construct a propagator object
-      p = propagator(g, gt, dg, dgt)
-
-      ! Calculate the second-derivatives of the Riccati parameters
-      call this % diffusion_equation(p, e, z)
-
-      ! Pack the results into a state vector
-      f( 1: 8) = p % dg
-      f( 9:16) = p % dgt
-      f(17:24) = p % d2g
-      f(25:32) = p % d2gt
-    end subroutine
-
-    pure subroutine bc(ua, ub, bca, bcb)
-      !! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
-      real(wp), intent(in)  :: ua(32)
-      real(wp), intent(in)  :: ub(32)
-      real(wp), intent(out) :: bca(16)
-      real(wp), intent(out) :: bcb(16)
-
-      type(propagator)      :: pa, pb
-      type(spin)            :: ra, rta
-      type(spin)            :: rb, rtb
-
-      ! State at the left end of the material
-      call unpack(pa, ua)
-
-      ! State at the right end of the material
-      call unpack(pb, ub)
-
-      ! Calculate residuals from the boundary conditions (left)
-      if (this % transparent_a) then
-        ! Transparent interface
-        ra  = pa % g  - a % g
-        rta = pa % gt - a % gt
-      else
-        ! Customized interface
-        call this % diffusion_equation_a(pa, a, ra, rta)
-      end if
-
-      ! Calculate residuals from the boundary conditions (right)
-      if (this % transparent_b) then
-        ! Transparent interface
-        rb  = pb % g  - b % g
-        rtb = pb % gt - b % gt
-      else
-        ! Customized interface
-        call this % diffusion_equation_b(pb, b, rb, rtb)
-      end if
-
-      ! Pack the results into state vectors
-      bca(1: 8) = ra
-      bca(9:16) = rta
-      bcb(1: 8) = rb
-      bcb(9:16) = rtb
-    end subroutine
-
-    pure subroutine pack(a, b)
-      !! Defines assignment from a propagator object to a real vector.
-      type(propagator),        intent(in)  :: a
-      real(wp), dimension(32), intent(out) :: b
-
-      b( 1: 8) = a % g
-      b( 9:16) = a % gt
-      b(17:24) = a % dg
-      b(25:32) = a % dgt
-    end subroutine
-
-    pure subroutine unpack(a, b)
-      !! Defines assignment from a real vector to a propagator object.
-      type(propagator),        intent(inout) :: a
-      real(wp), dimension(32), intent(in)    :: b
-
-      ! Unpack the vector elements
-      a % g   = b( 1: 8) 
-      a % gt  = b( 9:16) 
-      a % dg  = b(17:24) 
-      a % dgt = b(25:32) 
-
-      ! Update normalization matrices
-      a % N  = inverse( pauli0 - a%g  * a%gt )
-      a % Nt = inverse( pauli0 - a%gt * a%g  )
-    end subroutine
-  end subroutine
-
-  impure subroutine material_update_kinetic(this)
-    !! This subroutine calculates the nonequilibrium propagators of the material from the kinetic equation.
-    use bvp_m
-
-    ! Material object
-    class(material),                 intent(inout) :: this
-
-    ! Numerical solver
-    type(bvp_sol)                                  :: sol
-
-    ! State vectors
-    real(wp), dimension(16,size(this%location))    :: u, d
-    real(wp), dimension(16)                        :: a, b
-
-    ! Jacobian matrices
-    real(wp), dimension(16,16,size(this%location)) :: ju
-    real(wp), dimension(16,16)                     :: ja, jb
-
-    ! Loop variables
-    integer                                        :: n, m
-
-    ! Loop over energies
-    do n=size(this%energy),1,-1
-      ! Status information
-      if (this%information >= 0) then
-        write(stdout,'(6x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
-          '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
-        flush(stdout)
-      end if
-
-      ! Construct the state vector from the distribution and its derivative
-      do m=1,size(this%location)
-        call pack(this % propagator(n,m), d(:,m))
-      end do
-
-      ! Use the results from the previous iteration as an initial guess
-      u = d
-
-      ! Update the Jacobian matrix at each position
-      do m=1,size(this%location)
-        ! Trivial:  ∂(H)'/∂H
-        ju(:8,:8,m) = 0
-
-        ! Trivial:  ∂(H)'/∂H'
-        ju(:8,9:,m) = identity(8)
-
-        ! Physical: ∂(H')'/∂H
-        ju(9:,:8,m) = 0
-
-        ! Physical: ∂(H')'/∂H'
-        ju(9:,9:,m) = 0
-      end do
-
-      ! Update the boundary conditions (left)
-      a = 0
-      if (associated(this % material_a)) then
-        associate( other => this % material_a % propagator )
-          call pack(other(n,ubound(other,2)), a)
-        end associate
-      end if
-
-      ! Update the boundary conditions (right)
-      b = 0
-      if (associated(this % material_b)) then
-        associate( other => this % material_b % propagator )
-          call pack(other(n,lbound(other,2)), b)
-        end associate
-      end if
-
-      ! Initialize bvp_solver
-      sol = bvp_init(16, 8, this%location, u, max_num_subintervals=(size(this%location)*this%scaling))
-
-      ! Solve the differential equation
-      sol = bvp_solver(sol, ode, bc, dfdy=jac, method=this%method, error_control=this%control, &
-                       tol=this%tolerance, trace=this%information, stop_on_fail=.false.)
-
-      ! Check if the calculation succeeded
-      if (sol % info /= 0) then
-        call error('Failed to converge! This is usually because of an ill-posed problem.')
-      end if
-
-      ! Use the results to update the state
-      call bvp_eval(sol, this % location, u)
-      do m=1,size(this%location)
-        call unpack(this % propagator(n,m), u(:,m))
-      end do
-
-      ! Update the difference vector
-      d = abs(u - d)
-
-      ! Update the maximal difference since last update
-      this % difference = max(this % difference, maxval(d))
-
-      ! Clean up after bvp_solver
-      call bvp_terminate(sol)
-    end do
-  contains
-    pure subroutine ode(z, u, f)
-      !! Definition of the differential equation du/dz=f(z,u).
-      real(wp),                intent(in)  :: z
-      real(wp), dimension(16), intent(in)  :: u
-      real(wp), dimension(16), intent(out) :: f
-      real(wp), dimension(16,16)           :: j
-
-      ! Calculate the Jacobian matrix
-      call jac(z, u, j)
-
-      ! Calculate the state derivative
-      f = matmul(j, u)
-    end subroutine
-
-    pure subroutine jac(z, u, j)
-      !! Jacobian of the differential equation j=∂f/∂u.
-      !! @TODO: Calculate M, Q, K to find the true Jacobian.
-      !! @TODO: Call the kinetic equation to find self-energies.
-      real(wp),                   intent(in)  :: z
-      real(wp), dimension(16),    intent(in)  :: u
-      real(wp), dimension(16,16), intent(out) :: j
-
-      ! Interpolate the Jacobian at this position
-      j = interpolate(this % location, ju, z)
-    end subroutine
-
-    pure subroutine bc(ua, ub, bca, bcb)
-      !! Definition of the boundary conditions bca=g(ua) and bcb=g(ub).
-      !! @TODO: Implement support for general boundary conditions.
-      !! @TODO: Call kinetic_equation_a and kinetic_equation_b.
-      !! @TODO: Calculate the Jacobian of the boundary conditions?
-      real(wp), intent(in)  :: ua(16)
-      real(wp), intent(in)  :: ub(16)
-      real(wp), intent(out) :: bca(8)
-      real(wp), intent(out) :: bcb(8)
-
-      ! Calculate residuals from the boundary conditions (left)
-      if (this % transparent_a) then
-        ! Transparent interface
-        bca(1:8) = ua(1:8) - a(1:8)
-      ! else
-      ! ! Customized interface
-      !   call this % kinetic_equation_a(ua, a)
-      end if
-
-      if (this % transparent_b) then
-        ! Transparent interface
-        bcb(1:8) = ub(1:8) - b(1:8)
-      ! else
-      ! ! Customized interface
-      !   call this % kinetic_equation_b(ub, b)
-      end if
-    end subroutine
-
-    pure subroutine pack(a, b)
-      !! Defines assignment from a propagator object to a real vector.
-      type(propagator),        intent(in)  :: a
-      real(wp), dimension(16), intent(out) :: b
-
-      b( 1: 8) = a % h
-      b( 9:16) = a % dh
-    end subroutine
-
-    pure subroutine unpack(a, b)
-      !! Defines assignment from a real vector to a propagator object.
-      type(propagator),        intent(inout) :: a
-      real(wp), dimension(16), intent(in)    :: b
-
-      a % h   = b( 1: 8) 
-      a % dh  = b( 9:16) 
-    end subroutine
   end subroutine
 
   !--------------------------------------------------------------------------------!

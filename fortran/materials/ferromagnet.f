@@ -75,6 +75,48 @@ contains
     end associate
   end subroutine
 
+  pure subroutine ferromagnet_kinetic_equation(this, Gp, R, z)
+    !! Calculate the self-energies in the kinetic equation.
+    class(ferromagnet),           intent(in)    :: this
+    type(propagator),             intent(in)    :: Gp
+    real(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp),                     intent(in)    :: z
+    type(nambu)                                 :: S
+    real(wp)                                    :: d
+    type(spin)                                  :: h, ht
+    integer                                     :: n, m
+
+    ! Call the superclass kinetic equation
+    call this % conductor % kinetic_equation(Gp, R, z)
+
+    if (allocated(this%h)) then
+      ! Calculate the index corresponding to the given location
+      m = size(this%h) - 1          ! Number of array intervals
+      n = floor(z*m + 1)            ! Nearest position in array
+
+      ! Extract the exchange field terms at that point
+      if (n <= 1) then
+        ! Left edge of the material
+        h  = this%h(1)
+        ht = this%ht(1)
+      else
+        ! Linear interpolation from known values. The relative displacement d is defined
+        ! as [z - location(n-1)]/[location(n) - location(n-1)], but assuming location(:)
+        ! is a uniform array of values in the range [0,1], the below will be equivalent.
+        d  = z*m - (n-2)
+        h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
+        ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
+      end if
+
+      ! Construct the self-energy matrix
+      S % matrix(1:2,1:2) = h
+      S % matrix(3:4,3:4) = ht
+
+      ! Calculate the self-energy contribution
+      R = R + Gp % selfenergy1(S)
+    end if
+  end subroutine
+
   impure subroutine ferromagnet_update_prehook(this)
     !! Updates the exchange field terms in the diffusion equation.
     class(ferromagnet), intent(inout) :: this ! Ferromagnet object that will be updated

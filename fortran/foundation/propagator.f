@@ -51,6 +51,16 @@ module propagator_m
     procedure  :: distribution_gradient   => propagator_distribution_gradient   !! Distribution matrix ∇H
   ! procedure  :: distribution_laplacian  => propagator_distribution_laplacian  !! Distribution matrix ∇²H
 
+    ! Accessors for derived matrices used to solve the kinetic equations
+    procedure  :: dissipation             => propagator_dissipation             !! Dissipation matrix M
+    procedure  :: dissipation_gradient    => propagator_dissipation_gradient    !! Dissipation matrix ∇M
+
+    procedure  :: condensate              => propagator_condensate              !! Condensate matrix Q
+    procedure  :: condensate_gradient     => propagator_condensate_gradient     !! Condensate matrix ∇Q
+
+    procedure  :: selfenergy1             => propagator_selfenergy1             !! Selfenergy matrix R₁
+    procedure  :: selfenergy2             => propagator_selfenergy2             !! Selfenergy matrix R₂
+
     ! Accessors for physical quantities that derive from the propagators
     procedure  :: supercurrent       => propagator_supercurrent                 !! Spectral supercurrents
     procedure  :: lossycurrent       => propagator_lossycurrent                 !! Spectral dissipative currents
@@ -405,4 +415,174 @@ contains
     this % N    = other % N
     this % Nt   = other % Nt
   end subroutine
+
+  pure function propagator_dissipation(this) result(M)
+    !! Calculate the dissipation matrix M = ∂J/∂H', where J is the
+    !! current and H' is the gradient of the distribution function.
+    class(propagator), intent(in) :: this
+    real(wp), dimension(0:7,0:7)  :: M
+    type(nambu), dimension(0:7)   :: N
+    type(nambu)                   :: GR, GA
+    integer                       :: i, j
+
+    ! Memoize the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+
+    ! Construct the propagator matrices
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Construct the dissipation matrix
+    do i=0,7
+      do j=0,7
+        M(i,j) = re(trace( N(i)*N(j) - N(i)*GR*N(j)*GA ))/8
+      end do
+    end do
+  end function
+
+  pure function propagator_dissipation_gradient(this) result(dM)
+    !! Calculate the gradient of the dissipation matrix M'.
+    class(propagator), intent(in) :: this
+    real(wp), dimension(0:7,0:7)  :: dM
+    type(nambu), dimension(0:7)   :: N
+    type(nambu)                   :: GR, GA, dGR, dGA
+    integer                       :: i, j
+
+    ! Memoize the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+
+    ! Construct the propagator matrices
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Construct the propagator gradients
+    dGR = this % retarded_gradient()
+    dGA = this % advanced_gradient()
+
+    ! Construct the dissipation matrix
+    do j=0,7
+      do i=0,7
+        dM(i,j) = -re(trace( N(i)*dGR*N(j)*GA + N(i)*GR*N(j)*dGA ))/8
+      end do
+    end do
+  end function
+
+  pure function propagator_condensate(this) result(Q)
+    !! Calculate the condensate matrix Q = ∂J/∂H, where J is the
+    !! current and H is the nonequilibrium distribution function.
+    class(propagator), intent(in) :: this
+    real(wp), dimension(0:7,0:7)  :: Q
+    type(nambu), dimension(0:7)   :: N
+    type(nambu)                   :: GR, GA, dGR, dGA
+    integer                       :: i, j
+
+    ! Memoize the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+
+    ! Construct the propagator matrices
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Construct the propagator gradients
+    dGR = this % retarded_gradient()
+    dGA = this % advanced_gradient()
+
+    ! Construct the condensate matrix
+    do j=0,7
+      do i=0,7
+        Q(i,j) = re(trace( N(j)*N(i)*GR*dGR - N(i)*N(j)*GA*dGA ))/8
+      end do
+    end do
+  end function
+
+  pure function propagator_condensate_gradient(this) result(dQ)
+    !! Calculate the gradient of the condensate matrix Q'.
+    class(propagator), intent(in) :: this
+    real(wp), dimension(0:7,0:7)  :: dQ
+    type(nambu), dimension(0:7)   :: N
+    type(nambu)                   :: GR, GA, dGR, dGA, d2GR, d2GA
+    integer                       :: i, j
+
+    ! Memoize the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+
+    ! Construct the propagator matrices
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Construct the propagator gradients
+    dGR = this % retarded_gradient()
+    dGA = this % advanced_gradient()
+
+    ! Construct the propagator laplacians
+  ! d2GR = this % retarded_laplacian()
+  ! d2GA = this % advanced_laplacian()
+
+    ! Construct the condensate matrix
+    do j=0,7
+      do i=0,7
+        dQ(i,j) = re(trace( N(j)*N(i)*(dGR*dGR + GR*d2GR) - N(i)*N(j)*(dGA*dGA + GA*d2GA) ))/8
+      end do
+    end do
+  end function
+
+  pure function propagator_selfenergy1(this, S) result(R)
+    !! Calculate the 1st-order self-energy contribution to the kinetic equations.
+    class(propagator), intent(in) :: this
+    type(nambu),       intent(in) :: S
+    real(wp), dimension(0:7,0:7)  :: R
+    type(nambu), dimension(0:7)   :: N
+    type(nambu)                   :: GR, GA
+    integer                       :: i, j
+
+    ! Memoize the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+
+    ! Construct the propagator matrices
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Construct the self-energy matrix
+    do j=0,7
+      do i=0,7
+        R(i,j) = re(trace( (N(i)*S - S*N(i)) * (GR*N(j) - N(j)*GA) ))/8
+      end do
+    end do
+  end function
+
+  pure function propagator_selfenergy2(this, S) result(R)
+    !! Calculate the 2nd-order self-energy contribution to the kinetic equations.
+    class(propagator), intent(in) :: this
+    type(nambu),       intent(in) :: S
+    real(wp), dimension(0:7,0:7)  :: R
+    type(nambu), dimension(0:7)   :: N
+    type(nambu)                   :: GR, GA
+    integer                       :: i, j
+
+    ! Memoize the basis matrices
+    do i=0,7
+      N(i) = nambuv(i)
+    end do
+
+    ! Construct the propagator matrices
+    GR = this % retarded()
+    GA = this % advanced()
+
+    ! Construct the self-energy matrix
+    do j=0,7
+      do i=0,7
+        R(i,j) = re(trace( (N(i)*S - S*N(i)) * (GR*S*GR*N(j) - N(j)*GA*S*GA + GR*(N(j)*S-S*N(j))*GA) ))/8
+      end do
+    end do
+  end function
 end module
