@@ -75,28 +75,36 @@ module propagator_m
 
   ! Type constructor
   interface propagator
-    module procedure propagator_construct_riccati, propagator_construct_bcs
+    module procedure propagator_construct_vacuum, propagator_construct_riccati, propagator_construct_bcs
   end interface
 contains
+  pure function propagator_construct_vacuum() result(this)
+    !! Construct a vacuum propagator, i.e. a propagator which satisfies G=0.
+    type(propagator) :: this !! Constructed object
+
+    continue
+  end function
+
   pure function propagator_construct_riccati(g, gt, dg, dgt) result(this)
     !! Construct an arbitrary state by explicitly providing the Riccati parameters.
     !! Unspecified Riccati parameters default to zero due to the spin constructors.
     !! The distribution function defaults to equilibrium at zero temperature.
     type(propagator)                 :: this !! Constructed object
-    type(spin), optional, intent(in) :: g    !! Riccati parameter γ
-    type(spin), optional, intent(in) :: gt   !! Riccati parameter γ~
+    type(spin),           intent(in) :: g    !! Riccati parameter γ
+    type(spin),           intent(in) :: gt   !! Riccati parameter γ~
     type(spin), optional, intent(in) :: dg   !! Riccati parameter ∇γ
     type(spin), optional, intent(in) :: dgt  !! Riccati parameter ∇γ~
 
     ! Copy Riccati parameters into the new object
-    if (present(g  )) this % g   = g
-    if (present(gt )) this % gt  = gt
+    this % g  = g
+    this % gt = gt
+
+    ! Copy Riccati derivatives into the new object
     if (present(dg )) this % dg  = dg
     if (present(dgt)) this % dgt = dgt
 
     ! Update the normalization matrices
-    associate(g => this % g, gt => this % gt, & 
-              N => this % N, Nt => this % Nt  )
+    associate(g => this % g, gt => this % gt, N => this % N, Nt => this % Nt)
       this % N  = inverse( pauli0 - g*gt )
       this % Nt = inverse( pauli0 - gt*g )
     end associate
