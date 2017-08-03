@@ -18,7 +18,7 @@ contains
     type(propagator), target                      :: G0
 
     ! State vectors
-    real(wp), dimension(0:31,size(this%location)) :: up, vp
+    real(wp), dimension(0:31,size(this%location)) :: up, vp, dp
 
     ! Parameters
     complex(wp)                                   :: e
@@ -85,14 +85,14 @@ contains
       end if
 
       ! Extract the numerical solution
-      call bvp_eval(solver, this % location, up)
+      call bvp_eval(solver, this % location, up, dp)
 
       ! Update the convergence monitor
       this % difference = max(this % difference, maxval(abs(up - vp)))
 
       ! Update the equilibrium state
       do m=1,size(this % location)
-        call unpack(Gp(m), up(:,m))
+        call unpack(Gp(m), up(:,m), dp(:,m))
       end do
 
       ! Deallocate workspace memory
@@ -162,28 +162,44 @@ contains
       rb(8:) = rt
     end subroutine
 
-    pure subroutine pack(G, u)
+    pure subroutine pack(G, u, d)
       !! Defines assignment from a propagator object to a real vector.
-      type(propagator),          intent(in)  :: G
-      real(wp), dimension(0:31), intent(out) :: u
+      type(propagator),                    intent(in)  :: G
+      real(wp), dimension(0:31),           intent(out) :: u
+      real(wp), dimension(0:31), optional, intent(out) :: d
 
       ! Pack the propagator matrices
       u( 0: 7) = G % g
       u( 8:15) = G % gt
       u(16:23) = G % dg
       u(24:31) = G % dgt
+
+      ! Pack the derivative matrices
+      if (present(d)) then
+        d( 0: 7) = G % dg
+        d( 8:15) = G % dgt
+        d(16:23) = G % d2g
+        d(24:31) = G % d2gt
+      end if
     end subroutine
 
-    pure subroutine unpack(G, u)
+    pure subroutine unpack(G, u, d)
       !! Defines assignment from a real vector to a propagator object.
-      type(propagator),          intent(inout) :: G
-      real(wp), dimension(0:31), intent(in)    :: u
+      type(propagator),                    intent(inout) :: G
+      real(wp), dimension(0:31),           intent(in)    :: u
+      real(wp), dimension(0:31), optional, intent(in)    :: d
 
       ! Unpack the vector elements
       G % g   = u( 0: 7) 
       G % gt  = u( 8:15) 
       G % dg  = u(16:23) 
       G % dgt = u(24:31) 
+
+      ! Unpack the vector derivative
+      if (present(d)) then
+        G % d2g  = d(16:23)
+        G % d2gt = d(24:31)
+      end if
 
       ! Update normalization matrices
       G % N  = inverse( pauli0 - G%g  * G%gt )
