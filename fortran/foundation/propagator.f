@@ -152,10 +152,10 @@ contains
     associate(g => this % g, gt => this % gt, &
               N => this % N, Nt => this % Nt, &
               I => pauli0,   M  => GR % matrix)
-      M(1:2,1:2) = (+2.0_wp) * N  - I
+      M(1:2,1:2) = (+1.0_wp) * N  * (I + g*gt)
       M(1:2,3:4) = (+2.0_wp) * N  * g
       M(3:4,1:2) = (-2.0_wp) * Nt * gt
-      M(3:4,3:4) = (-2.0_wp) * Nt + I
+      M(3:4,3:4) = (-1.0_wp) * Nt * (I + gt*g)
     end associate
   end function
 
