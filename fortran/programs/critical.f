@@ -45,8 +45,8 @@ program main
   ! Construct the material stack
   stack = structure()
 
-  ! Use the fixpoint method for selfconsistency iterations
-  call stack % cmap('selfconsistency', 1)
+  ! Disable all selfconsistency iterations
+  call stack % cmap('selfconsistency', 0)
 
   ! Initialize the stack to a barely superconducting state
   call stack % initialize(cx(initgap))
@@ -62,6 +62,9 @@ program main
   !--------------------------------------------------------------------------------!
   !                           BINARY SEARCH PROCEDURE                              !
   !--------------------------------------------------------------------------------!
+
+  ! Use the fixpoint method for selfconsistency iterations
+  call stack % cmap('selfconsistency', 1)
 
   do n = 1,bisections
     ! Set the temperature of the materials
