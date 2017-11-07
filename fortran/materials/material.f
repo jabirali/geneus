@@ -49,7 +49,7 @@ module material_m
     class(material),                  pointer :: material_a      => null()                     !! Material to the left  (default: vacuum)
     class(material),                  pointer :: material_b      => null()                     !! Material to the right (default: vacuum)
 
-    ! The package bvp_solver is used to handle differential equations, and will be controlled by the following parameters
+    ! Control parameters for the numerical solvers
     integer                                   :: selfconsistency =  2                          !! Selfconsistency scheme (0 = none, 1 = fixpoint iteration, 2 = Steffensen's method)
     integer                                   :: scaling         =  128                        !! Maximal mesh increase (range: 2^N, N>1)
     integer                                   :: method          =  4                          !! Runge—Kutta order (range: 2, 4, 6)
@@ -115,7 +115,7 @@ module material_m
 
     pure subroutine diffusion_equation(this, p, e, z)
       !! This interface is used for the deferred procedure diffusion_equation.
-      import material, propagator, spin, wp
+      import material, propagator, wp
 
       class(material),  intent(in)    :: this
       type(propagator), intent(inout) :: p
@@ -143,7 +143,7 @@ module material_m
 
     pure subroutine kinetic_equation(this, Gp, R, z)
       !! This interface is used for the deferred procedure kinetic_equation.
-      import material, propagator, spin, nambu, wp
+      import material, propagator, wp
 
       class(material),              intent(in)    :: this
       type(propagator),             intent(in)    :: Gp
@@ -153,7 +153,7 @@ module material_m
 
     pure subroutine kinetic_equation_a(this, Gp, Ga, Cp, Ca)
       !! This interface is used for the deferred procedure kinetic_equation_a.
-      import material, propagator, spin, wp
+      import material, propagator, wp
 
       class(material),              intent(in)  :: this
       type(propagator),             intent(in)  :: Gp, Ga
@@ -162,7 +162,7 @@ module material_m
 
     pure subroutine kinetic_equation_b(this, Gp, Gb, Cp, Cb)
       !! This interface is used for the deferred procedure kinetic_equation_b.
-      import material, propagator, spin, wp
+      import material, propagator, wp
 
       class(material),              intent(in)  :: this
       type(propagator),             intent(in)  :: Gp, Gb
@@ -176,10 +176,11 @@ contains
   !--------------------------------------------------------------------------------!
 
   impure subroutine material_update(this, bootstrap)
-    !! This subroutine updates the state of the material by solving diffusion equations for the equilibrium
-    !! propagators, kinetic equations for the nonequilibrium propagators, and then calculating observables.
-    class(material),   intent(inout) :: this                       !! Material that will be updated
-    logical, optional, intent(in)    :: bootstrap                  !! Disables calculation of observables
+    !! This subroutine updates the state of the material by solving the diffusion 
+    !! equations for the equilibrium propagators, the kinetic equations for the 
+    !! nonequilibrium propagators, and then calculating physical observables.
+    class(material),   intent(inout) :: this      !! Material that will be updated
+    logical, optional, intent(in)    :: bootstrap !! Disable calculation of observables
 
     ! Only update materials with a positive order
     if (this % order <= 0) then
