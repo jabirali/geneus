@@ -1,13 +1,9 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Programs
 !>
-!> This program calculates the critical temperature of an arbitrary superconducting hybrid structure
-!> for a given set of physical parameters. In order to obtain the critical temperature as a function
-!> of these parameters, the program has to be invoked multiple times with different input parameters.
-!> The structure is constructed based on a configuration file which should be provided as the first 
-!> command-line argument, and the results are then written to the output file 'critical.dat'. 
+!> This program calculates the critical temperature of a one-dimensional superconducting structure.
 
-program main
+program critical_p
   use :: structure_m
   use :: stdio_m
   use :: math_m
@@ -51,7 +47,7 @@ program main
   ! Initialize the stack to a barely superconducting state
   call stack % initialize(cx(initgap))
 
-  ! Bootstrap the material states at zero temperature
+  ! Bootstrap the material states while locking the gap
   call stack % converge(threshold = threshold, iterations = bootstraps, bootstrap = .true.)
 
   ! Save the current state of the materials
@@ -94,20 +90,17 @@ program main
 contains
   impure subroutine prehook
     ! Write out status information.
-
     call status_body('Temperature', critical)
     call status_body('Bisection',   n)
   end subroutine
 
   impure subroutine finalize
-    ! Write out final results.
-
     ! Status information
     call status_head('CRITICAL TEMPERATURE')
     call status_body('Result', critical)
     call status_foot
 
-    ! Write the critical temperature to file
+    ! Write the result to file
     call dump('critical.dat', critical)
 
     ! Close output files

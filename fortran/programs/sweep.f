@@ -1,13 +1,9 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Programs
 !>
-!> This program calculates the charge and spin currents in a Josephson junction as a function of the
-!> phase difference between the two surrounding superconductors. In particular, the critical current
-!> of the junction is also calculated. The heterostructure is constructed based on the configuration
-!> file 'materials.conf', which the program expects to find in the runtime directory. The results are
-!> then written to various output files that will be created in the runtime directory.
+!> This program calculates the current-phase relation of a one-dimensional superconducting structure.
 
-program main
+program sweep_p
   use :: structure_m
   use :: stdio_m
   use :: math_m
@@ -48,7 +44,7 @@ program main
   call sa % construct()
   call sb % construct()
 
-  ! Disable the superconductor from updates
+  ! Disable the superconductors from updates
   call sa % conf('order','0')
   call sb % conf('order','0')
 
@@ -102,13 +98,11 @@ program main
 contains
   impure subroutine prehook
     ! Write out status information.
-
     call status_body('Phase difference', phase(n))
   end subroutine
 
   impure subroutine posthook
     ! Write results to output files.
-
     character(len=5) :: filename
     write(filename,'(f5.3)') phase(n)
 !   call stack % write_supercurrent('current.' // filename // '.dat')
@@ -116,8 +110,6 @@ contains
   end subroutine
 
   impure subroutine finalize
-    ! Write out the final results.
-
     ! Status information
     call status_head('CRITICAL CURRENT')
     call status_body('Result', critical)
