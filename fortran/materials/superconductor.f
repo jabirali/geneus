@@ -163,7 +163,6 @@ contains
     !! to make the calculations more stable near strong ferromagnetic materials.
     class(superconductor), intent(inout)        :: this       !! Superconductor object
     real(wp)                                    :: diff       !! Change between iterations
-    integer                                     :: n, m       !! Loop variables
 
     ! Interpolate the gap as a function of position to a higher resolution
     this % gap_function = interpolate(this % location, this % correlation, this % gap_location)

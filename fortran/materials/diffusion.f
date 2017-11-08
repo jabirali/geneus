@@ -68,7 +68,7 @@ contains
       e = cx(this%energy(n), this%scattering)/this%thouless
 
       ! If the difference between iterations is small, use the results from the previous
-      ! iteration as an initial guess. If not, use the results form the previous energy.
+      ! iteration as an initial guess. If not, use the results from the previous energy.
       if (this % difference < 0.05_wp) then
         solver = bvp_init(32, 16, this%location, vp, max_num_subintervals=(size(this%location)*this%scaling))
       else

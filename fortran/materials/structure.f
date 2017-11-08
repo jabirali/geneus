@@ -166,7 +166,6 @@ contains
   contains
     subroutine conf(m)
       class(material), pointer :: m
-      integer                  :: i
 
       ! Configure the material
       call m % conf(key, trim(adjustl(str)))

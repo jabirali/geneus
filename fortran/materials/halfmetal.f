@@ -38,7 +38,8 @@ contains
   !--------------------------------------------------------------------------------!
 
   pure subroutine halfmetal_diffusion_equation(this, p, e, z)
-    !! Use the diffusion equation to calculate the second-derivatives of the Riccati parameters at energy e and point z.
+    !! Use the diffusion equation to calculate the second-derivatives
+    !! of the Riccati parameters at an energy e and a position z.
     class(halfmetal), intent(in)    :: this
     complex(wp),      intent(in)    :: e
     real(wp),         intent(in)    :: z
