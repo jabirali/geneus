@@ -37,11 +37,11 @@ module propagator_m
     ! Accessors for the propagator matrices represented by this object
     procedure  :: retarded                => propagator_retarded                !! Retarded propagator G^R
     procedure  :: retarded_gradient       => propagator_retarded_gradient       !! Retarded propagator ∇G^R
-  ! procedure  :: retarded_laplacian      => propagator_retarded_laplacian      !! Retarded propagator ∇²G^R
+    procedure  :: retarded_laplacian      => propagator_retarded_laplacian      !! Retarded propagator ∇²G^R
 
     procedure  :: advanced                => propagator_advanced                !! Advanced propagator G^A
     procedure  :: advanced_gradient       => propagator_advanced_gradient       !! Advanced propagator ∇G^A
-  ! procedure  :: advanced_laplacian      => propagator_advanced_laplacian      !! Advanced propagator ∇²G^A
+    procedure  :: advanced_laplacian      => propagator_advanced_laplacian      !! Advanced propagator ∇²G^A
 
     procedure  :: keldysh                 => propagator_keldysh                 !! Keldysh propagator G^K
     procedure  :: keldysh_gradient        => propagator_keldysh_gradient        !! Keldysh propagator ∇G^K
@@ -185,6 +185,42 @@ contains
     end if
   end function
 
+  pure function propagator_retarded_laplacian(this) result(d2GR)
+    !! Calculates the 4×4 retarded propagator gradient ∇²G^R.
+    !!
+    !! @TODO: 
+    !!   Implement support for gauge-covariant laplacians.
+    class(propagator),     intent(in) :: this   !! Propagator object
+    type(nambu)                       :: d2GR   !! Retarded propagator laplacian
+    type(spin)                        :: D, Dt, dD, dDt, F, Ft, dF, dFt
+
+    ! Construct the propagator from the Riccati parameters
+    associate(g   => this % g,   gt   => this % gt,   &
+              dg  => this % dg,  dgt  => this % dgt,  &
+              d2g => this % d2g, d2gt => this % d2gt, &
+              N   => this % N,   Nt   => this % Nt,   &
+              I   => pauli0,     M    => d2GR % matrix)
+
+      ! Calculate 1st-derivative auxiliary matrices
+      D  = dg*gt + g*dgt
+      Dt = dgt*g + gt*dg
+      F  = dg    + g *dgt*g
+      Ft = dgt   + gt*dg *gt
+
+      ! Calculate 2nd-derivative auxiliary matrices
+      dD  = d2g*gt + g*d2gt + 2.0_wp*dg*dgt
+      dDt = d2gt*g + gt*d2g + 2.0_wp*dgt*dg
+      dF  = d2g  + g *d2gt*g  + dg*dgt*g  + g*dgt*dg
+      dFt = d2gt + gt*d2g *gt + dgt*dg*gt + gt*dg*dgt
+
+      ! Calculate the propagator matrix
+      M(1:2,1:2) = (+2.0_wp) * N  * (dD  + 2.0_wp * D *N *D   ) * N
+      M(1:2,3:4) = (+2.0_wp) * N  * (dF  + D *N *F  + F *Nt*Dt) * Nt
+      M(3:4,1:2) = (-2.0_wp) * Nt * (dFt + Dt*Nt*Ft + Ft*N *D ) * N
+      M(3:4,3:4) = (-2.0_wp) * Nt * (dDt + 2.0_wp * Dt*Nt*Dt  ) * Nt
+    end associate
+  end function
+
   pure function propagator_advanced(this) result(GA)
     !! Calculates the 4×4 advanced propagator G^A.
     class(propagator), intent(in) :: this   !! Propagator object
@@ -211,6 +247,22 @@ contains
 
     ! Use the identity GA = -τ₃GR†τ₃
     dGA = nambuv(4) * transpose(conjg(-dGR % matrix)) * nambuv(4)
+  end function
+
+  pure function propagator_advanced_laplacian(this) result(d2GA)
+    !! Calculates the 4×4 retarded propagator gradient ∇²G^A.
+    !!
+    !! @TODO: 
+    !!   Implement support for gauge-covariant laplacians.
+    class(propagator),     intent(in) :: this   !! Propagator object
+    type(nambu)                       :: d2GA   !! Advanced propagator laplacian
+    type(nambu)                       :: d2GR   !! Retarded propagator laplacian
+
+    ! Calculate the retarded propagator laplacian
+    d2GR = this % retarded_laplacian()
+
+    ! Use the identity GA = -τ₃GR†τ₃
+    d2GA = nambuv(4) * transpose(conjg(-d2GR % matrix)) * nambuv(4)
   end function
 
   pure function propagator_keldysh(this) result(GK)
@@ -531,8 +583,8 @@ contains
     dGA = this % advanced_gradient()
 
     ! Construct the propagator laplacians
-  ! d2GR = this % retarded_laplacian()
-  ! d2GA = this % advanced_laplacian()
+    d2GR = this % retarded_laplacian()
+    d2GA = this % advanced_laplacian()
 
     ! Construct the condensate matrix
     do j=0,7

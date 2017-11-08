@@ -98,15 +98,15 @@ contains
       do n = 1,size(this % energy)
         ! Finite nonequilibrium potentials
         this % propagator(n,m) % h = &
-          [                                                      &
-            f(n,+1,+1) + f(n,+1,-1) + f(n,-1,+1) + f(n,-1,-1),   &
-            0.0_wp,                                              &
-            0.0_wp,                                              &
-            f(n,+1,+1) - f(n,+1,-1) + f(n,-1,+1) - f(n,-1,-1),   &
-            f(n,+1,+1) + f(n,+1,-1) - f(n,-1,+1) - f(n,-1,-1),   &
-            0.0_wp,                                              &
-            0.0_wp,                                              &
-            f(n,+1,+1) - f(n,+1,-1) - f(n,-1,+1) + f(n,-1,-1)    &
+          [                                                               &
+            (f(n,+1,+1) + f(n,+1,-1) + f(n,-1,+1) + f(n,-1,-1)),          &
+            (f(n,+1,+1) - f(n,+1,-1) + f(n,-1,+1) - f(n,-1,-1)) * u(1),   &
+            (f(n,+1,+1) - f(n,+1,-1) + f(n,-1,+1) - f(n,-1,-1)) * u(2),   &
+            (f(n,+1,+1) - f(n,+1,-1) + f(n,-1,+1) - f(n,-1,-1)) * u(3),   &
+            (f(n,+1,+1) + f(n,+1,-1) - f(n,-1,+1) - f(n,-1,-1)),          &
+            (f(n,+1,+1) - f(n,+1,-1) - f(n,-1,+1) + f(n,-1,-1)) * u(1),   &
+            (f(n,+1,+1) - f(n,+1,-1) - f(n,-1,+1) + f(n,-1,-1)) * u(2),   &
+            (f(n,+1,+1) - f(n,+1,-1) - f(n,-1,+1) + f(n,-1,-1)) * u(3)    &
           ]
 
         ! Transverse applied potentials
@@ -128,6 +128,14 @@ contains
                  Ts => this % spintemperature * s  )
         h = tanh(0.8819384944310228_wp * (E+V+Vs)/(T+Ts))/4
       end associate
+    end function
+
+    pure function u(m) result(r)
+      ! Nonequilibrium spin-projection along the m'th basis vector.
+      integer, intent(in) :: m
+      real(wp)            :: r
+
+      r = this % spinaxis(m)
     end function
   end subroutine
 

@@ -30,6 +30,7 @@ module material_m
     real(wp)                                  :: temperature           =  0.01_wp              !! Temperature (T/Tc)
     real(wp)                                  :: spinvoltage           =  0.00_wp              !! Spin-voltage (eVs/Δ₀)
     real(wp)                                  :: spintemperature       =  0.00_wp              !! Spin-temperature (Ts/Tc)
+    real(wp),                  dimension(1:3) :: spinaxis              =  [0,0,1]              !! Spin quantization axis
 
     ! Physical state modelled using quasiclassical propagators
     real(wp),                     allocatable :: energy(:)                                     !! Energy domain
@@ -256,6 +257,10 @@ contains
         call this % initialize()
       case("spintemperature")
         call evaluate(val, this%spintemperature)
+        call this % initialize()
+      case("spinaxis")
+        call evaluate(val, this%spinaxis)
+        this%spinaxis = unitvector(this%spinaxis)
         call this % initialize()
       case("transverse")
         call evaluate(val, this%transverse)
