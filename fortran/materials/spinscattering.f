@@ -66,10 +66,11 @@ contains
       Gso = N(4)*Gsf*N(4)
     end associate
 
-    ! Calculate the self-energy prefactors
-    Cdp = (this % depairing) / (8 * this % material % thouless)
-    Csf = (this % spinflip ) / (2 * this % material % thouless)
-    Cso = (this % spinorbit) / (2 * this % material % thouless)
+    ! Calculate the self-energy prefactors 
+    ! (including 1/2 from the Riccati-parametrized Usadel equation)
+    Cdp = (this % depairing) / (2 * 4 * this % material % thouless)
+    Csf = (this % spinflip ) / (2 * 1 * this % material % thouless)
+    Cso = (this % spinorbit) / (2 * 1 * this % material % thouless)
 
     ! Calculate the self-energy commutators
     R = Cdp*Gdp + Csf*Gsf + Cso*Gso
