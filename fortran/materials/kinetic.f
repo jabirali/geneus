@@ -207,8 +207,8 @@ contains
       call this % kinetic_equation_a(Gp, Ga, Cp, Ca)
 
       ! Construct the Jacobian (this side)
-      Jpa(:,:7) = Cp - Qp
-      Jpa(:,8:) =    - Mp
+      Jpa(:,:7) = Cp + Qp
+      Jpa(:,8:) =    + Mp
 
       ! Construct the Jacobian (other side)
       Jaa(:,:7) = Ca
@@ -240,8 +240,8 @@ contains
       call this % kinetic_equation_b(Gp, Gb, Cp, Cb)
 
       ! Construct the Jacobian (this side)
-      Jpb(:,:7) = Cp - Qp
-      Jpb(:,8:) =    - Mp
+      Jpb(:,:7) = Cp + Qp
+      Jpb(:,8:) =    + Mp
 
       ! Construct the Jacobian (other side)
       Jbb(:,:7) = Cb
