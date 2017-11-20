@@ -180,7 +180,7 @@ contains
     complex(wp), dimension(1:4,1:4)          :: I
 
     ! Calculate a matrix current from the propagators
-    I = (-0.50_wp) * this % spinactive_a % diffusion_current(p % retarded(), a % retarded())
+    I = (+0.50_wp) * this % spinactive_a % diffusion_current(p % retarded(), a % retarded())
 
     ! Calculate the deviation from the boundary condition
     associate(g => p % g, gt => p % gt, dg => p % dg, dgt => p % dgt)
@@ -202,7 +202,7 @@ contains
     complex(wp), dimension(1:4,1:4)          :: I
 
     ! Calculate a matrix current from the propagators
-    I = (+0.50_wp) * this % spinactive_b % diffusion_current(p % retarded(), b % retarded())
+    I = (-0.50_wp) * this % spinactive_b % diffusion_current(p % retarded(), b % retarded())
 
     ! Calculate the deviation from the boundary condition
     associate(g => p % g, gt => p % gt, dg => p % dg, dgt => p % dgt)
@@ -235,7 +235,7 @@ contains
   pure subroutine conductor_kinetic_equation_a(this, Gp, Ga, Cp, Ca)
     !! Calculate proportionality matrices for the boundary conditions at the left interface.
     class(conductor),             intent(in)  :: this
-    type(propagator),             intent(in)  :: Gp,  Ga
+    type(propagator),             intent(in)  :: Gp, Ga
     real(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
 
     call this % spinactive_a % kinetic_current(Gp, Ga, Cp, Ca)

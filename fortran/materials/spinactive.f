@@ -71,7 +71,7 @@ contains
   
     ! Evaluate the 1st-order matrix current
     associate(S => S0 + S1)
-      I  = (G0*S - S*G0)
+      I  = (S*G0 - G0*S)
     end associate
   
     ! Calculate the 2nd-order contributions to the matrix current. Note that we make a
@@ -126,7 +126,7 @@ contains
       type(nambu) :: I
   
       associate(R => this % secondorder, Q => this % spinmixing)
-        I = (0.50*R/Q) * (S0*G0*S0)
+        I = (-0.50*R/Q) * (S0*G0*S0)
       end associate
     end function
   
@@ -136,7 +136,7 @@ contains
   
       associate(R => this % secondorder, Q => this % spinmixing, M0 => this % M0)
         U = M0*G0*M0
-        I = (0.25*R*Q) * (G0*U - U*G0)
+        I = (0.25*R*Q) * (U*G0 - G0*U)
       end associate
     end function
   
@@ -146,7 +146,7 @@ contains
   
       associate(R => this % secondorder, M0 => this % M0)
         U = S0*G0*M0 + M0*G0*S0 + S1
-        I = ((0.00,0.25)*R) * (G0*U - U*G0)
+        I = ((0.00,0.25)*R) * (U*G0 - G0*U)
       end associate
     end function
   end function
