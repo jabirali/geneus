@@ -238,7 +238,12 @@ contains
     type(propagator),             intent(in)  :: Gp, Ga
     real(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
 
+    ! Calculate the boundary coefficients
     call this % spinactive_a % kinetic_current(Gp, Ga, Cp, Ca)
+
+    ! Direction of the interface normal
+    Cp = +Cp
+    Ca = +Ca
   end subroutine
 
   pure subroutine conductor_kinetic_equation_b(this, Gp, Gb, Cp, Cb)
@@ -247,7 +252,12 @@ contains
     type(propagator),             intent(in)  :: Gp, Gb
     real(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
 
+    ! Calculate the boundary coefficients
     call this % spinactive_b % kinetic_current(Gp, Gb, Cp, Cb)
+
+    ! Direction of the interface normal
+    Cp = -Cp
+    Cb = -Cb
   end subroutine
 
   impure subroutine conductor_update_prehook(this)
