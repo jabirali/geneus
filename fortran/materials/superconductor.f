@@ -126,7 +126,7 @@ contains
     S % matrix(4,1) = -gapt
 
     ! Calculate the self-energy contribution
-    R = R + Gp % selfenergy1(S)
+    R = R + re(Gp % selfenergy1(S))
   end subroutine
 
   impure subroutine superconductor_update_prehook(this)

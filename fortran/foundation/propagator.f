@@ -596,12 +596,12 @@ contains
 
   pure function propagator_selfenergy1(this, S) result(R)
     !! Calculate the 1st-order self-energy contribution to the kinetic equations.
-    class(propagator), intent(in) :: this
-    type(nambu),       intent(in) :: S
-    real(wp), dimension(0:7,0:7)  :: R
-    type(nambu), dimension(0:7)   :: N
-    type(nambu)                   :: GR, GA
-    integer                       :: i, j
+    class(propagator),   intent(in) :: this
+    type(nambu),         intent(in) :: S
+    complex(wp), dimension(0:7,0:7) :: R
+    type(nambu), dimension(0:7)     :: N
+    type(nambu)                     :: GR, GA
+    integer                         :: i, j
 
     ! Memoize the basis matrices
     do i=0,7
@@ -615,19 +615,19 @@ contains
     ! Construct the self-energy matrix
     do j=0,7
       do i=0,7
-        R(i,j) = re((0.00,0.25) * trace( (N(i)*S - S*N(i)) * (GR*N(j) - N(j)*GA) ))
+        R(i,j) = (0.00,0.25) * trace( (N(i)*S - S*N(i)) * (GR*N(j) - N(j)*GA) )
       end do
     end do
   end function
 
   pure function propagator_selfenergy2(this, S) result(R)
     !! Calculate the 2nd-order self-energy contribution to the kinetic equations.
-    class(propagator), intent(in) :: this
-    type(nambu),       intent(in) :: S
-    real(wp), dimension(0:7,0:7)  :: R
-    type(nambu), dimension(0:7)   :: N
-    type(nambu)                   :: GR, GA
-    integer                       :: i, j
+    class(propagator),   intent(in) :: this
+    type(nambu),         intent(in) :: S
+    complex(wp), dimension(0:7,0:7) :: R
+    type(nambu), dimension(0:7)     :: N
+    type(nambu)                     :: GR, GA
+    integer                         :: i, j
 
     ! Memoize the basis matrices
     do i=0,7
@@ -641,7 +641,7 @@ contains
     ! Construct the self-energy matrix
     do j=0,7
       do i=0,7
-        R(i,j) = re((0.00,0.25) * trace( (N(i)*S - S*N(i)) * (GR*S*GR*N(j) - N(j)*GA*S*GA + GR*(N(j)*S-S*N(j))*GA) ))
+        R(i,j) = (0.00,0.25) * trace( (N(i)*S - S*N(i)) * (GR*S*GR*N(j) - N(j)*GA*S*GA + GR*(N(j)*S-S*N(j))*GA) )
       end do
     end do
   end function

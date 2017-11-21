@@ -118,7 +118,7 @@ contains
       S % matrix(3:4,3:4) = ht
 
       ! Calculate the self-energy contribution
-      R = R + Gp % selfenergy1(S)
+      R = R + re(Gp % selfenergy1(S))
     end if
   end subroutine
 
