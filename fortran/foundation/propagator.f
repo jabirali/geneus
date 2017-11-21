@@ -497,7 +497,7 @@ contains
     ! Construct the dissipation matrix
     do i=0,7
       do j=0,7
-        M(i,j) = re(trace( N(i)*N(j) - N(i)*GR*N(j)*GA ))/8
+        M(i,j) = re(trace( N(i)*N(j) - N(i)*GR*N(j)*GA ))/4
       end do
     end do
   end function
@@ -526,7 +526,7 @@ contains
     ! Construct the dissipation matrix
     do j=0,7
       do i=0,7
-        dM(i,j) = -re(trace( N(i)*dGR*N(j)*GA + N(i)*GR*N(j)*dGA ))/8
+        dM(i,j) = -re(trace( N(i)*dGR*N(j)*GA + N(i)*GR*N(j)*dGA ))/4
       end do
     end do
   end function
@@ -556,7 +556,7 @@ contains
     ! Construct the condensate matrix
     do j=0,7
       do i=0,7
-        Q(i,j) = re(trace( N(j)*N(i)*GR*dGR - N(i)*N(j)*GA*dGA ))/8
+        Q(i,j) = re(trace( N(j)*N(i)*GR*dGR - N(i)*N(j)*GA*dGA ))/4
       end do
     end do
   end function
@@ -589,7 +589,7 @@ contains
     ! Construct the condensate matrix
     do j=0,7
       do i=0,7
-        dQ(i,j) = re(trace( N(j)*N(i)*(dGR*dGR + GR*d2GR) - N(i)*N(j)*(dGA*dGA + GA*d2GA) ))/8
+        dQ(i,j) = re(trace( N(j)*N(i)*(dGR*dGR + GR*d2GR) - N(i)*N(j)*(dGA*dGA + GA*d2GA) ))/4
       end do
     end do
   end function
