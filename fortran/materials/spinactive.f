@@ -161,8 +161,8 @@ contains
     real(wp), dimension(0:7,0:7), intent(out) :: C1   !! Boundary coefficient (other side)
 
     type(nambu), dimension(0:7) :: N
-    type(nambu)                 :: GR0, GA0, GK0
-    type(nambu)                 :: GR1, GA1, GK1
+    type(nambu)                 :: GR0, GA0
+    type(nambu)                 :: GR1, GA1
     integer                     :: i, j
 
     ! Construct the basis matrices
@@ -181,21 +181,18 @@ contains
     ! Construct the boundary coefficients
     do j=0,7
       do i=0,7
-        ! Calculate the keldysh propagator placeholders
-        GK0 = GR0*N(j) - N(j)*GA0
-        GK1 = GR1*N(j) - N(j)*GA1
- 
         ! Calculate the boundary matrix coefficients
-        C0(i,j) = (this % conductance) * re(trace(N(i) * (GK0*R(GA1) - R(GR1)*GK0)))/16
-        C1(i,j) = (this % conductance) * re(trace(N(i) * (GK1*T(GA0) - T(GR0)*GK1)))/16
+        C0(i,j) = (this % conductance/8) * re(trace( ( R(GA1)*N(i) - N(i)*R(GR1) ) * (  (GR0*N(j) - N(j)*GA0) ) ))
+        C1(i,j) = (this % conductance/8) * re(trace( (   GA0 *N(i) - N(i)*  GR0  ) * ( T(GR1*N(j) - N(j)*GA1) ) ))
       end do
     end do
   contains
     pure function T(U)
       ! Calculates the contents of the spin-active boundary condition commutators:
-      !   I_a ~ [G_a, T(G_b)],   I_b ~ [T(G_a), G_b]
+      !   I_a ~ [G_a, F(G_b)],   I_b ~ [F(G_a), G_b]
       ! This is used for the calculation of the boundary coefficient matrices.
-      ! Note that this version of the function only includes transmission terms.
+      ! Note that this version of the function only includes transmission terms,
+      ! and used to evaluate contributions from the other side of the interface.
 
       type(nambu), intent(in) :: U
       type(nambu)             :: T
@@ -214,9 +211,10 @@ contains
 
     pure function R(U)
       ! Calculates the contents of the spin-active boundary condition commutators:
-      !   I_a ~ [G_a, R(G_b)],   I_b ~ [R(G_a), G_b]
+      !   I_a ~ [G_a, F(G_b)],   I_b ~ [F(G_a), G_b]
       ! This is used for the calculation of the boundary coefficient matrices.
-      ! Note that this version of the function also includes reflection terms.
+      ! Note that this version of the function also includes reflection terms,
+      ! and is used to evaluate contributions from this side of the interface.
 
       type(nambu), intent(in) :: U
       type(nambu)             :: R
