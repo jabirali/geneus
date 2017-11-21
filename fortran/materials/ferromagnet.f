@@ -13,7 +13,7 @@ module ferromagnet_m
   ! Type declaration
   type, public, extends(conductor)   :: ferromagnet
     real(wp),   allocatable          :: magnetization(:,:)                                    !! Magnetic exchange field as a function of position
-    type(spin), allocatable, private :: h(:), ht(:)                                           !! Used by internal subroutines to handle exchange fields
+    type(spin), allocatable, private :: h(:)                                                  !! Used by internal subroutines to handle exchange fields
   contains
     ! These methods define the class(material) interface
     procedure                        :: update_prehook     => ferromagnet_update_prehook      !! Code to execute before calculating the propagators
@@ -58,19 +58,22 @@ contains
         if (n <= 1) then
           ! Left edge of the material
           h  = this%h(1)
-          ht = this%ht(1)
         else
           ! Linear interpolation from known values. The relative displacement d is defined
           ! as [z - location(n-1)]/[location(n) - location(n-1)], but assuming location(:)
           ! is a uniform array of values in the range [0,1], the below will be equivalent.
           d  = z*m - (n-2)
           h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
-          ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
         end if
 
+        ! Find the corresponding tilde-conjugate
+        ht = conjg(h)
+
         ! Calculate the second derivatives of the Riccati parameters (ferromagnet terms)
-        d2g  = d2g  + h  * g  + g  * ht
-        d2gt = d2gt + ht * gt + gt * h
+        associate( i => (0.00_wp,1.00_wp) )
+          d2g  = d2g  - i * ( h  * g  - g  * ht )
+          d2gt = d2gt + i * ( ht * gt - gt * h  )
+        end associate
       end if
 
     end associate
@@ -99,15 +102,16 @@ contains
       if (n <= 1) then
         ! Left edge of the material
         h  = this%h(1)
-        ht = this%ht(1)
       else
         ! Linear interpolation from known values. The relative displacement d is defined
         ! as [z - location(n-1)]/[location(n) - location(n-1)], but assuming location(:)
         ! is a uniform array of values in the range [0,1], the below will be equivalent.
         d  = z*m - (n-2)
         h  = this%h(n-1)  + (this%h(n)  - this%h(n-1))  * d
-        ht = this%ht(n-1) + (this%ht(n) - this%ht(n-1)) * d
       end if
+
+      ! Find the corresponding tilde-conjugate
+      ht = conjg(h)
 
       ! Construct the self-energy matrix
       S % matrix(1:2,1:2) = h
@@ -131,14 +135,12 @@ contains
       ! Allocate space for internal variables
       if (.not. allocated(this%h)) then
         allocate(this%h (size(this%magnetization,2)))
-        allocate(this%ht(size(this%magnetization,2)))
       end if
 
       ! Update the internal variables
-      associate(M => this % magnetization, h => this % h, ht => this % ht)
+      associate(M => this % magnetization, h => this % h)
         do n = 1,size(M,2)
-          h(n)  = ((0.0_wp,-1.0_wp)/this%thouless) * (M(1,n)*pauli1 + M(2,n)*pauli2 + M(3,n)*pauli3)
-          ht(n) = ((0.0_wp,+1.0_wp)/this%thouless) * (M(1,n)*pauli1 - M(2,n)*pauli2 + M(3,n)*pauli3)
+          h(n)  = (M(1,n)*pauli1 + M(2,n)*pauli2 + M(3,n)*pauli3)/(this%thouless)
         end do
       end associate
     end if
