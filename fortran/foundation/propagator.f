@@ -615,7 +615,7 @@ contains
     ! Construct the self-energy matrix
     do j=0,7
       do i=0,7
-        R(i,j) = re(trace( (N(i)*S - S*N(i)) * (GR*N(j) - N(j)*GA) ))/8
+        R(i,j) = re((0.00,0.25) * trace( (N(i)*S - S*N(i)) * (GR*N(j) - N(j)*GA) ))
       end do
     end do
   end function
@@ -641,7 +641,7 @@ contains
     ! Construct the self-energy matrix
     do j=0,7
       do i=0,7
-        R(i,j) = re(trace( (N(i)*S - S*N(i)) * (GR*S*GR*N(j) - N(j)*GA*S*GA + GR*(N(j)*S-S*N(j))*GA) ))/8
+        R(i,j) = re((0.00,0.25) * trace( (N(i)*S - S*N(i)) * (GR*S*GR*N(j) - N(j)*GA*S*GA + GR*(N(j)*S-S*N(j))*GA) ))
       end do
     end do
   end function
