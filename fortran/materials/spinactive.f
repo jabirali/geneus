@@ -189,7 +189,7 @@ contains
   contains
     pure function T(U)
       ! Calculates the contents of the spin-active boundary condition commutators:
-      !   I_a ~ [G_a, F(G_b)],   I_b ~ [F(G_a), G_b]
+      !   I ~ [F(G₁), G₀]
       ! This is used for the calculation of the boundary coefficient matrices.
       ! Note that this version of the function only includes transmission terms,
       ! and used to evaluate contributions from the other side of the interface.
@@ -211,7 +211,7 @@ contains
 
     pure function R(U)
       ! Calculates the contents of the spin-active boundary condition commutators:
-      !   I_a ~ [G_a, F(G_b)],   I_b ~ [F(G_a), G_b]
+      !   I ~ [F(G₁), G₀]
       ! This is used for the calculation of the boundary coefficient matrices.
       ! Note that this version of the function also includes reflection terms,
       ! and is used to evaluate contributions from this side of the interface.
