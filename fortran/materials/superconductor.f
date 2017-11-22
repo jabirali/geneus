@@ -105,12 +105,12 @@ contains
 
   pure subroutine superconductor_kinetic_equation(this, Gp, R, z)
     !! Calculate the self-energies in the kinetic equation.
-    class(superconductor),        intent(in)    :: this
-    type(propagator),             intent(in)    :: Gp
-    real(wp), dimension(0:7,0:7), intent(inout) :: R
-    real(wp),                     intent(in)    :: z
-    complex(wp)                                 :: gap, gapt
-    type(nambu)                                 :: S
+    class(superconductor),           intent(in)    :: this
+    type(propagator),                intent(in)    :: Gp
+    complex(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp),                        intent(in)    :: z
+    complex(wp)                                    :: gap, gapt
+    type(nambu)                                    :: S
 
     ! Call the superclass kinetic equation
     call this % conductor % kinetic_equation(Gp, R, z)
@@ -126,7 +126,7 @@ contains
     S % matrix(4,1) = -gapt
 
     ! Calculate the self-energy contribution
-    R = R + re(Gp % selfenergy1(S))
+    R = R + Gp % selfenergy1(S)
   end subroutine
 
   impure subroutine superconductor_update_prehook(this)

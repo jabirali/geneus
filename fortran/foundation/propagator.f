@@ -479,11 +479,11 @@ contains
   pure function propagator_dissipation(this) result(M)
     !! Calculate the dissipation matrix M = ∂J/∂H', where J is the
     !! current and H' is the gradient of the distribution function.
-    class(propagator), intent(in) :: this
-    real(wp), dimension(0:7,0:7)  :: M
-    type(nambu), dimension(0:7)   :: N
-    type(nambu)                   :: GR, GA
-    integer                       :: i, j
+    class(propagator),   intent(in) :: this
+    complex(wp), dimension(0:7,0:7) :: M
+    type(nambu), dimension(0:7)     :: N
+    type(nambu)                     :: GR, GA
+    integer                         :: i, j
 
     ! Memoize the basis matrices
     do i=0,7
@@ -497,18 +497,18 @@ contains
     ! Construct the dissipation matrix
     do i=0,7
       do j=0,7
-        M(i,j) = re(trace( N(i)*N(j) - N(i)*GR*N(j)*GA ))/4
+        M(i,j) = trace( N(i)*N(j) - N(i)*GR*N(j)*GA )/4
       end do
     end do
   end function
 
   pure function propagator_dissipation_gradient(this) result(dM)
     !! Calculate the gradient of the dissipation matrix M'.
-    class(propagator), intent(in) :: this
-    real(wp), dimension(0:7,0:7)  :: dM
-    type(nambu), dimension(0:7)   :: N
-    type(nambu)                   :: GR, GA, dGR, dGA
-    integer                       :: i, j
+    class(propagator),   intent(in) :: this
+    complex(wp), dimension(0:7,0:7) :: dM
+    type(nambu), dimension(0:7)     :: N
+    type(nambu)                     :: GR, GA, dGR, dGA
+    integer                         :: i, j
 
     ! Memoize the basis matrices
     do i=0,7
@@ -526,7 +526,7 @@ contains
     ! Construct the dissipation matrix
     do j=0,7
       do i=0,7
-        dM(i,j) = -re(trace( N(i)*dGR*N(j)*GA + N(i)*GR*N(j)*dGA ))/4
+        dM(i,j) = -trace( N(i)*dGR*N(j)*GA + N(i)*GR*N(j)*dGA )/4
       end do
     end do
   end function
@@ -534,11 +534,11 @@ contains
   pure function propagator_condensate(this) result(Q)
     !! Calculate the condensate matrix Q = ∂J/∂H, where J is the
     !! current and H is the nonequilibrium distribution function.
-    class(propagator), intent(in) :: this
-    real(wp), dimension(0:7,0:7)  :: Q
-    type(nambu), dimension(0:7)   :: N
-    type(nambu)                   :: GR, GA, dGR, dGA
-    integer                       :: i, j
+    class(propagator),   intent(in) :: this
+    complex(wp), dimension(0:7,0:7) :: Q
+    type(nambu), dimension(0:7)     :: N
+    type(nambu)                     :: GR, GA, dGR, dGA
+    integer                         :: i, j
 
     ! Memoize the basis matrices
     do i=0,7
@@ -556,18 +556,18 @@ contains
     ! Construct the condensate matrix
     do j=0,7
       do i=0,7
-        Q(i,j) = re(trace( N(j)*N(i)*GR*dGR - N(i)*N(j)*GA*dGA ))/4
+        Q(i,j) = trace( N(j)*N(i)*GR*dGR - N(i)*N(j)*GA*dGA )/4
       end do
     end do
   end function
 
   pure function propagator_condensate_gradient(this) result(dQ)
     !! Calculate the gradient of the condensate matrix Q'.
-    class(propagator), intent(in) :: this
-    real(wp), dimension(0:7,0:7)  :: dQ
-    type(nambu), dimension(0:7)   :: N
-    type(nambu)                   :: GR, GA, dGR, dGA, d2GR, d2GA
-    integer                       :: i, j
+    class(propagator),   intent(in) :: this
+    complex(wp), dimension(0:7,0:7) :: dQ
+    type(nambu), dimension(0:7)     :: N
+    type(nambu)                     :: GR, GA, dGR, dGA, d2GR, d2GA
+    integer                         :: i, j
 
     ! Memoize the basis matrices
     do i=0,7
@@ -589,7 +589,7 @@ contains
     ! Construct the condensate matrix
     do j=0,7
       do i=0,7
-        dQ(i,j) = re(trace( N(j)*N(i)*(dGR*dGR + GR*d2GR) - N(i)*N(j)*(dGA*dGA + GA*d2GA) ))/4
+        dQ(i,j) = trace( N(j)*N(i)*(dGR*dGR + GR*d2GR) - N(i)*N(j)*(dGA*dGA + GA*d2GA) )/4
       end do
     end do
   end function

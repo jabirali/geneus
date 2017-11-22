@@ -81,14 +81,14 @@ contains
 
   pure subroutine ferromagnet_kinetic_equation(this, Gp, R, z)
     !! Calculate the self-energies in the kinetic equation.
-    class(ferromagnet),           intent(in)    :: this
-    type(propagator),             intent(in)    :: Gp
-    real(wp), dimension(0:7,0:7), intent(inout) :: R
-    real(wp),                     intent(in)    :: z
-    type(nambu)                                 :: S
-    real(wp)                                    :: d
-    type(spin)                                  :: h, ht
-    integer                                     :: n, m
+    class(ferromagnet),              intent(in)    :: this
+    type(propagator),                intent(in)    :: Gp
+    complex(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp),                        intent(in)    :: z
+    type(nambu)                                    :: S
+    real(wp)                                       :: d
+    type(spin)                                     :: h, ht
+    integer                                        :: n, m
 
     ! Call the superclass kinetic equation
     call this % conductor % kinetic_equation(Gp, R, z)
@@ -118,7 +118,7 @@ contains
       S % matrix(3:4,3:4) = ht
 
       ! Calculate the self-energy contribution
-      R = R + re(Gp % selfenergy1(S))
+      R = R + Gp % selfenergy1(S)
     end if
   end subroutine
 

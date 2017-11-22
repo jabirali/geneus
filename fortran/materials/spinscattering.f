@@ -88,10 +88,10 @@ contains
 
   pure subroutine spinscattering_kinetic_equation(this, Gp, R)
     !! Calculate the self-energies in the kinetic equation.
-    class(spinscattering),        intent(in)    :: this
-    type(propagator),             intent(in)    :: Gp
-    real(wp), dimension(0:7,0:7), intent(inout) :: R
-    complex(wp)                                 :: Csf, Cso, Cdp
+    class(spinscattering),           intent(in)    :: this
+    type(propagator),                intent(in)    :: Gp
+    complex(wp), dimension(0:7,0:7), intent(inout) :: R
+    complex(wp)                                    :: Csf, Cso, Cdp
 
     ! Calculate the self-energy prefactors
     Cdp = (0,1) * (this % depairing) / (4 * this % material % thouless)
@@ -100,14 +100,14 @@ contains
 
     ! Calculate the self-energy contributions
     associate(N => this % nambuv)
-      R = R                                  &
-        + re( Csf * Gp % selfenergy2(N(1)) ) &
-        + re( Csf * Gp % selfenergy2(N(2)) ) &
-        + re( Csf * Gp % selfenergy2(N(3)) ) &
-        + re( Cdp * Gp % selfenergy2(N(4)) ) &
-        + re( Cso * Gp % selfenergy2(N(5)) ) &
-        + re( Cso * Gp % selfenergy2(N(6)) ) &
-        + re( Cso * Gp % selfenergy2(N(7)) )
+      R = R                            &
+        + Csf * Gp % selfenergy2(N(1)) &
+        + Csf * Gp % selfenergy2(N(2)) &
+        + Csf * Gp % selfenergy2(N(3)) &
+        + Cdp * Gp % selfenergy2(N(4)) &
+        + Cso * Gp % selfenergy2(N(5)) &
+        + Cso * Gp % selfenergy2(N(6)) &
+        + Cso * Gp % selfenergy2(N(7))
     end associate
   end subroutine
 end module

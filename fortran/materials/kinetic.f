@@ -163,7 +163,7 @@ contains
     type(propagator),               intent(in)  :: Gp
     real(wp), dimension(0:15,0:15), intent(out) :: Jp
     real(wp),                       intent(in)  :: z
-    real(wp), dimension(0:7,0:7)                :: M, Q, dM, dQ, R
+    complex(wp), dimension(0:7,0:7)             :: M, Q, dM, dQ, R
 
     ! Construct the dissipation matrices
     M  = Gp % dissipation()
@@ -179,16 +179,16 @@ contains
     ! Construct the Jacobian matrix
     Jp(:7,:7) =  0
     Jp(:7,8:) =  identity(8)
-    Jp(8:,:7) = -matmul(inverse(M), dQ + R)
-    Jp(8:,8:) = -matmul(inverse(M), dM + Q)
+    Jp(8:,:7) = -re(matmul(inverse(M), dQ + R))
+    Jp(8:,8:) = -re(matmul(inverse(M), dM + Q))
   end subroutine
 
   pure subroutine kinetic_jacobian_a(this, Gp, Ga, Jpa, Jaa)
     !! This function calculates the 8×16 Jacobian of the kinetic boundary condition (left).
-    class(material),               intent(in)  :: this
-    type(propagator),              intent(in)  :: Gp,  Ga
-    real(wp), dimension(0:7,0:15), intent(out) :: Jpa, Jaa
-    real(wp), dimension(0:7,0:7)               :: Mp, Qp, Cp, Ca
+    class(material),                  intent(in)  :: this
+    type(propagator),                 intent(in)  :: Gp,  Ga
+    real(wp),    dimension(0:7,0:15), intent(out) :: Jpa, Jaa
+    complex(wp), dimension(0:7,0:7)               :: Mp, Qp, Cp, Ca
 
     if (this % transparent_a) then
       ! Construct a diagonal Jacobian (this side)
@@ -207,21 +207,21 @@ contains
       call this % kinetic_equation_a(Gp, Ga, Cp, Ca)
 
       ! Construct the Jacobian (this side)
-      Jpa(:,:7) = Cp + Qp
-      Jpa(:,8:) =    + Mp
+      Jpa(:,:7) = re(Cp + Qp)
+      Jpa(:,8:) = re(   + Mp)
 
       ! Construct the Jacobian (other side)
-      Jaa(:,:7) = Ca
+      Jaa(:,:7) = re(Ca)
       Jaa(:,8:) = 0
     end if
   end subroutine
 
   pure subroutine kinetic_jacobian_b(this, Gp, Gb, Jpb, Jbb)
     !! This function calculates the 8×16 Jacobian of the kinetic boundary condition (left).
-    class(material),               intent(in)  :: this
-    type(propagator),              intent(in)  :: Gp,  Gb
-    real(wp), dimension(0:7,0:15), intent(out) :: Jpb, Jbb
-    real(wp), dimension(0:7,0:7)               :: Mp, Qp, Cp, Cb
+    class(material),                  intent(in)  :: this
+    type(propagator),                 intent(in)  :: Gp,  Gb
+    real(wp),    dimension(0:7,0:15), intent(out) :: Jpb, Jbb
+    complex(wp), dimension(0:7,0:7)               :: Mp, Qp, Cp, Cb
 
     if (this % transparent_b) then
       ! Construct a diagonal Jacobian (this side)
@@ -240,11 +240,11 @@ contains
       call this % kinetic_equation_b(Gp, Gb, Cp, Cb)
 
       ! Construct the Jacobian (this side)
-      Jpb(:,:7) = Cp + Qp
-      Jpb(:,8:) =    + Mp
+      Jpb(:,:7) = re(Cp + Qp)
+      Jpb(:,8:) = re(   + Mp)
 
       ! Construct the Jacobian (other side)
-      Jbb(:,:7) = Cb
+      Jbb(:,:7) = re(Cb)
       Jbb(:,8:) = 0
     end if
   end subroutine

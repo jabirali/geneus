@@ -218,10 +218,10 @@ contains
 
   pure subroutine conductor_kinetic_equation(this, Gp, R, z)
     !! Calculate the self-energies in the kinetic equation.
-    class(conductor),             intent(in)    :: this
-    type(propagator),             intent(in)    :: Gp
-    real(wp), dimension(0:7,0:7), intent(inout) :: R
-    real(wp),                     intent(in)    :: z
+    class(conductor),                intent(in)    :: this
+    type(propagator),                intent(in)    :: Gp
+    complex(wp), dimension(0:7,0:7), intent(inout) :: R
+    real(wp),                        intent(in)    :: z
     
     ! There are no normal-metal terms
     R = 0
@@ -234,9 +234,9 @@ contains
 
   pure subroutine conductor_kinetic_equation_a(this, Gp, Ga, Cp, Ca)
     !! Calculate proportionality matrices for the boundary conditions at the left interface.
-    class(conductor),             intent(in)  :: this
-    type(propagator),             intent(in)  :: Gp, Ga
-    real(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
+    class(conductor),                intent(in)  :: this
+    type(propagator),                intent(in)  :: Gp, Ga
+    complex(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
 
     ! Calculate the boundary coefficients
     call this % spinactive_a % kinetic_current(Gp, Ga, Cp, Ca)
@@ -248,9 +248,9 @@ contains
 
   pure subroutine conductor_kinetic_equation_b(this, Gp, Gb, Cp, Cb)
     !! Calculate proportionality matrices for the boundary conditions at the right interface.
-    class(conductor),             intent(in)  :: this
-    type(propagator),             intent(in)  :: Gp, Gb
-    real(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
+    class(conductor),                intent(in)  :: this
+    type(propagator),                intent(in)  :: Gp, Gb
+    complex(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
 
     ! Calculate the boundary coefficients
     call this % spinactive_b % kinetic_current(Gp, Gb, Cp, Cb)

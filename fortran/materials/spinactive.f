@@ -154,11 +154,11 @@ contains
   pure subroutine spinactive_kinetic_current(this, G0, G1, C0, C1)
     !! Calculate the kinetic boundary coefficients at an interface with spin-active properties.
     !! These can be used to calculate the generalized current according to J = C₀H₀ - C₁H₁.
-    class(spinactive),            intent(in)  :: this
-    type(propagator),             intent(in)  :: G0   !! Propagator (this  side)
-    type(propagator),             intent(in)  :: G1   !! Propagator (other side)
-    real(wp), dimension(0:7,0:7), intent(out) :: C0   !! Boundary coefficient (this  side)
-    real(wp), dimension(0:7,0:7), intent(out) :: C1   !! Boundary coefficient (other side)
+    class(spinactive),               intent(in)  :: this
+    type(propagator),                intent(in)  :: G0   !! Propagator (this  side)
+    type(propagator),                intent(in)  :: G1   !! Propagator (other side)
+    complex(wp), dimension(0:7,0:7), intent(out) :: C0   !! Boundary coefficient (this  side)
+    complex(wp), dimension(0:7,0:7), intent(out) :: C1   !! Boundary coefficient (other side)
 
     type(nambu), dimension(0:7) :: N
     type(nambu)                 :: GR0, GA0
@@ -182,8 +182,8 @@ contains
     do j=0,7
       do i=0,7
         ! Calculate the boundary matrix coefficients
-        C0(i,j) = (this % conductance/8) * re(trace( ( R(GA1)*N(i) - N(i)*R(GR1) ) * (  (GR0*N(j) - N(j)*GA0) ) ))
-        C1(i,j) = (this % conductance/8) * re(trace( (   GA0 *N(i) - N(i)*  GR0  ) * ( T(GR1*N(j) - N(j)*GA1) ) ))
+        C0(i,j) = (this % conductance/8) * trace( ( R(GA1)*N(i) - N(i)*R(GR1) ) * (  (GR0*N(j) - N(j)*GA0) ) )
+        C1(i,j) = (this % conductance/8) * trace( (   GA0 *N(i) - N(i)*  GR0  ) * ( T(GR1*N(j) - N(j)*GA1) ) )
       end do
     end do
   contains

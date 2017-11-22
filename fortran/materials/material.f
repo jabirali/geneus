@@ -146,28 +146,28 @@ module material_m
       !! This interface is used for the deferred procedure kinetic_equation.
       import material, propagator, wp
 
-      class(material),              intent(in)    :: this
-      type(propagator),             intent(in)    :: Gp
-      real(wp), dimension(0:7,0:7), intent(inout) :: R
-      real(wp),                     intent(in)    :: z
+      class(material),                 intent(in)    :: this
+      type(propagator),                intent(in)    :: Gp
+      complex(wp), dimension(0:7,0:7), intent(inout) :: R
+      real(wp),                        intent(in)    :: z
     end subroutine
 
     pure subroutine kinetic_equation_a(this, Gp, Ga, Cp, Ca)
       !! This interface is used for the deferred procedure kinetic_equation_a.
       import material, propagator, wp
 
-      class(material),              intent(in)  :: this
-      type(propagator),             intent(in)  :: Gp, Ga
-      real(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
+      class(material),                 intent(in)  :: this
+      type(propagator),                intent(in)  :: Gp, Ga
+      complex(wp), dimension(0:7,0:7), intent(out) :: Cp, Ca
     end subroutine
 
     pure subroutine kinetic_equation_b(this, Gp, Gb, Cp, Cb)
       !! This interface is used for the deferred procedure kinetic_equation_b.
       import material, propagator, wp
 
-      class(material),              intent(in)  :: this
-      type(propagator),             intent(in)  :: Gp, Gb
-      real(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
+      class(material),                 intent(in)  :: this
+      type(propagator),                intent(in)  :: Gp, Gb
+      complex(wp), dimension(0:7,0:7), intent(out) :: Cp, Cb
     end subroutine
   end interface
 contains
