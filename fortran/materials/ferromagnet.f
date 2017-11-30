@@ -168,7 +168,7 @@ contains
         block
           ! Allocate memory for the location array
           real(wp), allocatable, dimension(:) :: location
-          allocate(location(1024 * size(this%location)))
+          allocate(location(4096 * size(this%location)))
 
           ! Discretize the locations in the material
           call linspace(location, 0.0_wp, 1.0_wp)

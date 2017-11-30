@@ -192,7 +192,7 @@ contains
     !!   Δ_{n+1} = Δ_{n} - f'(Δ_n)/f''(Δ_n)
     !! Using a finite-difference approximation for the derivatives, we arrive at the
     !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
-    !!   Δ_{n+3} = Δ_{n} - (Δ_{n+1} - Δ_{n})/(Δ_{n+2} - 2Δ_{n+1} + Δ_{n})
+    !!   Δ_{n+3} = Δ_{n} - (Δ_{n+1} - Δ_{n})²/(Δ_{n+2} - 2Δ_{n+1} + Δ_{n})
     !! In most of my tests, the simulation time is then reduced by a factor 2x to 5x.
     !!
     !! @NOTE:

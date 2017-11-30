@@ -164,7 +164,7 @@ if __name__ == "__main__":
                 plot_gap(data)
             #elif field == ['Position', 'Mx magnetization', 'My magnetization', 'Mz magnetization']:
             else:
-                plot_magnetization(data)
+                plot_density(data)
             #else:
             #    print('Sorry, unrecognized output file...')
         elif filename.endswith('.conf'):
