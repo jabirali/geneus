@@ -246,6 +246,7 @@ contains
         this%thouless = 1/(this%length**2 + eps)
       case("scattering")
         call evaluate(val, this%scattering)
+        call this % initialize(cx(0.0_wp))
       case("temperature")
         call evaluate(val, this%temperature)
         call this % initialize()
