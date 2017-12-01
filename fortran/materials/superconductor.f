@@ -202,7 +202,7 @@ contains
     !!   and often converged more slowly. These methods have therefore been discarded.
 
     class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: g
+    complex(wp), dimension(size(this%location)) :: g, d1, d2
     logical                                     :: u
 
     ! Update the iterator
@@ -217,10 +217,18 @@ contains
       this % method = 4
     end if
 
-    ! Boost the convergence using Steffensen's method when the iterator resets
-    if (this % iteration == 0) then
-      g = f(1) - (f(2)-f(1))**2/(f(3)-2*f(2)+f(1))
-    else
+    ! Stop here if it is not yet time to boost
+    if (this % iteration > 0) then
+      return
+    end if
+
+    ! Boost the convergence using Steffensen's method
+    d1 = f(2) - f(1)
+    d2 = f(3) - 2*f(2) + f(1)
+    g  = f(1) - d1**2/d2
+
+    ! Abort now if the boost is numerically unstable
+    if (any(abs(d2) < 1e-10)) then
       return
     end if
 
