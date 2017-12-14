@@ -22,6 +22,7 @@ module material_m
     real(wp)                                  :: scattering            =  0.01_wp              !! Inelastic scattering (η/Δ₀)
     logical                                   :: transparent_a         =  .false.              !! Interface transparency (left)
     logical                                   :: transparent_b         =  .false.              !! Interface transparency (right)
+    logical                                   :: phaselock             =  .false.              !! Lock the center-of-mass phase?
 
     ! Material properties that affect the nonequilibrium state
     logical                                   :: equilibrium           =  .true.               !! Equilibrium?
@@ -51,7 +52,7 @@ module material_m
     class(material),                  pointer :: material_b      => null()                     !! Material to the right (default: vacuum)
 
     ! Control parameters for the numerical solvers
-    integer                                   :: selfconsistency =  2                          !! Selfconsistency scheme (0 = none, 1 = fixpoint iteration, 2 = Steffensen's method)
+    integer                                   :: selfconsistency =  2                          !! Selfconsistency scheme (0 = none, 1 = fixpoint, 2 = boost)
     integer                                   :: scaling         =  128                        !! Maximal mesh increase (range: 2^N, N>1)
     integer                                   :: method          =  4                          !! Runge—Kutta order (range: 2, 4, 6)
     integer                                   :: control         =  2                          !! Error control (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
@@ -274,10 +275,12 @@ contains
         if (this % selfconsistency < 0 .or. this % selfconsistency > 2) then
           call error("The selfconsistency scheme should be in the range [0,2].")
         end if
+      case("phaselock")
+        call evaluate(val, this%phaselock)
       case("equilibrium")
         call evaluate(val, this%equilibrium)
       case default
-        call warning("Unknown material option '" // key // "' ignored.")
+        call error("Unknown material option '" // key // "'.")
     end select
   end subroutine
 

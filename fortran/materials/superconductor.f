@@ -234,12 +234,9 @@ contains
     ! Boost the convergence using Steffensen's method
     d1 = f(2) - f(1)
     d2 = f(3) - 2*f(2) + f(1)
-    g  = f(1) - d1**2/d2
-
-    ! Abort now if the boost is numerically unstable
-    if (any(abs(d2) < 1e-10)) then
-      return
-    end if
+    where (abs(d2) > 1e-6)
+      g  = f(1) - d1**2/d2
+    end where
 
     ! Interpolate the gap as a function of position to a higher resolution
     this % gap_function = interpolate(this % location, g, this % gap_location)

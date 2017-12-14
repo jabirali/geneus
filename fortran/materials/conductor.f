@@ -345,6 +345,13 @@ contains
       end do
     end associate
 
+    ! Reset the center-of-mass phase
+    if (this % phaselock) then
+      associate(g => this % correlation, i => (0,1))
+        g = g / exp(i*arg(mean(g)))
+      end associate
+    end if
+
     ! Deallocate workspace memory
     deallocate(S, Q, I, J)
   end subroutine
