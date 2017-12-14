@@ -172,11 +172,20 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_fmap(this, routine)
+  impure subroutine structure_fmap(this, routine, every)
     !! Maps a subroutine onto each element of the multilayer stack.
     class(structure), target  :: this
     class(material),  pointer :: ptr
     procedure(mappable)       :: routine
+    logical,         optional :: every
+    logical                   :: every_
+
+    ! Check for optional arguments
+    if (present(every)) then
+      every_ =  every
+    else
+      every_ = .false.
+    end if
 
     ! Traverse the structure from top to bottom
     call top(ptr)
@@ -192,7 +201,7 @@ contains
       if (.not. associated(ptr)) then
         skip = .false.
       else
-        skip = ptr % order <= 0
+        skip = (.not. every_) .and. (ptr % order <= 0)
       end if
     end function
     subroutine top(ptr)
@@ -244,17 +253,16 @@ contains
     end subroutine
   end function
 
-  impure subroutine structure_initialize(this, gap)
+  impure subroutine structure_initialize(this)
     !! Initializes the state of the entire multilayer stack.
     class(structure), target  :: this
-    complex(wp)               :: gap
 
     ! Initialize all material states
-    call this % fmap(initialize)
+    call this % fmap(initialize, every=.true.)
   contains
     subroutine initialize(m)
       class(material), pointer :: m
-      call m % initialize(gap)
+      call m % initialize
     end subroutine
   end subroutine
 
@@ -653,5 +661,8 @@ contains
     if (this % materials() < 1) then
       call error('The material stack described by "' // file // '" has no layers with order > 0!')
     end if
+
+    ! Initialize all materials
+    call this % initialize
   end function
 end module

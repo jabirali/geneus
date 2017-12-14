@@ -45,7 +45,10 @@ program critical_p
   call stack % cmap('selfconsistency', 1)
 
   ! Initialize the stack to a barely superconducting state
-  call stack % initialize(cx(initgap))
+  call stack % cmap('gap', initgap)
+
+  ! Reset the states of the propagators throughout the stack
+  call stack % initialize
 
   ! Bootstrap the material states while locking the gap
   call stack % converge(threshold = threshold, iterations = bootstraps, bootstrap = .true.)

@@ -99,12 +99,11 @@ module material_m
 
   ! Declare subclass procedures
   abstract interface
-    subroutine initialize(this, gap)
+    subroutine initialize(this)
       !! This interface is used for the deferred procedure initialize.
       import material, wp
 
-      class(material),       intent(inout) :: this
-      complex(wp), optional, intent(in)    :: gap
+      class(material), intent(inout) :: this
     end subroutine
 
     subroutine manipulate(this)
@@ -246,26 +245,19 @@ contains
         this%thouless = 1/(this%length**2 + eps)
       case("scattering")
         call evaluate(val, this%scattering)
-        call this % initialize(cx(0.0_wp))
       case("temperature")
         call evaluate(val, this%temperature)
-        call this % initialize()
       case("voltage")
         call evaluate(val, this%voltage)
-        call this % initialize()
       case("spinvoltage")
         call evaluate(val, this%spinvoltage)
-        call this % initialize()
       case("spintemperature")
         call evaluate(val, this%spintemperature)
-        call this % initialize()
       case("spinaxis")
         call evaluate(val, this%spinaxis)
         this%spinaxis = unitvector(this%spinaxis)
-        call this % initialize()
       case("transverse")
         call evaluate(val, this%transverse)
-        call this % initialize()
       case("transparent_a")
         call evaluate(val, this%transparent_a)
       case("transparent_b")

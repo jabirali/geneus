@@ -73,8 +73,12 @@ program sweep_p
   ! Calculate the charge current as a function of phase difference
   do n=1,size(phase)
     ! Update the phase
-    call sa % initialize( gap = exp(((0.0,-0.5)*pi)*phase(n)) )
-    call sb % initialize( gap = exp(((0.0,+0.5)*pi)*phase(n)) )
+    sa % correlation = exp(((0.0,-0.5)*pi)*phase(n))
+    sb % correlation = exp(((0.0,+0.5)*pi)*phase(n))
+
+    ! Reset the states
+    call sa % initialize
+    call sb % initialize
 
     ! Update the state
     call stack % converge(threshold = tolerance, prehook = prehook, posthook = posthook)

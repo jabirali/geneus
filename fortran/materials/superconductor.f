@@ -44,33 +44,42 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine superconductor_construct(this)
+  impure subroutine superconductor_construct(this)
     !! Constructs a superconducting material that is initialized to a superconducting state.
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass constructor
     call this % conductor % construct
 
-    ! Initialize the order parameter
+    ! Initialize superconductivity
+    this % correlation = 1
+
+    ! Allocate interpolation functions
     allocate(this % gap_history(size(this%location),1:3))
     allocate(this % gap_location(4096 * size(this%location)))
     allocate(this % gap_function(size(this%gap_location)))
     call linspace(this % gap_location, this % location(1), this % location(size(this % location)))
-    call this % initialize( (1.0_wp,0.0_wp) )
   end subroutine
 
-  pure subroutine superconductor_initialize(this, gap)
+  impure subroutine superconductor_initialize(this)
     !! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
-    complex(wp), optional, intent(in)    :: gap
+    integer                              :: info
 
     ! Call the superclass initializer
-    call this % conductor % initialize(gap)
+    call this % conductor % initialize()
 
-    ! Update the superconducting gap
-    if (present(gap)) then
-      call this % set_gap(gap)
+    ! Disable status messages
+    info = this%information
+    if (this%information >= 0) then
+      this%information = -1
     end if
+
+    ! Silently initialize the gap
+    call this % update_gap
+
+    ! Reenable status messages
+    this%information = info
   end subroutine
 
   !--------------------------------------------------------------------------------!
@@ -271,6 +280,7 @@ contains
     class(superconductor), intent(inout) :: this
     complex(wp),           intent(in)    :: gap
 
+    this % correlation  = gap
     this % gap_function = gap
     this % gap_history  = gap
     this % iteration    = 0
@@ -310,20 +320,6 @@ contains
     character(*),          intent(in)    :: val
 
     select case(key)
-      case ("gap")
-        block
-          integer  :: index
-          real(wp) :: gap, phase
-          index = scan(val,',')
-          if (index > 0) then
-            call evaluate(val(1:index-1), gap)
-            call evaluate(val(index+1: ), phase)
-          else
-            call evaluate(val, gap)
-            phase = 0
-          end if
-          call this % initialize( gap = gap*exp((0.0,1.0)*pi*phase) )
-        end block
       case default
         call this % conductor % conf(key, val)
     end select

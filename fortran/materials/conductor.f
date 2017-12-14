@@ -48,7 +48,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine conductor_construct(this)
+  impure subroutine conductor_construct(this)
     !! Constructs a conductor object initialized to a superconducting state.
     class(conductor), intent(inout) :: this
 
@@ -62,12 +62,14 @@ contains
     call linspace(this % energy(400:500), 1.50_wp, 4.50_wp)
     call linspace(this % energy(500:   ), 4.50_wp, 30.0_wp)
 
-    ! Initialize propagators
+    ! Allocate memory for propagators
     allocate(this % propagator(size(this % energy), size(this % location)))
-    call this % initialize(cx(0.0_wp))
+
+    ! Initialize superconductivity
+    allocate(this % correlation(size(this % location)))
+    this % correlation = eps
 
     ! Allocate memory for physical observables
-    allocate(this % correlation(size(this % location)))
     allocate(this % supercurrent(0:7,size(this % location)))
     allocate(this % lossycurrent(0:7,size(this % location)))
     allocate(this % accumulation(0:7,size(this % location)))
@@ -78,20 +80,17 @@ contains
     allocate(this % spinactive_b)
   end subroutine
 
-  pure subroutine conductor_initialize(this, gap)
+  impure subroutine conductor_initialize(this)
     !! Define the default initializer.
-    class(conductor),      intent(inout) :: this
-    complex(wp), optional, intent(in)    :: gap
-    integer                              :: n, m
+    class(conductor), intent(inout) :: this
+    integer                         :: n, m
 
     ! Initialize the Riccati parameters
-    if (present(gap)) then
-      do m = 1,size(this % location)
-        do n = 1,size(this % energy)
-            this % propagator(n,m) = propagator( cx(this % energy(n), this % scattering), gap )
-        end do
+    do m = 1,size(this % location)
+      do n = 1,size(this % energy)
+        this % propagator(n,m) = propagator( cx(this % energy(n), this % scattering), this % correlation(m) )
       end do
-    end if
+    end do
 
     ! Initialize the distribution function
     do m = 1,size(this % location)
@@ -431,17 +430,19 @@ contains
         this % spinorbit % field(2) = this % spinorbit % field(2) + (-tmp)*pauli2
       case ('gap')
         block
-          integer  :: index
-          real(wp) :: gap, phase
-          index = scan(val,',')
-          if (index > 0) then
-            call evaluate(val(1:index-1), gap)
-            call evaluate(val(index+1: ), phase)
-          else
-            call evaluate(val, gap)
-            phase = 0
-          end if
-          call this % initialize( gap = gap*exp((0.0,1.0)*pi*phase) )
+          real(wp), allocatable, dimension(:) :: r
+          associate(g => this % correlation, z => this % location, i => (0,1))
+            call evaluate(val, z, r)
+            g = r * exp(i*arg(g))
+          end associate
+        end block
+      case ('phase')
+        block
+          real(wp), allocatable, dimension(:) :: r
+          associate(g => this % correlation, z => this % location, i => (0,1))
+            call evaluate(val, z, r)
+            g = abs(g) * exp(i*pi*r)
+          end associate
         end block
       case ('scattering_spinflip')
         if (.not. allocated(this % spinscattering)) then

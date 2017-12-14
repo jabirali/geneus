@@ -180,9 +180,6 @@ contains
           if (norm2(this % magnetization) < sqrt(eps)) then
             deallocate(this % magnetization)
           end if
-
-          ! Deallocate the location array
-          deallocate(location)
         end block
       case default
         ! Pass this option to the superclass
