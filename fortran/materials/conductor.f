@@ -112,6 +112,10 @@ contains
         if (this % transverse) then
           this % propagator(n,m) % h(4:7) = 0
         end if
+
+        ! Derivatives of the above
+        this % propagator(n,m) % dh  = 0
+        this % propagator(n,m) % d2h = 0
       end do
     end do
   contains
