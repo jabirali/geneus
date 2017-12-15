@@ -302,7 +302,10 @@ contains
     class(material), intent(inout) :: this
     integer                        :: info
 
-    ! Load the saved propagators
+    ! Reinitialize from fields
+    call this % initialize
+
+    ! Load any saved propagators
     if (allocated(this%backup)) then
       call this % propagator % load(this % backup)
     end if
