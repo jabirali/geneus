@@ -31,8 +31,7 @@ module superconductor_m
     procedure                :: update_posthook     => superconductor_update_posthook     !! Update the superconducting order parameter from  the propagators
 
     ! These methods are used to access and mutate the parameters
-    procedure                :: set_gap             => superconductor_set_gap             !! Update the superconducting order parameter from a given scalar
-    procedure                :: get_gap             => superconductor_get_gap             !! Return the superconducting order parameter at a given position
+    procedure                :: gap                 => superconductor_gap                 !! Return the superconducting order parameter at a given position
 
     ! These methods define miscellaneous utility functions
     procedure                :: load                => superconductor_load                !! Load the state of a superconductor
@@ -100,7 +99,7 @@ contains
               d2g => p % d2g, d2gt => p % d2gt )
 
       ! Lookup the superconducting order parameter
-      gap  = this%get_gap(z)/this%thouless
+      gap  = (this % gap(z))/(this % thouless)
       gapt = conjg(gap)
 
       ! Calculate the second derivatives of the Riccati parameters (conductor terms)
@@ -125,7 +124,7 @@ contains
     call this % conductor % kinetic_equation(Gp, R, z)
 
     ! Lookup the superconducting order parameter
-    gap  = (this % get_gap(z))/(this % thouless)
+    gap  = (this % gap(z))/(this % thouless)
     gapt = conjg(gap)
 
     ! Construct the self-energy matrix
@@ -272,18 +271,7 @@ contains
   !                    IMPLEMENTATION OF GETTERS AND SETTERS                       !
   !--------------------------------------------------------------------------------!
 
-  pure subroutine superconductor_set_gap(this, gap)
-    !! Updates the superconducting order parameter from a scalar.
-    class(superconductor), intent(inout) :: this
-    complex(wp),           intent(in)    :: gap
-
-    this % correlation  = gap
-    this % gap_function = gap
-    this % gap_history  = gap
-    this % iteration    = 0
-  end subroutine
-
-  pure function superconductor_get_gap(this, location) result(gap)
+  pure function superconductor_gap(this, location) result(gap)
     !! Returns the superconducting order parameter at the given location.
     class(superconductor), intent(in) :: this
     real(wp),              intent(in) :: location
