@@ -178,14 +178,6 @@ contains
     class(material),  pointer :: ptr
     procedure(mappable)       :: routine
     logical,         optional :: every
-    logical                   :: every_
-
-    ! Check for optional arguments
-    if (present(every)) then
-      every_ =  every
-    else
-      every_ = .false.
-    end if
 
     ! Traverse the structure from top to bottom
     call top(ptr)
@@ -198,10 +190,25 @@ contains
       ! Check if a material layer should be skipped.
       class(material), pointer :: ptr
       logical                  :: skip
-      if (.not. associated(ptr)) then
+      logical                  :: every_
+
+      ! Check for optional arguments
+      if (present(every)) then
+        every_ =  every
+      else
+        every_ = .false.
+      end if
+
+      ! Decide whether to skip this layer
+      if (every_) then
+        ! Process every layer in the stack
+        skip = .false.
+      else if (.not. associated(ptr)) then
+        ! There are no layers left to skip
         skip = .false.
       else
-        skip = (.not. every_) .and. (ptr % order <= 0)
+        ! Decide based on the user config
+        skip = ptr % order <= 0
       end if
     end function
     subroutine top(ptr)
