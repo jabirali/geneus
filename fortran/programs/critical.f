@@ -66,6 +66,9 @@ program critical_p
     ! Set the temperature of the materials
     call stack % cmap('temperature', critical)
 
+    ! Reinitialize at the new temperature
+    call stack % initialize
+
     ! Load the saved material states
     call stack % load
 

@@ -302,13 +302,8 @@ contains
     class(material), intent(inout) :: this
     integer                        :: info
 
-    ! Reinitialize from fields
-    call this % initialize
-
-    ! Load any saved propagators
-    if (allocated(this%backup)) then
-      call this % propagator % load(this % backup)
-    end if
+    ! Load saved propagators
+    call this % propagator % load(this % backup)
 
     ! Disable status messages
     info = this%information
@@ -317,9 +312,9 @@ contains
     end if
 
     ! Silently recalculate derived properties
-    call this%update_posthook
+    call this % update_posthook
 
     ! Reenable status messages
-    this%information = info
+    this % information = info
   end subroutine
 end module

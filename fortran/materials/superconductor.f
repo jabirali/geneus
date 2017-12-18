@@ -8,10 +8,11 @@ module superconductor_m
   use :: stdio_m
   use :: condmat_m
   use :: conductor_m
+  use :: ferromagnet_m
   private
 
   ! Type declaration
-  type, public, extends(conductor) :: superconductor
+  type, public, extends(ferromagnet) :: superconductor
     ! These parameters control the physical characteristics of the material 
     complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
@@ -48,7 +49,7 @@ contains
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass constructor
-    call this % conductor % construct
+    call this % ferromagnet % construct
 
     ! Initialize superconductivity
     this % correlation = 1
@@ -66,7 +67,7 @@ contains
     integer                              :: info
 
     ! Call the superclass initializer
-    call this % conductor % initialize()
+    call this % ferromagnet % initialize
 
     ! Disable status messages
     info = this%information
@@ -102,8 +103,8 @@ contains
       gap  = (this % gap(z))/(this % thouless)
       gapt = conjg(gap)
 
-      ! Calculate the second derivatives of the Riccati parameters (conductor terms)
-      call this % conductor % diffusion_equation(p, e, z)
+      ! Calculate the second derivatives of the Riccati parameters (superclass terms)
+      call this % ferromagnet % diffusion_equation(p, e, z)
 
       ! Calculate the second derivatives of the Riccati parameters (superconductor terms)
       d2g  = d2g  - gap  * pauli2 + gapt * g  * pauli2 * g
@@ -121,7 +122,7 @@ contains
     type(nambu)                                    :: S
 
     ! Call the superclass kinetic equation
-    call this % conductor % kinetic_equation(Gp, R, z)
+    call this % ferromagnet % kinetic_equation(Gp, R, z)
 
     ! Lookup the superconducting order parameter
     gap  = (this % gap(z))/(this % thouless)
@@ -142,7 +143,7 @@ contains
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass prehook
-    call this % conductor % update_prehook
+    call this % ferromagnet % update_prehook
 
     ! Modify the type string
     this % type_string = color_green // 'SUPERCONDUCTOR' // color_none
@@ -153,7 +154,7 @@ contains
     class(superconductor), intent(inout) :: this
 
     ! Call the superclass posthook
-    call this % conductor % update_posthook
+    call this % ferromagnet % update_posthook
 
     ! Update the superconducting gap using fixpoint-iteration
     if (this % selfconsistency >= 1) then
@@ -306,7 +307,7 @@ contains
 
     select case(key)
       case default
-        call this % conductor % conf(key, val)
+        call this % ferromagnet % conf(key, val)
     end select
   end subroutine
 

@@ -41,6 +41,8 @@ module structure_m
     procedure :: save                => structure_save                !! Save the physical state
     procedure :: load                => structure_load                !! Load the physical state
     procedure :: update              => structure_update              !! Update the physical state
+    procedure :: update_prehook      => structure_update_prehook      !! Execute all update prehooks
+    procedure :: update_posthook     => structure_update_posthook     !! Execute all update posthooks
     procedure :: converge            => structure_converge            !! Update until convergence
     procedure :: write               => structure_write               !! Write out observables
 
@@ -341,6 +343,11 @@ contains
     materials       = this % materials()
     superconductors = this % superconductors()
 
+    ! If we're not bootstrapping, then we wish to execute all posthook actions at least once
+    if (.not. bootstrap_) then
+      call this % update_posthook
+    end if
+
     ! If we're not bootstrapping, then we have to solve the diffusion equation until convergence.
     ! If we're bootstrapping, it's only required if we have at least one enabled superconductor.
     if ((.not. bootstrap_) .or. (superconductors > 0)) then
@@ -388,11 +395,34 @@ contains
         end if
       end do
     end if
+  end subroutine
 
-    ! Solve the selfconsistency equations at least once
-    if (bootstrap_) then
-      call this % load()
-    end if
+  impure subroutine structure_update_prehook(this)
+    !! Execute all update prehooks.
+    class(structure) :: this
+
+    ! Traverse all materials
+    call this % fmap(prehook)
+  contains
+    subroutine prehook(ptr)
+      class(material), pointer :: ptr
+
+      call ptr % update_prehook
+    end subroutine
+  end subroutine
+
+  impure subroutine structure_update_posthook(this)
+    !! Execute all update posthooks.
+    class(structure) :: this
+
+    ! Traverse all materials
+    call this % fmap(posthook)
+  contains
+    subroutine posthook(ptr)
+      class(material), pointer :: ptr
+
+      call ptr % update_posthook
+    end subroutine
   end subroutine
  
   impure function structure_materials(this) result(num)
@@ -413,7 +443,7 @@ contains
   end function
 
   impure function structure_superconductors(this) result(num)
-    !! Checks the number of enabled superconductors in the multilayer stack.
+    !! Checks the number of selfconsistent superconductors in the multilayer stack.
     class(structure), target :: this
     integer                  :: num
 
@@ -427,7 +457,9 @@ contains
       class(material), pointer :: ptr
       select type (ptr)
         class is (superconductor)
-          num = num + 1
+          if (ptr % selfconsistency > 0) then
+            num = num + 1
+          end if
       end select
     end subroutine
   end function
