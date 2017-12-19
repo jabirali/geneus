@@ -164,7 +164,7 @@ contains
     end select
 
     ! Map it onto each material
-    call this % fmap(conf)
+    call this % fmap(conf, every=.true.)
   contains
     subroutine conf(m)
       class(material), pointer :: m
