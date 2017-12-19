@@ -53,14 +53,13 @@ contains
     class(conductor), intent(inout) :: this
 
     ! Initialize locations
-    allocate(this % location(151))
+    allocate(this % location(101))
     call linspace(this % location, 0 + 1e-10_wp, 1 - 1e-10_wp)
 
     ! Initialize energies
-    allocate(this % energy(600))
-    call linspace(this % energy(   :400), 1e-6_wp, 1.50_wp)
-    call linspace(this % energy(400:500), 1.50_wp, 4.50_wp)
-    call linspace(this % energy(500:   ), 4.50_wp, 30.0_wp)
+    allocate(this % energy(1000))
+    call linspace(this % energy(   :800), 1e-6_wp, 4.00_wp)
+    call linspace(this % energy(800:   ), 4.00_wp, 30.0_wp)
 
     ! Allocate memory for propagators
     allocate(this % propagator(size(this % energy), size(this % location)))
