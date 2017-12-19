@@ -17,7 +17,6 @@ module superconductor_m
     complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    integer                  :: iteration            !! Used to count where in the selfconsistent iteration cycle we are
   contains
     ! These methods define the class(material) interface
     procedure                :: construct          => superconductor_construct            !! Construct  propagators
@@ -35,7 +34,6 @@ module superconductor_m
     procedure                :: gap                 => superconductor_gap                 !! Return the superconducting order parameter at a given position
 
     ! These methods define miscellaneous utility functions
-    procedure                :: load                => superconductor_load                !! Load the state of a superconductor
     procedure                :: conf                => superconductor_conf                !! Configure material parameters
   end type
 contains
@@ -217,6 +215,11 @@ contains
     ! Update the iterator
     this % iteration = modulo(this % iteration + 1, 8)
 
+    ! Stop here if we have transparent interfaces
+    if (this % transparent_a .or. this % transparent_b) then
+      return
+    end if
+
     ! Right after a convergence boost, a 6th-order Runge-Kutta algorithm is the 
     ! most efficient alternative for solving the diffusion equations. Otherwise,
     ! a 4th-order algorithm is sufficient, and spends less time per iteration.
@@ -234,9 +237,7 @@ contains
     ! Boost the convergence using Steffensen's method
     d1 = f(2) - f(1)
     d2 = f(3) - 2*f(2) + f(1)
-    where (abs(d2) > 1e-6)
-      g  = f(1) - d1**2/d2
-    end where
+    g  = f(1) - d1**2/d2
 
     ! Interpolate the gap as a function of position to a higher resolution
     this % gap_function = interpolate(this % location, g, this % gap_location)
@@ -309,17 +310,5 @@ contains
       case default
         call this % ferromagnet % conf(key, val)
     end select
-  end subroutine
-
-  impure subroutine superconductor_load(this)
-    !! Load a backup of a previous material state.
-    use :: material_m
-    class(superconductor), intent(inout) :: this
-
-    ! Call the superclass prehook
-    call material_load(this)
-
-    ! Reset the iteration counter
-    this % iteration = 0
   end subroutine
 end module

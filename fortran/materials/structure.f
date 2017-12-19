@@ -348,6 +348,9 @@ contains
       call this % update_posthook
     end if
 
+    ! Make sure that any iteration cycles are reset to zero before we start a new one
+    call this % cmap('iteration', 0)
+
     ! If we're not bootstrapping, then we have to solve the diffusion equation until convergence.
     ! If we're bootstrapping, it's only required if we have at least one enabled superconductor.
     if ((.not. bootstrap_) .or. (superconductors > 0)) then
@@ -398,7 +401,7 @@ contains
   end subroutine
 
   impure subroutine structure_update_prehook(this)
-    !! Execute all update prehooks.
+    !! Silently execute all update prehooks.
     class(structure) :: this
 
     ! Traverse all materials
@@ -406,13 +409,24 @@ contains
   contains
     subroutine prehook(ptr)
       class(material), pointer :: ptr
+      integer                  :: info
 
+      ! Disable status messages
+      info = ptr % information
+      if (ptr % information >= 0) then
+        ptr % information = -1
+      end if
+
+      ! Silently run prehooks
       call ptr % update_prehook
+
+      ! Reenable status messages
+      ptr % information = info
     end subroutine
   end subroutine
 
   impure subroutine structure_update_posthook(this)
-    !! Execute all update posthooks.
+    !! Silently execute all update posthooks.
     class(structure) :: this
 
     ! Traverse all materials
@@ -420,8 +434,19 @@ contains
   contains
     subroutine posthook(ptr)
       class(material), pointer :: ptr
+      integer                  :: info
 
+      ! Disable status messages
+      info = ptr % information
+      if (ptr % information >= 0) then
+        ptr % information = -1
+      end if
+
+      ! Silently run posthooks
       call ptr % update_posthook
+
+      ! Reenable status messages
+      ptr % information = info
     end subroutine
   end subroutine
  

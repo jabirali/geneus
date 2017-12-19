@@ -52,6 +52,7 @@ module material_m
     class(material),                  pointer :: material_b      => null()                     !! Material to the right (default: vacuum)
 
     ! Control parameters for the numerical solvers
+    integer                                   :: iteration       =  0                          !! Used to keep track of selfconsistent iteration cycles
     integer                                   :: selfconsistency =  2                          !! Selfconsistency scheme (0 = none, 1 = fixpoint, 2 = boost)
     integer                                   :: scaling         =  128                        !! Maximal mesh increase (range: 2^N, N>1)
     integer                                   :: method          =  4                          !! Runge—Kutta order (range: 2, 4, 6)
@@ -275,6 +276,8 @@ contains
         if (this % selfconsistency < 0 .or. this % selfconsistency > 2) then
           call error("The selfconsistency scheme should be in the range [0,2].")
         end if
+      case("iteration")
+        call evaluate(val, this%iteration)
       case("phaselock")
         call evaluate(val, this%phaselock)
       case("equilibrium")
