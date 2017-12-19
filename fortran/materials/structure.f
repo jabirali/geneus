@@ -348,9 +348,6 @@ contains
       call this % update_posthook
     end if
 
-    ! Make sure that any iteration cycles are reset to zero before we start a new one
-    call this % cmap('iteration', 0)
-
     ! If we're not bootstrapping, then we have to solve the diffusion equation until convergence.
     ! If we're bootstrapping, it's only required if we have at least one enabled superconductor.
     if ((.not. bootstrap_) .or. (superconductors > 0)) then

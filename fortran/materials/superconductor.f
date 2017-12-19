@@ -17,6 +17,7 @@ module superconductor_m
     complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
+    integer                  :: iteration            !! Used to keep track of selfconsistent iteration cycles
   contains
     ! These methods define the class(material) interface
     procedure                :: construct          => superconductor_construct            !! Construct  propagators
@@ -52,6 +53,9 @@ contains
     ! Initialize superconductivity
     this % correlation = 1
 
+    ! Enable a higher-order solver
+    this % method = 6
+
     ! Allocate interpolation functions
     allocate(this % gap_history(size(this%location),1:3))
     allocate(this % gap_location(4096 * size(this%location)))
@@ -68,16 +72,19 @@ contains
     call this % ferromagnet % initialize
 
     ! Disable status messages
-    info = this%information
-    if (this%information >= 0) then
-      this%information = -1
+    info = this % information
+    if (this % information >= 0) then
+      this % information = -1
     end if
 
     ! Silently initialize the gap
     call this % update_gap
 
     ! Reenable status messages
-    this%information = info
+    this % information = info
+
+    ! Reset the iteration counter
+    this % iteration = 0
   end subroutine
 
   !--------------------------------------------------------------------------------!
@@ -212,22 +219,13 @@ contains
     complex(wp), dimension(size(this%location)) :: g, d1, d2
     logical                                     :: u
 
-    ! Update the iterator
-    this % iteration = modulo(this % iteration + 1, 8)
-
     ! Stop here if we have transparent interfaces
     if (this % transparent_a .or. this % transparent_b) then
       return
     end if
 
-    ! Right after a convergence boost, a 6th-order Runge-Kutta algorithm is the 
-    ! most efficient alternative for solving the diffusion equations. Otherwise,
-    ! a 4th-order algorithm is sufficient, and spends less time per iteration.
-    if (this % iteration == 0) then
-      this % method = 6
-    else
-      this % method = 4
-    end if
+    ! Update the iterator
+    this % iteration = modulo(this % iteration + 1, 8)
 
     ! Stop here if it is not yet time to boost
     if (this % iteration > 0) then
