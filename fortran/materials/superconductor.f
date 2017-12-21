@@ -219,11 +219,6 @@ contains
     complex(wp), dimension(size(this%location)) :: g, d1, d2
     logical                                     :: u
 
-    ! Stop here if we have transparent interfaces
-    if (this % transparent_a .or. this % transparent_b) then
-      return
-    end if
-
     ! Update the iterator
     this % iteration = modulo(this % iteration + 1, 10)
 
@@ -236,6 +231,14 @@ contains
     d1 = f(2) - f(1)
     d2 = f(3) - 2*f(2) + f(1)
     g  = f(1) - d1**2/d2
+
+    ! Do not boost adjacent to transparent interfaces
+    if (this % transparent_a) then
+      g(lbound(g,1)) = this % gap(0.0_wp)
+    end if
+    if (this % transparent_b) then
+      g(ubound(g,1)) = this % gap(1.0_wp)
+    end if
 
     ! Interpolate the gap as a function of position to a higher resolution
     this % gap_function = interpolate(this % location, g, this % gap_location)
