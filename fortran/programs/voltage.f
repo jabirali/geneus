@@ -19,7 +19,7 @@ program voltage_p
   ! Declare program control parameters
   real(wp), parameter                 :: threshold   = 1e-2
   real(wp), parameter                 :: tolerance   = 1e-8
-  integer,  parameter                 :: iterations  = 1024
+  integer,  parameter                 :: iterations  = 200
 
   ! Declare variables used by the program
   real(wp), dimension(:), allocatable :: voltage
