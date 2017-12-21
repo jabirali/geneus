@@ -17,7 +17,6 @@ module superconductor_m
     complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
-    integer                  :: iteration            !! Used to keep track of selfconsistent iteration cycles
   contains
     ! These methods define the class(material) interface
     procedure                :: construct          => superconductor_construct            !! Construct  propagators
@@ -220,7 +219,7 @@ contains
     logical                                     :: u
 
     ! Update the iterator
-    this % iteration = modulo(this % iteration + 1, 10)
+    this % iteration = modulo(this % iteration + 1, 8)
 
     ! Stop here if it is not yet time to boost
     if (this % iteration > 0) then

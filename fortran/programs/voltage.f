@@ -64,7 +64,7 @@ program voltage_p
 
   ! Initialize the voltage and current
   allocate(voltage(iterations), current(iterations))
-  call linspace(voltage, 0.0_wp, 2.00_wp)
+  call linspace(voltage, 1e-6_wp, 2.00_wp)
 
   ! Start with a non-selfconsistent bootstrap procedure
   call stack % converge(threshold = threshold, bootstrap = .true.)

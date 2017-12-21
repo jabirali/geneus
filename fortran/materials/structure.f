@@ -355,6 +355,9 @@ contains
     materials       = this % materials()
     superconductors = this % superconductors()
 
+    ! Reset any iteration counters
+    call this % cmap('iteration', 0)
+
     ! If we're not bootstrapping, then we wish to execute all posthook actions at least once
     if (.not. bootstrap_) then
       call this % update_posthook
