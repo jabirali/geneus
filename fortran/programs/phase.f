@@ -3,7 +3,7 @@
 !>
 !> This program calculates the current-phase relation of a one-dimensional superconducting structure.
 
-program sweep_p
+program phase_p
   use :: structure_m
   use :: stdio_m
   use :: math_m
