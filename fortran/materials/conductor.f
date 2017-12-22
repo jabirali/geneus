@@ -329,7 +329,7 @@ contains
         end do
 
         ! Superconducting correlations depend on the cutoff
-        S = S/acosh(E(size(E)))
+        S = S/log(2*E(size(E)))
 
         ! Heat and spin-heat observables depend on the energy
         do k = 4,7
