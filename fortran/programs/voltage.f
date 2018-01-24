@@ -79,8 +79,8 @@ program voltage_p
   current = 0
   do n=1,size(voltage)
     ! Update the voltage
-    na % voltage = +voltage(n)/2
-    nb % voltage = -voltage(n)/2
+    na % voltage = +voltage(n)
+    nb % voltage = -voltage(n)
 
     ! Reset the states
     call na % initialize
