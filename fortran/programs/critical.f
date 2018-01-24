@@ -17,10 +17,10 @@ program critical_p
 
   ! Declare program control parameters
   integer,      parameter         :: bisections = 20
-  integer,      parameter         :: bootstraps = 20
+  integer,      parameter         :: bootstraps = 10
   integer,      parameter         :: iterations = 10
   real(wp),     parameter         :: threshold  = 1e-08_wp
-  real(wp),     parameter         :: initgap    = 1e-06_wp
+  real(wp),     parameter         :: initgap    = 1e-02_wp
 
   ! Declare variables used by the program
   real(wp)                        :: minimum    = 0.00_wp
