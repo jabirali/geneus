@@ -42,6 +42,7 @@ program phase_p
 
   ! Find out what gap the user has initialized the system to
   init = stack % gap()
+  flow = 1.0
 
   ! Reset the states of the propagators throughout the stack
   call stack % initialize
