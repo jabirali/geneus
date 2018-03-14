@@ -563,6 +563,7 @@ contains
     call sync(this % supercurrent)
     call sync(this % lossycurrent)
     call sync(this % correlation)
+    call sync(this % distribution)
     call sync(this % density)
   contains
     subroutine sync(unit)
