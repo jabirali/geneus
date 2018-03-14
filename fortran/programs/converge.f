@@ -36,6 +36,7 @@ program converge_p
   stack % supercurrent  = output('supercurrent.dat')
   stack % lossycurrent  = output('lossycurrent.dat')
   stack % accumulation  = output('accumulation.dat')
+  stack % distribution  = output('distribution.dat')
   stack % correlation   = output('correlation.dat')
   stack % density       = output('density.dat')
 

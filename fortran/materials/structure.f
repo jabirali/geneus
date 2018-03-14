@@ -28,6 +28,7 @@ module structure_m
     integer, allocatable :: lossycurrent      !! Output unit (allocate to write lossycurrents to file)
     integer, allocatable :: accumulation      !! Output unit (allocate to write accumulations to file)
     integer, allocatable :: correlation       !! Output unit (allocate to write correlations  to file)
+    integer, allocatable :: distribution      !! Output unit (allocate to write distributions to file)
     integer, allocatable :: density           !! Output unit (allocate to write density of states to file)
   contains
     ! Basic construction and management
@@ -610,6 +611,14 @@ contains
         if (allocated(this % correlation)) then
           write(this % correlation,'(*(es20.12e3,:,"	"))') &
             z, abs(ptr % correlation(m)), arg(ptr % correlation(m))/pi
+        end if
+
+        ! Write distribution functions
+        if (allocated(this % distribution)) then
+          do n=1,size(ptr % energy)
+            write(this % distribution,'(*(es20.12e3,:,"	"))') &
+              z, ptr % energy(n), ptr % propagator(n,m) % h
+          end do
         end if
 
         ! Write density of states
