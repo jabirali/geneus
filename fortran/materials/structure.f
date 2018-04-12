@@ -616,10 +616,13 @@ contains
 
         ! Write distribution functions
         if (allocated(this % distribution)) then
+          ! Energies
           do n=1,size(ptr % energy)
             write(this % distribution,'(*(es20.12e3,:,"	"))') &
               z, ptr % energy(n), ptr % propagator(n,m) % h
           end do
+          ! Newline
+          write(this % distribution,'')
         end if
 
         ! Write density of states
@@ -634,6 +637,8 @@ contains
             write(this % density,'(*(es20.12e3,:,"	"))') &
               z, +ptr % energy(n), ptr % density(n,m,0:3)
           end do
+          ! Newline
+          write(this % density,'')
         end if
       end do
     end subroutine
