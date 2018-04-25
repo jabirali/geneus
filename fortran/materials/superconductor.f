@@ -245,7 +245,7 @@ contains
     end if
 
     ! Boost the convergence using Steffensen's method
-    g  = f(1) - (f(2)-f(1))*d(1)/(d(2) - d(1))
+    g  = f(1) - (f(2)-f(1))*d(1)/(d(3) - d(2))
 
     ! Avoid boosts near transparent interfaces
     if (this % transparent_a) then
