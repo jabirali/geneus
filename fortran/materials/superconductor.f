@@ -213,9 +213,9 @@ contains
     !! The basic idea is that a selfconsistent solution of the Usadel equations can be
     !! regarded as a fixpoint iteration problem Δ=f(Δ), where the function f consists
     !! of solving the diffusion and gap equations one time. We're seeking the point
-    !! where f'(Δ)=0, and this can be done more efficiently using e.g. Newtons method
-    !! than a straight-forward fixpoint-iteration. Using Newtons method, we get:
-    !!   Δ_{n+1} = Δ_{n} - f'(Δ_n)/f''(Δ_n)
+    !! where g(Δ)=f(Δ)-Δ=0, and this can be done more efficiently using e.g. Newtons 
+    !! method than a straight-forward fixpoint-iteration. Using Newtons method, we get:
+    !!   Δ_{n+1} = Δ_{n} - g(Δ_n)/g'(Δ_n)
     !! Using a finite-difference approximation for the derivatives, we arrive at the
     !! Steffensen iteration scheme, which yields an improved 2nd-order convergence:
     !!   Δ_{n+3} = Δ_{n} - (Δ_{n+1} - Δ_{n})²/(Δ_{n+2} - 2Δ_{n+1} + Δ_{n})
