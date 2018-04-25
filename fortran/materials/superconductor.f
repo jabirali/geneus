@@ -177,14 +177,27 @@ contains
     class(superconductor), intent(inout)        :: this       !! Superconductor object
     real(wp)                                    :: diff       !! Change between iterations
 
-    ! Interpolate the gap as a function of position to a higher resolution
-    this % gap_function = interpolate(this % location, this % correlation, this % gap_location)
+    associate( raw_loc  => this % location,        &
+               raw_val  => this % correlation,     &
+               raw_bak  => this % gap_history,     &
+               gap_loc  => this % gap_location,    &
+               gap_val  => this % gap_function,    &
+               r        => this % progressive,     &
+               m  => lbound(this % gap_history,2), &
+               n  => ubound(this % gap_history,2)  )
 
-    ! Save the calculated gap as backup
-    associate( b => this % gap_history, m => lbound(this % gap_history,2), n => ubound(this % gap_history,2) )
-      b(:,m:n-1) = b(:,m+1:n)
-      b(:,  n  ) = this % correlation
-      diff       = mean(abs(b(:,n) - b(:,n-1)))
+      ! Calculate difference from previous gap
+      diff = mean(abs(raw_val(:) - raw_bak(:,n)))
+
+      ! Linear mixing of the old and new solutions
+      raw_val = r*raw_val + (1-r)*raw_bak(:,n)
+
+      ! Save the calculated gap as backup
+      raw_bak(:,m:n-1) = raw_bak(:,m+1:n)
+      raw_bak(:, n   ) = raw_val
+
+      ! Interpolate the gap as a function of position to a higher resolution
+      gap_val = interpolate(raw_loc, raw_val, gap_loc)
     end associate
 
     ! Status information
@@ -231,7 +244,7 @@ contains
     d2 = f(3) - 2*f(2) + f(1)
     g  = f(1) - d1**2/d2
 
-    ! Do not boost adjacent to transparent interfaces
+    ! Avoid boosts near transparent interfaces
     if (this % transparent_a) then
       g(lbound(g,1)) = this % gap(0.0_wp)
     end if
