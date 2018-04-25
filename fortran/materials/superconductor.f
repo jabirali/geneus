@@ -14,7 +14,6 @@ module superconductor_m
   ! Type declaration
   type, public, extends(ferromagnet) :: superconductor
     ! These parameters control the physical characteristics of the material 
-    complex(wp), allocatable :: gap_gradient(:,:)    !! Superconducting order parameter difference
     complex(wp), allocatable :: gap_history(:,:)     !! Superconducting order parameter as a function of location (backup of previously calculated gaps on the location mesh)
     complex(wp), allocatable :: gap_function(:)      !! Superconducting order parameter as a function of location (relative to the zero-temperature gap of a bulk superconductor)
     real(wp),    allocatable :: gap_location(:)      !! Location array for the gap function (required because we interpolate the gap to a higher resolution than the propagators)
@@ -57,7 +56,6 @@ contains
     this % method = 6
 
     ! Allocate interpolation functions
-    allocate(this % gap_gradient(size(this%location),1:3))
     allocate(this % gap_history(size(this%location),1:3))
     allocate(this % gap_location(4096 * size(this%location)))
     allocate(this % gap_function(size(this%gap_location)))
@@ -181,7 +179,6 @@ contains
 
     associate( raw_loc  => this % location,        &
                raw_val  => this % correlation,     &
-               raw_diff => this % gap_gradient,    &
                raw_bak  => this % gap_history,     &
                gap_loc  => this % gap_location,    &
                gap_val  => this % gap_function,    &
@@ -190,12 +187,10 @@ contains
                n  => ubound(this % gap_history,2)  )
 
       ! Calculate difference from previous gap
-      raw_diff(:,m:n-1) = raw_diff(:,m+1:n)
-      raw_diff(:, n   ) = raw_val(:) - raw_bak(:,n)
-      diff = mean(abs(raw_diff(:,n)))
+      diff = mean(abs(raw_val(:) - raw_bak(:,n)))
 
       ! Linear mixing of the old and new solutions
-      raw_val = raw_bak(:,n) + r * raw_diff(:,n)
+      raw_val = r*raw_val + (1-r)*raw_bak(:,n)
 
       ! Save the calculated gap as backup
       raw_bak(:,m:n-1) = raw_bak(:,m+1:n)
@@ -233,7 +228,7 @@ contains
     !!   and often converged more slowly. These methods have therefore been discarded.
 
     class(superconductor), intent(inout)        :: this
-    complex(wp), dimension(size(this%location)) :: g
+    complex(wp), dimension(size(this%location)) :: g, d1, d2
     logical                                     :: u
 
     ! Update the iterator
@@ -245,7 +240,9 @@ contains
     end if
 
     ! Boost the convergence using Steffensen's method
-    g  = f(1) - (f(2)-f(1))*d(1)/(d(3) - d(2))
+    d1 = f(2) - f(1)
+    d2 = f(3) - 2*f(2) + f(1)
+    g  = f(1) - d1**2/d2
 
     ! Avoid boosts near transparent interfaces
     if (this % transparent_a) then
@@ -282,14 +279,6 @@ contains
       complex(wp), dimension(size(this%gap_history,1)) :: r
 
       r = this % gap_history(:,n)
-    end function
-
-    pure function d(n) result(r)
-      ! Define an accessor for the gradient after n iterations.
-      integer, intent(in)                               :: n
-      complex(wp), dimension(size(this%gap_gradient,1)) :: r
-
-      r = this % gap_gradient(:,n)
     end function
   end subroutine
 
