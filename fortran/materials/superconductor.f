@@ -26,6 +26,7 @@ module superconductor_m
     procedure                :: diffusion_equation  => superconductor_diffusion_equation  !! Diffusion equation
     procedure                :: kinetic_equation    => superconductor_kinetic_equation    !! Kinetic equation
     procedure                :: update_gap          => superconductor_update_gap          !! Calculate the superconducting order parameter
+    procedure                :: update_qnls         => superconductor_update_qnls         !! Boost the convergence of the order parameter (Quasi-Newton Least-Squares)
     procedure                :: update_boost        => superconductor_update_boost        !! Boost the convergence of the order parameter (Steffensen's method)
     procedure                :: update_prehook      => superconductor_update_prehook      !! Update the internal variables before calculating the propagators
     procedure                :: update_posthook     => superconductor_update_posthook     !! Update the superconducting order parameter from  the propagators
@@ -56,7 +57,7 @@ contains
     this % method = 6
 
     ! Allocate interpolation functions
-    allocate(this % gap_history(size(this%location),1:3))
+    allocate(this % gap_history(size(this%location),1:12))
     allocate(this % gap_location(4096 * size(this%location)))
     allocate(this % gap_function(size(this%gap_location)))
     call linspace(this % gap_location, this % location(1), this % location(size(this % location)))
@@ -160,14 +161,14 @@ contains
     ! Call the superclass posthook
     call this % ferromagnet % update_posthook
 
-    ! Update the superconducting gap using fixpoint-iteration
+    ! Update the superconducting gap using fixed-point iteration
     if (this % selfconsistency >= 1) then
       call this % update_gap
     end if
 
-    ! Boost the superconducting gap using Steffensen's method
+    ! Boost the superconducting gap using a Quasi-Newton method
     if (this % selfconsistency >= 2) then
-      call this % update_boost
+      call this % update_qnls
     end if
   end subroutine
 
@@ -232,7 +233,7 @@ contains
     logical                                     :: u
 
     ! Update the iterator
-    this % iteration = modulo(this % iteration + 1, 8)
+    this % iteration = modulo(this % iteration + 1, 18)
 
     ! Stop here if it is not yet time to boost
     if (this % iteration > 0) then
@@ -280,6 +281,79 @@ contains
 
       r = this % gap_history(:,n)
     end function
+  end subroutine
+
+  impure subroutine superconductor_update_qnls(this)
+    !! Boost convergence using the Quasi-Newton Least-Squares method.
+
+    class(superconductor), intent(inout)  :: this
+    real(wp), allocatable, dimension(:,:) :: jacobian, state, diff
+    logical                               :: update
+    integer                               :: n, m
+
+    ! Update the iterator
+    this % iteration = modulo(this % iteration + 1, 8)
+
+    ! Stop here if it is not yet time to boost
+    if (this % iteration > 0) then
+      return
+    end if
+
+    ! Check size of the historical data
+    n = size(this % gap_history, 1)
+    m = size(this % gap_history, 2)
+
+    ! Construct state vectors for the gap
+    allocate(state(m,2*n))
+    state(1:m,   1:n) = re(transpose(this % gap_history))
+    state(1:m, n+1: ) = im(transpose(this % gap_history))
+
+    ! Construct differences between states
+    allocate(diff(m-1,2*n))
+    diff(:,:) = state(2:m,:) - state(1:m-1,:)
+
+    ! Least-squares Jacobian based on history
+    allocate(jacobian(2*n,2*n))
+    jacobian  = matmul( diff(2:m-1,1:n),                             &
+                matmul( inverse(matmul( transpose(diff(1:m-2,1:n)),  &
+                                        diff(1:m-2,1:n)) ),          &
+                        transpose(diff(1:m-2,1:n))))                 &
+              - identity(2*n)
+
+    ! Convergence acceleration
+    state(m,:) = state(m,:) - matmul(jacobian, state(m,:))
+
+    ! Convert the results back to complex numbers
+    this % correlation = cx(state(m,:n), state(m,n+1:))
+
+    ! Avoid boosts near transparent interfaces
+    if (this % transparent_a) then
+      this % correlation(1) = this % gap(0.0_wp)
+    end if
+    if (this % transparent_b) then
+      this % correlation(n) = this % gap(1.0_wp)
+    end if
+
+    ! Interpolate the gap as a function of position to a higher resolution
+    this % gap_function = interpolate(this % location, this % correlation, this % gap_location)
+
+    ! Perform one extra update if necessary
+    update = .false.
+    if (associated(this % material_a)) then
+      update = update .or. (this % material_a % order > 0)
+    end if
+    if (associated(this % material_b)) then
+      update = update .or. (this % material_b % order > 0)
+    end if
+    if (update) then
+      call this % update(bootstrap = .true.)
+    end if
+
+    ! Status information
+    ! if (this%information >= 0 .and. this%order > 0) then
+    !   write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(g-f(3)))
+    !   flush(stdout)
+    ! end if
   end subroutine
 
   !--------------------------------------------------------------------------------!
