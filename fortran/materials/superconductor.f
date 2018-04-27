@@ -292,7 +292,7 @@ contains
     integer                               :: n, m
 
     ! Update the iterator
-    this % iteration = modulo(this % iteration + 1, 8)
+    this % iteration = modulo(this % iteration + 1, 18)
 
     ! Stop here if it is not yet time to boost
     if (this % iteration > 0) then
