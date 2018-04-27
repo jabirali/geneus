@@ -285,6 +285,10 @@ contains
 
   impure subroutine superconductor_update_qnls(this)
     !! Boost convergence using the Quasi-Newton Least-Squares method.
+    !! 
+    !! @TODO
+    !!  * Double-check the theoretical expressions in implementation
+    !!  * Try ignoring the position-dependence and boosting locally
 
     class(superconductor), intent(inout)  :: this
     real(wp), allocatable, dimension(:,:) :: jacobian, state, diff
