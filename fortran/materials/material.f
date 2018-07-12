@@ -54,7 +54,6 @@ module material_m
     ! Control parameters for the numerical solvers
     integer                                   :: iteration       =  0                          !! Used to keep track of selfconsistent iteration cycles
     integer                                   :: selfconsistency =  2                          !! Selfconsistency scheme (0 = none, 1 = fixpoint, 2 = boost)
-    real(wp)                                  :: progressive     =  1                          !! How progressive or conservativative the selfconsistency iterations should be (range: [0, 1])
     integer                                   :: scaling         =  128                        !! Maximal mesh increase (range: 2^N, N>1)
     integer                                   :: method          =  4                          !! Runge—Kutta order (range: 2, 4, 6)
     integer                                   :: control         =  2                          !! Error control (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)
@@ -278,11 +277,6 @@ contains
         call evaluate(val, this%selfconsistency)
         if (this % selfconsistency < 0 .or. this % selfconsistency > 2) then
           call error("The selfconsistency scheme should be in the range [0,2].")
-        end if
-      case("progressive")
-        call evaluate(val, this%progressive)
-        if (this % progressive < 0 .or. this % progressive > 1) then
-          call error("The progressive parameter should be in the range [0,1].")
         end if
       case("phaselock")
         call evaluate(val, this%phaselock)

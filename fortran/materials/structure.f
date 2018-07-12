@@ -622,7 +622,7 @@ contains
               z, ptr % energy(n), ptr % propagator(n,m) % h
           end do
           ! Newline
-          write(this % distribution,'()')
+          write(this % distribution,'')
         end if
 
         ! Write density of states
@@ -638,7 +638,7 @@ contains
               z, +ptr % energy(n), ptr % density(n,m,0:3)
           end do
           ! Newline
-          write(this % density,'()')
+          write(this % density,'')
         end if
       end do
     end subroutine
