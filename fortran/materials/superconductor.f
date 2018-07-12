@@ -166,13 +166,8 @@ contains
       call this % update_gap
     end if
 
-    ! Boost the superconducting gap using Steffensen's method
-    if (this % selfconsistency >= 2) then
-      call this % update_boost
-    end if
-
     ! Boost the superconducting gap using a Quasi-Newton method
-    if (this % selfconsistency >= 3) then
+    if (this % selfconsistency >= 2) then
       call this % update_qnls
     end if
   end subroutine
@@ -238,7 +233,7 @@ contains
     logical                                     :: u
 
     ! Update the iterator
-    this % iteration = modulo(this % iteration + 1, 8)
+    this % iteration = modulo(this % iteration + 1, 18)
 
     ! Stop here if it is not yet time to boost
     if (this % iteration > 0) then
