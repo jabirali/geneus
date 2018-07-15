@@ -74,6 +74,12 @@ contains
     allocate(this % accumulation(0:7,size(this % location)))
     allocate(this % density(size(this % energy), size(this % location), 0:7))
 
+    ! Initialize observables
+    this % supercurrent = 0
+    this % lossycurrent = 0
+    this % accumulation = 0
+    this % density      = 0
+
     ! Allocate boundary condition objects
     allocate(this % spinactive_a)
     allocate(this % spinactive_b)

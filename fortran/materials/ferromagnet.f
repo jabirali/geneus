@@ -161,7 +161,7 @@ contains
 
       ! Update the internal variables
       do n = 1,size(interpolation,2)
-        this % h = (interpolation(1,n)*pauli1 + interpolation(2,n)*pauli2 + interpolation(3,n)*pauli3)/(this % thouless)
+        this % h(n) = (interpolation(1,n)*pauli1 + interpolation(2,n)*pauli2 + interpolation(3,n)*pauli3)/(this % thouless)
       end do
     end if
 
@@ -187,6 +187,7 @@ contains
       case ('magnetization')
         call evaluate(val, this % location, this % exchange)
       case ('zeeman')
+        allocate(this % zeeman)
         call evaluate(val, this % zeeman)
       case default
         ! Pass this option to the superclass
