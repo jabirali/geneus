@@ -12,7 +12,9 @@ module ferromagnet_m
 
   ! Type declaration
   type, public, extends(conductor)   :: ferromagnet
-    real(wp),   allocatable          :: magnetization(:,:)                                    !! Magnetic exchange field as a function of position
+    real(wp),   allocatable          :: zeeman                                                !! How easy the material is magnetized by spin accumulation
+    real(wp),   allocatable          :: exchange(:,:)                                         !! Magnetic exchange field as a function of position
+    real(wp),   allocatable, private :: z(:)                                                  !! Used by internal subroutines to handle location data
     type(spin), allocatable, private :: h(:)                                                  !! Used by internal subroutines to handle exchange fields
   contains
     ! These methods define the class(material) interface
@@ -124,29 +126,47 @@ contains
 
   impure subroutine ferromagnet_update_prehook(this)
     !! Updates the exchange field terms in the diffusion equation.
-    class(ferromagnet), intent(inout) :: this ! Ferromagnet object that will be updated
-    integer                           :: n    ! Loop variable
+    class(ferromagnet), intent(inout)     :: this          ! Ferromagnet object that will be updated
+    real(wp), allocatable, dimension(:,:) :: magnetization ! Locally calculated effective magnetization
+    real(wp), allocatable, dimension(:,:) :: interpolation ! High-resolution magnetization interpolation
+    integer                               :: n             ! Loop variable
 
     ! Call the superclass prehook
-    call this%conductor%update_prehook
+    call this % conductor % update_prehook
 
     ! Rename the internal variables
-    if (allocated(this%magnetization)) then
-      ! Allocate space for internal variables
-      if (.not. allocated(this%h)) then
-        allocate(this%h (size(this%magnetization,2)))
+    if (allocated(this % exchange) .or. allocated(this % zeeman)) then
+      ! Allocate and initialize workspace
+      if (.not. allocated(this % h)) then
+        allocate(magnetization(3, size(this % location)))
+        allocate(interpolation(3, size(this % location) * 4096))
+        allocate(this % h(size(interpolation, 2)))
+        allocate(this % z(size(interpolation, 2)))
+        call linspace(this % z, this % location(1), this % location(size(this % location)))
       end if
 
+      ! Calculate the effective magnetization
+      magnetization = 0
+      if (allocated(this % exchange)) then
+        magnetization = magnetization + (this % exchange(1:3,:))
+      end if
+      if (allocated(this % zeeman)) then
+        magnetization = magnetization + (this % accumulation(1:3,:)) * (this % zeeman)
+      end if
+
+      ! High-resolution interpolation
+      interpolation(1,:) = interpolate(this % location, magnetization(1,:), this % z)
+      interpolation(2,:) = interpolate(this % location, magnetization(2,:), this % z)
+      interpolation(3,:) = interpolate(this % location, magnetization(3,:), this % z)
+
       ! Update the internal variables
-      associate(M => this % magnetization, h => this % h)
-        do n = 1,size(M,2)
-          h(n)  = (M(1,n)*pauli1 + M(2,n)*pauli2 + M(3,n)*pauli3)/(this%thouless)
-        end do
-      end associate
+      do n = 1,size(interpolation,2)
+        this % h = (interpolation(1,n)*pauli1 + interpolation(2,n)*pauli2 + interpolation(3,n)*pauli3)/(this % thouless)
+      end do
     end if
 
     ! Modify the type string
-    if (allocated(this%magnetization)) then
+    if (allocated(this%exchange)) then
       this%type_string = color_red // 'FERROMAGNET' // color_none
     end if
   end subroutine
@@ -165,22 +185,9 @@ contains
 
     select case(key)
       case ('magnetization')
-        block
-          ! Allocate memory for the location array
-          real(wp), allocatable, dimension(:) :: location
-          allocate(location(4096 * size(this%location)))
-
-          ! Discretize the locations in the material
-          call linspace(location, 0.0_wp, 1.0_wp)
-
-          ! Initialize the magnetic exchange field
-          call evaluate(val, location, this % magnetization)
-
-          ! Deallocate the field if it is negligible
-          if (norm2(this % magnetization) < sqrt(eps)) then
-            deallocate(this % magnetization)
-          end if
-        end block
+        call evaluate(val, this % location, this % exchange)
+      case ('zeeman')
+        call evaluate(val, this % zeeman)
       case default
         ! Pass this option to the superclass
         call this % conductor % conf(key, val)
