@@ -134,12 +134,12 @@ contains
     ! Call the superclass prehook
     call this % conductor % update_prehook
 
-    ! Rename the internal variables
+    ! Update magnetization matrices
     if (allocated(this % exchange) .or. allocated(this % zeeman)) then
       ! Allocate and initialize workspace
+      allocate(magnetization(3, size(this % location)))
+      allocate(interpolation(3, size(this % location) * 4096))
       if (.not. allocated(this % h)) then
-        allocate(magnetization(3, size(this % location)))
-        allocate(interpolation(3, size(this % location) * 4096))
         allocate(this % h(size(interpolation, 2)))
         allocate(this % z(size(interpolation, 2)))
         call linspace(this % z, this % location(1), this % location(size(this % location)))
@@ -161,13 +161,17 @@ contains
 
       ! Update the internal variables
       do n = 1,size(interpolation,2)
+        write(*,*) interpolation(1:3,n)
         this % h(n) = (interpolation(1,n)*pauli1 + interpolation(2,n)*pauli2 + interpolation(3,n)*pauli3)/(this % thouless)
       end do
+
+      ! Clean up
+      deallocate(magnetization, interpolation)
     end if
 
     ! Modify the type string
-    if (allocated(this%exchange)) then
-      this%type_string = color_red // 'FERROMAGNET' // color_none
+    if (allocated(this % exchange) .or. allocated(this % zeeman)) then
+      this%type_string = color_red // 'MAGNET' // color_none
     end if
   end subroutine
 
