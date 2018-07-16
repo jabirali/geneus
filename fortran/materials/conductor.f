@@ -68,6 +68,10 @@ contains
     allocate(this % correlation(size(this % location)))
     this % correlation = eps
 
+    ! Initialize magnetism
+    allocate(this % magnetization(1:3, size(this % location)))
+    this % magnetization = 0
+
     ! Allocate memory for physical observables
     allocate(this % supercurrent(0:7,size(this % location)))
     allocate(this % lossycurrent(0:7,size(this % location)))

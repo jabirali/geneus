@@ -24,11 +24,12 @@ module structure_m
     class(material), pointer :: b => null()   !! Last  material
 
     ! Output units for physical observables
-    integer, allocatable :: supercurrent      !! Output unit (allocate to write supercurrents to file)
-    integer, allocatable :: lossycurrent      !! Output unit (allocate to write lossycurrents to file)
-    integer, allocatable :: accumulation      !! Output unit (allocate to write accumulations to file)
-    integer, allocatable :: correlation       !! Output unit (allocate to write correlations  to file)
-    integer, allocatable :: distribution      !! Output unit (allocate to write distributions to file)
+    integer, allocatable :: supercurrent      !! Output unit (allocate to write supercurrents  to file)
+    integer, allocatable :: lossycurrent      !! Output unit (allocate to write lossycurrents  to file)
+    integer, allocatable :: accumulation      !! Output unit (allocate to write accumulations  to file)
+    integer, allocatable :: correlation       !! Output unit (allocate to write correlations   to file)
+    integer, allocatable :: magnetization     !! Output unit (allocate to write magnetizations to file)
+    integer, allocatable :: distribution      !! Output unit (allocate to write distributions  to file)
     integer, allocatable :: density           !! Output unit (allocate to write density of states to file)
   contains
     ! Basic construction and management
@@ -586,6 +587,7 @@ contains
     call sync(this % supercurrent)
     call sync(this % lossycurrent)
     call sync(this % correlation)
+    call sync(this % magnetization)
     call sync(this % distribution)
     call sync(this % density)
   contains
@@ -635,6 +637,12 @@ contains
         if (allocated(this % correlation)) then
           write(this % correlation,'(*(es20.12e3,:,"	"))') &
             z, abs(ptr % correlation(m)), arg(ptr % correlation(m))/pi
+        end if
+
+        ! Write effective magnetizations
+        if (allocated(this % magnetization)) then
+          write(this % magnetization, '(*(es20.12e3,:,"	"))') &
+            z, ptr % magnetization(:,m)
         end if
 
         ! Write distribution functions

@@ -127,7 +127,6 @@ contains
   impure subroutine ferromagnet_update_prehook(this)
     !! Updates the exchange field terms in the diffusion equation.
     class(ferromagnet), intent(inout)     :: this          ! Ferromagnet object that will be updated
-    real(wp), allocatable, dimension(:,:) :: magnetization ! Locally calculated effective magnetization
     real(wp), allocatable, dimension(:,:) :: interpolation ! High-resolution magnetization interpolation
     integer                               :: n             ! Loop variable
 
@@ -137,7 +136,6 @@ contains
     ! Update magnetization matrices
     if (allocated(this % exchange) .or. allocated(this % zeeman)) then
       ! Allocate and initialize workspace
-      allocate(magnetization(3, size(this % location)))
       allocate(interpolation(3, size(this % location) * 4096))
       if (.not. allocated(this % h)) then
         allocate(this % h(size(interpolation, 2)))
@@ -146,27 +144,26 @@ contains
       end if
 
       ! Calculate the effective magnetization
-      magnetization = 0
+      this % magnetization = 0
       if (allocated(this % exchange)) then
-        magnetization = magnetization + (this % exchange(1:3,:))
+        this % magnetization = this % magnetization + (this % exchange(1:3,:))
       end if
       if (allocated(this % zeeman)) then
-        magnetization = magnetization + (this % accumulation(1:3,:)) * (this % zeeman)
+        this % magnetization = this % magnetization + (this % accumulation(1:3,:)) * (this % zeeman)
       end if
 
       ! High-resolution interpolation
-      interpolation(1,:) = interpolate(this % location, magnetization(1,:), this % z)
-      interpolation(2,:) = interpolate(this % location, magnetization(2,:), this % z)
-      interpolation(3,:) = interpolate(this % location, magnetization(3,:), this % z)
+      interpolation(1,:) = interpolate(this % location, this % magnetization(1,:), this % z)
+      interpolation(2,:) = interpolate(this % location, this % magnetization(2,:), this % z)
+      interpolation(3,:) = interpolate(this % location, this % magnetization(3,:), this % z)
 
       ! Update the internal variables
       do n = 1,size(interpolation,2)
-        write(*,*) interpolation(1:3,n)
         this % h(n) = (interpolation(1,n)*pauli1 + interpolation(2,n)*pauli2 + interpolation(3,n)*pauli3)/(this % thouless)
       end do
 
       ! Clean up
-      deallocate(magnetization, interpolation)
+      deallocate(interpolation)
     end if
 
     ! Modify the type string

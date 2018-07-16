@@ -44,6 +44,7 @@ module material_m
     real(wp),                     allocatable :: supercurrent(:,:)                             !! Charge, spin, heat, and spin-heat supercurrents
     real(wp),                     allocatable :: lossycurrent(:,:)                             !! Charge, spin, heat, and spin-heat dissipative currents
     real(wp),                     allocatable :: accumulation(:,:)                             !! Charge, spin, heat, and spin-heat accumulation
+    real(wp),                     allocatable :: magnetization(:,:)                            !! Magnetization due to exchange and Zeeman effects
     complex(wp),                  allocatable :: correlation(:)                                !! Superconducting pair-correlations
 
     ! Hybrid structures are modeled as double-linked lists

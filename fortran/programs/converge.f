@@ -38,6 +38,7 @@ program converge_p
   stack % accumulation  = output('accumulation.dat')
   stack % distribution  = output('distribution.dat')
   stack % correlation   = output('correlation.dat')
+  stack % magnetization = output('magnetization.dat')
   stack % density       = output('density.dat')
 
 
