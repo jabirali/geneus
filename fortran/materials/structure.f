@@ -50,6 +50,7 @@ module structure_m
     ! Auxiliary helper functions
     procedure :: difference          => structure_difference          !! Check how much the physical state changes
     procedure :: materials           => structure_materials           !! Check the number of enabled materials
+    procedure :: selfconsistency     => structure_selfconsistency     !! Whether selfconsistency iteration is required
     procedure :: superconductors     => structure_superconductors     !! Check the number of enables superconductors
     procedure :: chargeviolation     => structure_chargeviolation     !! Check the violation of charge conservation
     procedure :: gap                 => structure_gap                 !! Check the minimum superconducting gap
@@ -339,7 +340,7 @@ contains
     procedure(hook),  optional :: prehook
     procedure(hook),  optional :: posthook
     integer                    :: materials
-    integer                    :: superconductors
+    logical                    :: selfconsistency
     integer                    :: n
 
     ! Set default arguments
@@ -354,7 +355,7 @@ contains
 
     ! Count the number of materials
     materials       = this % materials()
-    superconductors = this % superconductors()
+    selfconsistency = this % selfconsistency()
 
     ! Reset any iteration counters
     call this % cmap('iteration', 0)
@@ -365,8 +366,8 @@ contains
     end if
 
     ! If we're not bootstrapping, then we have to solve the diffusion equation until convergence.
-    ! If we're bootstrapping, it's only required if we have at least one enabled superconductor.
-    if ((.not. bootstrap_) .or. (superconductors > 0)) then
+    ! If we're bootstrapping, it's only required if we have selfconsistency equations to solve.
+    if ((.not. bootstrap_) .or. selfconsistency) then
       n = 0
       do
         ! Update counter
@@ -400,7 +401,7 @@ contains
         end if
 
         ! Exit criterion #1: one iteration is sufficient for convergence
-        if ((materials == 1) .and. (superconductors == 0 .or. bootstrap_)) then
+        if ((materials == 1) .and. (bootstrap_ .or. (.not. selfconsistency))) then
           exit
         end if
 
@@ -477,6 +478,28 @@ contains
     subroutine count(ptr)
       class(material), pointer :: ptr
       num = num + 1
+    end subroutine
+  end function
+
+  impure function structure_selfconsistency(this) result(res)
+    !! Checks whether selfconsistency iteration is required.
+    class(structure), target :: this
+    logical                  :: res
+
+    ! Initialize variables
+    res = .false.
+
+    ! Check for materials where selfconsistency iterations are required
+    call this % fmap(count)
+  contains
+    subroutine count(ptr)
+      class(material), pointer :: ptr
+      select type (ptr)
+        class is (superconductor)
+          res = res .or. (abs(ptr % zeeman) > 0) .or. (ptr % selfconsistency > 0)
+        class is (ferromagnet)
+          res = res .or. (abs(ptr % zeeman) > 0)
+      end select
     end subroutine
   end function
 
