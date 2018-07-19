@@ -497,9 +497,9 @@ contains
       class(material), pointer :: ptr
       select type (ptr)
         class is (superconductor)
-          res = res .or. (abs(ptr % zeeman) > 0) .or. (ptr % selfconsistency > 0)
+          res = res .or. (allocated(ptr % zeeman)) .or. (ptr % selfconsistency > 0)
         class is (ferromagnet)
-          res = res .or. (abs(ptr % zeeman) > 0)
+          res = res .or. (allocated(ptr % zeeman))
       end select
     end subroutine
   end function
