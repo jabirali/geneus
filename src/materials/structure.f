@@ -737,7 +737,13 @@ contains
           write(arg,'(i0)') k+1
           call error('Missing command line argument #' // trim(arg) // ', i.e. parameter ' // str(i:j) // ' in the config file.')
         end if
-        str = str(:i-1) // trim(arg) // str(j+1:)
+        if ( scan(trim(arg),'+-') == 1 ) then
+          ! Escape signed command line arguments
+          str = str(:i-1) // '(' // trim(arg) // ')' // str(j+1:)
+        else
+          ! Do not escape unsigned arguments
+          str = str(:i-1) //        trim(arg)        // str(j+1:)
+        end if
         i = scan(str, '{')
         j = scan(str, '}')
       end do
