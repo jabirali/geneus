@@ -1,18 +1,20 @@
-author:      		Jabir Ali Ouassou
-email:       		jabirali@switzerlandmail.ch
-project:     		S4TRAN
-summary:     		Superconducting Spintronics Simulation Suite in Fortran
-output_dir:  		./html
-page_dir:    		./txt
-src_dir:     		../fortran/system
-             		../fortran/foundation
-             		../fortran/materials
-             		../fortran/programs
-extensions:  		f
-fixed_extensions:
+author:            Jabir Ali Ouassou
+email:             jabirali@switzerlandmail.ch
+project:           S4TRAN
+summary:           Superconducting Spintronics Simulation Suite in Fortran
+output_dir:        ./html
+page_dir:          ./txt
+src_dir:           ../src/system
+                   ../src/foundation
+                   ../src/materials
+                   ../src/programs
+exclude:           diffusion.f
+                   kinetic.f
+extensions:        f
+fixed_extensions:  
 fpp_extensions:
-display:     		public
-graph:       		false
+display:           public
+graph:             false
 
 
 
