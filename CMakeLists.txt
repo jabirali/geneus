@@ -18,10 +18,10 @@ cmake_minimum_required(VERSION 2.6)
 enable_language(Fortran)
 
 # Source files
-file(GLOB src_e77 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_la.f")
-file(GLOB src_e90 RELATIVE ${CMAKE_SOURCE_DIR} "fortran/external/bvp_m.f" "fortran/external/pchip.f" "fortran/external/fparser.f")
-file(GLOB src_mod RELATIVE ${CMAKE_SOURCE_DIR} "fortran/system/*.f" "fortran/foundation/*.f" "fortran/materials/*.f")
-file(GLOB src_exe RELATIVE ${CMAKE_SOURCE_DIR} "fortran/programs/*.f")
+file(GLOB src_e77 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_la.f")
+file(GLOB src_e90 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/bvp_m.f" "src/external/pchip.f" "src/external/fparser.f")
+file(GLOB src_mod RELATIVE ${CMAKE_SOURCE_DIR} "src/system/*.f" "src/foundation/*.f" "src/materials/*.f")
+file(GLOB src_exe RELATIVE ${CMAKE_SOURCE_DIR} "src/programs/*.f")
 
 # Libraries
 add_library(s4tran STATIC ${src_mod} ${src_e90} ${src_e77})
