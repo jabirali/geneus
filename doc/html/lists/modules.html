@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="Superconducting Spintronics Simulation Suite in Fortran">
+    
+    <meta name="author" content="Jabir Ali Ouassou" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>
+All Modules &ndash; S4TRAN
+</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">S4TRAN </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li><a href='../page/index.html'>Overview</a></li>
+      
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../lists/programs.html">Programs</a></li>
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+
+      <div class="row">
+        <div class="col-lg-12" id='text'>
+			 <h1>Modules</h1>
+			 <table class="table">
+			 <thead><tr><th>Module</th><th>Source File</th><th>Description</th></tr></thead>
+			 <tbody>
+             
+			 
+			   <tr class="active"><td><a href='../module/basic_m.html'>basic_m</a></td><td><a href='../sourcefile/basic.f.html'>basic.f</a></td><td><p>This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
+ floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
+ the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
+ As for module procedures, this library defines some common utility functions for working with e.g. complex numbers.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/calculus_m.html'>calculus_m</a></td><td><a href='../sourcefile/calculus.f.html'>calculus.f</a></td><td><p>This file defines functions that perform some common calculus operations.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/condmat_m.html'>condmat_m</a></td><td><a href='../sourcefile/condmat.f.html'>condmat.f</a></td><td><p>This file provides a common interface to a library of mathematical objects
+ that can be useful for modelling materials in condensed matter physics.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/conductor_m.html'>conductor_m</a></td><td><a href='../sourcefile/conductor.f.html'>conductor.f</a></td><td><p>This module defines the data type 'conductor', which models the physical state of a conductor for a discretized range
+ of positions and energies.  It has two main applications: (i) it can be used as a base type for more exotic materials,
+ such as superconductors and ferromagnets; (ii) it can be used in conjunction with such materials in hybrid structures.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/evaluate_m.html'>evaluate_m</a></td><td><a href='../sourcefile/evaluate.f.html'>evaluate.f</a></td><td><p>This file defines functions that perform some common matrix operations.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/ferromagnet_m.html'>ferromagnet_m</a></td><td><a href='../sourcefile/ferromagnet.f.html'>ferromagnet.f</a></td><td><p>This module defines the data type 'ferromagnet', which models the physical state of a ferromagnet. The type is a
+ member of class(conductor), and thus inherits the internal structure and generic methods defined in conductor_m.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/halfmetal_m.html'>halfmetal_m</a></td><td><a href='../sourcefile/halfmetal.f.html'>halfmetal.f</a></td><td><p>This module defines the data type 'halfmetal', which models the physical state of a strong or halfmetallic ferromagnet.
+ The type is a member of class(conductor), and inherits the internal structure and generic methods defined there.</p><a href="../module/halfmetal_m.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/material_m.html'>material_m</a></td><td><a href='../sourcefile/material.f.html'>material.f</a></td><td><p>This module defines the data type 'material',  which models the state of a physical material for a discretized range of
+ positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
+ intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
+ type defines the essential data structures and program structure, while the derived subtypes will define actual physics.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/math_m.html'>math_m</a></td><td><a href='../sourcefile/math.f.html'>math.f</a></td><td><p>This file provides a common interface to a large library of mathematical
+ functions and subroutines. See the documentation of individual interfaces
+ below for more information about the contents of the mathematical library.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/matrix_m.html'>matrix_m</a></td><td><a href='../sourcefile/matrix.f.html'>matrix.f</a></td><td><p>This file defines functions that perform some common matrix operations.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/nambu_m.html'>nambu_m</a></td><td><a href='../sourcefile/nambu.f.html'>nambu.f</a></td><td><p>This module defines the data type 'nambu', which represents 4×4 complex matrices in spin and Nambu space. The module
+ overloads arithmetic operators to work with the new type, and defines and exports the Pauli matrices as constants.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/propagator_m.html'>propagator_m</a></td><td><a href='../sourcefile/propagator.f.html'>propagator.f</a></td><td><p>This module defines the data type 'propagator', which represents the propagator at a given position and energy. 
+ The equilibrium propagators (retarded and advanced) are stored internally using the Riccati parameters γ and γ~
+ and their derivatives, while the nonequilibrium propagator (Keldysh) is represented by taking the traces of the
+ distribution function and its derivatives. These quantities are together sufficient to reconstruct the full 8×8
+ propagator and its derivatives, and can be used to calculate associated physical quantities such as the density
+ of states, charge currents, spin currents, heat currents, spin-heat currents, and various accumulation effects.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/spin_m.html'>spin_m</a></td><td><a href='../sourcefile/spin.f.html'>spin.f</a></td><td><p>This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads
+ common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
+ To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
+ the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/spinactive_m.html'>spinactive_m</a></td><td><a href='../sourcefile/spinactive.f.html'>spinactive.f</a></td><td><p>This submodule is included by conductor.f, and contains the equations which model spin-active interfaces.</p><a href="../module/spinactive_m.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/spinorbit_m.html'>spinorbit_m</a></td><td><a href='../sourcefile/spinorbit.f.html'>spinorbit.f</a></td><td><p>This submodule is included by conductor.f, and contains the equations which model spin-orbit coupling in diffusive materials.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/spinscattering_m.html'>spinscattering_m</a></td><td><a href='../sourcefile/spinscattering.f.html'>spinscattering.f</a></td><td><p>This submodule is included by conductor.f, and contains equations which model 
+ spin-flip scattering, spin-orbit scattering, and magnetic orbital depairing.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/stdio_m.html'>stdio_m</a></td><td><a href='../sourcefile/stdio.f.html'>stdio.f</a></td><td><p>This file renames the ISO input/output units to the standard UNIX names, 
+ defines the ANSI escape codes for colored output, and defines a number of 
+ auxiliary subroutines for e.g. writing out error and warning messages.</p></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/structure_m.html'>structure_m</a></td><td><a href='../sourcefile/structure.f.html'>structure.f</a></td><td><p>This module defines a data type 'structure', which is useful for constructing and using multilayer hybrid structures. It
+ also exports the type definitions and constructors for all class(material) types, although these should rarely be needed.</p></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/superconductor_m.html'>superconductor_m</a></td><td><a href='../sourcefile/superconductor.f.html'>superconductor.f</a></td><td><p>This module defines the data type 'superconductor', which models the physical state of a superconductor. The type is
+ a member of class(conductor), and thus inherits the internal structure and generic methods defined in conductor_m.</p></td></tr>
+               
+               <!--active-->
+			 
+			 </tbody></table>
+             
+        </div>
+      </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2018 
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> S4TRAN was developed by Jabir Ali Ouassou</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

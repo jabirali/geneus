@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="Superconducting Spintronics Simulation Suite in Fortran">
+    
+    <meta name="author" content="Jabir Ali Ouassou" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>propagator_m &ndash; S4TRAN</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">S4TRAN </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li><a href='../page/index.html'>Overview</a></li>
+      
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../lists/programs.html">Programs</a></li>
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>propagator_m 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     <li><i class="fa fa-pencil"></i> Jabir Ali Ouassou</li>
+     
+     
+     
+     
+    
+    <li><i class="fa fa-folder-open"></i> Foundation</li>
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="12.1% of total for modules and submodules.">399 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/propagator.f"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/propagator.f.html'>propagator.f</a></li>
+    
+  
+     <li class="active">propagator_m</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
+  <div id="inters-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/propagator_m.html#interface-propagator">propagator</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/propagator_m.html#type-propagator">propagator</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>This module defines the data type 'propagator', which represents the propagator at a given position and energy. 
+ The equilibrium propagators (retarded and advanced) are stored internally using the Riccati parameters γ and γ~
+ and their derivatives, while the nonequilibrium propagator (Keldysh) is represented by taking the traces of the
+ distribution function and its derivatives. These quantities are together sufficient to reconstruct the full 8×8
+ propagator and its derivatives, and can be used to calculate associated physical quantities such as the density
+ of states, charge currents, spin currents, heat currents, spin-heat currents, and various accumulation effects.</p>
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href='../module/math_m.html'>math_m</a></li>
+    
+    <li><a href='../module/spin_m.html'>spin_m</a></li>
+    
+    <li><a href='../module/nambu_m.html'>nambu_m</a></li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      </ul>
+    </div>
+    
+
+    
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
+  <div id="inters-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/propagator_m.html#interface-propagator">propagator</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/propagator_m.html#type-propagator">propagator</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+    <section>
+   <h2>Interfaces</h2>
+   
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-propagator"></span><h3>public interface <a href='../interface/propagator.html'>propagator</a>
+    
+  </h3></div>
+  
+  <ul class="list-group">
+  
+  
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+private pure function propagator_construct_vacuum() result(this)
+    
+    
+   
+</h3>
+    
+
+
+
+<p>Construct a vacuum propagator, i.e. a propagator which satisfies G=0.</p>
+    
+    <h4>Arguments</h4>
+    
+      <em>None</em>
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(<a href='../type/propagator.html'>propagator</a>)
+  </small></h4>
+  <p>Constructed object</p>
+    
+
+    </li>
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+private pure function propagator_construct_riccati(g, gt, dg, dgt) result(this)
+    
+    
+   
+</h3>
+    
+
+
+
+<p>Construct an arbitrary state by explicitly providing the Riccati parameters.
+ Unspecified Riccati parameters default to zero due to the spin constructors.
+ The distribution function defaults to equilibrium at zero temperature.</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>g</strong></td><td><p>Riccati parameter γ</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>gt</strong></td><td><p>Riccati parameter γ~</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>dg</strong></td><td><p>Riccati parameter ∇γ</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>dgt</strong></td><td><p>Riccati parameter ∇γ~</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(<a href='../type/propagator.html'>propagator</a>)
+  </small></h4>
+  <p>Constructed object</p>
+    
+
+    </li>
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+private pure function propagator_construct_bcs(energy, gap) result(this)
+    
+    
+   
+</h3>
+    
+
+
+
+<p>Constructs a state corresponding to a BCS superconductor at some given energy,
+ which may have an imaginary term representing inelastic scattering. The second
+ argument 'gap' is used to provide the superconducting order parameter Δ.
+ The distribution function defaults to equilibrium at zero temperature.</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=wp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>energy</strong></td><td><p>Quasiparticle energy (including inelastic scattering contribution)</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=wp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>gap</strong></td><td><p>Superconducting order parameter (including superconducting phase)</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(<a href='../type/propagator.html'>propagator</a>)
+  </small></h4>
+  <p>Constructed object</p>
+    
+
+    </li>
+  
+  
+  </ul>
+</div>
+
+    
+    </section>
+  <br>
+    
+
+    
+    
+    
+    <section>
+     <h2>Derived Types</h2>
+   
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-propagator"></span><h3>type, public :: <a href='../type/propagator.html'>propagator</a>
+    
+  </h3></div>
+  <div class="panel-body">
+    
+     
+     <h4>Components</h4>
+    
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th>
+
+<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-g"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>g</strong></td><td></td><td></td><td><p>Riccati parameter γ</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-gt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>gt</strong></td><td></td><td></td><td><p>Riccati parameter γ~</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-dg"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>dg</strong></td><td></td><td></td><td><p>Riccati parameter ∇γ</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-dgt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>dgt</strong></td><td></td><td></td><td><p>Riccati parameter ∇γ~</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-d2g"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>d2g</strong></td><td></td><td></td><td><p>Riccati parameter ∇²γ</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-d2gt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>d2gt</strong></td><td></td><td></td><td><p>Riccati parameter ∇²γ~</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-n"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td><td></td><td><p>Riccati normalization N</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>Nt</strong></td><td></td><td></td><td><p>Riccati normalization N~</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-h"></span>real(kind=wp),</td>
+  
+  <td>public,</td>
+  <td>dimension(0:7)</td><td>::</td>
+  <td><strong>h</strong></td><td> =</td><td>[1, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace H</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-dh"></span>real(kind=wp),</td>
+  
+  <td>public,</td>
+  <td>dimension(0:7)</td><td>::</td>
+  <td><strong>dh</strong></td><td> =</td><td>[0, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace ∇H</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-d2h"></span>real(kind=wp),</td>
+  
+  <td>public,</td>
+  <td>dimension(0:7)</td><td>::</td>
+  <td><strong>d2h</strong></td><td> =</td><td>[0, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace ∇²H</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+     
+     
+     <h4>Constructor</h4>
+       
+         
+       
+       <table class="table table-striped varlist">
+      <tbody>
+        
+             
+             
+             
+             <tr><td>private pure function <strong>propagator_construct_vacuum</strong>()</td><td><p>Construct a vacuum propagator, i.e. a propagator which satisfies G=0.</p></td></tr>
+             
+             
+             <tr><td>private pure function <strong>propagator_construct_riccati</strong>(g, gt, dg, dgt)</td><td><p>Construct an arbitrary state by explicitly providing the Riccati parameters.
+ Unspecified Riccati parameters default to zero due to the spin constructors.
+ The distribution function defaults to equilibrium at zero temperature.</p></td></tr>
+             
+             
+             <tr><td>private pure function <strong>propagator_construct_bcs</strong>(energy, gap)</td><td><p>Constructs a state corresponding to a BCS superconductor at some given energy,
+ which may have an imaginary term representing inelastic scattering. The second
+ argument 'gap' is used to provide the superconducting order parameter Δ.
+ The distribution function defaults to equilibrium at zero temperature.</p></td></tr>
+             
+        
+       </tbody>
+       </table>
+     
+          
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-retarded'>retarded</a></strong>  => propagator_retarded </td>
+       <td><p>Retarded propagator G^R</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-retarded_gradient'>retarded_gradient</a></strong>  => propagator_retarded_gradient </td>
+       <td><p>Retarded propagator ∇G^R</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-retarded_laplacian'>retarded_laplacian</a></strong>  => propagator_retarded_laplacian </td>
+       <td><p>Retarded propagator ∇²G^R</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-advanced'>advanced</a></strong>  => propagator_advanced </td>
+       <td><p>Advanced propagator G^A</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-advanced_gradient'>advanced_gradient</a></strong>  => propagator_advanced_gradient </td>
+       <td><p>Advanced propagator ∇G^A</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-advanced_laplacian'>advanced_laplacian</a></strong>  => propagator_advanced_laplacian </td>
+       <td><p>Advanced propagator ∇²G^A</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-keldysh'>keldysh</a></strong>  => propagator_keldysh </td>
+       <td><p>Keldysh propagator G^K</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-keldysh_gradient'>keldysh_gradient</a></strong>  => propagator_keldysh_gradient </td>
+       <td><p>Keldysh propagator ∇G^K</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-distribution'>distribution</a></strong>  => propagator_distribution </td>
+       <td><p>Distribution matrix H</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-distribution_gradient'>distribution_gradient</a></strong>  => propagator_distribution_gradient </td>
+       <td><p>Distribution matrix ∇H</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-dissipation'>dissipation</a></strong>  => propagator_dissipation </td>
+       <td><p>Dissipation matrix M</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-dissipation_gradient'>dissipation_gradient</a></strong>  => propagator_dissipation_gradient </td>
+       <td><p>Dissipation matrix ∇M</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-condensate'>condensate</a></strong>  => propagator_condensate </td>
+       <td><p>Condensate matrix Q</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-condensate_gradient'>condensate_gradient</a></strong>  => propagator_condensate_gradient </td>
+       <td><p>Condensate matrix ∇Q</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-selfenergy1'>selfenergy1</a></strong>  => propagator_selfenergy1 </td>
+       <td><p>Selfenergy matrix R₁</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-selfenergy2'>selfenergy2</a></strong>  => propagator_selfenergy2 </td>
+       <td><p>Selfenergy matrix R₂</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-supercurrent'>supercurrent</a></strong>  => propagator_supercurrent </td>
+       <td><p>Spectral supercurrents</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-lossycurrent'>lossycurrent</a></strong>  => propagator_lossycurrent </td>
+       <td><p>Spectral dissipative currents</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-accumulation'>accumulation</a></strong>  => propagator_accumulation </td>
+       <td><p>Spectral accumulations</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-correlation'>correlation</a></strong>  => propagator_correlation </td>
+       <td><p>Spectral correlations</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-density'>density</a></strong>  => propagator_density </td>
+       <td><p>Spin-resolved density of states</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-save'>save</a></strong>  => propagator_save </td>
+       <td><p>Export Riccati parameters</p></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-load'>load</a></strong>  => propagator_load </td>
+       <td><p>Import Riccati parameters</p></td></tr>
+      
+       </tbody>
+       </table>
+     
+  </div>
+</div>
+
+     
+    </section>
+  <br>
+    
+    
+    
+
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2018 
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> S4TRAN was developed by Jabir Ali Ouassou</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>
