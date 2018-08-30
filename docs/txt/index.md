@@ -38,10 +38,9 @@ The project also relies on the following Fortran libraries:
  * [`pchip`](https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html),
    which is used for one-dimensional interpolation.
 
-The first one is available under a mixture open-source licences, as listed
+The first is available under a mixture open-source licences, as indicated
 in the source files themselves. The latter two are available under the BSD
-and LGPL licences, respectively. The source code for these libraries are
-bundled with this project, and located in the folder `src/external/`.
+and LGPL licences, respectively. Their sources are located under `src/external/`.
 
 Start by checking if your system satisfies the [list of dependencies](01-dependencies.html),
 and then move on to the [compilation instructions](02-compilation.html). After that, you can
