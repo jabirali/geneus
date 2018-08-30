@@ -12,10 +12,10 @@ programs such as Gnuplot and Matlab. Finally, the code itself is written in
 modern object-oriented Fortran (2008+), making it both simple and efficient.
 
 This software was developed by [Jabir Ali Ouassou](https://github.com/jabirali)
-during his doctoral research in theoretical physics. The research was supervised
+during his doctoral research. The research was supervised
 by [Prof. Jacob Linder](https://folk.ntnu.no/jacobrun/) at the 
 [Center for Quantum Spintronics](https://www.ntnu.edu/quspin), NTNU, Norway.
-The software itself is released under an MIT open-source licence; this basically means that
+The software is released under the MIT open-source licence; this basically means that
 you are free to use it for any purpose, as long as you give credit where appropriate.
 
-For more information, see the [documentation](doc/html/page/index.html).
+For more information, see the [documentation](https://jabirali.github.io/DoctorCode/html/page/index.html).
