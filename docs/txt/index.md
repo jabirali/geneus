@@ -1,6 +1,6 @@
 title:  Overview
 author: Jabir Ali Ouassou
-date:   2016-04-13
+date:   2018-08-30
 
 @NOTE The documentation is incomplete, and parts of it are already out-of-date.
       The plan is to amend it with a discussion of the configuration file format
@@ -39,8 +39,8 @@ The project also relies on the following Fortran libraries:
    which is used for one-dimensional interpolation.
 
 The first is available under a mixture open-source licences, as indicated
-in the source files themselves. The latter two are available under the BSD
-and LGPL licences, respectively. Their sources are located under `src/external/`.
+in the source files. The latter two are available under the BSD and LGPL
+licences, respectively. Their sources are located under `src/external/`.
 
 Start by checking if your system satisfies the [list of dependencies](01-dependencies.html),
 and then move on to the [compilation instructions](02-compilation.html). After that, you can

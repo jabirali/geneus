@@ -32,7 +32,7 @@ The project also relies on the following Fortran libraries:
    which is used for one-dimensional interpolation.
 
 The first is available under a mixture open-source licences, as indicated
-in the source files themselves. The latter two are available under the BSD
+in the source files. The latter two are available under the BSD
 and LGPL licences, respectively. Their sources are located under `src/external/`.
 
 For more information, see the 
