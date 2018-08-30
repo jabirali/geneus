@@ -1,3 +1,5 @@
+# Superconducting spintronics simulation software
+
 This is a set of numerical programs for solving the Usadel diffusion equation in
 superconducting nanostructures, both in and out of equilibrium. The programs are
 quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit
