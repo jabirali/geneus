@@ -165,16 +165,10 @@ The research was supervised by <a href="https://folk.ntnu.no/jacobrun/">Prof. Ja
 The software is released under the <a href="https://github.com/jabirali/DoctorCode/blob/master/LICENSE.md">MIT open-source licence</a>;
 this basically means that you are free to use it for any purpose, as long as you give credit where appropriate.
 The source is available on <a href="https://github.com/jabirali/DoctorCode">Github</a>.</p>
-<p>The project also relies on the following Fortran libraries:</p>
-<ul>
-<li><a href="http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml"><code>bvp_solver</code></a>, which is used to numerically solve boundary value problems;</li>
-<li><a href="http://fparser.sourceforge.net/"><code>fparser</code></a>, which is used to parse mathematical expressions in configuration files;</li>
-<li><a href="https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html"><code>pchip</code></a>, which is used for one-dimensional interpolation.</li>
-</ul>
-<p>The first is available under a mixture open-source licences, as indicated in the source files.
-The latter two are available under the BSD and LGPL licences, respectively.
-Their sources are located under <code>src/external/</code>.</p>
-<p>Start by checking if your system satisfies the <a href="01-dependencies.html">list of dependencies</a>, and then move on to the <a href="02-compilation.html">compilation instructions</a>.
+<p>The project also relies on the external libraries <a href="http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml"><code>bvp_solver</code></a>, <a href="http://fparser.sourceforge.net/"><code>fparser</code></a>, and <a href="https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html"><code>pchip</code></a>.
+The first is available under a mixture of open-source licences, as indicated in the source files themselves.
+For convenience, these libraries have been bundled with this software page, and their sources are located under <a href="https://github.com/jabirali/DoctorCode/tree/master/src/external">src/external</a>.</p>
+<p>You should start by checking if your system satisfies the <a href="01-dependencies.html">list of dependencies</a>, and then move on to the <a href="02-compilation.html">compilation instructions</a>.
 After that, you can learn about the format of the configuration files used to describe relevant physical systems <a href="03-config/index.html">here</a>, and about each particular program in the suite <a href="04-programs/index.html">here</a>.</p>
     </div>
     

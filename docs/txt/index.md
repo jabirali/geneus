@@ -18,16 +18,10 @@ The software is released under the [MIT open-source licence](https://github.com/
 this basically means that you are free to use it for any purpose, as long as you give credit where appropriate.
 The source is available on [Github](https://github.com/jabirali/DoctorCode).
 
-The project also relies on the following Fortran libraries:
+The project also relies on the external libraries [`bvp_solver`](http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml), [`fparser`](http://fparser.sourceforge.net/), and [`pchip`](https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html).
+The first is available under a mixture of open-source licences, as indicated in the source files themselves.
+For convenience, these libraries have been bundled with this software page, and their sources are located under [src/external](https://github.com/jabirali/DoctorCode/tree/master/src/external).
 
- * [`bvp_solver`](http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml), which is used to numerically solve boundary value problems;
- * [`fparser`](http://fparser.sourceforge.net/), which is used to parse mathematical expressions in configuration files;
- * [`pchip`](https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html), which is used for one-dimensional interpolation.
-
-The first is available under a mixture open-source licences, as indicated in the source files.
-The latter two are available under the BSD and LGPL licences, respectively.
-Their sources are located under `src/external/`.
-
-Start by checking if your system satisfies the [list of dependencies](01-dependencies.html), and then move on to the [compilation instructions](02-compilation.html).
+You should start by checking if your system satisfies the [list of dependencies](01-dependencies.html), and then move on to the [compilation instructions](02-compilation.html).
 After that, you can learn about the format of the configuration files used to describe relevant physical systems [here](03-config/index.html), and about each particular program in the suite [here](04-programs/index.html).
 
