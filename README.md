@@ -11,7 +11,6 @@ This software was developed by [Jabir Ali Ouassou](https://github.com/jabirali) 
 The research was supervised by [Prof. Jacob Linder](https://folk.ntnu.no/jacobrun/) at the [Center for Quantum Spintronics](https://www.ntnu.edu/quspin), NTNU, Norway.
 The software is released under the [MIT open-source licence](https://github.com/jabirali/DoctorCode/blob/master/LICENSE.md);
 this basically means that you are free to use it for any purpose, as long as you give credit where appropriate.
-The source is available on [Github](https://github.com/jabirali/DoctorCode).
 
 The project also relies on the external libraries [`bvp_solver`](http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml), [`fparser`](http://fparser.sourceforge.net/), and [`pchip`](https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html).
 The first is available under a mixture of open-source licences, as indicated in the source files themselves.
