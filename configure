@@ -46,17 +46,17 @@ case "$1" in
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=x86_64-w64-mingw32-gfortran -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
 
-  "--doc")
+  "--docs")
     echo "Preparing for generation of DOCUMENTATION with FORD."
     echo
-    cd doc
+    cd docs
     if [ -e html ]; then
       echo "Removing the existing HTML documentation."
       rm -r html
     fi
     ford readme.md || exit 1
-    echo "Documentation has been generated in the subdirectory 'doc'."
-    echo "You can now open 'doc/html/index.html' in your web browser."
+    echo "Documentation has been generated in the subdirectory 'docs'."
+    echo "You can now open 'docs/html/index.html' in your web browser."
     exit 0 ;;
 
   *)
