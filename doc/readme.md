@@ -1,5 +1,3 @@
-author:              Jabir Ali Ouassou
-author_description:  See my [Github page](https://github.com/jabirali) for contact information.
 project:             ​
 summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/DoctorCode/) for the code.
 output_dir:          ./html
