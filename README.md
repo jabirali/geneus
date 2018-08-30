@@ -15,7 +15,9 @@ This software was developed by [Jabir Ali Ouassou](https://github.com/jabirali)
 during his doctoral research. The research was supervised
 by [Prof. Jacob Linder](https://folk.ntnu.no/jacobrun/) at the 
 [Center for Quantum Spintronics](https://www.ntnu.edu/quspin), NTNU, Norway.
-The software is released under the MIT open-source licence; this basically means that
-you are free to use it for any purpose, as long as you give credit where appropriate.
+The software is released under the 
+[MIT open-source licence](https://github.com/jabirali/DoctorCode/blob/master/LICENSE.md);
+this basically means that you are free to use it for any purpose, 
+as long as you give credit where appropriate.
 
 For more information, see the [documentation](https://jabirali.github.io/DoctorCode/html/page/index.html).
