@@ -2,9 +2,6 @@ title:  Overview
 author: Jabir Ali Ouassou
 date:   2018-08-30
 
-@NOTE The documentation is incomplete, and parts of it are out-of-date.
-      The plan is to amend it with a discussion of the configuration file format as well as some example programs as soon as possible.
-
 This is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
 The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-flip scattering, spin-orbit scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
 The suite also contains specialized programs for calculating the critical temperature and phase diagrams of all these hybrid structures.

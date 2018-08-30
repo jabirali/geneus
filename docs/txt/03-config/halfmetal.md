@@ -1,6 +1,9 @@
 title:  Halfmetal
 author: Jabir Ali Ouassou
-date:   2016-04-13
+date:   2018-08-30
 
 
-Halfmetal-specific options.
+
+@TODO This page is still under construction.
+
+This page should describe options specific to half-metallic ferromagnets.

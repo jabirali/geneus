@@ -1,4 +1,4 @@
-title:  Superconductor
+title:  Critical
 author: Jabir Ali Ouassou
 date:   2018-08-30
 
@@ -6,4 +6,4 @@ date:   2018-08-30
 
 @TODO This page is still under construction.
 
-This page should describe options specific to superconductors.
+Program for calculating the critical temperature of a system.

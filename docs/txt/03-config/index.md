@@ -1,6 +1,10 @@
 title:  Configuration files
 author: Jabir Ali Ouassou
-date:   2016-04-13
+date:   2018-08-30
 
 
-The programs [[equilibrium]], [[critical_temperature]], and [[critical_current]] all require a configuration file `materials.conf` to run.
+
+@TODO This page is still under construction.
+
+All simulation programs are configured using a simple plaintext files.
+This page should contain a description of the file format with some common examples.

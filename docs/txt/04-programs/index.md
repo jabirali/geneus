@@ -1,22 +1,10 @@
 title:  Programs
 author: Jabir Ali Ouassou
-date:   2016-04-13
+date:   2018-08-30
 
 
 
-List of programs.
+@TODO This page is still under construction.
 
-### Equilibrium properties
-This program does something. Fill in details.
-
-    ./bin/equilibrium
-
-### Critical temperature
-This program does something. Fill in details.
-
-    ./bin/temperature
-
-### Critical current
-This program does something. Fill in details.
-
-    ./bin/current
+The software consists of several simulation programs that perform different tasks.
+This page should contain a short description of what these programs do and how to use them.
