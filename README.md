@@ -1,10 +1,9 @@
 # Superconducting spintronics simulation software
 
-This is a set of numerical programs for solving the Usadel diffusion equation in superconducting nanostructures, both in and out of equilibrium.
+This is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
 The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-flip scattering, spin-orbit scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
 The suite also contains specialized programs for calculating the critical temperature and phase diagrams of all these hybrid structures.
-The programs are also built to be user-friendly:
-they are configured using simple plaintext configuration files, which can include mathematical expressions to initialize the physical system, and the output data can be directly imported in e.g. Gnuplot or Matlab.
+The programs are built to be user-friendly: they are configured using simple configuration files, which can include mathematical expressions to initialize the physical system, and the output files are easily imported in e.g. Gnuplot or Matlab.
 Finally, the code is written in modern object-oriented Fortran, making it both simple and efficient.
 
 This software was developed by [Jabir Ali Ouassou](https://github.com/jabirali) during his doctoral research.
