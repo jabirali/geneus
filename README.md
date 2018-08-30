@@ -22,4 +22,17 @@ The software is released under the
 this basically means that you are free to use it for any purpose, 
 as long as you give credit where appropriate.
 
-For more information, see the [documentation](https://jabirali.github.io/DoctorCode/html/page/index.html).
+The project also relies on the following Fortran libraries:
+ * [`bvp_solver`](http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml),
+   which is used to numerically solve boundary value problems;
+ * [`fparser`](http://fparser.sourceforge.net/),
+   which is used to parse mathematical expressions in configuration files;
+ * [`pchip`](https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html),
+   which is used for one-dimensional interpolation.
+The first one is available under a mixture open-source licences, as listed
+in the source files themselves. The latter two are available under the BSD
+and LGPL licences, respectively. The source code for these libraries are
+bundled with this project, and located in the folder `src/external/`.
+
+For more information, see the 
+[documentation](https://jabirali.github.io/DoctorCode/html/page/index.html).
