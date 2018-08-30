@@ -153,45 +153,29 @@
   <div class="row">
     <div class="col-md-9 col-md-push-3" id='text'>
       <p></p><div class="alert alert-info" role="alert"><h4>Note</h4><p>The documentation is incomplete, and parts of it are already out-of-date.
-      The plan is to amend it with a discussion of the configuration file format
-      as well as some example programs as soon as possible.</p></div>
-<p>This is a set of numerical programs for solving the Usadel diffusion equation in
-superconducting nanostructures, both in and out of equilibrium. The programs are
-quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit
-coupling, spin-flip scattering, spin-orbit scattering, strongly polarized magnetic
-interfaces, voltage gradients, and temperature gradients. The suite also contains
-specialized programs for calculating the critical temperature and phase diagrams
-of all these hybrid structures. The programs are also built to be user-friendly:
-they are configured using a simple plaintext configuration file, which can include
-mathematical expressions to initialize the physical properties of the system, and 
-the output data is saved as plaintext files that can be directly imported in 
-programs such as Gnuplot and Matlab. Finally, the code itself is written in 
-modern object-oriented Fortran (2008+), making it both simple and efficient.</p>
-<p>This software was developed by <a href="https://github.com/jabirali">Jabir Ali Ouassou</a>
-during his doctoral research. The research was supervised
-by <a href="https://folk.ntnu.no/jacobrun/">Prof. Jacob Linder</a> at the 
-<a href="https://www.ntnu.edu/quspin">Center for Quantum Spintronics</a>, NTNU, Norway.
-The software is released under the 
-<a href="https://github.com/jabirali/DoctorCode/blob/master/LICENSE.md">MIT open-source licence</a>;
-this basically means that you are free to use it for any purpose, 
-as long as you give credit where appropriate.
+      The plan is to amend it with a discussion of the configuration file format as well as some example programs as soon as possible.</p></div>
+<p>This is a set of numerical programs for solving the Usadel diffusion equation in superconducting nanostructures, both in and out of equilibrium.
+The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-flip scattering, spin-orbit scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
+The suite also contains specialized programs for calculating the critical temperature and phase diagrams of all these hybrid structures.
+The programs are also built to be user-friendly:
+they are configured using a simple plaintext configuration file, which can include mathematical expressions to initialize the physical properties of the system, and the output data is saved as plaintext files that can be directly imported in programs such as Gnuplot and Matlab.
+Finally, the code itself is written in modern object-oriented Fortran (2008+), making it both simple and efficient.</p>
+<p>This software was developed by <a href="https://github.com/jabirali">Jabir Ali Ouassou</a> during his doctoral research.
+The research was supervised by <a href="https://folk.ntnu.no/jacobrun/">Prof. Jacob Linder</a> at the <a href="https://www.ntnu.edu/quspin">Center for Quantum Spintronics</a>, NTNU, Norway.
+The software is released under the <a href="https://github.com/jabirali/DoctorCode/blob/master/LICENSE.md">MIT open-source licence</a>;
+this basically means that you are free to use it for any purpose, as long as you give credit where appropriate.
 The source is available on <a href="https://github.com/jabirali/DoctorCode">Github</a>.</p>
 <p>The project also relies on the following Fortran libraries:</p>
 <ul>
-<li><a href="http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml"><code>bvp_solver</code></a>,
-   which is used to numerically solve boundary value problems;</li>
-<li><a href="http://fparser.sourceforge.net/"><code>fparser</code></a>,
-   which is used to parse mathematical expressions in configuration files;</li>
-<li><a href="https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html"><code>pchip</code></a>,
-   which is used for one-dimensional interpolation.</li>
+<li><a href="http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml"><code>bvp_solver</code></a>, which is used to numerically solve boundary value problems;</li>
+<li><a href="http://fparser.sourceforge.net/"><code>fparser</code></a>, which is used to parse mathematical expressions in configuration files;</li>
+<li><a href="https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html"><code>pchip</code></a>, which is used for one-dimensional interpolation.</li>
 </ul>
-<p>The first is available under a mixture open-source licences, as indicated
-in the source files. The latter two are available under the BSD and LGPL
-licences, respectively. Their sources are located under <code>src/external/</code>.</p>
-<p>Start by checking if your system satisfies the <a href="01-dependencies.html">list of dependencies</a>,
-and then move on to the <a href="02-compilation.html">compilation instructions</a>. After that, you can
-learn about the format of the configuration files used to describe relevant physical systems
-<a href="03-config/index.html">here</a>, and about each particular program in the suite <a href="04-programs/index.html">here</a>.</p>
+<p>The first is available under a mixture open-source licences, as indicated in the source files.
+The latter two are available under the BSD and LGPL licences, respectively.
+Their sources are located under <code>src/external/</code>.</p>
+<p>Start by checking if your system satisfies the <a href="01-dependencies.html">list of dependencies</a>, and then move on to the <a href="02-compilation.html">compilation instructions</a>.
+After that, you can learn about the format of the configuration files used to describe relevant physical systems <a href="03-config/index.html">here</a>, and about each particular program in the suite <a href="04-programs/index.html">here</a>.</p>
     </div>
     
     <div class="col-md-3 col-md-pull-9">
