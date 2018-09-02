@@ -11,7 +11,7 @@
 ###############################################################################
 
 # General metadata
-project(s4tran Fortran)
+project(NEUS Fortran)
 cmake_minimum_required(VERSION 2.6)
 
 # Programming languages
@@ -24,13 +24,13 @@ file(GLOB src_mod RELATIVE ${CMAKE_SOURCE_DIR} "src/system/*.f" "src/foundation/
 file(GLOB src_exe RELATIVE ${CMAKE_SOURCE_DIR} "src/programs/*.f")
 
 # Libraries
-add_library(s4tran STATIC ${src_mod} ${src_e90} ${src_e77})
+add_library(neus STATIC ${src_mod} ${src_e90} ${src_e77})
 
 # Executables
 foreach(src_name ${src_exe})
   get_filename_component( exe_name ${src_name} NAME_WE )
   add_executable( ${exe_name} ${src_name} )
-  target_link_libraries( ${exe_name} s4tran )
+  target_link_libraries( ${exe_name} neus )
 endforeach()
 
 

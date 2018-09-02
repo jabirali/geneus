@@ -7,10 +7,10 @@
    
    <meta name="description" content="Please click here for the documentation or here for the code.">
     
-    <meta name="author" content="" >
+    <meta name="author" content="Jabir Ali Ouassou" >
     <link rel="icon" href="../favicon.png">
 
-    <title>Overview &ndash; ​</title>
+    <title>Overview &ndash; NEUS</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">​ </a>
+          <a class="navbar-brand" href="../index.html">NEUS </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -152,19 +152,20 @@
   
   <div class="row">
     <div class="col-md-9 col-md-push-3" id='text'>
-      <p>This is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
-The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-flip scattering, spin-orbit scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
+      <h3>NEUS: Non-Equilibrium Usadel Solver</h3>
+<p>NEUS is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
+The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-dependent scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
 The suite also contains specialized programs for calculating the critical temperature and phase diagrams of all these hybrid structures.
-The programs are also built to be user-friendly: they are configured using simple configuration files, which can include mathematical expressions to initialize the physical system, and the output files are easily imported in e.g. Gnuplot or Matlab.
+The programs are also built to be user-friendly: they are configured using simple configuration files, which can include mathematical expressions to initialize the physical system, and the output is easily imported in e.g. Gnuplot or Matlab.
 Finally, the code is written in modern object-oriented Fortran, making it both simple and efficient.</p>
 <p>This software was developed by <a href="https://github.com/jabirali">Jabir Ali Ouassou</a> during his doctoral research.
 The research was supervised by <a href="https://folk.ntnu.no/jacobrun/">Prof. Jacob Linder</a> at the <a href="https://www.ntnu.edu/quspin">Center for Quantum Spintronics</a>, NTNU, Norway.
-The software itself is released under the <a href="https://github.com/jabirali/DoctorCode/blob/master/LICENSE.md">MIT open-source licence</a>;
+The software itself is released under the <a href="https://github.com/jabirali/NEUS/blob/master/LICENSE.md">MIT open-source licence</a>;
 this basically means that you are free to use it for any purpose, as long as you give credit where appropriate.
-The source is available on <a href="https://github.com/jabirali/DoctorCode">Github</a>.</p>
+The source is available on <a href="https://github.com/jabirali/NEUS">Github</a>.</p>
 <p>The project also relies on the external libraries <a href="http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml"><code>bvp_solver</code></a>, <a href="http://fparser.sourceforge.net/"><code>fparser</code></a>, and <a href="https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html"><code>pchip</code></a>.
 These are available under a mixture of open-source licences, as indicated in the source files themselves.
-For convenience, these libraries have been bundled with this software page, and their sources are located under <a href="https://github.com/jabirali/DoctorCode/tree/master/src/external">src/external</a>.</p>
+For convenience, these libraries have been bundled with this software page, and their sources are located under <a href="https://github.com/jabirali/NEUS/tree/master/src/external">src/external</a>.</p>
 <p>You should start by checking if your system satisfies the <a href="01-dependencies.html">list of dependencies</a>, and then move on to the <a href="02-compilation.html">compilation instructions</a>.
 After that, you can learn about the format of the configuration files used to describe relevant physical systems <a href="03-config/index.html">here</a>, and about each particular program in the suite <a href="04-programs/index.html">here</a>.</p>
     </div>
@@ -276,6 +277,7 @@ After that, you can learn about the format of the configuration files used to de
             
           </p>
         </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> NEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

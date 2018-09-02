@@ -1,5 +1,6 @@
-project:             ​
-summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/DoctorCode/) for the code.
+project:             NEUS
+summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/NEUS/) for the code.
+author:              Jabir Ali Ouassou
 output_dir:          ./html
 page_dir:            ./txt
 src_dir:             ../src/system
