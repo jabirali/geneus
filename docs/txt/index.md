@@ -19,6 +19,5 @@ The project also relies on the external libraries [`bvp_solver`](http://cs.stmar
 These are available under a mixture of open-source licences, as indicated in the source files themselves.
 For convenience, these libraries have been bundled with this software page, and their sources are located under [src/external](https://github.com/jabirali/NEUS/tree/master/src/external).
 
-You should start by checking if your system satisfies the [list of dependencies](01-dependencies.html), and then move on to the [compilation instructions](02-compilation.html).
-After that, you can learn about the format of the configuration files used to describe relevant physical systems [here](03-config/index.html), and about each particular program in the suite [here](04-programs/index.html).
-
+For instructions on how to install NEUS, continue to the [next part](01-installation.html) of the manual.
+After that, the different sections shown in the table of contents on the left will guide you through the use of the programs themselves.

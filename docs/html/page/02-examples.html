@@ -10,7 +10,7 @@
     <meta name="author" content="Jabir Ali Ouassou" >
     <link rel="icon" href="../favicon.png">
 
-    <title>Compilation &ndash; NEUS</title>
+    <title>User guide &ndash; NEUS</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -113,7 +113,7 @@
     <div class="container">
     
   <div class="row">
-    <h1>Compilation</h1>
+    <h1>User guide</h1>
     <div class="row">
     <div class="col-lg-12">
     <div class="well well-sm" style="min-height: 40px;">
@@ -122,7 +122,7 @@
         <li><i class="fa fa-pencil"></i> Jabir Ali Ouassou</li>
          
          
-        <li><i class="fa fa-calendar-o"></i> 2018-08-30</li>
+        <li><i class="fa fa-calendar-o"></i> 2018-09-03</li>
          
 <!--
         
@@ -132,7 +132,7 @@
       
          <li><a href='../page/index.html'>Overview</a></li>
       
-         <li class="active">Compilation</li>
+         <li class="active">User guide</li>
       </ol>
     </div>
     </div>
@@ -141,38 +141,8 @@
   
   <div class="row">
     <div class="col-md-9 col-md-push-3" id='text'>
-      <p></p><div class="alert alert-info" role="alert"><h4>Note</h4><p>These instructions should work for Unix-like operating systems with all the <a href="01-dependencies.html">recommended dependencies</a> installed.
-  This should include Linux/Unix/Mac systems, and possibly also Windows if you have e.g. <a href="https://www.cygwin.com/">Cygwin</a> installed. 
-  If you use other platforms or compilers, you may have to compile the project manually.</p></div>
-<p>After downloading the source code, open a terminal, and go to the top directory of the project.
-This should be the directory with the files <code>configure</code> and <code>CMakeLists.txt</code>.
-To prepare for compilation, you should then run one of the following commands, depending on whether you wish to compile with GFortran or IFort:</p>
-<div class="codehilite"><pre><span></span>./configure --gfortran
-./configure --ifort
-</pre></div>
-
-
-<p>If you need to search for bugs, it can be quite useful to enable debug mode.
-This essentially means that all compiler optimizations are disabled, and extra safety checks are performed at both compiletime and runtime.
-As a consequence, the generated code will run several times slower, but will also provide better feedback if something goes wrong.
-To enable debug mode, run one of these commands instead of the above:</p>
-<div class="codehilite"><pre><span></span>./configure --gfortran-debug
-./configure --ifort-debug
-</pre></div>
-
-
-<p>After configuration, change to the subdirectory <code>build</code>, and run <code>make</code> to compile:</p>
-<div class="codehilite"><pre><span></span>cd build
-make -j4
-</pre></div>
-
-
-<p>If the project compiles successfully, the executables should appear in the subdirectory <code>bin</code> of the top directory. 
-You might want to add that directory to your system <code>PATH</code> variable, or move the executables to a system location like <code>/usr/local/bin/</code>, so that the programs can be run without specifying a full path.</p>
-<p>This documentation has been automatically generated using <a href="https://github.com/cmacmackin/ford">FORD</a>.
-If you modify the source code, and wish to update the documentation accordingly, run the following command:</p>
-<div class="codehilite"><pre><span></span>./configure --docs
-</pre></div>
+      <p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This page is still under construction.</p></div>
+<p>On this page, we should give an introduction to how to use the software...</p>
     </div>
     
     <div class="col-md-3 col-md-pull-9">
@@ -185,12 +155,12 @@ If you modify the source code, and wish to update the documentation accordingly,
           <ul class="nav nav-stacked nav-pills">
             
             <li role="presentation">
-            <a href='../page/./01-dependencies.html'>Dependencies</a>
+            <a href='../page/./01-installation.html'>Installation</a>
             
             </li>
             
             <li role="presentation" class="disabled">
-            <a href='../page/./02-compilation.html'>Compilation</a>
+            <a href='../page/./02-examples.html'>User guide</a>
             
             </li>
             
