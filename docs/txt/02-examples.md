@@ -230,7 +230,80 @@ Once the simulation finishes, the resistive current and supercurrent can be visu
 
 
 ### Advanced functionality
-@TODO This section is still under construction.
+In this section, we introduce some more advanced capabilities of the configuration format: mathematical expressions and command-line arguments.
+In the configuration file, you may replace any real number or vector by a mathematical expression.
+The simulation program uses the [fparser](http://fparser.sourceforge.net/) library to parse these expressions, and supports all functionality of that library.
+This basically means that you can use all elementary mathematical operators supported by Fortran itself (`**`, `*`, `/`, `+`, `-`), in addition to the most common elementary functions (`sin`, `cos`, `exp`, `log`, `sqrt`, etc.).
+For more information, see the [fparser documentation](http://fparser.sourceforge.net/).
+
+When defining mathematical expressions, there are two special variables available.
+One of them is `pi`, which just refers to the mathematical constant (\( \pi = 3.1415\ldots \)).
+The second is `z`, which refers to the position \( z \) inside a material.
+The latter can be used to initialize physical fields using an analytical function of position, and is normalized so that that \( z = 0 \) at the left and \( z = 1 \) at the right interface of each material.
+
+You can also feed the simulation programs command-line arguments.
+These can then be referred to in the configuration file using the syntax `{1}` for the first command-line argument, `{2}` for the second, and so on.
+In this way, the configuration files themselves specify how to interpret these arguments.
+Note that if a command-line argument is referred to in the configuration file but not provided, the simulation program exits with an error.
+
+Let us now consider a physical example where the functionality above might be useful.
+Imagine an S/F/S Josephson junction, where the central layer is a helical ferromagnet like Ho.
+Its magnetization texture can then be specified as a vector-valued function of position: \( \boldsymbol{m}(z) = [3\Delta_0 \cos(\pi z/2), 3\Delta_0 \sin(\pi z/2), \Delta_0] \).
+
+As for the superconductors, these are modelled as reservoirs with fixed order parameters.
+However, we wish to investigate the current-phase relation for multiple phase differences.
+We therefore set the reservoir phases to \( \pm \delta\varphi/2 \), where the phase difference \( \delta\varphi \) is provided as a command-line argument `{1}`.
+This allows us to perform simulations for different \( \delta\varphi \) in parallel without having to write multiple configuration files.
+
+An appropriate configuration file is then:
+
+    :::ini
+    # Josephson junction with a helical ferromagnet.
+
+    [superconductor]
+      order:         0
+      phase:        -{1}/2
+
+    [ferromagnet]
+      length:        3.0
+      magnetization: [3*cos(pi*z/2), 3*sin(pi*z/2), 1]
+      conductance_a: 0.3
+      conductance_b: 0.3
+
+    [superconductor]
+      order:         0
+      phase:        +{1}/2
+
+Save this file as e.g. `helical.conf` and open a terminal in the same folder.
+We can then use a Bash loop to start multiple parallel simulations with different \( \delta\varphi \in \{ 0.0, 0.1, \ldots, 1.0 \} \) in separate subdirectories:
+
+    :::bash
+    for n in $(seq 0.0 0.1 1.0); do
+      mkdir sim_${n};
+      cd sim_${n};
+      converge ../helical.conf ${n} &
+      cd ..;
+    done
+
+With IFort and an Intel Core i7, it takes roughly 3 min for all the simulations to complete.
+Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
+The charge current is conserved, so we can extract it at any point in the ferromagnet; in this case, we use `tail -n 1` to extract it from the right end.
+In Bash, these results can then be collected by running:
+
+    :::bash
+    for n in $(seq 0.0 0.1 1.0); do
+      echo -n ${n} >> current.dat;
+      tail -n 1 sim_${n}/supercurrent.dat >> current.dat
+    done
+
+Finally, the resulting current-phase relation can be plotted using:
+
+    :::gnuplot
+    set ylabel 'Charge current'
+    set xlabel 'Phase difference'
+
+    plot 'current.dat' using 1:3
+
 
 ### Critical temperature
 @TODO This section is still under construction.
