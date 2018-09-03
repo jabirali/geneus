@@ -3,7 +3,7 @@ author: Jabir Ali Ouassou
 date:   2018-09-03
 
 ### Introduction
-In this tutorial, we demonstrate how to model some common superconducting spintronics devices using the NEUS software suite.
+In this tutorial, we demonstrate how to model some common superconducting spintronics devices using the GNEUS software suite.
 The first few sections will gradually introduce basic calculations, selfconsistent calculations, and nonequilibrium calculations.
 After that, we will demonstrate some more advanced features of the configuration files, such as how to initialize a system using mathematical equations, and how to set system parameters using command-line arguments.
 Finally, we will show how to use more specialized simulation programs to calculate phase diagrams and the superconducting critical temperature.

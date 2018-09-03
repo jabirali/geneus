@@ -38,7 +38,7 @@ In that case, the problem can be resolved by running the command `ulimit -s unli
 There are also some optional but recommended programs:
 
  * [Git](https://git-scm.com/): the software and its entire version history can be downloaded via Git.
-   However, the software may also be [browsed online](https://github.com/jabirali/NEUS) or [downloaded as a zip file](https://github.com/jabirali/NEUS/archive/master.zip) if that is preferred.
+   However, the software may also be [browsed online](https://github.com/jabirali/GNEUS) or [downloaded as a zip file](https://github.com/jabirali/GNEUS/archive/master.zip) if that is preferred.
  * [FORD](https://github.com/cmacmackin/ford): this program was used to automatically generate software documentation from the source code and some supplementary [Markdown](https://daringfireball.net/projects/markdown/) files.
    This program should be installed if you plan to modify the source code, and wish to automatically update the documentation accordingly.
  * [Gnuplot](http://www.gnuplot.info/): the output formats are specifically designed to be easy to plot with Gnuplot.
@@ -47,7 +47,7 @@ There are also some optional but recommended programs:
 
 
 ### Compilation
-The first step is to [download the source code](https://github.com/jabirali/NEUS).
+The first step is to [download the source code](https://github.com/jabirali/GNEUS).
 After that, open a terminal, and go to the project top directory, i.e. the directory containing the files `configure` and `CMakeLists.txt`.
 To prepare for compilation, you should then run one of the following commands, depending on whether you wish to compile with GFortran or IFort:
 

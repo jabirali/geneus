@@ -1,5 +1,5 @@
-project:             NEUS
-summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/NEUS/) for the code.
+project:             GNEUS
+summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/GNEUS/) for the code.
 author:              Jabir Ali Ouassou
 output_dir:          ./html
 page_dir:            ./txt
