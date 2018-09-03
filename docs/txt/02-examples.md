@@ -306,7 +306,59 @@ Finally, the resulting current-phase relation can be plotted using:
 
 
 ### Critical temperature
-@TODO This section is still under construction.
+In all of the examples above, we have focused on a single program `converge`, which essentially calculates the steady-state solution for a physical system with known parameters.
+In this section, we will demonstrate how to calculate the critical temperature of a superconducting junction using a more specialized program `critical`.
+The program uses a kind of binary search algorithm to drastically improve the calculation time needed to determine the critical temperature with a high precision.
+The ideas behind this algorithm are explained in more detail in the appendix of [Scientific Reports 6, 29312 (2016)](https://www.nature.com/articles/srep29312).
+
+As a model system, we consider an FI/S/FI spin-valve setup.
+The ferromagnetic insulators are modelled as spin-active interfaces with spin-mixing conductances \( G_\varphi = 0.5G_{\mathrm{N}} \), where \( G_{\mathrm{N}} \) is the normal-state conductance of the superconductor.
+Their magnetization directions are set to \( \boldsymbol{m} = [\cos(\pm\theta/2), \sin(\pm\theta/2), 0] \), where the relative magnetization angle \( \theta \) will be provided as a command-line argument.
+
+An appropriate model for this spin-valve setup is:
+
+    :::ini
+    # FI/S/FI Spin-valve setup.
+
+    [superconductor]
+      # Material itself
+      length:          1.0
+    
+      # Left interface
+      magnetization_a: [cos(-{1}*pi/2),sin(-{1}*pi/2),0]
+      spinmixing_a:    0.5
+    
+      # Right interface
+      magnetization_b: [cos(+{1}*pi/2),sin(+{1}*pi/2),0]
+      spinmixing_b:    0.5
+
+Save this configuration file as e.g. `spinvalve.conf` and open a terminal in the same folder.
+We then perform parallel simulations for magnetization angles \( \theta/\pi \in \{ 0.0, 0.1, \ldots, 1.0 \} \):
+
+    :::bash
+    for n in $(seq 0.0 0.1 1.0); do
+      mkdir sim_${n};
+      cd sim_${n};
+      critical ../spinvalve.conf ${n} &
+      cd ..;
+    done
+
+These simulations may take a few hours to complete.
+When the simulations are finished, they will write both the command-line options used to invoke each process and the calculated critical temperature to `critical.dat` output files.
+The critical temperature result \(T_{\mathrm{c}}\) is normalized to the critical temperature \(T_{\mathrm{cs}}\) of a bulk superconductor.
+The results can be collected into a single output file as follows:
+
+    :::bash
+    cat sim_*/critical.dat | cut -f 2,3 > critical.dat
+
+It is then trivial to plot the results in Gnuplot:
+
+    :::gnuplot
+    set xlabel 'Magnetization angle'
+    set ylabel 'Critical temperature'
+
+    plot 'critical.dat' u 1:2 notitle
+
 
 ### Phase diagrams
 In this example, we demonstrate another specialized program `flow`, which can be used to rapidly map out the phase diagram of a superconducting system.

@@ -421,7 +421,57 @@ In Bash, these results can then be collected by running:</p>
 
 
 <h3>Critical temperature</h3>
-<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<p>In all of the examples above, we have focused on a single program <code>converge</code>, which essentially calculates the steady-state solution for a physical system with known parameters.
+In this section, we will demonstrate how to calculate the critical temperature of a superconducting junction using a more specialized program <code>critical</code>.
+The program uses a kind of binary search algorithm to drastically improve the calculation time needed to determine the critical temperature with a high precision.
+The ideas behind this algorithm are explained in more detail in the appendix of <a href="https://www.nature.com/articles/srep29312">Scientific Reports 6, 29312 (2016)</a>.</p>
+<p>As a model system, we consider an FI/S/FI spin-valve setup.
+The ferromagnetic insulators are modelled as spin-active interfaces with spin-mixing conductances <script type="math/tex"> G_\varphi = 0.5G_{\mathrm{N}} </script>, where <script type="math/tex"> G_{\mathrm{N}} </script> is the normal-state conductance of the superconductor.
+Their magnetization directions are set to <script type="math/tex"> \boldsymbol{m} = [\cos(\pm\theta/2), \sin(\pm\theta/2), 0] </script>, where the relative magnetization angle <script type="math/tex"> \theta </script> will be provided as a command-line argument.</p>
+<p>An appropriate model for this spin-valve setup is:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># FI/S/FI Spin-valve setup.</span>
+
+<span class="k">[superconductor]</span>
+  <span class="c1"># Material itself</span>
+  <span class="na">length:          1.0</span>
+
+  <span class="c1"># Left interface</span>
+  <span class="na">magnetization_a: [cos(-{1}*pi/2),sin(-{1}*pi/2),0]</span>
+  <span class="na">spinmixing_a:    0.5</span>
+
+  <span class="c1"># Right interface</span>
+  <span class="na">magnetization_b: [cos(+{1}*pi/2),sin(+{1}*pi/2),0]</span>
+  <span class="na">spinmixing_b:    0.5</span>
+</pre></div>
+
+
+<p>Save this configuration file as e.g. <code>spinvalve.conf</code> and open a terminal in the same folder.
+We then perform parallel simulations for magnetization angles <script type="math/tex"> \theta/\pi \in \{ 0.0, 0.1, \ldots, 1.0 \} </script>:</p>
+<div class="codehilite"><pre><span></span><span class="k">for</span> n in <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+  mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
+  <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
+  critical ../spinvalve.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  <span class="nb">cd</span> ..<span class="p">;</span>
+<span class="k">done</span>
+</pre></div>
+
+
+<p>These simulations may take a few hours to complete.
+When the simulations are finished, they will write both the command-line options used to invoke each process and the calculated critical temperature to <code>critical.dat</code> output files.
+The critical temperature result <script type="math/tex">T_{\mathrm{c}}</script> is normalized to the critical temperature <script type="math/tex">T_{\mathrm{cs}}</script> of a bulk superconductor.
+The results can be collected into a single output file as follows:</p>
+<div class="codehilite"><pre><span></span>cat sim_*/critical.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; critical.dat
+</pre></div>
+
+
+<p>It is then trivial to plot the results in Gnuplot:</p>
+<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Magnetization angle&#39;</span>
+<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Critical temperature&#39;</span>
+
+<span class="k">plot</span> <span class="s">&#39;critical.dat&#39;</span> <span class="nb">u</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span> <span class="nb">notitle</span>
+</pre></div>
+
+
 <h3>Phase diagrams</h3>
 <p>In this example, we demonstrate another specialized program <code>flow</code>, which can be used to rapidly map out the phase diagram of a superconducting system.
 The program is based on analysing the "flow" of the order parameter during selfconsistency iterations; the concept is explained in more detail in the supplemental information of <a href="https://arxiv.org/abs/1803.07076">arXiv:1803.07076</a>.
