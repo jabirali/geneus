@@ -94,6 +94,7 @@ If you have Gnuplot installed, you can visualize the results by running `gnuplot
     set xlabel 'Position'
     set ylabel 'Charge current'
     set yrange [-0.012:0.012]
+
     plot 'supercurrent.dat' using 1:2
 
 The data files are formatted using tab-separated values (TSV files), where the first two columns correspond to the position and charge current, respectively.
@@ -107,11 +108,68 @@ Thus, this information can be plotted as follows:
     set xlabel 'Position'
     set ylabel 'Superconducting phase'
     set yrange [-0.25:0.25]
+
     plot 'correlation.dat' using 1:3
 
 
 ### Selfconsistent calculations
-@TODO This section is still under construction.
+For the next example, we consider an S/F bilayer with spin-orbit coupling in the ferromagnet.
+We take the superconductor length to be \( L_{\mathrm{S}} = 2.5\xi \), and treat its order parameter selfconsistently.
+The ferromagnet has length \( L_{\mathrm{F}} = 0.5\xi \), magnetic exchange field \( \boldsymbol{m} = 3\Delta_0\boldsymbol{e}_x \), Rashba coupling \( \alpha\xi = 1 \), and Dresselhaus coupling \( \beta\xi = 1 \).
+The spin-orbit coupling is in-plane; since the junction direction is along the \(z\)-axis, this corresponds to a Rashba Hamiltonian \( \mathcal{H}_{\mathrm{R}} \sim \alpha(p_y \sigma_x - p_x \sigma_y) \) and Dresselhaus Hamiltonian \( \mathcal{H}_{\mathrm{D}} \sim \beta(p_y\sigma_y - p_x\sigma_x) \).
+The goal will be to calculate the local density of states in the junction.
+
+An appropriate configuration file for this system would be:
+
+    :::ini
+    # S/F bilayer with SOC
+
+    [superconductor]
+      order:         2
+      length:        2.5
+      conductance_b: 0.3
+    
+    [ferromagnet]
+      order:         1
+      length:        0.5
+      rashba:        1.0
+      dresselhaus:   1.0
+      magnetization: [3,0,0]
+      conductance_a: 0.3
+
+Save this file as e.g. `bilayer.conf`.
+Note that there is no need to define boundary conditions for the "outer" interfaces: when no material is defined there, the program will automatically select vacuum boundary conditions.
+The only thing needed to perform a selfconsistent calculation in the superconductor, is to specify a positive order for that layer (in this case 2).
+The simulation can again be performed using the `converge` program:
+
+    :::bash
+    converge bilayer.conf &
+
+The simulation program will alternate between solving the Usadel equation in the two layers.
+Note that for the first few iterations, the order parameter in the superconductor is locked to \(\Delta = \Delta_0\).
+This is because the state changes rapidly between iterations in the beginning, and selfconsistently updating the order parameter before the initial boundary conditions are approximately satisfied can slow down the convergence.
+This "bootstrap procedure" continues until the change in the Riccati parameters between iterations is below 1%.
+After that, the program start to perform proper selfconsistency iterations, where it both solves the Usadel equation and updates the order parameter.
+After each such iteration, the physical observables in the system is written to output files, making it possible to preview the results.
+Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.
+Using IFort and a modern processor, the entire simulation should require roughly 30 min to converge (using a default error tolerance of \( 10^{-8} \) for the Riccati parameters).
+
+Once the simulation has finished, the relevant output file is `density.dat`.
+The first three columns of this file correspond to the position, energy, and the spin-independent local density of states, respectively.
+The results are easily visualized as a contour plot in Gnuplot:
+
+    :::gnuplot
+    set xlabel  'Position'
+    set ylabel  'Energy'
+    set title   'Density of states'
+
+    set yrange  [-3:3]
+    set cbrange [0:2]
+
+    set pm3d map
+    splot 'density.dat' using 1:2:3
+
+
 
 ### Nonequilibrium calculations
 @TODO This section is still under construction.

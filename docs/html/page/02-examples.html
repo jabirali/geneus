@@ -224,6 +224,7 @@ If you have Gnuplot installed, you can visualize the results by running <code>gn
 <div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
 <span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Charge current&#39;</span>
 <span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">-0</span><span class="mf">.012</span><span class="o">:</span><span class="mf">0.012</span><span class="p">]</span>
+
 <span class="k">plot</span> <span class="s">&#39;supercurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span>
 </pre></div>
 
@@ -236,12 +237,66 @@ Thus, this information can be plotted as follows:</p>
 <div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
 <span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Superconducting phase&#39;</span>
 <span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">-0</span><span class="mf">.25</span><span class="o">:</span><span class="mf">0.25</span><span class="p">]</span>
+
 <span class="k">plot</span> <span class="s">&#39;correlation.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">3</span>
 </pre></div>
 
 
 <h3>Selfconsistent calculations</h3>
-<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<p>For the next example, we consider an S/F bilayer with spin-orbit coupling in the ferromagnet.
+We take the superconductor length to be <script type="math/tex"> L_{\mathrm{S}} = 2.5\xi </script>, and treat its order parameter selfconsistently.
+The ferromagnet has length <script type="math/tex"> L_{\mathrm{F}} = 0.5\xi </script>, magnetic exchange field <script type="math/tex"> \boldsymbol{m} = 3\Delta_0\boldsymbol{e}_x </script>, Rashba coupling <script type="math/tex"> \alpha\xi = 1 </script>, and Dresselhaus coupling <script type="math/tex"> \beta\xi = 1 </script>.
+The spin-orbit coupling is in-plane; since the junction direction is along the <script type="math/tex">z</script>-axis, this corresponds to a Rashba Hamiltonian <script type="math/tex"> \mathcal{H}_{\mathrm{R}} \sim \alpha(p_y \sigma_x - p_x \sigma_y) </script> and Dresselhaus Hamiltonian <script type="math/tex"> \mathcal{H}_{\mathrm{D}} \sim \beta(p_y\sigma_y - p_x\sigma_x) </script>.
+The goal will be to calculate the local density of states in the junction.</p>
+<p>An appropriate configuration file for this system would be:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># S/F bilayer with SOC</span>
+
+<span class="k">[superconductor]</span>
+  <span class="na">order:         2</span>
+  <span class="na">length:        2.5</span>
+  <span class="na">conductance_b: 0.3</span>
+
+<span class="k">[ferromagnet]</span>
+  <span class="na">order:         1</span>
+  <span class="na">length:        0.5</span>
+  <span class="na">rashba:        1.0</span>
+  <span class="na">dresselhaus:   1.0</span>
+  <span class="na">magnetization: [3,0,0]</span>
+  <span class="na">conductance_a: 0.3</span>
+</pre></div>
+
+
+<p>Save this file as e.g. <code>bilayer.conf</code>.
+Note that there is no need to define boundary conditions for the "outer" interfaces: when no material is defined there, the program will automatically select vacuum boundary conditions.
+The only thing needed to perform a selfconsistent calculation in the superconductor, is to specify a positive order for that layer (in this case 2).
+The simulation can again be performed using the <code>converge</code> program:</p>
+<div class="codehilite"><pre><span></span>converge bilayer.conf <span class="p">&amp;</span>
+</pre></div>
+
+
+<p>The simulation program will alternate between solving the Usadel equation in the two layers.
+Note that for the first few iterations, the order parameter in the superconductor is locked to <script type="math/tex">\Delta = \Delta_0</script>.
+This is because the state changes rapidly between iterations in the beginning, and selfconsistently updating the order parameter before the initial boundary conditions are approximately satisfied can slow down the convergence.
+This "bootstrap procedure" continues until the change in the Riccati parameters between iterations is below 1%.
+After that, the program start to perform proper selfconsistency iterations, where it both solves the Usadel equation and updates the order parameter.
+After each such iteration, the physical observables in the system is written to output files, making it possible to preview the results.
+Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.
+Using IFort and a modern processor, the entire simulation should require roughly 30 min to converge (using a default error tolerance of <script type="math/tex"> 10^{-8} </script> for the Riccati parameters).</p>
+<p>Once the simulation has finished, the relevant output file is <code>density.dat</code>.
+The first three columns of this file correspond to the position, energy, and the spin-independent local density of states, respectively.
+The results are easily visualized as a contour plot in Gnuplot:</p>
+<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span>  <span class="s">&#39;Position&#39;</span>
+<span class="k">set</span> <span class="nb">ylabel</span>  <span class="s">&#39;Energy&#39;</span>
+<span class="k">set</span> <span class="nb">title</span>   <span class="s">&#39;Density of states&#39;</span>
+
+<span class="k">set</span> <span class="nb">yrange</span>  <span class="p">[</span><span class="mi">-3</span><span class="o">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="k">set</span> <span class="nb">cbrange</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="k">set</span> <span class="nb">pm3d</span> <span class="n">map</span>
+<span class="k">splot</span> <span class="s">&#39;density.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="o">:</span><span class="mi">3</span>
+</pre></div>
+
+
 <h3>Nonequilibrium calculations</h3>
 <p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
 <h3>Advanced functionality</h3>
