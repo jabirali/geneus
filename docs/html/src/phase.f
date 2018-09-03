@@ -37,8 +37,8 @@ program phase_p
   ! Construct the material stack
   stack = structure()
 
-  ! Use the fixpoint method for selfconsistency iterations
-  call stack % cmap('selfconsistency', 1)
+  ! Disable convergence acceleration
+  call stack % cmap('boost', .false.)
 
   ! Find out what gap the user has initialized the system to
   init = stack % gap()

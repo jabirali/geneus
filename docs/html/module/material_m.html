@@ -136,7 +136,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 6.5% of total for modules and submodules.">215 statements</a>
+    title=" 6.6% of total for modules and submodules.">218 statements</a>
      </li> 
      
      
@@ -436,11 +436,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-equilibrium"></span>logical,</td>
+  <td><span class="anchor" id="variable-nonequilibrium"></span>logical,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>equilibrium</strong></td><td> =</td><td>.true.</td><td><p>Equilibrium?</p></td>
+  <td><strong>nonequilibrium</strong></td><td> =</td><td>.false.</td><td><p>Equilibrium?</p></td>
   
 </tr>
 
@@ -730,11 +730,25 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-selfconsistency%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-selfconsistent"></span>logical,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>selfconsistency</strong></td><td> =</td><td>2</td><td><p>Selfconsistency scheme (0 = none, 1 = fixpoint, 2 = boost)</p></td>
+  <td><strong>selfconsistent</strong></td><td> =</td><td>.true.</td><td><p>Whether to selfconsistently calculate the superconducting gap</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-boost"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>boost</strong></td><td> =</td><td>.true.</td><td><p>Whether to use convergence acceleration methods</p></td>
   
 </tr>
 

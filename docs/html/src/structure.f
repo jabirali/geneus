@@ -497,7 +497,7 @@ contains
       class(material), pointer :: ptr
       select type (ptr)
         class is (superconductor)
-          res = res .or. (allocated(ptr % zeeman)) .or. (ptr % selfconsistency > 0)
+          res = res .or. (allocated(ptr % zeeman)) .or. (ptr % selfconsistent)
         class is (ferromagnet)
           res = res .or. (allocated(ptr % zeeman))
       end select
@@ -519,7 +519,7 @@ contains
       class(material), pointer :: ptr
       select type (ptr)
         class is (superconductor)
-          if (ptr % selfconsistency > 0) then
+          if (ptr % selfconsistent) then
             num = num + 1
           end if
       end select

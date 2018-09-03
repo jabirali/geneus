@@ -430,12 +430,12 @@
 <a name="ln-161"></a>    <span class="k">call </span><span class="n">this</span> <span class="p">%</span> <span class="n">ferromagnet</span> <span class="p">%</span> <span class="n">update_posthook</span>
 <a name="ln-162"></a>
 <a name="ln-163"></a>    <span class="c">! Update the superconducting gap using fixpoint-iteration</span>
-<a name="ln-164"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span> <span class="p">%</span> <span class="n">selfconsistency</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-164"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span> <span class="p">%</span> <span class="n">selfconsistent</span><span class="p">)</span> <span class="k">then</span>
 <a name="ln-165"></a><span class="k">      call </span><span class="n">this</span> <span class="p">%</span> <span class="n">update_gap</span>
 <a name="ln-166"></a>    <span class="k">end if</span>
 <a name="ln-167"></a>
 <a name="ln-168"></a>    <span class="c">! Boost the superconducting gap using Steffensen&#39;s method</span>
-<a name="ln-169"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span> <span class="p">%</span> <span class="n">selfconsistency</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-169"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span> <span class="p">%</span> <span class="n">selfconsistent</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">this</span> <span class="p">%</span> <span class="n">boost</span><span class="p">)</span> <span class="k">then</span>
 <a name="ln-170"></a><span class="k">      call </span><span class="n">this</span> <span class="p">%</span> <span class="n">update_boost</span>
 <a name="ln-171"></a>    <span class="k">end if</span>
 <a name="ln-172"></a><span class="k">  end subroutine</span>

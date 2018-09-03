@@ -306,8 +306,8 @@
 <a name="ln-37"></a>  <span class="c">! Construct the material stack</span>
 <a name="ln-38"></a>  <span class="n">stack</span> <span class="o">=</span> <span class="n">structure</span><span class="p">()</span>
 <a name="ln-39"></a>
-<a name="ln-40"></a>  <span class="c">! Use the fixpoint method for selfconsistency iterations</span>
-<a name="ln-41"></a>  <span class="k">call </span><span class="n">stack</span> <span class="p">%</span> <span class="n">cmap</span><span class="p">(</span><span class="s1">&#39;selfconsistency&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a name="ln-40"></a>  <span class="c">! Disable convergence acceleration</span>
+<a name="ln-41"></a>  <span class="k">call </span><span class="n">stack</span> <span class="p">%</span> <span class="n">cmap</span><span class="p">(</span><span class="s1">&#39;boost&#39;</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.)</span>
 <a name="ln-42"></a>
 <a name="ln-43"></a>  <span class="c">! Find out what gap the user has initialized the system to</span>
 <a name="ln-44"></a>  <span class="n">init</span> <span class="o">=</span> <span class="n">stack</span> <span class="p">%</span> <span class="n">gap</span><span class="p">()</span>

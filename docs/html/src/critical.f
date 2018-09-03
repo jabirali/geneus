@@ -41,8 +41,8 @@ program critical_p
   ! Construct the material stack
   stack = structure()
 
-  ! Use the fixpoint method for selfconsistency iterations
-  call stack % cmap('selfconsistency', 1)
+  ! Disable convergence acceleration
+  call stack % cmap('boost', .false.)
 
   ! Initialize the stack to a barely superconducting state
   call stack % cmap('gap', initgap)

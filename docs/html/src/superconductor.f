@@ -161,12 +161,12 @@ contains
     call this % ferromagnet % update_posthook
 
     ! Update the superconducting gap using fixpoint-iteration
-    if (this % selfconsistency >= 1) then
+    if (this % selfconsistent) then
       call this % update_gap
     end if
 
     ! Boost the superconducting gap using Steffensen's method
-    if (this % selfconsistency >= 2) then
+    if (this % selfconsistent .and. this % boost) then
       call this % update_boost
     end if
   end subroutine

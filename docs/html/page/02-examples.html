@@ -10,7 +10,7 @@
     <meta name="author" content="Jabir Ali Ouassou" >
     <link rel="icon" href="../favicon.png">
 
-    <title>User guide &ndash; NEUS</title>
+    <title>Tutorial &ndash; NEUS</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -113,7 +113,7 @@
     <div class="container">
     
   <div class="row">
-    <h1>User guide</h1>
+    <h1>Tutorial</h1>
     <div class="row">
     <div class="col-lg-12">
     <div class="well well-sm" style="min-height: 40px;">
@@ -132,7 +132,7 @@
       
          <li><a href='../page/index.html'>Overview</a></li>
       
-         <li class="active">User guide</li>
+         <li class="active">Tutorial</li>
       </ol>
     </div>
     </div>
@@ -141,8 +141,115 @@
   
   <div class="row">
     <div class="col-md-9 col-md-push-3" id='text'>
-      <p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This page is still under construction.</p></div>
-<p>On this page, we should give an introduction to how to use the software...</p>
+      <h3>Introduction</h3>
+<p>In this tutorial, we demonstrate how to model some common superconducting spintronics devices using the NEUS software suite.
+The first few sections will gradually introduce basic calculations, selfconsistent calculations, and nonequilibrium calculations.
+After that, we will demonstrate some more advanced features of the configuration files, such as how to initialize a system using mathematical equations, and how to set system parameters using command-line arguments.
+Finally, we will show how to use more specialized simulation programs to calculate phase diagrams and the superconducting critical temperature.
+The instructions assume that you use Bash as your terminal shell, and have Gnuplot available for data visualization.</p>
+<h3>Basic calculations</h3>
+<p>As the first example, we consider an S/N/S Josephson junction.
+This consists of a normal-metal layer in-between two bulk superconductors, which we treat as reservoirs with fixed order parameters <script type="math/tex">\Delta = \Delta_0 e^{\pm i\pi/4}</script>.
+This produces a phase-difference <script type="math/tex">\delta\varphi = \pi/2</script> and maximizes the charge supercurrent <script type="math/tex">J_{\mathrm{e}} = J_{\mathrm{e}0} \sin(\delta\varphi)</script>.
+The normal-metal layer is assumed to have a length <script type="math/tex">L=3\xi</script>, where <script type="math/tex">\xi</script> is the superconducting coherence length.
+Finally, the interfaces are assumed to have tunneling conductances <script type="math/tex">G_{\mathrm{T}} = 0.3G_{\mathrm{N}}</script>, where <script type="math/tex">G_{\mathrm{N}}</script> is the normal-state conductance of the normal-metal layer.</p>
+<p>First, we have to write an INI-like configuration file that describes the physical system above.
+The format used for these configuration files is simple but flexible: </p>
+<ul>
+<li>Sections like <code>[material]</code> defines a new material layer in a one-dimensional nanostructure.
+    Possible materials include <code>superconductor</code>, <code>conductor</code>, <code>ferromagnet</code>, and <code>halfmetal</code>.</li>
+<li>The physical properties and numerical model used for each material is configured using key-value pairs with the syntax <code>key: value</code>.
+    Depending on the property, this can be either a boolean variable (T or F), an integer (e.g. 1), a real number (e.g. 1.0), or a real vector (e.g. [1.0,0,0]).</li>
+<li>Material properties can also be specified using mathematical functions or command-line options.
+    This functionality will be discussed in more detail later in the tutorial.</li>
+<li>Spaces are ignored by the configuration parser, and empty lines are permitted as well.
+    However, tabs are <em>not</em> permitted anywhere, and newlines are <em>not</em> permitted within a key-value pair.</li>
+<li>Everything after <code>#</code> is regarded as a comment, and ignored by the configuration parser.</li>
+</ul>
+<p>Here is a configuration file that describes the physical setup above:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># S/N/S Josephson junction</span>
+<span class="c1"># with π/2 phase difference</span>
+
+<span class="k">[superconductor]</span>
+  <span class="na">order:         0</span>
+  <span class="na">gap:           1.00</span>
+  <span class="na">phase:        +0.25</span>
+
+<span class="k">[conductor]</span>
+  <span class="na">order:         1</span>
+  <span class="na">length:        3.00</span>
+  <span class="na">conductance_a: 0.30</span>
+  <span class="na">conductance_b: 0.30</span>
+
+<span class="k">[superconductor]</span>
+  <span class="na">order:         0</span>
+  <span class="na">gap:           1.00</span>
+  <span class="na">phase:        -0.25</span>
+</pre></div>
+
+
+<p>Sections like <code>[superconductor]</code> and <code>[conductor]</code> specify that we wish to simulate an S/N/S junction.
+Below each section, the physical properties of that material layer is specified using key-value pairs.</p>
+<p>Let us first consider their physical properties.
+For the superconductors, the parameter <code>phase</code> sets the phases of the order parameters (in units of <script type="math/tex">\pi</script>), while the parameter <code>gap</code> sets the magnitude (in units of <script type="math/tex">\Delta_0</script>).
+Since <script type="math/tex">\Delta = \Delta_0</script> is the default value for superconducting layers, specifying the <code>gap</code> is in this case optional.</p>
+<p>For the normal metal, the parameters <code>conductance_a</code> and <code>conductance_b</code> define the tunneling conductance of the "left" and "right" interfaces, respectively.
+Here, "left" refers to the material defined above, and "right" the material defined below.
+These conductance values are normalized relative to the bulk conductance of the normal metal.
+The length of the material is obviously defined using the <code>length</code> parameter (in units of <script type="math/tex">\xi</script>).</p>
+<p>In addition to these physical parameters, a property <code>order</code> is used to control the numerical procedure.
+The simulation programs work by solving the Usadel diffusion equation in one layer at a time, and this property can be used to control in what order this happens.
+This is particularly useful in large multilayer structures, where some iteration orders may converge faster than others due to e.g. symmetry reasons.
+The special value 0 is used to disable simulations entirely in a material, thus making it into a reservoir.
+This is what we have done in the example above: since both superconductors have the order set to 0, they are treated as bulk reservoirs by the simulation program.
+Note that since the order defaults to 1, it is optional to define it for the normal metal here.</p>
+<p>After saving the above configuration file in a suitable folder as e.g.  <code>josephson.conf</code>, open a terminal in that directory.
+The simulation can now be started using the <code>converge</code> program:</p>
+<div class="codehilite"><pre><span></span>converge josephson.conf <span class="p">&amp;</span>
+</pre></div>
+
+
+<p>The simulation program should now run in the background.
+It will continuously write status information to the file <code>output.log</code>, while information about any errors that might occur is written to <code>error.log</code>.
+In order to track the progress of the simulation, you can use the command <code>tail</code>:</p>
+<div class="codehilite"><pre><span></span>tail -n +0 -f *.log
+</pre></div>
+
+
+<p>If you compiled the program using IFort, and have a modern processor (e.g. an Intel Core i7 in my case), the simulation should finish in less than a minute.
+During that time, it solves the Usadel equation as a function of position for 1000 energies in the range <script type="math/tex">(0,30\Delta_0)</script>.
+Physical observables such as the density of states and supercurrents are subsequently calculated from the propagators, and the results saved to DAT files.</p>
+<p>For this system, we may be especially interested in displaying the charge supercurrent in the system.
+If you have Gnuplot installed, you can visualize the results by running <code>gnuplot</code> in the terminal, and then typing:</p>
+<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
+<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Charge current&#39;</span>
+<span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">-0</span><span class="mf">.012</span><span class="o">:</span><span class="mf">0.012</span><span class="p">]</span>
+<span class="k">plot</span> <span class="s">&#39;supercurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span>
+</pre></div>
+
+
+<p>The data files are formatted using tab-separated values (TSV files), where the first two columns correspond to the position and charge current, respectively.
+If you wish to use a different visualization tool, it should be straight-forward to import the file <code>supercurrent.dat</code>, and plot the first two columns against each other.</p>
+<p>Another quantity that might be interesting for this system, is to look at the superconducting phase as a function of position.
+The file <code>correlation.dat</code> contains three data columns, which corresponds to the position, the gap magnitude, and the superconducting phase, respectively.
+Thus, this information can be plotted as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
+<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Superconducting phase&#39;</span>
+<span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">-0</span><span class="mf">.25</span><span class="o">:</span><span class="mf">0.25</span><span class="p">]</span>
+<span class="k">plot</span> <span class="s">&#39;correlation.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">3</span>
+</pre></div>
+
+
+<h3>Selfconsistent calculations</h3>
+<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<h3>Nonequilibrium calculations</h3>
+<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<h3>Advanced functionality</h3>
+<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<h3>Critical temperature</h3>
+<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<h3>Phase diagrams</h3>
+<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
     </div>
     
     <div class="col-md-3 col-md-pull-9">
@@ -160,70 +267,17 @@
             </li>
             
             <li role="presentation" class="disabled">
-            <a href='../page/./02-examples.html'>User guide</a>
+            <a href='../page/./02-examples.html'>Tutorial</a>
             
             </li>
             
             <li role="presentation">
-            <a href='../page/03-config/index.html'>Configuration files</a>
-            
-            <ul class="nav nav-stacked nav-pills">
-              
-            <li role="presentation">
-            <a href='../page/03-config/conductor.html'>Conductor</a>
+            <a href='../page/./03-config.html'>Configuration</a>
             
             </li>
             
             <li role="presentation">
-            <a href='../page/03-config/ferromagnet.html'>Ferromagnet</a>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/03-config/halfmetal.html'>Halfmetal</a>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/03-config/superconductor.html'>Superconductor</a>
-            
-            </li>
-            
-            </ul>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/04-programs/index.html'>Programs</a>
-            
-            <ul class="nav nav-stacked nav-pills">
-              
-            <li role="presentation">
-            <a href='../page/04-programs/converge.html'>Converge</a>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/04-programs/critical.html'>Critical</a>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/04-programs/phase.html'>Phase</a>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/04-programs/sweep_phase.html'>Sweep Phase</a>
-            
-            </li>
-            
-            <li role="presentation">
-            <a href='../page/04-programs/sweep_voltage.html'>Sweep Voltage</a>
-            
-            </li>
-            
-            </ul>
+            <a href='../page/./04-programs.html'>Programs</a>
             
             </li>
             
