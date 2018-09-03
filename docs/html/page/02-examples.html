@@ -298,7 +298,58 @@ The results are easily visualized as a contour plot in Gnuplot:</p>
 
 
 <h3>Nonequilibrium calculations</h3>
-<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<p>In this section, we consider a voltage-biased N/S/N junction.
+The voltage-biased contacts are used to inject a resistive charge current into the superconductor.
+Once inside the superconductor, this resistive current decays as it is converted to a supercurrent.
+Below, we intend to calculate and visualize that conversion process.
+The superconductor is taken to have length <script type="math/tex"> L_{\mathrm{S}} = 5\xi </script>, and its order parameter has to be determined selfconsistently to obtain physically reasonable results.
+Furthermore, due to the voltage bias, the system is necessarily out-of-equilibrium, which means that we also need to solve the kinetic equations numerically.
+As for the normal metals, we will treat these as reservoirs at voltages <script type="math/tex"> eV/\Delta_0 = \pm 0.1 </script>.</p>
+<p>An appropriate configuration file for the system above is:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># Voltage-biased superconductor</span>
+
+<span class="k">[conductor]</span>
+  <span class="na">order:           0</span>
+  <span class="na">voltage:        -0.1</span>
+
+<span class="k">[superconductor]</span>
+  <span class="na">order:           1</span>
+  <span class="na">nonequilibrium:  T</span>
+  <span class="na">boost:           F</span>
+  <span class="na">length:          5.0</span>
+  <span class="na">conductance_a:   0.3</span>
+  <span class="na">conductance_b:   0.3</span>
+
+<span class="k">[conductor]</span>
+  <span class="na">order:           0</span>
+  <span class="na">voltage:        +0.1</span>
+</pre></div>
+
+
+<p>Save the configuration above as <code>voltage.conf</code>, and start the simulation:</p>
+<div class="codehilite"><pre><span></span>converge voltage.conf <span class="p">&amp;</span>
+</pre></div>
+
+
+<p>By default, a convergence acceleration method is invoked every 8th selfconsistency iteration.
+For systems without phase gradients (i.e. charge supercurrents), this can speed up convergence by a factor 2-5x.
+However, for systems with such phase gradients, the convergence acceleration procedure fails miserably, and should be disabled.
+This is done by setting the parameter <code>boost</code> to false in the example above.</p>
+<p>Note that you explicitly need to set <code>nonequilibrium</code> to true in each layer where you wish to solve the out-of-equilibrium kinetic equations.
+Without this switch, the simulation program will assume that it is dealing with an equilibrium problem, and only solve the Usadel equation for the retarded propagators.</p>
+<p>The example above is among the slowest single-layer junctions you can simulate with the code: using IFort and a modern processor, it takes roughly 90 min to converge completely.
+This is because the code in general requires a large number of iterations to perform selfconsistent calculations with phase gradients, a problem that is further exacerbated by the lack of convergence acceleration.
+If you wish to perform some faster numerical experiments to explore the out-of-equilibrium functionality, I would recommend testing N/N/N systems first.</p>
+<p>Once the simulation finishes, the resistive current and supercurrent can be visualized together using Gnuplot:</p>
+<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
+<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Charge current&#39;</span>
+<span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mf">0.002</span><span class="p">]</span>
+
+<span class="k">plot</span> <span class="s">&#39;supercurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span> <span class="nb">title</span> <span class="s">&#39;Super&#39;</span><span class="o">,</span> \
+     <span class="s">&#39;lossycurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span> <span class="nb">title</span> <span class="s">&#39;Resistive&#39;</span>
+</pre></div>
+
+
 <h3>Advanced functionality</h3>
 <p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
 <h3>Critical temperature</h3>

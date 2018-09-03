@@ -172,7 +172,62 @@ The results are easily visualized as a contour plot in Gnuplot:
 
 
 ### Nonequilibrium calculations
-@TODO This section is still under construction.
+In this section, we consider a voltage-biased N/S/N junction.
+The voltage-biased contacts are used to inject a resistive charge current into the superconductor.
+Once inside the superconductor, this resistive current decays as it is converted to a supercurrent.
+Below, we intend to calculate and visualize that conversion process.
+The superconductor is taken to have length \( L_{\mathrm{S}} = 5\xi \), and its order parameter has to be determined selfconsistently to obtain physically reasonable results.
+Furthermore, due to the voltage bias, the system is necessarily out-of-equilibrium, which means that we also need to solve the kinetic equations numerically.
+As for the normal metals, we will treat these as reservoirs at voltages \( eV/\Delta_0 = \pm 0.1 \).
+
+An appropriate configuration file for the system above is:
+
+    :::ini
+    # Voltage-biased superconductor
+
+    [conductor]
+      order:           0
+      voltage:        -0.1
+
+    [superconductor]
+      order:           1
+      nonequilibrium:  T
+      boost:           F
+      length:          5.0
+      conductance_a:   0.3
+      conductance_b:   0.3
+
+    [conductor]
+      order:           0
+      voltage:        +0.1
+
+Save the configuration above as `voltage.conf`, and start the simulation:
+
+    :::bash
+    converge voltage.conf &
+
+By default, a convergence acceleration method is invoked every 8th selfconsistency iteration.
+For systems without phase gradients (i.e. charge supercurrents), this can speed up convergence by a factor 2-5x.
+However, for systems with such phase gradients, the convergence acceleration procedure fails miserably, and should be disabled.
+This is done by setting the parameter `boost` to false in the example above.
+
+Note that you explicitly need to set `nonequilibrium` to true in each layer where you wish to solve the out-of-equilibrium kinetic equations.
+Without this switch, the simulation program will assume that it is dealing with an equilibrium problem, and only solve the Usadel equation for the retarded propagators.
+
+The example above is among the slowest single-layer junctions you can simulate with the code: using IFort and a modern processor, it takes roughly 90 min to converge completely.
+This is because the code in general requires a large number of iterations to perform selfconsistent calculations with phase gradients, a problem that is further exacerbated by the lack of convergence acceleration.
+If you wish to perform some faster numerical experiments to explore the out-of-equilibrium functionality, I would recommend testing N/N/N systems first.
+
+Once the simulation finishes, the resistive current and supercurrent can be visualized together using Gnuplot:
+
+    :::gnuplot 
+    set xlabel 'Position'
+    set ylabel 'Charge current'
+    set yrange [0:0.002]
+
+    plot 'supercurrent.dat' using 1:2 title 'Super', \
+         'lossycurrent.dat' using 1:2 title 'Resistive'
+
 
 ### Advanced functionality
 @TODO This section is still under construction.
