@@ -40,7 +40,7 @@ program voltage_p
   stack = structure()
 
   ! Ensure that the voltage has an effect
-  call stack % cmap('equilibrium','F')
+  call stack % cmap('nonequilibrium','T')
 
   ! Construct the surrounding conductors
   call na % construct()

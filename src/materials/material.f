@@ -25,7 +25,7 @@ module material_m
     logical                                   :: phaselock             =  .false.              !! Lock the center-of-mass phase?
 
     ! Material properties that affect the nonequilibrium state
-    logical                                   :: equilibrium           =  .true.               !! Equilibrium?
+    logical                                   :: nonequilibrium        =  .false.              !! Equilibrium?
     logical                                   :: transverse            =  .false.              !! Transverse potential gradients?
     real(wp)                                  :: voltage               =  0.00_wp              !! Voltage (eV/Δ₀)
     real(wp)                                  :: temperature           =  0.01_wp              !! Temperature (T/Tc)
@@ -209,7 +209,7 @@ contains
     call this % update_diffusion
 
     ! Solve the kinetic equations
-    if (.not. this % equilibrium) then
+    if (this % nonequilibrium) then
       call this % update_kinetic
     end if
 
@@ -282,7 +282,10 @@ contains
       case("phaselock")
         call evaluate(val, this%phaselock)
       case("equilibrium")
-        call evaluate(val, this%equilibrium)
+        call evaluate(val, this%nonequilibrium)
+        this % nonequilibrium = .not. this % nonequilibrium
+      case("nonequilibrium")
+        call evaluate(val, this%nonequilibrium)
       case default
         call error("Unknown material option '" // key // "'.")
     end select
