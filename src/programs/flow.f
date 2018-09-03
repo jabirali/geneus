@@ -3,7 +3,7 @@
 !>
 !> This program calculates the phase-diagram of a one-dimensional superconducting structure.
 
-program phase_p
+program flow_p
   use :: structure_m
   use :: stdio_m
   use :: math_m
