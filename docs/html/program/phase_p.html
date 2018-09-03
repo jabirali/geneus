@@ -136,19 +136,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="15.9% of total for programs.">35 statements</a>
+    title="25.0% of total for programs.">55 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/phase.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/sweep_phase.f"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/phase.f.html'>phase.f</a></li>
+     <li><a href='../sourcefile/sweep_phase.f.html'>sweep_phase.f</a></li>
     
   
      <li class="active">phase_p</li>
@@ -179,17 +179,27 @@
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-stack%7E2">stack</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-stack%7E4">stack</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-bootstraps">bootstraps</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-sa">sa</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-iterations%7E2">iterations</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-sb">sb</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-threshold%7E2">threshold</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-threshold%7E4">threshold</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-flow">flow</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-tolerance%7E4">tolerance</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-init">init</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-iterations%7E3">iterations</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-phase">phase</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-current%7E2">current</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-critical%7E2">critical</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-n%7E4">n</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-m">m</a>
       
     </div>
   </div>
@@ -212,9 +222,11 @@
   <div class="list-group">
     <div id="subs-0" class="panel-collapse collapse">
       
-      <a class="list-group-item" href="../program/phase_p.html#proc-prehook%7E2">prehook</a>
+      <a class="list-group-item" href="../program/phase_p.html#proc-prehook%7E3">prehook</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#proc-finalize%7E2">finalize</a>
+      <a class="list-group-item" href="../program/phase_p.html#proc-posthook%7E2">posthook</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#proc-finalize%7E4">finalize</a>
       
     </div>
   </div>
@@ -260,7 +272,7 @@
     </div>
     
 
-    <p>This program calculates the phase-diagram of a one-dimensional superconducting structure.</p>
+    <p>This program calculates the current-phase relation of a one-dimensional superconducting structure.</p>
     
     <br>
 
@@ -276,17 +288,27 @@
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-stack%7E2">stack</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-stack%7E4">stack</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-bootstraps">bootstraps</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-sa">sa</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-iterations%7E2">iterations</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-sb">sb</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-threshold%7E2">threshold</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-threshold%7E4">threshold</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-flow">flow</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-tolerance%7E4">tolerance</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#variable-init">init</a>
+      <a class="list-group-item" href="../program/phase_p.html#variable-iterations%7E3">iterations</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-phase">phase</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-current%7E2">current</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-critical%7E2">critical</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-n%7E4">n</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#variable-m">m</a>
       
     </div>
   </div>
@@ -309,9 +331,11 @@
   <div class="list-group">
     <div id="subs-1" class="panel-collapse collapse">
       
-      <a class="list-group-item" href="../program/phase_p.html#proc-prehook%7E2">prehook</a>
+      <a class="list-group-item" href="../program/phase_p.html#proc-prehook%7E3">prehook</a>
       
-      <a class="list-group-item" href="../program/phase_p.html#proc-finalize%7E2">finalize</a>
+      <a class="list-group-item" href="../program/phase_p.html#proc-posthook%7E2">posthook</a>
+      
+      <a class="list-group-item" href="../program/phase_p.html#proc-finalize%7E4">finalize</a>
       
     </div>
   </div>
@@ -350,7 +374,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-stack%7E2"></span>type(<a href='../type/structure.html'>structure</a>)</td>
+  <td><span class="anchor" id="variable-stack%7E4"></span>type(<a href='../type/structure.html'>structure</a>)</td>
   
   
   <td></td><td>::</td>
@@ -364,25 +388,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-bootstraps"></span>integer,</td>
+  <td><span class="anchor" id="variable-sa"></span>type(<a href='../type/superconductor.html'>superconductor</a>),</td>
   
   
-  <td>parameter</td><td>::</td>
-  <td><strong>bootstraps</strong></td><td> =</td><td>10</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-iterations%7E2"></span>integer,</td>
-  
-  
-  <td>parameter</td><td>::</td>
-  <td><strong>iterations</strong></td><td> =</td><td>10</td><td></td>
+  <td>target</td><td>::</td>
+  <td><strong>sa</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -392,11 +402,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-threshold%7E2"></span>real(kind=wp),</td>
+  <td><span class="anchor" id="variable-sb"></span>type(<a href='../type/superconductor.html'>superconductor</a>),</td>
   
   
-  <td>parameter</td><td>::</td>
-  <td><strong>threshold</strong></td><td> =</td><td>1e-8_wp</td><td></td>
+  <td>target</td><td>::</td>
+  <td><strong>sb</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -406,11 +416,81 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-flow"></span>real(kind=wp)</td>
+  <td><span class="anchor" id="variable-threshold%7E4"></span>real(kind=wp),</td>
+  
+  
+  <td>parameter</td><td>::</td>
+  <td><strong>threshold</strong></td><td> =</td><td>1e-2</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-tolerance%7E4"></span>real(kind=wp),</td>
+  
+  
+  <td>parameter</td><td>::</td>
+  <td><strong>tolerance</strong></td><td> =</td><td>1e-8</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-iterations%7E3"></span>integer,</td>
+  
+  
+  <td>parameter</td><td>::</td>
+  <td><strong>iterations</strong></td><td> =</td><td>51</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-phase"></span>real(kind=wp),</td>
+  
+  
+  <td>dimension(:), allocatable</td><td>::</td>
+  <td><strong>phase</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-current%7E2"></span>real(kind=wp),</td>
+  
+  
+  <td>dimension(:), allocatable</td><td>::</td>
+  <td><strong>current</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-critical%7E2"></span>real(kind=wp)</td>
   
   
   <td></td><td>::</td>
-  <td><strong>flow</strong></td><td></td><td></td><td></td>
+  <td><strong>critical</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -420,11 +500,25 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-init"></span>real(kind=wp)</td>
+  <td><span class="anchor" id="variable-n%7E4"></span>integer</td>
   
   
   <td></td><td>::</td>
-  <td><strong>init</strong></td><td></td><td></td><td></td>
+  <td><strong>n</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-m"></span>integer</td>
+  
+  
+  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -452,8 +546,8 @@
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-prehook%7E2"></span><h3>
-impure subroutine <a href='../proc/prehook%7E2.html'>prehook</a>()
+  <div class="panel-heading codesum"><span class="anchor" id="proc-prehook%7E3"></span><h3>
+impure subroutine <a href='../proc/prehook%7E3.html'>prehook</a>()
     
     
    
@@ -474,8 +568,30 @@ impure subroutine <a href='../proc/prehook%7E2.html'>prehook</a>()
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-finalize%7E2"></span><h3>
-impure subroutine <a href='../proc/finalize%7E2.html'>finalize</a>()
+  <div class="panel-heading codesum"><span class="anchor" id="proc-posthook%7E2"></span><h3>
+impure subroutine <a href='../proc/posthook%7E2.html'>posthook</a>()
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      <em>None</em>
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-finalize%7E4"></span><h3>
+impure subroutine <a href='../proc/finalize%7E4.html'>finalize</a>()
     
     
    

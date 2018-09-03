@@ -309,4 +309,54 @@ Finally, the resulting current-phase relation can be plotted using:
 @TODO This section is still under construction.
 
 ### Phase diagrams
-@TODO This section is still under construction.
+In this example, we demonstrate another specialized program `flow`, which can be used to rapidly map out the phase diagram of a superconducting system.
+The program is based on analysing the "flow" of the order parameter during selfconsistency iterations; the concept is explained in more detail in the supplemental information of [arXiv:1803.07076](https://arxiv.org/abs/1803.07076).
+The program will be illustrated using a spin-valve setup similar to the previous section.
+However, in this case we will assume zero temperature and perpendicular magnetizations, and investigate how the spin-mixing conductance \( G_\varphi \) affects the stability of superconductivity.
+
+An appropriate configuration file is:
+
+    :::ini
+    # FI/S/FI Spin-valve setup.
+
+    [superconductor]
+      # Material itself
+      gap:             0.01
+      length:          1.00
+    
+      # Left interface
+      magnetization_a: [1,0,0]
+      spinmixing_a:    {1}
+    
+      # Right interface
+      magnetization_b: [0,1,0]
+      spinmixing_b:    {1}
+
+Save the file above as e.g. `spinvalve2.conf`, and run the following commands to start the simulations:
+
+    :::bash
+    for n in $(seq 0.0 0.1 1.0); do
+      mkdir sim_${n};
+      cd sim_${n};
+      flow ../spinvalve2.conf ${n} &
+      cd ..;
+    done
+
+According to the configuration file above, the order parameter is initially set to a small value \( \Delta = 0.01\Delta_0 \).
+The simulation program then performs a fixed number of selfconsistency iterations, and determines whether the order parameter is spontaneously increasing (>1) or decreasing (<1) compared to its initial value.
+This can be used to classify regions in parameter space as having a stable or unstable superconducting solution branch.
+
+The simulations should take about 10 min to complete. 
+The results can then be collected to a single output file:
+
+    :::bash
+    cat sim_*/flow.dat | cut -f 2,3 > flow.dat
+
+They are then straight-forward to visualize in Gnuplot:
+
+    :::gnuplot
+    set xlabel 'Spin-mixing conductance'
+    set ytics ('Normal' 0, 'Super' 1)
+
+    plot 'flow.dat' u 1:($2 > 1) notitle
+

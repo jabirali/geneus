@@ -423,7 +423,53 @@ In Bash, these results can then be collected by running:</p>
 <h3>Critical temperature</h3>
 <p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
 <h3>Phase diagrams</h3>
-<p></p><div class="alert alert-success" role="alert"><h4>Todo</h4><p>This section is still under construction.</p></div>
+<p>In this example, we demonstrate another specialized program <code>flow</code>, which can be used to rapidly map out the phase diagram of a superconducting system.
+The program is based on analysing the "flow" of the order parameter during selfconsistency iterations; the concept is explained in more detail in the supplemental information of <a href="https://arxiv.org/abs/1803.07076">arXiv:1803.07076</a>.
+The program will be illustrated using a spin-valve setup similar to the previous section.
+However, in this case we will assume zero temperature and perpendicular magnetizations, and investigate how the spin-mixing conductance <script type="math/tex"> G_\varphi </script> affects the stability of superconductivity.</p>
+<p>An appropriate configuration file is:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># FI/S/FI Spin-valve setup.</span>
+
+<span class="k">[superconductor]</span>
+  <span class="c1"># Material itself</span>
+  <span class="na">gap:             0.01</span>
+  <span class="na">length:          1.00</span>
+
+  <span class="c1"># Left interface</span>
+  <span class="na">magnetization_a: [1,0,0]</span>
+  <span class="na">spinmixing_a:    {1}</span>
+
+  <span class="c1"># Right interface</span>
+  <span class="na">magnetization_b: [0,1,0]</span>
+  <span class="na">spinmixing_b:    {1}</span>
+</pre></div>
+
+
+<p>Save the file above as e.g. <code>spinvalve2.conf</code>, and run the following commands to start the simulations:</p>
+<div class="codehilite"><pre><span></span><span class="k">for</span> n in <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+  mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
+  <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
+  flow ../spinvalve2.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  <span class="nb">cd</span> ..<span class="p">;</span>
+<span class="k">done</span>
+</pre></div>
+
+
+<p>According to the configuration file above, the order parameter is initially set to a small value <script type="math/tex"> \Delta = 0.01\Delta_0 </script>.
+The simulation program then performs a fixed number of selfconsistency iterations, and determines whether the order parameter is spontaneously increasing (&gt;1) or decreasing (&lt;1) compared to its initial value.
+This can be used to classify regions in parameter space as having a stable or unstable superconducting solution branch.</p>
+<p>The simulations should take about 10 min to complete. 
+The results can then be collected to a single output file:</p>
+<div class="codehilite"><pre><span></span>cat sim_*/flow.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; flow.dat
+</pre></div>
+
+
+<p>They are then straight-forward to visualize in Gnuplot:</p>
+<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Spin-mixing conductance&#39;</span>
+<span class="k">set</span> <span class="nb">ytics</span> <span class="p">(</span><span class="s">&#39;Normal&#39;</span> <span class="mi">0</span><span class="o">,</span> <span class="s">&#39;Super&#39;</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">plot</span> <span class="s">&#39;flow.dat&#39;</span> <span class="nb">u</span> <span class="mi">1</span><span class="o">:</span><span class="p">(</span><span class="err">$</span><span class="mi">2</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="nb">notitle</span>
+</pre></div>
     </div>
     
     <div class="col-md-3 col-md-pull-9">
