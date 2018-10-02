@@ -1,6 +1,6 @@
 # GENEUS: General Non-Equilibrium Usadel Solver
 
-GENEUS (pronounced "genius") is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
+GENEUS is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
 The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-dependent scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
 The suite also contains specialized programs for calculating the critical temperature and phase diagrams of all these hybrid structures.
 The programs are built to be user-friendly: they are configured using simple configuration files, which can include mathematical expressions to initialize the physical system, and the output is easily imported in e.g. Gnuplot or Matlab.
