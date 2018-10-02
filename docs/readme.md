@@ -1,5 +1,5 @@
-project:             GNEUS
-summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/GNEUS/) for the code.
+project:             GENEUS
+summary:             Please click [here](page/index.html) for the documentation or [here](https://github.com/jabirali/GENEUS/) for the code.
 author:              Jabir Ali Ouassou
 output_dir:          ./html
 page_dir:            ./txt
