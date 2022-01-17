@@ -1,8 +1,8 @@
 #!/bin/sh
 
 case "$1" in
-  "--gfortran")
-    echo "Preparing for a compilation in RELEASE mode with GFORTRAN."
+  "--optim")
+    echo "Preparing for a compilation in RELEASE mode."
     if [ -e build ]; then
       echo "Removing the existing build directory."
       rm -r build
@@ -10,41 +10,14 @@ case "$1" in
     echo
     cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
 
-  "--ifort")
-    echo "Preparing for a compilation in RELEASE mode with IFORT."
+  "--debug")
+    echo "Preparing for a compilation in DEBUG mode."
     if [ -e build ]; then
       echo "Removing the existing build directory."
       rm -r build
     fi
     echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild    || exit 1 ;;
-
-  "--gfortran-debug")
-    echo "Preparing for a compilation in DEBUG mode with GFORTRAN." 
-    if [ -e build ]; then
-      echo "Removing the existing build directory."
-      rm -r build
-    fi
-    echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild   || exit 1 ;;
-
-  "--ifort-debug")
-    echo "Preparing for a compilation in DEBUG mode with IFORT." 
-    if [ -e build ]; then
-      echo "Removing the existing build directory."
-      rm -r build
-    fi
-    echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifort -H. -Bbuild      || exit 1 ;;
-
-  "--windows")
-    echo "Preparing for a compilation in RELEASE mode with MINGW32."
-    if [ -e build ]; then
-      echo "Removing the existing build directory."
-      rm -r build
-    fi
-    echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=x86_64-w64-mingw32-gfortran -DCMAKE_SYSTEM_NAME=Windows -H. -Bbuild || exit 1 ;;
+    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
 
   "--docs")
     echo "Preparing for generation of DOCUMENTATION with FORD."
@@ -62,12 +35,9 @@ case "$1" in
   *)
     echo
     echo "Usage:"
-    echo " $0 --gfortran         # Build in RELEASE mode using gfortran"
-    echo " $0 --ifort            # Build in RELEASE mode using ifort"
-    echo " $0 --win64            # Build in RELEASE mode using mingw32"
-    echo " $0 --gfortran-debug   # Build in DEBUG mode using gfortran"
-    echo " $0 --ifort-debug      # Build in DEBUG mode using ifort"
-    echo " $0 --doc              # Build documentation using ford"
+    echo " $0 --optim    # Build with full optimization (recommended)"
+    echo " $0 --debug    # Build with debug options (slow but stable)"
+    echo " $0 --docs     # Build the documentation (requires 'ford')"
     exit 0 ;;
 esac
 
