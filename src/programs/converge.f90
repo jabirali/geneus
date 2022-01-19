@@ -4,74 +4,68 @@
 !> This program calculates steady-state observables in a one-dimensional superconducting structure.
 
 program converge_p
-  use :: structure_m
-  use :: stdio_m
-  use :: math_m
+    use :: structure_m
+    use :: stdio_m
+    use :: math_m
 
-  !--------------------------------------------------------------------------------!
-  !                                GLOBAL VARIABLES                                !
-  !--------------------------------------------------------------------------------!
+    !--------------------------------------------------------------------------------!
+    !                                GLOBAL VARIABLES                                !
+    !--------------------------------------------------------------------------------!
 
-  ! Declare the superconducting structure
-  type(structure) :: stack
+    ! Declare the superconducting structure
+    type(structure) :: stack
 
-  ! Declare program control parameters
-  real(wp), parameter :: threshold = 1e-2
-  real(wp), parameter :: tolerance = 1e-8
+    ! Declare program control parameters
+    real(wp), parameter :: threshold = 1e-2
+    real(wp), parameter :: tolerance = 1e-8
 
+    !--------------------------------------------------------------------------------!
+    !                           INITIALIZATION PROCEDURE                             !
+    !--------------------------------------------------------------------------------!
 
+    ! Redefine stdout and stderr
+    stdout = output('output.log')
+    stderr = output('error.log')
 
-  !--------------------------------------------------------------------------------!
-  !                           INITIALIZATION PROCEDURE                             !
-  !--------------------------------------------------------------------------------!
+    ! Construct the superconducting structure
+    stack = structure()
 
-  ! Redefine stdout and stderr 
-  stdout = output('output.log')
-  stderr = output('error.log')
+    ! Define output files
+    stack%supercurrent = output('supercurrent.dat')
+    stack%lossycurrent = output('lossycurrent.dat')
+    stack%accumulation = output('accumulation.dat')
+    stack%distribution = output('distribution.dat')
+    stack%correlation = output('correlation.dat')
+    stack%magnetization = output('magnetization.dat')
+    stack%density = output('density.dat')
 
-  ! Construct the superconducting structure
-  stack = structure()
+    !--------------------------------------------------------------------------------!
+    !                            CONVERGENCE PROCEDURE                               !
+    !--------------------------------------------------------------------------------!
 
-  ! Define output files
-  stack % supercurrent  = output('supercurrent.dat')
-  stack % lossycurrent  = output('lossycurrent.dat')
-  stack % accumulation  = output('accumulation.dat')
-  stack % distribution  = output('distribution.dat')
-  stack % correlation   = output('correlation.dat')
-  stack % magnetization = output('magnetization.dat')
-  stack % density       = output('density.dat')
+    ! Non-selfconsistent bootstrap procedure
+    call stack%converge(threshold=threshold, bootstrap=.true.)
 
+    ! Selfconsistent convergence procedure
+    call stack%converge(threshold=tolerance)
 
+    ! Write out the final results
+    call finalize
 
-  !--------------------------------------------------------------------------------!
-  !                            CONVERGENCE PROCEDURE                               !
-  !--------------------------------------------------------------------------------!
-
-  ! Non-selfconsistent bootstrap procedure
-  call stack % converge(threshold = threshold, bootstrap = .true.)
-
-  ! Selfconsistent convergence procedure
-  call stack % converge(threshold = tolerance)
-
-  ! Write out the final results
-  call finalize
-
-
-
-  !--------------------------------------------------------------------------------!
-  !                                 SUBROUTINES                                    !
-  !--------------------------------------------------------------------------------!
+    !--------------------------------------------------------------------------------!
+    !                                 SUBROUTINES                                    !
+    !--------------------------------------------------------------------------------!
 
 contains
-  impure subroutine finalize
-    ! Status information
-    call status_head('STEADY STATE')
-    call status_body('State difference', stack % difference())
-    call status_body('Charge violation', stack % chargeviolation())
-    call status_foot
+    impure subroutine finalize
+        ! Status information
+        call status_head('STEADY STATE')
+        call status_body('State difference', stack%difference())
+        call status_body('Charge violation', stack%chargeviolation())
+        call status_foot
 
-    ! Close output files
-    close(stdout)
-    close(stderr)
-  end subroutine
+        ! Close output files
+        close (stdout)
+        close (stderr)
+    end subroutine
 end program
