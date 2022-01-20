@@ -380,9 +380,11 @@ contains
         else
           call status_head('CONVERGING')
         end if
-        call status_body('State difference', this % difference())
-        if (.not. bootstrap_) then
-          call status_body('Charge violation', this % chargeviolation())
+        if (n > 1) then
+          call status_body('State difference', this % difference())
+          if (.not. bootstrap_) then
+            call status_body('Charge violation', this % chargeviolation())
+          end if
         end if
         if (present(prehook)) then
           call prehook
@@ -537,7 +539,7 @@ contains
     ! Traverse all materials
     call this % fmap(check)
   contains
-    subroutine check(m)
+    recursive subroutine check(m)
       class(material), pointer :: m
       ! Accumulate the difference
       difference = max(difference, m % difference)
@@ -563,7 +565,7 @@ contains
     ! Calculate the difference between these extreme values
     difference = maximum - minimum
   contains
-    subroutine check(m)
+    recursive subroutine check(m)
       class(material), pointer :: m
       ! Determine the charge current extrema
       maximum = max(maximum, maxval(m % supercurrent(0,:) + m % lossycurrent(0,:)))
