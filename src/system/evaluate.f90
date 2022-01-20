@@ -1,7 +1,8 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Foundation
 !>
-!> This file defines functions that evaluate textual expressions as math.
+!> This module has functions that evaluate textual expressions as Fortran data.
+!> This includes functions for converting mathematical expressions as arrays.
 
 module evaluate_m
     use :: math_m
@@ -14,8 +15,8 @@ module evaluate_m
     ! Declare public interfaces
     interface evaluate
         module procedure &
-            evaluate_scalar_value, evaluate_scalar_field, &
-            evaluate_vector_value, evaluate_vector_field, &
+            evaluate_scalar_value,  evaluate_scalar_field, &
+            evaluate_vector_value,  evaluate_vector_field, &
             evaluate_logical_value, evaluate_integer_value
     end interface
 contains
@@ -48,8 +49,8 @@ contains
     !!      call evaluate_integer_value('10', output)
     !!
 
-        character(*), intent(in)  :: expression !! String-encoded integer
-        integer,      intent(out) :: value      !! Parsed expression
+        character(*), intent(in)  :: expression !! Numerical expression
+        integer,      intent(out) :: value      !! Parsed result
 
         integer :: iostat
 
@@ -70,11 +71,11 @@ contains
     !!
         use :: fparser
 
-        character(*), intent(in)  :: expression !! Scalar-valued math expression
-        real(wp),     intent(out) :: value      !! Parsed expression
+        character(*), intent(in)  :: expression !! Mathematical expression
+        real(wp),     intent(out) :: value      !! Parsed result
 
         ! Make sure the expression is non-empty
-        if (scan(expression, '0123456789pi') .le. 0) then
+        if (scan(expression, '0123456789pi') <= 0) then
             call error('Invalid scalar expression: "'//trim(expression)//'"')
         end if
 
@@ -96,14 +97,14 @@ contains
     !!
         use :: fparser
 
-        character(*),           intent(in)  :: expression !! Scalar-valued function of 'z'
-        real(wp), dimension(:), intent(in)  :: domain     !! Values for the variable 'z'
-        real(wp), dimension(:), allocatable :: value      !! Pased expression
+        character(*),           intent(in)  :: expression !! Function of 'z'
+        real(wp), dimension(:), intent(in)  :: domain     !! Values of 'z'
+        real(wp), dimension(:), allocatable :: value      !! Parsed result
 
         integer :: n
 
         ! Make sure the expression is non-empty
-        if (scan(expression, '0123456789piz') .le. 0) then
+        if (scan(expression, '0123456789piz') <= 0) then
             call error('Invalid scalar expression: "'//trim(expression)//'"')
         end if
 
@@ -130,8 +131,8 @@ contains
     !!
         use :: fparser
 
-        character(*),           intent(in)  :: expression !! Vector-valued math expression
-        real(wp), dimension(3), intent(out) :: value      !! Parsed expression
+        character(*),           intent(in)  :: expression !! Mathematical expression
+        real(wp), dimension(3), intent(out) :: value      !! Parsed result
 
         integer, dimension(4) :: sep
 
@@ -174,9 +175,9 @@ contains
     !!
         use :: fparser
 
-        character(*),              intent(in)  :: expression !! Vector-valued function 'z'
-        real(wp), dimension(:),    intent(in)  :: domain     !! Values for the variable 'z'
-        real(wp), dimension(:, :), allocatable :: value      !! Parsed expression
+        character(*),              intent(in)  :: expression !! Function of 'z'
+        real(wp), dimension(:),    intent(in)  :: domain     !! Values of 'z'
+        real(wp), dimension(:, :), allocatable :: value      !! Parsed result
 
         integer, dimension(4) :: sep
         integer               :: n
