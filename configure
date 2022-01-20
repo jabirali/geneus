@@ -2,7 +2,7 @@
 
 # Clean build directory
 if [ -e build ]; then
-	echo "Removing the existing build directory."
+	echo "-- Removing the existing build directory."
 	rm -r build
 fi
 
@@ -13,3 +13,4 @@ cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -B
 echo
 echo "Make has been initialized for compilation in the subdirectory 'build'."
 echo "You can now type 'cd build' followed by 'make' to compile the project."
+echo
