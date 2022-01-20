@@ -2,8 +2,8 @@
 !> Category: Foundation
 !>
 !> This module defines the new data type 'nambu', which represents 4×4 complex
-!> matrices in spin and Nambu space. The module overloads arithmetic operators
-!> to work with the new type, and exports relevant Pauli matrices as constants.
+!> matrices in spin and particle-hole space. It overloads arithmetic operators
+!> to work with the new type and exports relevant Pauli matrices as constants.
 
 module nambu_m
     use :: math_m
@@ -26,14 +26,20 @@ module nambu_m
             assr_rscalar, assr_cscalar, &
             assr_cmatrix, assl_cmatrix
         generic :: operator(+) => &
-            addl_rscalar, addr_rscalar, addl_cscalar, addr_cscalar, &
-            addl_cmatrix, addr_cmatrix, add_nambu
+            addl_rscalar, addr_rscalar, &
+            addl_cscalar, addr_cscalar, &
+            addl_cmatrix, addr_cmatrix, &
+            add_nambu
         generic :: operator(-) => &
-            subl_rscalar, subr_rscalar, subl_cscalar, subr_cscalar, &
-            subl_cmatrix, subr_cmatrix, sub_nambu
+            subl_rscalar, subr_rscalar, &
+            subl_cscalar, subr_cscalar, &
+            subl_cmatrix, subr_cmatrix, &
+            sub_nambu
         generic :: operator(*) => &
-            mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, &
-            mull_cmatrix, mulr_cmatrix, mul_nambu
+            mull_rscalar, mulr_rscalar, &
+            mull_cscalar, mulr_cscalar, &
+            mull_cmatrix, mulr_cmatrix, &
+            mul_nambu
         generic :: operator(/) => &
             divr_rscalar, divr_cscalar
         generic :: operator(**) => &

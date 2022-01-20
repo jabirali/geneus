@@ -1,15 +1,14 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Foundation
 !>
-!> This module defines the type 'propagator', which represents a propagator
-!> (i.e. Green's function) at a given position and energy. The equilibrium
-!> parts (retarded and advanced) are represented via the Riccati parameters
-!> γ, γ~ and their derivatives, while the nonequilibrium part (Keldysh) is
-!> represented as traces of the distribution function and its derivatives.
-!> These are together sufficient to reconstruct the full 8×8 propagator and
-!> its derivatives, and can be used to calculate associated physical quantities
-!> such as the density of states, charge currents, spin currents, heat currents,
-!> spin-heat currents, and various nonequilibrium quasiparticle accumulations.
+!> This module defines a type 'propagator' which represents a propagator (also
+!> known as a Green's function) for a given position and energy. The equilibrium
+!> parts (i.e. retarded and advanced) are represented via the Riccati parameters
+!> γ, γ~ and their derivatives, while the nonequilibrium part (i.e. Keldysh part)
+!> is represented by the traces of the distribution function and its derivatives.
+!> These are together sufficient to reconstruct the full 8×8 propagator and its
+!> derivatives, and can be used to calculate the associated physical quantities
+!> such as the density of states, charge currents, spin currents, and so on.
 
 module propagator_m
     use :: math_m
@@ -33,50 +32,53 @@ module propagator_m
         type(spin) :: Nt   !! Riccati normalization N~
 
         ! Distribution-trace parametrization of nonequilibrium propagators.
-        real(wp), dimension(0:7) :: h   = [1, 0, 0, 0, 0, 0, 0, 0] !! Distribution trace H
-        real(wp), dimension(0:7) :: dh  = [0, 0, 0, 0, 0, 0, 0, 0] !! Distribution trace ∇H
-        real(wp), dimension(0:7) :: d2h = [0, 0, 0, 0, 0, 0, 0, 0] !! Distribution trace ∇²H
+        real(wp), dimension(0:7) :: h   = [1, 0, 0, 0, 0, 0, 0, 0]              !! Distribution trace H
+        real(wp), dimension(0:7) :: dh  = [0, 0, 0, 0, 0, 0, 0, 0]              !! Distribution trace ∇H
+        real(wp), dimension(0:7) :: d2h = [0, 0, 0, 0, 0, 0, 0, 0]              !! Distribution trace ∇²H
     contains
         ! Accessors for the propagator matrices represented by this object
-        procedure :: retarded             => propagator_retarded              !! Retarded propagator Gᴿ
-        procedure :: retarded_gradient    => propagator_retarded_gradient     !! Retarded propagator ∇Gᴿ
-        procedure :: retarded_laplacian   => propagator_retarded_laplacian    !! Retarded propagator ∇²Gᴿ
+        procedure :: retarded              => propagator_retarded               !! Retarded propagator Gᴿ
+        procedure :: retarded_gradient     => propagator_retarded_gradient      !! Retarded propagator ∇Gᴿ
+        procedure :: retarded_laplacian    => propagator_retarded_laplacian     !! Retarded propagator ∇²Gᴿ
 
-        procedure :: advanced             => propagator_advanced              !! Advanced propagator Gᴬ
-        procedure :: advanced_gradient    => propagator_advanced_gradient     !! Advanced propagator ∇Gᴬ
-        procedure :: advanced_laplacian   => propagator_advanced_laplacian    !! Advanced propagator ∇²Gᴬ
+        procedure :: advanced              => propagator_advanced               !! Advanced propagator Gᴬ
+        procedure :: advanced_gradient     => propagator_advanced_gradient      !! Advanced propagator ∇Gᴬ
+        procedure :: advanced_laplacian    => propagator_advanced_laplacian     !! Advanced propagator ∇²Gᴬ
 
-        procedure :: keldysh              => propagator_keldysh               !! Keldysh propagator Gᴷ
-        procedure :: keldysh_gradient     => propagator_keldysh_gradient      !! Keldysh propagator ∇Gᴷ
+        procedure :: keldysh               => propagator_keldysh                !! Keldysh propagator Gᴷ
+        procedure :: keldysh_gradient      => propagator_keldysh_gradient       !! Keldysh propagator ∇Gᴷ
 
-        procedure :: distribution         => propagator_distribution          !! Distribution matrix H
-        procedure :: distribution_gradien => propagator_distribution_gradient !! Distribution matrix ∇H
+        procedure :: distribution          => propagator_distribution           !! Distribution matrix H
+        procedure :: distribution_gradient => propagator_distribution_gradient  !! Distribution matrix ∇H
 
         ! Accessors for derived matrices used to solve the kinetic equations
-        procedure :: dissipation          => propagator_dissipation           !! Dissipation matrix M
-        procedure :: dissipation_gradient => propagator_dissipation_gradient  !! Dissipation matrix ∇M
+        procedure :: dissipation           => propagator_dissipation            !! Dissipation matrix M
+        procedure :: dissipation_gradient  => propagator_dissipation_gradient   !! Dissipation matrix ∇M
 
-        procedure :: condensate           => propagator_condensate            !! Condensate matrix Q
-        procedure :: condensate_gradient  => propagator_condensate_gradient   !! Condensate matrix ∇Q
+        procedure :: condensate            => propagator_condensate             !! Condensate matrix Q
+        procedure :: condensate_gradient   => propagator_condensate_gradient    !! Condensate matrix ∇Q
 
-        procedure :: selfenergy1          => propagator_selfenergy1           !! Selfenergy matrix R₁
-        procedure :: selfenergy2          => propagator_selfenergy2           !! Selfenergy matrix R₂
+        procedure :: selfenergy1           => propagator_selfenergy1            !! Self-energy matrix R₁
+        procedure :: selfenergy2           => propagator_selfenergy2            !! Self-energy matrix R₂
 
         ! Accessors for physical quantities that derive from the propagators
-        procedure :: supercurrent         => propagator_supercurrent          !! Spectral supercurrents
-        procedure :: lossycurrent         => propagator_lossycurrent          !! Spectral dissipative currents
-        procedure :: accumulation         => propagator_accumulation          !! Spectral accumulations
-        procedure :: correlation          => propagator_correlation           !! Spectral correlations
-        procedure :: density              => propagator_density               !! Spin-resolved density of states
+        procedure :: supercurrent          => propagator_supercurrent           !! Spectral super currents
+        procedure :: lossycurrent          => propagator_lossycurrent           !! Spectral lossy currents
+        procedure :: accumulation          => propagator_accumulation           !! Spectral accumulations
+        procedure :: correlation           => propagator_correlation            !! Spectral correlations
+        procedure :: density               => propagator_density                !! Local density of states
 
-        ! Miscellaneous utiliy functions for working with propagator objects
-        procedure :: save                 => propagator_save                  !! Export Riccati parameters
-        procedure :: load                 => propagator_load                  !! Import Riccati parameters
+        ! Miscellaneous utility functions for working with propagator objects
+        procedure :: save                  => propagator_save                   !! Export Riccati parameters
+        procedure :: load                  => propagator_load                   !! Import Riccati parameters
     end type
 
     ! Type constructor
     interface propagator
-        module procedure propagator_construct_vacuum, propagator_construct_riccati, propagator_construct_bcs
+        module procedure &
+            propagator_construct_vacuum, &
+            propagator_construct_riccati, &
+            propagator_construct_bcs
     end interface
 contains
     pure function propagator_construct_vacuum() result(this)
@@ -105,7 +107,7 @@ contains
         if (present(dgt)) this%dgt = dgt
 
         ! Update the normalization matrices
-        associate (g => this%g, gt => this%gt, N => this%N, Nt => this%Nt)
+        associate (g  => this%g, gt  => this%gt, N  => this%N, Nt  => this%Nt)
             N  = inverse(pauli0 - g*gt)
             Nt = inverse(pauli0 - gt*g)
         end associate
@@ -165,7 +167,7 @@ contains
     !!  gauge field is specified, it returns the gauge-covariant gradient.
         class(propagator),     intent(in) :: this  !! Propagator object
         type(nambu), optional, intent(in) :: gauge !! Optional gauge field
-        type(nambu)                       :: dGR   !! Retarded propagator gradient
+        type(nambu)                       :: dGR   !! Retarded gradient
 
         ! Construct the propagator from the Riccati parameters
         associate (g  => this%g,  gt  => this%gt,  &
@@ -180,7 +182,7 @@ contains
 
         ! Construct the gauge-covariant terms
         if (present(gauge)) then
-            associate (A => gauge, GR => this%retarded(), i => (0.0_wp, 1.0_wp))
+            associate (A  => gauge, GR  => this%retarded(), i  => (0.0_wp, 1.0_wp))
                 dGR = dGR - i*(A*GR - GR*A)
             end associate
         end if
@@ -192,16 +194,16 @@ contains
     !!  @TODO:
     !!    Implement support for gauge-covariant laplacians.
         class(propagator), intent(in) :: this !! Propagator object
-        type(nambu)                   :: d2GR !! Retarded propagator laplacian
+        type(nambu)                   :: d2GR !! Retarded laplacian
 
         type(spin) :: D, Dt, dD, dDt, F, Ft, dF, dFt
 
         ! Construct the propagator from the Riccati parameters
-        associate (g   => this%g,   gt   => this%gt,   &
-                   dg  => this%dg,  dgt  => this%dgt,  &
-                   d2g => this%d2g, d2gt => this%d2gt, &
-                   N   => this%N,   Nt   => this%Nt,   &
-                   I   => pauli0,   M    => d2GR%matrix)
+        associate (g    => this%g,   gt    => this%gt,   &
+                   dg   => this%dg,  dgt   => this%dgt,  &
+                   d2g  => this%d2g, d2gt  => this%d2gt, &
+                   N    => this%N,   Nt    => this%Nt,   &
+                   I    => pauli0,   M     => d2GR%matrix)
 
             ! Calculate 1st-derivative auxiliary matrices
             D  = dg*gt + g*dgt
@@ -242,7 +244,7 @@ contains
     !!  gauge field is specified, it returns the gauge-covariant gradient.
         class(propagator),     intent(in) :: this  !! Propagator object
         type(nambu), optional, intent(in) :: gauge !! Optional gauge field
-        type(nambu)                       :: dGA   !! Advanced propagator gradient
+        type(nambu)                       :: dGA   !! Advanced gradient
 
         type(nambu) :: dGR
 
@@ -259,7 +261,7 @@ contains
     !!  @TODO:
     !!    Implement support for gauge-covariant laplacians.
         class(propagator), intent(in) :: this !! Propagator object
-        type(nambu)                   :: d2GA !! Advanced propagator laplacian
+        type(nambu)                   :: d2GA !! Advanced laplacian
 
         type(nambu) :: d2GR
 
@@ -339,14 +341,14 @@ contains
 
         ! Construct the gauge-covariant terms
         if (present(gauge)) then
-            associate (A => gauge, H => this%distribution(), i => (0.0_wp, 1.0_wp))
+            associate (A  => gauge, H  => this%distribution(), i  => (0.0_wp, 1.0_wp))
                 dH = dH - i*(A*H - H*A)
             end associate
         end if
     end function
 
     pure function propagator_supercurrent(this, gauge) result(J)
-    !!  Calculates the spectral supercurrents in the junction. The result is an
+    !!  Calculates the spectral super currents in the junction. The result is an
     !!  8-vector encoding respectively charge, spin, heat, spin-heat currents.
         class(propagator),     intent(in) :: this  !! Propagator object
         type(nambu), optional, intent(in) :: gauge !! Optional gauge field
@@ -372,11 +374,11 @@ contains
     end function
 
     pure function propagator_lossycurrent(this, gauge) result(J)
-    !!  Calculates the spectral dissipative currents in the junction. The result
-    !!  is an 8-vector containing the charge, spin, heat, and spin-heat currents.
+    !!  Calculates the spectral lossy currents in the junction. The result
+    !!  is an 8-vector containing charge, spin, heat, and spin-heat currents.
         class(propagator),     intent(in) :: this  !! Propagator object
         type(nambu), optional, intent(in) :: gauge !! Optional gauge field
-        real(wp), dimension(0:7)          :: J     !! Spectral dissipative current
+        real(wp), dimension(0:7)          :: J     !! Spectral lossy current
 
         type(nambu) :: I, dH, GR, GA
         integer     :: n
@@ -414,8 +416,8 @@ contains
     end function
 
     pure function propagator_correlation(this) result(r)
-    !!  Calculates the spectral pair-correlation function. This is useful when
-    !!  self-consistently calculating the superconducting gap in a superconductor.
+    !!  Calculates the spectral pair-correlation function. This is useful to
+    !!  self-consistently calculate the superconducting gap in a superconductor.
         class(propagator), intent(in) :: this !! Propagator object
         complex(wp)                   :: r    !! Spectral correlation
 
@@ -607,7 +609,7 @@ contains
     end function
 
     pure function propagator_selfenergy1(this, S) result(R)
-    !!  Calculates the 1st-order self-energy contribution to the kinetic equations.
+    !!  Calculates 1st-order self-energy contribution to the kinetic equations.
         class(propagator), intent(in)    :: this
         type(nambu),       intent(in)    :: S
         complex(wp), dimension(0:7, 0:7) :: R
@@ -634,7 +636,7 @@ contains
     end function
 
     pure function propagator_selfenergy2(this, S) result(R)
-    !!  Calculates the 2nd-order self-energy contribution to the kinetic equations.
+    !!  Calculates 2nd-order self-energy contribution to the kinetic equations.
         class(propagator), intent(in)    :: this
         type(nambu),       intent(in)    :: S
         complex(wp), dimension(0:7, 0:7) :: R
