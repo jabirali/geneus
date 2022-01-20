@@ -1,16 +1,16 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Programs
 !>
-!> This program calculates steady-state observables in a one-dimensional superconducting structure.
+!> Calculates general steady-state observables for a superconducting structure.
 
 program converge_p
     use :: structure_m
     use :: stdio_m
     use :: math_m
 
-    !--------------------------------------------------------------------------------!
-    !                                GLOBAL VARIABLES                                !
-    !--------------------------------------------------------------------------------!
+    !--------------------------------------------------------------------------!
+    !                                GLOBAL VARIABLES                          !
+    !--------------------------------------------------------------------------!
 
     ! Declare the superconducting structure
     type(structure) :: stack
@@ -19,53 +19,44 @@ program converge_p
     real(wp), parameter :: threshold = 1e-2
     real(wp), parameter :: tolerance = 1e-8
 
-    !--------------------------------------------------------------------------------!
-    !                           INITIALIZATION PROCEDURE                             !
-    !--------------------------------------------------------------------------------!
-
-    ! Redefine stdout and stderr
-    stdout = output('output.log')
-    stderr = output('error.log')
+    !--------------------------------------------------------------------------!
+    !                           INITIALIZATION PROCEDURE                       !
+    !--------------------------------------------------------------------------!
 
     ! Construct the superconducting structure
     stack = structure()
 
     ! Define output files
-    stack%supercurrent = output('supercurrent.dat')
-    stack%lossycurrent = output('lossycurrent.dat')
-    stack%accumulation = output('accumulation.dat')
-    stack%distribution = output('distribution.dat')
-    stack%correlation = output('correlation.dat')
+    stack%supercurrent  = output('supercurrent.dat')
+    stack%lossycurrent  = output('lossycurrent.dat')
+    stack%accumulation  = output('accumulation.dat')
+    stack%distribution  = output('distribution.dat')
+    stack%correlation   = output('correlation.dat')
     stack%magnetization = output('magnetization.dat')
-    stack%density = output('density.dat')
+    stack%density       = output('density.dat')
 
-    !--------------------------------------------------------------------------------!
-    !                            CONVERGENCE PROCEDURE                               !
-    !--------------------------------------------------------------------------------!
+    !--------------------------------------------------------------------------!
+    !                            CONVERGENCE PROCEDURE                         !
+    !--------------------------------------------------------------------------!
 
-    ! Non-selfconsistent bootstrap procedure
+    ! Bootstrap procedure (not self-consistent)
     call stack%converge(threshold=threshold, bootstrap=.true.)
 
-    ! Selfconsistent convergence procedure
+    ! Convergence procedure (self-consistent)
     call stack%converge(threshold=tolerance)
 
     ! Write out the final results
-    call finalize
+    call finalize()
 
-    !--------------------------------------------------------------------------------!
-    !                                 SUBROUTINES                                    !
-    !--------------------------------------------------------------------------------!
+    !--------------------------------------------------------------------------!
+    !                                 SUBROUTINES                              !
+    !--------------------------------------------------------------------------!
 
 contains
     impure subroutine finalize
-        ! Status information
         call status_head('STEADY STATE')
         call status_body('State difference', stack%difference())
         call status_body('Charge violation', stack%chargeviolation())
-        call status_foot
-
-        ! Close output files
-        close (stdout)
-        close (stderr)
+        call status_foot()
     end subroutine
 end program
