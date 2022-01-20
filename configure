@@ -1,46 +1,15 @@
 #!/bin/sh
 
-case "$1" in
-  "--optim")
-    echo "Preparing for a compilation in RELEASE mode."
-    if [ -e build ]; then
-      echo "Removing the existing build directory."
-      rm -r build
-    fi
-    echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
+# Clean build directory
+if [ -e build ]; then
+	echo "Removing the existing build directory."
+	rm -r build
+fi
 
-  "--debug")
-    echo "Preparing for a compilation in DEBUG mode."
-    if [ -e build ]; then
-      echo "Removing the existing build directory."
-      rm -r build
-    fi
-    echo
-    cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1 ;;
+# Generate new makefile
+cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1
 
-  "--docs")
-    echo "Preparing for generation of DOCUMENTATION with FORD."
-    echo
-    cd docs
-    if [ -e html ]; then
-      echo "Removing the existing HTML documentation."
-      rm -r html
-    fi
-    ford readme.md || exit 1
-    echo "Documentation has been generated in the subdirectory 'docs'."
-    echo "You can now open 'docs/html/index.html' in your web browser."
-    exit 0 ;;
-
-  *)
-    echo
-    echo "Usage:"
-    echo " $0 --optim    # Build with full optimization (recommended)"
-    echo " $0 --debug    # Build with debug options (slow but stable)"
-    echo " $0 --docs     # Build the documentation (requires 'ford')"
-    exit 0 ;;
-esac
-
+# Instructions for users
 echo
 echo "Make has been initialized for compilation in the subdirectory 'build'."
 echo "You can now type 'cd build' followed by 'make' to compile the project."
