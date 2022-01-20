@@ -1,7 +1,8 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Foundation
 !>
-!> This file defines functions that perform some common matrix operations.
+!> This module implements standard operations from linear algebra, including
+!> including matrix construction, inversion, commutation, and taking traces.
 
 module matrix_m
     use :: basic_m
@@ -30,7 +31,7 @@ contains
     end function
 
     pure function matrix_inverse_cx(A) result(R)
-    !!  Inverts a square matrix via Gauss-Jordan elimination with partial pivoting
+    !!  Inverts a square matrix via Gauss-Jordan elimination with partial pivot
     !!  (general) or a cofactoring algorithm (2x2 matrices). The implementation
     !!  is based on Algorithm #2 in "Efficient matrix inversion via Gauss-Jordan
     !!  elimination and its parallelization" by E.S. Quintana et al. (1998).
@@ -42,44 +43,44 @@ contains
         integer     :: i, j
 
         select case (size(A, 1))
-        case (1)
-            ! Trivial case
-            R(1, 1) = 1/A(1, 1)
+            case (1)
+                ! Trivial case
+                R(1, 1) = 1/A(1, 1)
 
-        case (2)
-            ! Inverse determinant
-            Q = 1/(A(1, 1)*A(2, 2) - A(1, 2)*A(2, 1))
+            case (2)
+                ! Inverse determinant
+                Q = 1/(A(1, 1)*A(2, 2) - A(1, 2)*A(2, 1))
 
-            ! Inverse matrix
-            R(1, 1) = +Q*A(2, 2)
-            R(2, 1) = -Q*A(2, 1)
-            R(1, 2) = -Q*A(1, 2)
-            R(2, 2) = +Q*A(1, 1)
+                ! Inverse matrix
+                R(1, 1) = +Q*A(2, 2)
+                R(2, 1) = -Q*A(2, 1)
+                R(1, 2) = -Q*A(1, 2)
+                R(2, 2) = +Q*A(1, 1)
 
-        case default
-            ! Permutation array
-            P = [(i, i=1, size(A, 1))]
+            case default
+                ! Permutation array
+                P = [(i, i=1, size(A, 1))]
 
-            ! Matrix copy
-            R = A
+                ! Matrix copy
+                R = A
 
-            ! Matrix inversion
-            do i = 1, size(A, 1)
-                ! Pivoting procedure
-                j = (i - 1) + maxloc(abs(A(i:, i)), 1)
-                P([i, j])    = P([j, i])
-                R([i, j], :) = R([j, i], :)
+                ! Matrix inversion
+                do i = 1, size(A, 1)
+                    ! Pivoting procedure
+                    j = (i - 1) + maxloc(abs(A(i:, i)), 1)
+                    P([i, j])    = P([j, i])
+                    R([i, j], :) = R([j, i], :)
 
-                ! Jordan transformation
-                Q = R(i, i)
-                R(:, i) = [R(:i-1, i), (0.0_wp, 0.0_wp), R(i+1:, i)]/(-Q)
+                    ! Jordan transformation
+                    Q = R(i, i)
+                    R(:, i) = [R(:i-1, i), (0.0_wp, 0.0_wp), R(i+1:, i)]/(-Q)
 
-                R = R + matmul(R(:, [i]), R([i], :))
-                R(i, :) = [R(i, :i-1), (1.0_wp, 0.0_wp), R(i, i+1:)]/(+Q)
-            end do
+                    R = R + matmul(R(:, [i]), R([i], :))
+                    R(i, :) = [R(i, :i-1), (1.0_wp, 0.0_wp), R(i, i+1:)]/(+Q)
+                end do
 
-            ! Pivot inversion
-            R(:, P) = R
+                ! Pivot inversion
+                R(:, P) = R
         end select
     end function
 
