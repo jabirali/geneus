@@ -134,7 +134,7 @@ module spin_m
     type(spin), parameter :: pauli3 = &
         spin(reshape([(1, 0), (0, 0),  (0, 0), (-1, 0)], [2, 2], order=[2, 1]))
 
-    type(spin), parameter, dimension(0:3) :: pauli =
+    type(spin), parameter, dimension(0:3) :: pauli = &
         [pauli0, pauli1, pauli2, pauli3]
 contains
 
