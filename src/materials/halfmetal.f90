@@ -101,7 +101,7 @@ contains
     rt % matrix(2,1)  = p % gt % matrix(2,1)
   end subroutine
 
-  impure subroutine halfmetal_update_prehook(this)
+  impure recursive subroutine halfmetal_update_prehook(this)
     !! Code to execute before running the update method of a class(halfmetal) object.
     class(halfmetal), intent(inout) :: this
 
@@ -131,7 +131,7 @@ contains
     this%type_string = color_red // 'HALFMETAL' // color_none
   end subroutine
 
-  impure subroutine halfmetal_update_posthook(this)
+  impure recursive subroutine halfmetal_update_posthook(this)
     !! Code to execute after running the update method of a class(halfmetal) object.
     class(halfmetal), intent(inout) :: this
     real(wp)                        :: error

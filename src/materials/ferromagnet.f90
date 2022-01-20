@@ -124,7 +124,7 @@ contains
     end if
   end subroutine
 
-  impure subroutine ferromagnet_update_prehook(this)
+  impure recursive subroutine ferromagnet_update_prehook(this)
     !! Updates the exchange field terms in the diffusion equation.
     class(ferromagnet), intent(inout)     :: this          ! Ferromagnet object that will be updated
     real(wp), allocatable, dimension(:,:) :: interpolation ! High-resolution magnetization interpolation

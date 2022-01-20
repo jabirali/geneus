@@ -272,7 +272,7 @@ contains
     Cb = -Cb
   end subroutine
 
-  impure subroutine conductor_update_prehook(this)
+  impure recursive subroutine conductor_update_prehook(this)
     !! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
  
@@ -297,7 +297,7 @@ contains
     this % type_string = color_yellow // 'CONDUCTOR' // color_none
   end subroutine
 
-  impure subroutine conductor_update_posthook(this)
+  impure recursive subroutine conductor_update_posthook(this)
     !! Code to execute after running the update method of a class(conductor) object.
     !! In particular, this function calculates supercurrents, dissipative currents,
     !! accumulations, and density of states, and stores the results in the object.

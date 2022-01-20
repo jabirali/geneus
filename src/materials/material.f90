@@ -179,7 +179,7 @@ contains
   !                    IMPLEMENTATION OF STATE UPDATE METHODS                      !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine material_update(this, bootstrap)
+  impure recursive subroutine material_update(this, bootstrap)
     !! This subroutine updates the state of the material by solving the diffusion 
     !! equations for the equilibrium propagators, the kinetic equations for the 
     !! nonequilibrium propagators, and then calculating physical observables.

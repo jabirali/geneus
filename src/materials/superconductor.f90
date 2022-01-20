@@ -142,7 +142,7 @@ contains
     R = R + Gp % selfenergy1(S)
   end subroutine
 
-  impure subroutine superconductor_update_prehook(this)
+  impure recursive subroutine superconductor_update_prehook(this)
     !! Code to execute before running the update method of a class(superconductor) object.
     class(superconductor), intent(inout) :: this
 
@@ -153,7 +153,7 @@ contains
     this % type_string = color_green // 'SUPERCONDUCTOR' // color_none
   end subroutine
 
-  impure subroutine superconductor_update_posthook(this)
+  impure recursive subroutine superconductor_update_posthook(this)
     !! Updates the superconducting order parameter based on the propagators of the system.
     class(superconductor), intent(inout) :: this
 
@@ -171,7 +171,7 @@ contains
     end if
   end subroutine
 
-  impure subroutine superconductor_update_gap(this)
+  impure recursive subroutine superconductor_update_gap(this)
     !! Interpolate the superconducting correlations Δ(z) to a higher resolution,
     !! to make the calculations more stable near strong ferromagnetic materials.
     class(superconductor), intent(inout)        :: this       !! Superconductor object
@@ -194,7 +194,7 @@ contains
     end if
   end subroutine
 
-  impure subroutine superconductor_update_boost(this)
+  impure recursive subroutine superconductor_update_boost(this)
     !! Boost the convergence of the order parameter using Steffensen's method.
     !!
     !! The basic idea is that a selfconsistent solution of the Usadel equations can be

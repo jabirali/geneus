@@ -304,7 +304,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_update(this, bootstrap)
+  impure recursive subroutine structure_update(this, bootstrap)
     !! Updates the state of the entire multilayer stack.
     class(structure), target   :: this
     logical,          optional :: bootstrap
@@ -415,7 +415,7 @@ contains
     end if
   end subroutine
 
-  impure subroutine structure_update_prehook(this)
+  impure recursive subroutine structure_update_prehook(this)
     !! Silently execute all update prehooks.
     class(structure) :: this
 
@@ -440,7 +440,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_update_posthook(this)
+  impure recursive subroutine structure_update_posthook(this)
     !! Silently execute all update posthooks.
     class(structure) :: this
 
