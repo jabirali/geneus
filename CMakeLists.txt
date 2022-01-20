@@ -76,13 +76,11 @@ endforeach()
 
 # Customize build flags
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
-  # Extra debug info
   set(CMAKE_Fortran_FLAGS    "-march=native -Og -g -pg -fbacktrace")
   set(CMAKE_EXE_LINKER_FLAGS "-march=native -Og -fwhole-program -static")
 else(CMAKE_BUILD_TYPE MATCHES "Release")
-  # Full optimization
-  set(CMAKE_Fortran_FLAGS    "-march=native -flto -Ofast -fno-stack-arrays -s")
-  set(CMAKE_EXE_LINKER_FLAGS "-march=native -flto -Ofast -fwhole-program -static")
+  set(CMAKE_Fortran_FLAGS    "-march=native -O2 -s")
+  set(CMAKE_EXE_LINKER_FLAGS "-march=native -O2 -fwhole-program -static")
 endif()
 
 # Print the results
