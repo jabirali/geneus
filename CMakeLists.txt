@@ -17,8 +17,8 @@ endif()
 
 # Customize the compile and linking options.
 set(EXECUTABLE_OUTPUT_PATH "../bin/")
-set(CMAKE_Fortran_FLAGS    "-march=native -O2 -frecursive -fno-strict-aliasing -g -pg -fbacktrace")
-set(CMAKE_EXE_LINKER_FLAGS "-march=native -O2 -frecursive -fno-strict-aliasing -static -static-libgfortran")
+set(CMAKE_Fortran_FLAGS    "-march=native -Og -frecursive -fno-strict-aliasing -g -pg -fbacktrace")
+set(CMAKE_EXE_LINKER_FLAGS "-march=native -Og -frecursive -fno-strict-aliasing -static -static-libgfortran")
 
 # Customize the compile flags per source type.
 file(GLOB lib77 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/*.f")
