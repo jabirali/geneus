@@ -1,7 +1,8 @@
 !> Author:   Jabir Ali Ouassou
 !> Category: Foundation
 !>
-!> This file defines functions that perform some common calculus operations.
+!> This module defines some functions that perform common calculus operations,
+!> including differentiating, integrating, and interpolating discretized data.
 
 module calculus_m
     use :: basic_m
@@ -33,8 +34,8 @@ contains
     pure function differentiate_array_re(x, y) result(r)
     !!  Calculates the numerical derivative of an array y wrt. x using central
     !!  differences at the interior points and forward/backward differences at
-    !!  the exterior points. All 3 approaches yield two-point approximations
-    !!  of the derivative, so the mesh spacing does not have to be uniform.
+    !!  the exterior points. All three approaches yield two-point approximations
+    !!  of the derivatives, thus the mesh spacing does not have to be uniform.
         real(wp), dimension(:),       intent(in) :: x !! Variable x
         real(wp), dimension(size(x)), intent(in) :: y !! Function y(x)
         real(wp), dimension(size(x))             :: r !! Derivative dy/dx
@@ -121,7 +122,7 @@ contains
         complex(wp)                                 :: r !! Integral ∫y(x)·dx
 
         ! Integrate the real and imaginary parts separately
-        ! TODO: Replace this with two sequental integrations.
+        ! TODO: Replace this with two sequential integrations.
         r = cx(integrate_range_re(x, re(y), a, b), &
                integrate_range_re(x, im(y), a, b))
     end function
@@ -159,7 +160,7 @@ contains
         complex(wp), dimension(size(p))             :: r !! Interpolation y(p)
 
         ! Interpolate the real and imaginary parts separately
-        ! TODO: Replace this with two sequental interpolations.
+        ! TODO: Replace this with two sequential interpolations.
         r = cx(interpolate_array_re(x, re(y), p), &
                interpolate_array_re(x, im(y), p))
     end function
@@ -190,7 +191,7 @@ contains
         complex(wp), dimension(1) :: rs
 
         ! Perform the interpolation
-        ! TODO: Replace this with two sequental interpolations.
+        ! TODO: Replace this with two sequential interpolations.
         rs = cx(interpolate_array_re(x, re(y), [p]), &
                 interpolate_array_re(x, im(y), [p]))
 
