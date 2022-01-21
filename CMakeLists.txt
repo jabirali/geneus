@@ -1,4 +1,5 @@
 # This file is used by `cmake` to generate a `Makefile` for the project.
+# It is recommended that you use the `configure` script to invoke `cmake`.
 
 # Project metadata.
 project(GENEUS Fortran)
