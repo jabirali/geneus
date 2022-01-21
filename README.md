@@ -1,7 +1,8 @@
 # GENEUS: General Non-Equilibrium Usadel Solver
 
-You are currently viewing an EXPERIMENTAL branch, which is not recommended for
-production use. Please checkout the `master` branch for the stable version.
+You are currently viewing an EXPERIMENTAL branch, which will eventually
+become GENEUS v2. This branch is not recommended for production use.
+Please see the `master` branch for the stable version (GENEUS v1).
 
 ## Quick start
 You need an up-to-date installation of GNU/Linux with GFortran and CMake
