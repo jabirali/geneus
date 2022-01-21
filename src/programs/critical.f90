@@ -84,12 +84,12 @@ program critical_p
     !--------------------------------------------------------------------------!
 
 contains
-    impure subroutine prehook
+    subroutine prehook
         call status_body('Temperature', critical)
         call status_body('Bisection', n)
     end subroutine
 
-    impure subroutine finalize
+    subroutine finalize
         call status_head('CRITICAL TEMPERATURE')
         call status_body('Result', critical)
         call status_foot()

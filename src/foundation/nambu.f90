@@ -261,7 +261,7 @@ contains
     !                     SPECIFIC MULTIPLICATION PROCEDURES                   !
     !--------------------------------------------------------------------------!
 
-    elemental pure function nambu_mul_nambu(this, other) result(r)
+    elemental function nambu_mul_nambu(this, other) result(r)
     !!  Defines multiplication of two nambu matrices.
         class(nambu), intent(in) :: this
         class(nambu), intent(in) :: other
@@ -350,7 +350,7 @@ contains
     !                        SPECIFIC ADDITION PROCEDURES                      !
     !--------------------------------------------------------------------------!
 
-    elemental pure function nambu_add_nambu(this, other) result(r)
+    elemental function nambu_add_nambu(this, other) result(r)
     !!  Defines addition of two nambu matrices.
         class(nambu), intent(in) :: this
         class(nambu), intent(in) :: other
@@ -417,7 +417,7 @@ contains
     !                       SPECIFIC SUBTRACTION PROCEDURES                    !
     !--------------------------------------------------------------------------!
 
-    elemental pure function nambu_sub_nambu(this, other) result(r)
+    elemental function nambu_sub_nambu(this, other) result(r)
     !!  Defines subtraction of two nambu matrices.
         class(nambu), intent(in) :: this
         class(nambu), intent(in) :: other
@@ -484,7 +484,7 @@ contains
     !                                MATRIX ALGEBRA                            !
     !--------------------------------------------------------------------------!
 
-    elemental pure function nambu_conjg(this) result(r)
+    elemental function nambu_conjg(this) result(r)
     !!  Calculates the complex conjugate of the nambu matrix.
         class(nambu), intent(in) :: this
         type(nambu)              :: r
@@ -492,7 +492,7 @@ contains
         r%matrix = conjg(this%matrix)
     end function
 
-    elemental pure function nambu_trace(this) result(r)
+    elemental function nambu_trace(this) result(r)
     !!  Calculates the trace of the nambu matrix.
         class(nambu), intent(in) :: this
         complex(wp)              :: r

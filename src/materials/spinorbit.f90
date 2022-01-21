@@ -41,7 +41,7 @@ contains
     this % field = spin(0)
   end function
 
-  impure recursive subroutine spinorbit_update_prehook(this)
+  subroutine spinorbit_update_prehook(this)
     !! Updates the internal variables associated with spin-orbit coupling.
     class(spinorbit), intent(inout) :: this 
 

@@ -263,7 +263,7 @@ contains
     !                     SPECIFIC MULTIPLICATION PROCEDURES                   !
     !--------------------------------------------------------------------------!
 
-    elemental pure function spin_mul_spin(this, other) result(r)
+    elemental function spin_mul_spin(this, other) result(r)
     !!  Defines multiplication of two spin matrices.
         class(spin), intent(in) :: this
         class(spin), intent(in) :: other
@@ -352,7 +352,7 @@ contains
     !                        SPECIFIC ADDITION PROCEDURES                      !
     !--------------------------------------------------------------------------!
 
-    elemental pure function spin_add_spin(this, other) result(r)
+    elemental function spin_add_spin(this, other) result(r)
     !!  Defines addition of two spin matrices.
         class(spin), intent(in) :: this
         class(spin), intent(in) :: other
@@ -419,7 +419,7 @@ contains
     !                       SPECIFIC SUBTRACTION PROCEDURES                    !
     !--------------------------------------------------------------------------!
 
-    elemental pure function spin_sub_spin(this, other) result(r)
+    elemental function spin_sub_spin(this, other) result(r)
     !!  Defines subtraction of two spin matrices.
         class(spin), intent(in) :: this
         class(spin), intent(in) :: other
@@ -486,7 +486,7 @@ contains
     !                                MATRIX ALGEBRA                            !
     !--------------------------------------------------------------------------!
 
-    elemental pure function spin_norm(this) result(r)
+    elemental function spin_norm(this) result(r)
     !!  Calculate the Frobenius norm of the spin matrix.
         class(spin), intent(in) :: this
         real(wp)                :: r, w(8)
@@ -495,7 +495,7 @@ contains
         r = norm2(w)
     end function
 
-    elemental pure function spin_conjg(this) result(r)
+    elemental function spin_conjg(this) result(r)
     !!  Calculate the complex conjugate of the spin matrix.
         class(spin), intent(in) :: this
         type(spin)              :: r
@@ -503,7 +503,7 @@ contains
         r%matrix = conjg(this%matrix)
     end function
 
-    elemental pure function spin_trace(this) result(r)
+    elemental function spin_trace(this) result(r)
     !!  Calculate the trace of the spin matrix.
         class(spin), intent(in) :: this
         complex(wp)             :: r

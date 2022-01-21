@@ -124,7 +124,7 @@ contains
     end if
   end subroutine
 
-  impure recursive subroutine ferromagnet_update_prehook(this)
+  subroutine ferromagnet_update_prehook(this)
     !! Updates the exchange field terms in the diffusion equation.
     class(ferromagnet), intent(inout)     :: this          ! Ferromagnet object that will be updated
     real(wp), allocatable, dimension(:,:) :: interpolation ! High-resolution magnetization interpolation
@@ -176,7 +176,7 @@ contains
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine ferromagnet_conf(this, key, val)
+  subroutine ferromagnet_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     use :: evaluate_m
 

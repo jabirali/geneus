@@ -21,7 +21,7 @@ module basic_m
     real(wp), parameter :: eps = epsilon(1.0_wp)     !! Infinitesimal
     real(wp), parameter :: pi  = atan(1.0_wp)*4.0_wp !! Circle constant
 contains
-    pure elemental function re(z) result(x)
+    elemental function re(z) result(x)
     !!  Returns the real part of a complex number z=x+iy.
     !!
     !!  @NOTE:
@@ -32,7 +32,7 @@ contains
         x = real(z, kind=wp)
     end function
 
-    pure elemental function im(z) result(y)
+    elemental function im(z) result(y)
     !!  Returns the imaginary part of a complex number z=x+iy.
     !!
     !!  @NOTE:
@@ -43,7 +43,7 @@ contains
         y = aimag(z)
     end function
 
-    pure elemental function cx(x, y) result(z)
+    elemental function cx(x, y) result(z)
     !!  Returns the complex number z=x+iy.
     !!
     !!  @NOTE:
@@ -59,7 +59,7 @@ contains
         end if
     end function
 
-    pure elemental function arg(z) result(t)
+    elemental function arg(z) result(t)
     !!  Returns the complex argument θ of a complex number z=r·exp(iθ).
     !!
     !!  @NOTE:

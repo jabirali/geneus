@@ -62,12 +62,12 @@ program flow_p
     !--------------------------------------------------------------------------!
 
 contains
-    impure subroutine prehook
+    subroutine prehook
         flow = stack%gap()/init
         call status_body('Gap flow', flow)
     end subroutine
 
-    impure subroutine finalize
+    subroutine finalize
         call status_head('PHASE DIAGRAM')
         call status_body('Gap flow', flow)
         call status_foot()

@@ -42,7 +42,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine superconductor_construct(this)
+  subroutine superconductor_construct(this)
     !! Constructs a superconducting material that is initialized to a superconducting state.
     class(superconductor), intent(inout) :: this
 
@@ -62,7 +62,7 @@ contains
     call linspace(this % gap_location, this % location(1), this % location(size(this % location)))
   end subroutine
 
-  impure subroutine superconductor_initialize(this)
+  subroutine superconductor_initialize(this)
     !! Redefine the default initializer.
     class(superconductor), intent(inout) :: this
     integer                              :: info
@@ -142,7 +142,7 @@ contains
     R = R + Gp % selfenergy1(S)
   end subroutine
 
-  impure recursive subroutine superconductor_update_prehook(this)
+  subroutine superconductor_update_prehook(this)
     !! Code to execute before running the update method of a class(superconductor) object.
     class(superconductor), intent(inout) :: this
 
@@ -153,7 +153,7 @@ contains
     this % type_string = color_green // 'SUPERCONDUCTOR' // color_none
   end subroutine
 
-  impure recursive subroutine superconductor_update_posthook(this)
+  subroutine superconductor_update_posthook(this)
     !! Updates the superconducting order parameter based on the propagators of the system.
     class(superconductor), intent(inout) :: this
 
@@ -171,7 +171,7 @@ contains
     end if
   end subroutine
 
-  impure recursive subroutine superconductor_update_gap(this)
+  subroutine superconductor_update_gap(this)
     !! Interpolate the superconducting correlations Δ(z) to a higher resolution,
     !! to make the calculations more stable near strong ferromagnetic materials.
     class(superconductor), intent(inout)        :: this       !! Superconductor object
@@ -194,7 +194,7 @@ contains
     end if
   end subroutine
 
-  impure recursive subroutine superconductor_update_boost(this)
+  subroutine superconductor_update_boost(this)
     !! Boost the convergence of the order parameter using Steffensen's method.
     !!
     !! The basic idea is that a selfconsistent solution of the Usadel equations can be
@@ -298,7 +298,7 @@ contains
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine superconductor_conf(this, key, val)
+  subroutine superconductor_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     use :: evaluate_m
 

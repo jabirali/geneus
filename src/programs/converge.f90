@@ -53,7 +53,7 @@ program converge_p
     !--------------------------------------------------------------------------!
 
 contains
-    impure subroutine finalize
+    subroutine finalize
         call status_head('STEADY STATE')
         call status_body('State difference', stack%difference())
         call status_body('Charge violation', stack%chargeviolation())

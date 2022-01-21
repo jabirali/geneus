@@ -90,16 +90,16 @@ program phase_p
     !--------------------------------------------------------------------------!
 
 contains
-    impure subroutine prehook
+    subroutine prehook
         call status_body('Phase difference', phase(n))
     end subroutine
 
-    impure subroutine posthook
+    subroutine posthook
         character(len=5) :: filename
         write (filename, '(f5.3)') phase(n)
     end subroutine
 
-    impure subroutine finalize
+    subroutine finalize
         call status_head('CRITICAL CURRENT')
         call status_body('Result', critical)
         call status_foot()

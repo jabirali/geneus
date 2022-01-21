@@ -93,16 +93,16 @@ program voltage_p
     !--------------------------------------------------------------------------!
 
 contains
-    impure subroutine prehook
+    subroutine prehook
         call status_body('Voltage difference', voltage(n))
     end subroutine
 
-    impure subroutine posthook
+    subroutine posthook
         character(len=5) :: filename
         write (filename, '(f5.3)') voltage(n)
     end subroutine
 
-    impure subroutine finalize
+    subroutine finalize
         call dump('current.dat', [voltage, current], ['Voltage           ', 'Charge current    '])
     end subroutine
 end program

@@ -32,7 +32,7 @@ module spinscattering_m
     module procedure spinscattering_construct
   end interface
 contains
-  impure function spinscattering_construct(parent) result(this)
+  function spinscattering_construct(parent) result(this)
     !! Constructs a spinscattering object with a given parent material.
     type(spinscattering)    :: this
     class(material), target :: parent

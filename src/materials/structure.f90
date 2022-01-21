@@ -76,7 +76,7 @@ module structure_m
     end subroutine
   end interface
 contains
-  impure subroutine structure_push(this, string)
+  subroutine structure_push(this, string)
     !! Constructs a new class(material) object at the bottom of the multilayer stack.
     class(structure), intent(inout) :: this
     character(*),     intent(in)    :: string
@@ -119,7 +119,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_conf(this, key, val)
+  subroutine structure_conf(this, key, val)
     !! Configures the last material pushed to the multilayer stack.
     !!
     !! @TODO
@@ -146,7 +146,7 @@ contains
     end if
   end subroutine
 
-  impure subroutine structure_cmap(this, key, val)
+  subroutine structure_cmap(this, key, val)
     !! Maps a configuration option onto each element of the multilayer stack.
     class(structure), intent(inout) :: this
     character(*),     intent(in)    :: key
@@ -177,7 +177,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_fmap(this, routine, every)
+  subroutine structure_fmap(this, routine, every)
     !! Maps a subroutine onto each element of the multilayer stack.
     class(structure), target  :: this
     class(material),  pointer :: ptr
@@ -236,7 +236,7 @@ contains
     end subroutine
   end subroutine
 
-  impure function structure_gap(this) result(gap)
+  function structure_gap(this) result(gap)
     !! Obtains the mean gap in the enabled superconductor. If there are multiple such
     !! superconductors in the junction, then it returns the minimum of the mean gaps.
     class(structure), target :: this
@@ -265,7 +265,7 @@ contains
     end subroutine
   end function
 
-  impure subroutine structure_initialize(this)
+  subroutine structure_initialize(this)
     !! Initializes the state of the entire multilayer stack.
     class(structure), target  :: this
 
@@ -278,7 +278,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_save(this)
+  subroutine structure_save(this)
     !! Saves the state of the entire multilayer stack.
     class(structure), target  :: this
 
@@ -291,7 +291,7 @@ contains
     end subroutine
   end subroutine
 
-  impure subroutine structure_load(this)
+  subroutine structure_load(this)
     !! Loads the saved state of the multilayer stack.
     class(structure), target  :: this
 
@@ -304,7 +304,7 @@ contains
     end subroutine
   end subroutine
 
-  impure recursive subroutine structure_update(this, bootstrap)
+  subroutine structure_update(this, bootstrap)
     !! Updates the state of the entire multilayer stack.
     class(structure), target   :: this
     logical,          optional :: bootstrap
@@ -324,7 +324,7 @@ contains
     end subroutine 
   end subroutine
 
-  impure subroutine structure_converge(this, threshold, iterations, bootstrap, prehook, posthook)
+  subroutine structure_converge(this, threshold, iterations, bootstrap, prehook, posthook)
     !! Performs a convergence procedure, where the state of every material in the stack
     !! is repeatedly updated until the residuals drop below some specified threshold 
     !! and/or a certain number of iterations have been performed. If bootstrap is set
@@ -417,7 +417,7 @@ contains
     end if
   end subroutine
 
-  impure recursive subroutine structure_update_prehook(this)
+  subroutine structure_update_prehook(this)
     !! Silently execute all update prehooks.
     class(structure) :: this
 
@@ -442,7 +442,7 @@ contains
     end subroutine
   end subroutine
 
-  impure recursive subroutine structure_update_posthook(this)
+  subroutine structure_update_posthook(this)
     !! Silently execute all update posthooks.
     class(structure) :: this
 
@@ -467,7 +467,7 @@ contains
     end subroutine
   end subroutine
  
-  impure function structure_materials(this) result(num)
+  function structure_materials(this) result(num)
     !! Checks the number of enabled materials in the multilayer stack.
     class(structure), target :: this
     integer                  :: num
@@ -484,7 +484,7 @@ contains
     end subroutine
   end function
 
-  impure function structure_selfconsistency(this) result(res)
+  function structure_selfconsistency(this) result(res)
     !! Checks whether selfconsistency iteration is required.
     class(structure), target :: this
     logical                  :: res
@@ -506,7 +506,7 @@ contains
     end subroutine
   end function
 
-  impure function structure_superconductors(this) result(num)
+  function structure_superconductors(this) result(num)
     !! Checks the number of selfconsistent superconductors in the multilayer stack.
     class(structure), target :: this
     integer                  :: num
@@ -528,7 +528,7 @@ contains
     end subroutine
   end function
 
-  impure function structure_difference(this) result(difference)
+  function structure_difference(this) result(difference)
     !! Checks how much the multilayer stack has changed recently.
     class(structure), target  :: this
     real(wp)                  :: difference
@@ -539,14 +539,14 @@ contains
     ! Traverse all materials
     call this % fmap(check)
   contains
-    recursive subroutine check(m)
+    subroutine check(m)
       class(material), pointer :: m
       ! Accumulate the difference
       difference = max(difference, m % difference)
     end subroutine
   end function
 
-  impure function structure_chargeviolation(this) result(difference)
+  function structure_chargeviolation(this) result(difference)
     !! Checks how much the charge current varies with position. Since charge current
     !! is supposed to be conserved through the junction, this provides a measure of
     !! charge conservation violation, i.e. if the solution is physically realistic.
@@ -565,7 +565,7 @@ contains
     ! Calculate the difference between these extreme values
     difference = maximum - minimum
   contains
-    recursive subroutine check(m)
+    subroutine check(m)
       class(material), pointer :: m
       ! Determine the charge current extrema
       maximum = max(maximum, maxval(m % supercurrent(0,:) + m % lossycurrent(0,:)))
@@ -573,7 +573,7 @@ contains
     end subroutine
   end function
 
-  impure subroutine structure_write(this)
+  subroutine structure_write(this)
     !! Writes physical observables to output files.
     class(structure), target  :: this
     real(wp)                  :: a, b
@@ -677,7 +677,7 @@ contains
     end subroutine
   end subroutine
 
-  impure function structure_construct() result(this)
+  function structure_construct() result(this)
     !! Constructs a multilayer stack from a configuration file.
 
     type(structure)          :: this

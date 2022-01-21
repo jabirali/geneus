@@ -36,7 +36,7 @@ module spinactive_m
     procedure :: update_prehook       => spinactive_update_prehook
   end type
 contains
-  impure recursive subroutine spinactive_update_prehook(this)
+  subroutine spinactive_update_prehook(this)
     !! Updates the internal variables associated with spin-active interfaces.
     class(spinactive), intent(inout) :: this 
   

@@ -454,7 +454,7 @@ contains
         D(4:7) = re(trace(pauli*gt))/2
     end function
 
-    pure elemental subroutine propagator_save(this, other)
+    elemental subroutine propagator_save(this, other)
     !!  Defines a function for exporting Riccati parameters.
         class(propagator), intent(inout) :: this
         class(propagator), intent(inout) :: other
@@ -470,7 +470,7 @@ contains
         other%Nt   = this%Nt
     end subroutine
 
-    pure elemental subroutine propagator_load(this, other)
+    elemental subroutine propagator_load(this, other)
     !!  Defines a function for importing Riccati parameters.
         class(propagator), intent(inout) :: this
         class(propagator), intent(inout) :: other

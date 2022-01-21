@@ -20,7 +20,7 @@ module evaluate_m
             evaluate_logical_value, evaluate_integer_value
     end interface
 contains
-    impure subroutine evaluate_logical_value(expression, value)
+    subroutine evaluate_logical_value(expression, value)
     !!  Takes a scalar logical expression as input and returns the value.
     !!
     !!  Usage:
@@ -41,7 +41,7 @@ contains
         end select
     end subroutine
 
-    impure subroutine evaluate_integer_value(expression, value)
+    subroutine evaluate_integer_value(expression, value)
     !!  Takes a scalar integer expression as input and returns the value.
     !!
     !!  Usage:
@@ -61,7 +61,7 @@ contains
         end if
     end subroutine
 
-    impure subroutine evaluate_scalar_value(expression, value)
+    subroutine evaluate_scalar_value(expression, value)
     !!  Takes a scalar mathematical expression as input and returns the value.
     !!
     !!  Usage:
@@ -87,7 +87,7 @@ contains
         value = evalf(1, [pi])
     end subroutine
 
-    impure subroutine evaluate_scalar_field(expression, domain, value)
+    subroutine evaluate_scalar_field(expression, domain, value)
     !!  Evaluates a scalar-valued function of 'z' at the provided values for 'z'.
     !!
     !!  Usage:
@@ -121,7 +121,7 @@ contains
         end do
     end subroutine
 
-    impure subroutine evaluate_vector_value(expression, value)
+    subroutine evaluate_vector_value(expression, value)
     !!  Takes a vector mathematical expression as input and returns the value.
     !!
     !!  Usage:
@@ -165,7 +165,7 @@ contains
         value(3) = evalf(3, [pi])
     end subroutine
 
-    impure subroutine evaluate_vector_field(expression, domain, value)
+    subroutine evaluate_vector_field(expression, domain, value)
     !!  Evaluates a vector-valued function of 'z' at the provided values for 'z'.
     !!
     !!  Usage:

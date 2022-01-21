@@ -29,7 +29,7 @@ module stdio_m
         module procedure dump_arrays, dump_scalar
     end interface
 contains
-    impure subroutine message(msg)
+    subroutine message(msg)
     !!  Provides a way to report a status message.
         character(*), intent(in) :: msg
 
@@ -37,7 +37,7 @@ contains
         flush (stderr)
     end subroutine
 
-    impure subroutine warning(msg)
+    subroutine warning(msg)
     !!  Provides a way to report a warning message.
         character(*), intent(in) :: msg
 
@@ -45,7 +45,7 @@ contains
         flush (stderr)
     end subroutine
 
-    impure subroutine error(msg)
+    subroutine error(msg)
     !!  Provides a way to report an error message and halt the program.
         character(*), intent(in) :: msg
 
@@ -54,7 +54,7 @@ contains
         stop
     end subroutine
 
-    impure subroutine status_head(title)
+    subroutine status_head(title)
     !!  Provides a way to write boxed status messages to standard out; in
     !!  particular, this routine writes out a boxed title with a timestamp.
         character(len=*), intent(in) :: title
@@ -85,7 +85,7 @@ contains
             '│', 'Elapsed time:', hh, ':', mm, ':', ss, '│'
     end subroutine
 
-    impure subroutine status_body(title, value)
+    subroutine status_body(title, value)
     !!  Provides a way to write boxed status messages to standard out; in
     !!  particular, this routine writes out the name and value of a variable.
         character(len=*), intent(in) :: title
@@ -108,7 +108,7 @@ contains
         end select
     end subroutine
 
-    impure subroutine status_foot()
+    subroutine status_foot()
     !!  Provides a way to write boxed status messages to standard out; in
     !!  particular, this routine writes out the bottom edge of such a box.
 
@@ -120,7 +120,7 @@ contains
         flush (unit=stdout)
     end subroutine
 
-    impure subroutine status_box(title)
+    subroutine status_box(title)
     !!  Provides a way to write boxed status messages to standard out.
         character(len=*), intent(in) :: title
 
@@ -140,7 +140,7 @@ contains
             '╘═══════════════════════════════════╛'
     end subroutine
 
-    impure function input(file) result(unit)
+    function input(file) result(unit)
     !!  Open an input file for reading.
         character(len=*), intent(in) :: file
         integer                      :: unit
@@ -154,7 +154,7 @@ contains
         end if
     end function
 
-    impure function output(file) result(unit)
+    function output(file) result(unit)
     !!  Open an output file for writing.
         character(len=*), intent(in) :: file
         integer                      :: unit
@@ -168,7 +168,7 @@ contains
         end if
     end function
 
-    impure subroutine dump_arrays(filename, arrays, header)
+    subroutine dump_arrays(filename, arrays, header)
     !!  Dump numerical arrays to an output file.
         use :: iso_fortran_env
 
@@ -199,7 +199,7 @@ contains
         close (unit=unit)
     end subroutine
 
-    impure subroutine dump_scalar(filename, scalar)
+    subroutine dump_scalar(filename, scalar)
     !!  Dump a numerical result to an output file.
         use :: iso_fortran_env
 

@@ -48,7 +48,7 @@ contains
   !                        IMPLEMENTATION OF CONSTRUCTORS                          !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine conductor_construct(this)
+  subroutine conductor_construct(this)
     !! Constructs a conductor object initialized to a superconducting state.
     class(conductor), intent(inout) :: this
 
@@ -89,7 +89,7 @@ contains
     allocate(this % spinactive_b)
   end subroutine
 
-  impure subroutine conductor_initialize(this)
+  subroutine conductor_initialize(this)
     !! Define the default initializer.
     class(conductor), intent(inout) :: this
     integer                         :: n, m
@@ -272,7 +272,7 @@ contains
     Cb = -Cb
   end subroutine
 
-  impure recursive subroutine conductor_update_prehook(this)
+  subroutine conductor_update_prehook(this)
     !! Code to execute before running the update method of a class(conductor) object.
     class(conductor), intent(inout) :: this
  
@@ -297,7 +297,7 @@ contains
     this % type_string = color_yellow // 'CONDUCTOR' // color_none
   end subroutine
 
-  impure recursive subroutine conductor_update_posthook(this)
+  subroutine conductor_update_posthook(this)
     !! Code to execute after running the update method of a class(conductor) object.
     !! In particular, this function calculates supercurrents, dissipative currents,
     !! accumulations, and density of states, and stores the results in the object.
@@ -375,7 +375,7 @@ contains
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine conductor_conf(this, key, val)
+  subroutine conductor_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     use :: evaluate_m
 

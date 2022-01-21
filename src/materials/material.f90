@@ -179,7 +179,7 @@ contains
   !                    IMPLEMENTATION OF STATE UPDATE METHODS                      !
   !--------------------------------------------------------------------------------!
 
-  impure recursive subroutine material_update(this, bootstrap)
+  subroutine material_update(this, bootstrap)
     !! This subroutine updates the state of the material by solving the diffusion 
     !! equations for the equilibrium propagators, the kinetic equations for the 
     !! nonequilibrium propagators, and then calculating physical observables.
@@ -235,7 +235,7 @@ contains
   !                      IMPLEMENTATION OF UTILITY METHODS                         !
   !--------------------------------------------------------------------------------!
 
-  impure subroutine material_conf(this, key, val)
+  subroutine material_conf(this, key, val)
     !! Configure a material property based on a key-value pair.
     use :: evaluate_m
 
@@ -291,7 +291,7 @@ contains
     end select
   end subroutine
 
-  impure subroutine material_save(this)
+  subroutine material_save(this)
     !! Save a backup of the current material state.
     class(material), intent(inout) :: this
 
@@ -304,7 +304,7 @@ contains
     call this % propagator % save(this % backup)
   end subroutine
 
-  impure subroutine material_load(this)
+  subroutine material_load(this)
     !! Load a backup of a previous material state.
     class(material), intent(inout) :: this
     integer                        :: info
