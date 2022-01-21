@@ -380,12 +380,6 @@ contains
         else
           call status_head('CONVERGING')
         end if
-        if (n > 1) then
-          call status_body('State difference', this % difference())
-          if (.not. bootstrap_) then
-            call status_body('Charge violation', this % chargeviolation())
-          end if
-        end if
         if (present(prehook)) then
           call prehook
         end if
