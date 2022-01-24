@@ -74,6 +74,7 @@ contains
         title_((len(title_) - len(title) + 1)/2:) = title
 
         ! Write out the boxed header
+        flush (unit=stdout)
         write (stdout, *)
         write (stdout, '(a)') &
             '╒═══════════════════════════════════╕'
@@ -100,11 +101,14 @@ contains
         ! TODO: Use a kind selector when that is supported.
         select type (value)
             type is (integer)
+                ! Standard integers
                 write (stdout, '(a,3x,a,i10  ,2x,a)') '│', title_, value, '│'
             type is (real)
+                ! Single-precision reals
                 write (stdout, '(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
             type is (double precision)
-                write (stdout, '(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
+                ! Double-precision reals
+                write (stdout, '(a,3x,a,g10.8,2x,a)') '│', title_, value, '│'
         end select
     end subroutine
 

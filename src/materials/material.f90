@@ -217,7 +217,6 @@ contains
     ! Status information
     if (this % information >= 0) then
       write(stdout,'(6x,a,f10.8,a)') 'Max change: ',this % difference,'                                        '
-      flush(stdout)
     end if
 
     ! Stop here if bootstrapping

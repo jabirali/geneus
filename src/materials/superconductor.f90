@@ -190,7 +190,6 @@ contains
     ! Status information
     if (this%information >= 0 .and. this%order > 0) then
       write(stdout,'(6x,a,f10.8,a,10x)') 'Gap change: ', diff
-      flush(stdout)
     end if
   end subroutine
 
@@ -257,7 +256,6 @@ contains
     ! Status information
     if (this%information >= 0 .and. this%order > 0) then
       write(stdout,'(6x,a,f10.8,a,10x)') 'Gap boost:  ', mean(abs(g-f(3)))
-      flush(stdout)
     end if
   contains
     pure function f(n) result(r)

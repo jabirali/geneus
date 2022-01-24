@@ -383,6 +383,10 @@ contains
         if (present(prehook)) then
           call prehook
         end if
+        call status_body('State difference', this % difference())
+        if (.not. bootstrap_) then
+          call status_body('Charge violation', this % chargeviolation())
+        end if
         call status_body('Iteration', n)
         call status_foot
 
