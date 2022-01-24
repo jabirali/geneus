@@ -5,11 +5,17 @@ become GENEUS v2. This branch is not recommended for production use.
 Please see the `master` branch for the stable version [GENEUS v1][v1].
 
 ## Quick start
-You need a recent version of GNU/Linux with GFortran v8.x and CMake v3.x 
-installed. If you're using e.g. Ubuntu, these can be installed via:
+You need a recent version of GNU/Linux with GFortran v8.x and CMake v3.x
+installed. Note that the code currently segfaults when compiled with
+GFortran v9.x or higher, and resolving this is still work in progress.
+Meanwhile, I would recommend that you either compile the code using an
+older GFortran version, or that you download precompiled GENEUS binaries.
+
+If you use Ubuntu, the dependencies listed above can be installed via:
 
 	sudo apt install cmake gfortran-8 gfortran-8-doc
 	sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-8 8
+
 
 After cloning the repository and opening it in a terminal, you can then
 compile the software via the following commands:
@@ -26,22 +32,19 @@ the [documentation][docs] for more information on how to use these.
 In contrast to GENEUS v1, this branch only supports a single `cmake` build
 type, a single platform (Ubuntu x86-64), and a single compiler (GFortran).
 Since the initial public release in 2018, I haven't had much time to maintain
-the code (I don't use it that much anymore), and different bugs have surfaced
-on different compilers and systems. By narrowing down the debugging to one
-compilation target, the future maintenance of GENEUS becomes easier.
+the code, and different bugs have surfaced on different compilers and systems.
+Narrowing down the debugging to one compilation target simplifies maintenance.
 
 ### Speed versus robustness
 One drawback of the above is performance. In my experience, GFortran
 produces 3-4x faster code with more aggressive compilation options (as used
-in GENEUS v1), and Intel Fortran produces 3-4x faster code than that again,
-which yields a net speedup of an order of magnitude. Thus, GENEUS v2 can be
-expected to be noticeably slower than GENEUS v1.
+in GENEUS v1), and Intel Fortran can produce 3-4x faster code than that again.
+Thus, GENEUS v2 can be up to an order of magnitude slower than v1 was.
 
-On the other hand, less aggressive options also means that I don't have 
-to test and update the code rigorously every time a new compiler version is
-released. Most things should "just work", making the code more reliable. I've
-also changed the build target from `native` to `x86-64`, while retaining a
-fully static compile system, making the binaries themselves more portable.
+On the other hand, less aggressive options also means that less rigorous
+testing is required after each compiler update. Moreover, switching the compile
+target from `native` to `x86-64` means that binaries can be shared between
+computers instead of each person having to recompile the code from scratch.
 
 ### Code style
 I've attempted to make the code conform more to the conventions used
