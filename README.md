@@ -5,10 +5,11 @@ become GENEUS v2. This branch is not recommended for production use.
 Please see the `master` branch for the stable version [GENEUS v1][v1].
 
 ## Quick start
-You need a recent version of GNU/Linux with GFortran and CMake installed.
-If you're using e.g. Ubuntu, these can be installed via:
+You need a recent version of GNU/Linux with GFortran v8.x and CMake v3.x 
+installed. If you're using e.g. Ubuntu, these can be installed via:
 
-	sudo apt install gfortran cmake
+	sudo apt install cmake gfortran-8 gfortran-8-doc
+	sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-8 8
 
 After cloning the repository and opening it in a terminal, you can then
 compile the software via the following commands:
@@ -27,7 +28,7 @@ type, a single platform (Ubuntu x86-64), and a single compiler (GFortran).
 Since the initial public release in 2018, I haven't had much time to maintain
 the code (I don't use it that much anymore), and different bugs have surfaced
 on different compilers and systems. By narrowing down the debugging to one
-compilation target, the future maintenance of GENEUS becomes much easier.
+compilation target, the future maintenance of GENEUS becomes easier.
 
 ### Speed versus robustness
 One drawback of the above is performance. In my experience, GFortran
