@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -126,25 +131,28 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p>12.6% of total for derived types.</p>Including implementation: 352 statements, 11.0% of total for derived types.">37 statements</a>
+    title="<p>12.6% of total for derived types.</p>Including implementation: 346 statements, 10.9% of total for derived types.">37 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/propagator.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/propagator.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/propagator.f.html'>propagator.f</a></li>
+     <li><a href='../sourcefile/propagator.f90.html'>propagator.f90</a></li>
     
      <li><a href='../module/propagator_m.html'>propagator_m</a></li>
     
@@ -170,38 +178,6 @@
 <h3>Contents</h3>
  
 
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
-  <div id="vars-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-g">g</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-gt">gt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-dg">dg</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-dgt">dgt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-d2g">d2g</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-d2gt">d2gt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-n">N</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-nt">Nt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-h">h</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-dh">dh</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-d2h">d2h</a>
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -308,38 +284,6 @@
 
 
 
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
-  <div id="vars-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-g">g</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-gt">gt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-dg">dg</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-dgt">dgt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-d2g">d2g</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-d2gt">d2gt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-n">N</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-nt">Nt</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-h">h</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-dh">dh</a>
-      
-      <a class="list-group-item" href="../type/propagator.html#variable-d2h">d2h</a>
-      
-    </div>
-  </div>
-</div>
-
-
 
 
 <div class="panel panel-primary">
@@ -429,178 +373,6 @@
     <br class="visible-xs visible-sm hidden-md">
 
     
-    <section>
-    <h2>Components</h2>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-g"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>g</strong></td><td></td><td></td><td><p>Riccati parameter γ</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-gt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>gt</strong></td><td></td><td></td><td><p>Riccati parameter γ~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dg"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>dg</strong></td><td></td><td></td><td><p>Riccati parameter ∇γ</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dgt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>dgt</strong></td><td></td><td></td><td><p>Riccati parameter ∇γ~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-d2g"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>d2g</strong></td><td></td><td></td><td><p>Riccati parameter ∇²γ</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-d2gt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>d2gt</strong></td><td></td><td></td><td><p>Riccati parameter ∇²γ~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-n"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>N</strong></td><td></td><td></td><td><p>Riccati normalization N</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>Nt</strong></td><td></td><td></td><td><p>Riccati normalization N~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-h"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>h</strong></td><td> =</td><td>[1, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace H</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dh"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>dh</strong></td><td> =</td><td>[0, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace ∇H</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-d2h"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>d2h</strong></td><td> =</td><td>[0, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace ∇²H</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-    </section>
-    <br>
-    
     
     
    <section>
@@ -661,9 +433,9 @@ private pure function propagator_construct_riccati(g, gt, dg, dgt) result(this)
 
 
 
-<p>Construct an arbitrary state by explicitly providing the Riccati parameters.
- Unspecified Riccati parameters default to zero due to the spin constructors.
- The distribution function defaults to equilibrium at zero temperature.</p>
+<p>Construct an arbitrary state by explicitly providing Riccati parameters.
+Unspecified Riccati parameters default to zero due to spin constructors.
+The distribution function defaults to equilibrium at zero temperature.</p>
     
     <h4>Arguments</h4>
     
@@ -769,10 +541,10 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
 
 
 
-<p>Constructs a state corresponding to a BCS superconductor at some given energy,
- which may have an imaginary term representing inelastic scattering. The second
- argument 'gap' is used to provide the superconducting order parameter Δ.
- The distribution function defaults to equilibrium at zero temperature.</p>
+<p>Constructs the state of a a BCS superconductor at a given energy, which
+may have an imaginary term representing inelastic scattering. The second
+argument 'gap' is used to provide the superconducting order parameter Δ.
+The distribution function defaults to equilibrium at zero temperature.</p>
     
     <h4>Arguments</h4>
     
@@ -798,7 +570,7 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>energy</strong></td><td><p>Quasiparticle energy (including inelastic scattering contribution)</p></td>
+  <td><strong>energy</strong></td><td><p>Quasiparticle energy</p></td>
   
 </tr>
 
@@ -813,7 +585,7 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>gap</strong></td><td><p>Superconducting order parameter (including superconducting phase)</p></td>
+  <td><strong>gap</strong></td><td><p>Order parameter</p></td>
   
 </tr>
 
@@ -860,7 +632,7 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
     
 
 
-    <p>Retarded propagator G^R</p>
+    <p>Retarded propagator Gᴿ</p>
   </div>
   
   <ul class="list-group">
@@ -880,7 +652,7 @@ private pure function propagator_retarded(this) result(GR)
 
 
 
-<p>Calculates the 4×4 retarded propagator G^R.</p>
+<p>Calculates the 4×4 retarded propagator Gᴿ.</p>
     
     <h4>Arguments</h4>
     
@@ -944,7 +716,7 @@ private pure function propagator_retarded(this) result(GR)
     
 
 
-    <p>Retarded propagator ∇G^R</p>
+    <p>Retarded propagator ∇Gᴿ</p>
   </div>
   
   <ul class="list-group">
@@ -964,8 +736,8 @@ private pure function propagator_retarded_gradient(this, gauge) result(dGR)
 
 
 
-<p>Calculates the 4×4 retarded propagator gradient ∇G^R. If an optional
- gauge field is specified, it returns the gauge-covariant gradient.</p>
+<p>Calculates the 4×4 retarded propagator gradient ∇Gᴿ. If an optional
+gauge field is specified, it returns the gauge-covariant gradient.</p>
     
     <h4>Arguments</h4>
     
@@ -1023,7 +795,7 @@ private pure function propagator_retarded_gradient(this, gauge) result(dGR)
   
      <h4>Return Value <small>type(<a href='../type/nambu.html'>nambu</a>)
   </small></h4>
-  <p>Retarded propagator gradient</p>
+  <p>Retarded gradient</p>
     
 
         
@@ -1044,7 +816,7 @@ private pure function propagator_retarded_gradient(this, gauge) result(dGR)
     
 
 
-    <p>Retarded propagator ∇²G^R</p>
+    <p>Retarded propagator ∇²Gᴿ</p>
   </div>
   
   <ul class="list-group">
@@ -1064,7 +836,7 @@ private pure function propagator_retarded_laplacian(this) result(d2GR)
 
 
 
-<p>Calculates the 4×4 retarded propagator gradient ∇²G^R.</p><a href="../proc/propagator_retarded_laplacian.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Calculates the 4×4 retarded propagator gradient ∇²Gᴿ.</p><a href="../proc/propagator_retarded_laplacian.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1107,7 +879,7 @@ private pure function propagator_retarded_laplacian(this) result(d2GR)
   
      <h4>Return Value <small>type(<a href='../type/nambu.html'>nambu</a>)
   </small></h4>
-  <p>Retarded propagator laplacian</p>
+  <p>Retarded laplacian</p>
     
 
         
@@ -1128,7 +900,7 @@ private pure function propagator_retarded_laplacian(this) result(d2GR)
     
 
 
-    <p>Advanced propagator G^A</p>
+    <p>Advanced propagator Gᴬ</p>
   </div>
   
   <ul class="list-group">
@@ -1148,7 +920,7 @@ private pure function propagator_advanced(this) result(GA)
 
 
 
-<p>Calculates the 4×4 advanced propagator G^A.</p>
+<p>Calculates the 4×4 advanced propagator Gᴬ.</p>
     
     <h4>Arguments</h4>
     
@@ -1212,7 +984,7 @@ private pure function propagator_advanced(this) result(GA)
     
 
 
-    <p>Advanced propagator ∇G^A</p>
+    <p>Advanced propagator ∇Gᴬ</p>
   </div>
   
   <ul class="list-group">
@@ -1232,8 +1004,8 @@ private pure function propagator_advanced_gradient(this, gauge) result(dGA)
 
 
 
-<p>Calculates the 4×4 advanced propagator gradient ∇G^A. If an optional
- gauge field is specified, it returns the gauge-covariant gradient.</p>
+<p>Calculates the 4×4 advanced propagator gradient ∇Gᴬ. If an optional
+gauge field is specified, it returns the gauge-covariant gradient.</p>
     
     <h4>Arguments</h4>
     
@@ -1291,7 +1063,7 @@ private pure function propagator_advanced_gradient(this, gauge) result(dGA)
   
      <h4>Return Value <small>type(<a href='../type/nambu.html'>nambu</a>)
   </small></h4>
-  <p>Advanced propagator gradient</p>
+  <p>Advanced gradient</p>
     
 
         
@@ -1312,7 +1084,7 @@ private pure function propagator_advanced_gradient(this, gauge) result(dGA)
     
 
 
-    <p>Advanced propagator ∇²G^A</p>
+    <p>Advanced propagator ∇²Gᴬ</p>
   </div>
   
   <ul class="list-group">
@@ -1332,7 +1104,7 @@ private pure function propagator_advanced_laplacian(this) result(d2GA)
 
 
 
-<p>Calculates the 4×4 retarded propagator gradient ∇²G^A.</p><a href="../proc/propagator_advanced_laplacian.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Calculates the 4×4 retarded propagator gradient ∇²Gᴬ.</p><a href="../proc/propagator_advanced_laplacian.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1375,7 +1147,7 @@ private pure function propagator_advanced_laplacian(this) result(d2GA)
   
      <h4>Return Value <small>type(<a href='../type/nambu.html'>nambu</a>)
   </small></h4>
-  <p>Advanced propagator laplacian</p>
+  <p>Advanced laplacian</p>
     
 
         
@@ -1396,7 +1168,7 @@ private pure function propagator_advanced_laplacian(this) result(d2GA)
     
 
 
-    <p>Keldysh propagator G^K</p>
+    <p>Keldysh propagator Gᴷ</p>
   </div>
   
   <ul class="list-group">
@@ -1416,7 +1188,7 @@ private pure function propagator_keldysh(this) result(GK)
 
 
 
-<p>Calculates the 4×4 Keldysh propagator G^K.</p>
+<p>Calculates the 4×4 Keldysh propagator Gᴷ.</p>
     
     <h4>Arguments</h4>
     
@@ -1480,7 +1252,7 @@ private pure function propagator_keldysh(this) result(GK)
     
 
 
-    <p>Keldysh propagator ∇G^K</p>
+    <p>Keldysh propagator ∇Gᴷ</p>
   </div>
   
   <ul class="list-group">
@@ -1500,8 +1272,8 @@ private pure function propagator_keldysh_gradient(this, gauge) result(dGK)
 
 
 
-<p>Calculates the 4×4 Keldysh propagator gradient ∇G^K. If an optional
- gauge field is specified, it returns the gauge-covariant gradient.</p>
+<p>Calculates the 4×4 Keldysh propagator gradient ∇Gᴷ. If an optional
+gauge field is specified, it returns the gauge-covariant gradient.</p>
     
     <h4>Arguments</h4>
     
@@ -1685,7 +1457,7 @@ private pure function propagator_distribution_gradient(this, gauge) result(dH)
 
 
 <p>Calculates the 4×4 distribution function gradient ∇H. If an optional
- gauge field is specified, it returns the gauge-covariant gradient.</p>
+gauge field is specified, it returns the gauge-covariant gradient.</p>
     
     <h4>Arguments</h4>
     
@@ -1784,8 +1556,8 @@ private pure function propagator_dissipation(this) result(M)
 
 
 
-<p>Calculate the dissipation matrix M = ∂J/∂H', where J is the
- current and H' is the gradient of the distribution function.</p>
+<p>Calculates the dissipation matrix M = ∂J/∂H', where J is the
+current and H' is the gradient of the distribution function.</p>
     
     <h4>Arguments</h4>
     
@@ -1827,7 +1599,7 @@ private pure function propagator_dissipation(this) result(M)
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(0:7,0:7)</small></h4>
+  dimension(0:7, 0:7)</small></h4>
   
     
 
@@ -1869,7 +1641,7 @@ private pure function propagator_dissipation_gradient(this) result(dM)
 
 
 
-<p>Calculate the gradient of the dissipation matrix M'.</p>
+<p>Calculates the gradient of the dissipation matrix M'.</p>
     
     <h4>Arguments</h4>
     
@@ -1911,7 +1683,7 @@ private pure function propagator_dissipation_gradient(this) result(dM)
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(0:7,0:7)</small></h4>
+  dimension(0:7, 0:7)</small></h4>
   
     
 
@@ -1953,8 +1725,8 @@ private pure function propagator_condensate(this) result(Q)
 
 
 
-<p>Calculate the condensate matrix Q = ∂J/∂H, where J is the
- current and H is the nonequilibrium distribution function.</p>
+<p>Calculates the condensate matrix Q = ∂J/∂H, where J is the
+current and H is the nonequilibrium distribution function.</p>
     
     <h4>Arguments</h4>
     
@@ -1996,7 +1768,7 @@ private pure function propagator_condensate(this) result(Q)
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(0:7,0:7)</small></h4>
+  dimension(0:7, 0:7)</small></h4>
   
     
 
@@ -2038,7 +1810,7 @@ private pure function propagator_condensate_gradient(this) result(dQ)
 
 
 
-<p>Calculate the gradient of the condensate matrix Q'.</p>
+<p>Calculates the gradient of the condensate matrix Q'.</p>
     
     <h4>Arguments</h4>
     
@@ -2080,7 +1852,7 @@ private pure function propagator_condensate_gradient(this) result(dQ)
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(0:7,0:7)</small></h4>
+  dimension(0:7, 0:7)</small></h4>
   
     
 
@@ -2102,7 +1874,7 @@ private pure function propagator_condensate_gradient(this) result(dQ)
     
 
 
-    <p>Selfenergy matrix R₁</p>
+    <p>Self-energy matrix R₁</p>
   </div>
   
   <ul class="list-group">
@@ -2122,7 +1894,7 @@ private pure function propagator_selfenergy1(this, S) result(R)
 
 
 
-<p>Calculate the 1st-order self-energy contribution to the kinetic equations.</p>
+<p>Calculates 1st-order self-energy contribution to the kinetic equations.</p>
     
     <h4>Arguments</h4>
     
@@ -2179,7 +1951,7 @@ private pure function propagator_selfenergy1(this, S) result(R)
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(0:7,0:7)</small></h4>
+  dimension(0:7, 0:7)</small></h4>
   
     
 
@@ -2201,7 +1973,7 @@ private pure function propagator_selfenergy1(this, S) result(R)
     
 
 
-    <p>Selfenergy matrix R₂</p>
+    <p>Self-energy matrix R₂</p>
   </div>
   
   <ul class="list-group">
@@ -2221,7 +1993,7 @@ private pure function propagator_selfenergy2(this, S) result(R)
 
 
 
-<p>Calculate the 2nd-order self-energy contribution to the kinetic equations.</p>
+<p>Calculates 2nd-order self-energy contribution to the kinetic equations.</p>
     
     <h4>Arguments</h4>
     
@@ -2278,7 +2050,7 @@ private pure function propagator_selfenergy2(this, S) result(R)
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(0:7,0:7)</small></h4>
+  dimension(0:7, 0:7)</small></h4>
   
     
 
@@ -2300,7 +2072,7 @@ private pure function propagator_selfenergy2(this, S) result(R)
     
 
 
-    <p>Spectral supercurrents</p>
+    <p>Spectral super currents</p>
   </div>
   
   <ul class="list-group">
@@ -2320,8 +2092,8 @@ private pure function propagator_supercurrent(this, gauge) result(J)
 
 
 
-<p>Calculates the spectral supercurrents in the junction. The result is returned in the
- form of an 8-vector containing the charge, spin, heat, and spin-heat currents.</p>
+<p>Calculates the spectral super currents in the junction. The result is an
+8-vector encoding respectively charge, spin, heat, spin-heat currents.</p>
     
     <h4>Arguments</h4>
     
@@ -2400,7 +2172,7 @@ private pure function propagator_supercurrent(this, gauge) result(J)
     
 
 
-    <p>Spectral dissipative currents</p>
+    <p>Spectral lossy currents</p>
   </div>
   
   <ul class="list-group">
@@ -2420,8 +2192,8 @@ private pure function propagator_lossycurrent(this, gauge) result(J)
 
 
 
-<p>Calculates the spectral dissipative currents in the junction. The result is returned in
- the form of an 8-vector containing the charge, spin, heat, and spin-heat currents.</p>
+<p>Calculates the spectral lossy currents in the junction. The result
+is an 8-vector containing charge, spin, heat, and spin-heat currents.</p>
     
     <h4>Arguments</h4>
     
@@ -2479,7 +2251,7 @@ private pure function propagator_lossycurrent(this, gauge) result(J)
   
      <h4>Return Value <small>real(kind=wp),
   dimension(0:7)</small></h4>
-  <p>Spectral dissipative current</p>
+  <p>Spectral lossy current</p>
     
 
         
@@ -2520,8 +2292,8 @@ private pure function propagator_accumulation(this) result(Q)
 
 
 
-<p>Calculates the spectral accumulations in the junction. The result is returned in the
- form of an 8-vector containing the charge, spin, heat, and spin-heat accumulations.</p>
+<p>Calculates the spectral accumulations. The result is an 8-vector
+containing the charge, spin, heat, and spin-heat accumulations.</p>
     
     <h4>Arguments</h4>
     
@@ -2605,8 +2377,8 @@ private pure function propagator_correlation(this) result(r)
 
 
 
-<p>Calculates the spectral pair-correlation function. This is useful e.g. for
- self-consistently calculating the superconducting gap in a superconductor.</p>
+<p>Calculates the spectral pair-correlation function. This is useful to
+self-consistently calculate the superconducting gap in a superconductor.</p>
     
     <h4>Arguments</h4>
     
@@ -2670,7 +2442,7 @@ private pure function propagator_correlation(this) result(r)
     
 
 
-    <p>Spin-resolved density of states</p>
+    <p>Local density of states</p>
   </div>
   
   <ul class="list-group">
@@ -2765,7 +2537,7 @@ private pure function propagator_density(this) result(D)
           
     
     <h3>
-private pure elemental subroutine propagator_save(this, other)
+private elemental subroutine propagator_save(this, other)
     
     
    
@@ -2855,7 +2627,7 @@ private pure elemental subroutine propagator_save(this, other)
           
     
     <h3>
-private pure elemental subroutine propagator_load(this, other)
+private elemental subroutine propagator_load(this, other)
     
     
    
@@ -2938,16 +2710,17 @@ private pure elemental subroutine propagator_load(this, other)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

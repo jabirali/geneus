@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Materials</li>
@@ -136,19 +144,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.1% of total for modules and submodules.">137 statements</a>
+    title=" 4.2% of total for modules and submodules.">137 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/spinactive.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/spinactive.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/spinactive.f.html'>spinactive.f</a></li>
+     <li><a href='../sourcefile/spinactive.f90.html'>spinactive.f90</a></li>
     
   
      <li class="active">spinactive_m</li>
@@ -224,9 +232,9 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href='../module/propagator_m.html'>propagator_m</a></li>
-    
     <li><a href='../module/material_m.html'>material_m</a></li>
+    
+    <li><a href='../module/propagator_m.html'>propagator_m</a></li>
     
     <li><a href='../module/condmat_m.html'>condmat_m</a></li>
     
@@ -307,119 +315,6 @@
   <div class="panel-body">
     
      
-     <h4>Components</h4>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-conductance"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>conductance</strong></td><td> =</td><td>1.0</td><td><p>Interfacial conductance</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-polarization"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>polarization</strong></td><td> =</td><td>0.0</td><td><p>Interfacial spin-polarization</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinmixing"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spinmixing</strong></td><td> =</td><td>0.0</td><td><p>Interfacial 1st-order spin-mixing</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-secondorder"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>secondorder</strong></td><td> =</td><td>0.0</td><td><p>Interfacial 2nd-order spin-mixing</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-magnetization%7E2"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(1:3)</td><td>::</td>
-  <td><strong>magnetization</strong></td><td> =</td><td>[0, 0, 1]</td><td><p>Interfacial magnetization direction</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-misalignment0"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(1:3)</td><td>::</td>
-  <td><strong>misalignment0</strong></td><td> =</td><td>[0, 0, 0]</td><td><p>Interfacial magnetization misalignment (this  side)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-misalignment1"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(1:3)</td><td>::</td>
-  <td><strong>misalignment1</strong></td><td> =</td><td>[0, 0, 0]</td><td><p>Interfacial magnetization misalignment (other side)</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-     
      
           
      
@@ -433,7 +328,7 @@
        <tr><td>procedure, public :: <strong><a href='../type/spinactive.html#boundprocedure-kinetic_current'>kinetic_current</a></strong>  => spinactive_kinetic_current </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/spinactive.html#boundprocedure-update_prehook%7E2'>update_prehook</a></strong>  => spinactive_update_prehook </td>
+       <tr><td>procedure, public :: <strong><a href='../type/spinactive.html#boundprocedure-update_prehook~8'>update_prehook</a></strong>  => spinactive_update_prehook </td>
        <td></td></tr>
       
        </tbody>
@@ -461,16 +356,17 @@
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

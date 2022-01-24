@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -126,25 +131,28 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p>13.6% of total for derived types.</p>Including implementation: 419 statements, 13.1% of total for derived types.">43 statements</a>
+    title="<p>13.6% of total for derived types.</p>Including implementation: 419 statements, 13.2% of total for derived types.">43 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/nambu.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/nambu.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/nambu.f.html'>nambu.f</a></li>
+     <li><a href='../sourcefile/nambu.f90.html'>nambu.f90</a></li>
     
      <li><a href='../module/nambu_m.html'>nambu_m</a></li>
     
@@ -170,18 +178,6 @@
 <h3>Contents</h3>
  
 
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
-  <div id="vars-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/nambu.html#variable-matrix">matrix</a>
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -213,11 +209,11 @@
       
       <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28-%29">operator(-)</a>
       
-      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28%2A%29">operator(*)</a>
+      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28ASTERISK%29">operator(*)</a>
       
       <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28SLASH%29">operator(/)</a>
       
-      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28%2A%2A%29">operator(**)</a>
+      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28ASTERISKASTERISK%29">operator(**)</a>
       
     </div>
   </div>
@@ -244,18 +240,6 @@
 <h3>Contents</h3>
  
 
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
-  <div id="vars-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/nambu.html#variable-matrix">matrix</a>
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -287,11 +271,11 @@
       
       <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28-%29">operator(-)</a>
       
-      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28%2A%29">operator(*)</a>
+      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28ASTERISK%29">operator(*)</a>
       
       <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28SLASH%29">operator(/)</a>
       
-      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28%2A%2A%29">operator(**)</a>
+      <a class="list-group-item" href="../type/nambu.html#boundprocedure-operator%28ASTERISKASTERISK%29">operator(**)</a>
       
     </div>
   </div>
@@ -304,38 +288,6 @@
     </section>
     <br class="visible-xs visible-sm hidden-md">
 
-    
-    <section>
-    <h2>Components</h2>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-matrix"></span>complex(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>matrix</strong>(4,4)</td><td> =</td><td>0.0_wp</td><td><p>Encapsulate a spin and Nambu space matrix</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-    </section>
-    <br>
     
     
     
@@ -1408,7 +1360,7 @@ private pure function nambu_addr_cmatrix(this, other) result(r)
             
     
     <h3>
-private pure elemental function nambu_add_nambu(this, other) result(r)
+private elemental function nambu_add_nambu(this, other) result(r)
     
     
    
@@ -1980,7 +1932,7 @@ private pure function nambu_subr_cmatrix(this, other) result(r)
             
     
     <h3>
-private pure elemental function nambu_sub_nambu(this, other) result(r)
+private elemental function nambu_sub_nambu(this, other) result(r)
     
     
    
@@ -2060,7 +2012,7 @@ private pure elemental function nambu_sub_nambu(this, other) result(r)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-operator%28%2A%29"></span><h3>generic, public :: <strong>operator(*)</strong>  => mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, mull_cmatrix, mulr_cmatrix, mul_nambu 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-operator%28ASTERISK%29"></span><h3>generic, public :: <strong>operator(*)</strong>  => mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, mull_cmatrix, mulr_cmatrix, mul_nambu 
     
   </h3></div>
   
@@ -2552,7 +2504,7 @@ private pure function nambu_mulr_cmatrix(this, other) result(r)
             
     
     <h3>
-private pure elemental function nambu_mul_nambu(this, other) result(r)
+private elemental function nambu_mul_nambu(this, other) result(r)
     
     
    
@@ -2804,7 +2756,7 @@ private pure function nambu_divr_cscalar(this, other) result(r)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-operator%28%2A%2A%29"></span><h3>generic, public :: <strong>operator(**)</strong>  => expr_iscalar 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-operator%28ASTERISKASTERISK%29"></span><h3>generic, public :: <strong>operator(**)</strong>  => expr_iscalar 
     
   </h3></div>
   
@@ -2908,16 +2860,17 @@ private pure function nambu_expr_iscalar(this, other) result(r)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

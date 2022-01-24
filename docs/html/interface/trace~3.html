@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -126,27 +131,30 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 0.5% of total for procedures.</p>Including implementation: 12 statements,  2.1% of total for procedures.">3 statements</a>
+    title="<p> 0.5% of total for procedures.</p>Including implementation: 8 statements,  1.4% of total for procedures.">3 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/math.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/spin.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/math.f.html'>math.f</a></li>
+     <li><a href='../sourcefile/spin.f90.html'>spin.f90</a></li>
     
-     <li><a href='../module/math_m.html'>math_m</a></li>
+     <li><a href='../module/spin_m.html'>spin_m</a></li>
     
   
      <li class="active">trace</li>
@@ -194,7 +202,7 @@
   <div id="modprocs-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../interface/trace%7E3.html#moduleprocedure-matrix_trace">matrix_trace</a>
+      <a class="list-group-item" href="../interface/trace~3.html#moduleprocedure-spin_trace">spin_trace</a>
       
     </div>
   </div>
@@ -209,10 +217,10 @@
     
     <div class="col-md-9" id='text'>
       <h2>public interface trace</h2>
-   <p>Public interface for functions that calculate a matrix trace.</p>
+   
      
      
-    <br>
+    
 
      <section class="visible-xs visible-sm hidden-md">
        
@@ -243,7 +251,7 @@
   <div id="modprocs-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../interface/trace%7E3.html#moduleprocedure-matrix_trace">matrix_trace</a>
+      <a class="list-group-item" href="../interface/trace~3.html#moduleprocedure-spin_trace">spin_trace</a>
       
     </div>
   </div>
@@ -264,8 +272,8 @@
    
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-matrix_trace"></span><h3>
-public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-spin_trace"></span><h3>
+private elemental function spin_trace(this) result(r)
     
     
    
@@ -276,11 +284,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
 
 
 
-
-
-
-
-<p>Calculate the trace of a general complex matrix.</p>
+<p>Calculate the trace of the spin matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -301,12 +305,12 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
   
 <tr>
   
-  <td><span class="anchor" ></span>complex(kind=wp),</td>
-  <td>intent(in),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/spin.html'>spin</a>),</td>
+  <td>intent(in)</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
-  <td><strong>A</strong></td><td><p>Matrix [n×m]</p></td>
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
   
 </tr>
 
@@ -323,7 +327,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
   
      <h4>Return Value <small>complex(kind=wp)
   </small></h4>
-  <p>r = Tr(A)</p>
+  
     
 
   </div>
@@ -341,16 +345,17 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

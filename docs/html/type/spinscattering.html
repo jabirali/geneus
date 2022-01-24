@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -126,6 +131,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     
@@ -137,14 +145,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/spinscattering.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/spinscattering.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/spinscattering.f.html'>spinscattering.f</a></li>
+     <li><a href='../sourcefile/spinscattering.f90.html'>spinscattering.f90</a></li>
     
      <li><a href='../module/spinscattering_m.html'>spinscattering_m</a></li>
     
@@ -170,26 +178,6 @@
 <h3>Contents</h3>
  
 
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
-  <div id="vars-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-material%7E2">material</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-nambuv">nambuv</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-depairing">depairing</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-spinflip">spinflip</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-spinorbit%7E2">spinorbit</a>
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -223,9 +211,9 @@
   <div id="boundprocs-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-diffusion_equation%7E7">diffusion_equation</a>
+      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-diffusion_equation">diffusion_equation</a>
       
-      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-kinetic_equation%7E5">kinetic_equation</a>
+      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-kinetic_equation">kinetic_equation</a>
       
     </div>
   </div>
@@ -252,26 +240,6 @@
 <h3>Contents</h3>
  
 
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
-  <div id="vars-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-material%7E2">material</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-nambuv">nambuv</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-depairing">depairing</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-spinflip">spinflip</a>
-      
-      <a class="list-group-item" href="../type/spinscattering.html#variable-spinorbit%7E2">spinorbit</a>
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -305,9 +273,9 @@
   <div id="boundprocs-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-diffusion_equation%7E7">diffusion_equation</a>
+      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-diffusion_equation">diffusion_equation</a>
       
-      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-kinetic_equation%7E5">kinetic_equation</a>
+      <a class="list-group-item" href="../type/spinscattering.html#boundprocedure-kinetic_equation">kinetic_equation</a>
       
     </div>
   </div>
@@ -320,94 +288,6 @@
     </section>
     <br class="visible-xs visible-sm hidden-md">
 
-    
-    <section>
-    <h2>Components</h2>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-material%7E2"></span>class(<a href='../type/material.html'>material</a>),</td>
-  
-  <td>public,</td>
-  <td>pointer</td><td>::</td>
-  <td><strong>material</strong></td><td>=> </td><td>null()</td><td><p>Pointer to the material modelled by this instance</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nambuv"></span>type(nambu),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>nambuv</strong></td><td></td><td></td><td><p>Pauli matrices spanning the 4×4 Spin-Nambu space</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-depairing"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>depairing</strong></td><td> =</td><td>0.0_wp</td><td><p>Orbital depairing coefficient</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinflip"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spinflip</strong></td><td> =</td><td>0.0_wp</td><td><p>Spin-flip  scattering coefficient (1/8τΔ)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinorbit%7E2"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spinorbit</strong></td><td> =</td><td>0.0_wp</td><td><p>Spin-orbit scattering coefficient (1/8τΔ)</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-    </section>
-    <br>
     
     
     
@@ -428,7 +308,7 @@
     
     
     <h3>
-public impure function <a href='../proc/spinscattering_construct.html'>spinscattering_construct</a>(parent) result(this)
+public function <a href='../proc/spinscattering_construct.html'>spinscattering_construct</a>(parent) result(this)
     
     
    
@@ -506,7 +386,7 @@ public impure function <a href='../proc/spinscattering_construct.html'>spinscatt
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-diffusion_equation%7E7"></span><h3>procedure, public :: <strong>diffusion_equation</strong>  => spinscattering_diffusion_equation 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-diffusion_equation"></span><h3>procedure, public :: <strong>diffusion_equation</strong>  => spinscattering_diffusion_equation 
     
   </h3></div>
   
@@ -535,7 +415,7 @@ private pure subroutine spinscattering_diffusion_equation(this, p)
 
 
 <p>Calculate the spin-flip and spin-orbit scattering terms in the diffusion
- equation, and update the second derivatives of the Riccati parameters.</p>
+equation, and update the second derivatives of the Riccati parameters.</p>
     
     <h4>Arguments</h4>
     
@@ -571,7 +451,7 @@ private pure subroutine spinscattering_diffusion_equation(this, p)
   
 <tr>
   
-  <td><span class="anchor" ></span>type(propagator),</td>
+  <td><span class="anchor" ></span>type(<a href='../type/propagator.html'>propagator</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -597,7 +477,7 @@ private pure subroutine spinscattering_diffusion_equation(this, p)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-kinetic_equation%7E5"></span><h3>procedure, public :: <strong>kinetic_equation</strong>  => spinscattering_kinetic_equation 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-kinetic_equation"></span><h3>procedure, public :: <strong>kinetic_equation</strong>  => spinscattering_kinetic_equation 
     
   </h3></div>
   
@@ -661,7 +541,7 @@ private pure subroutine spinscattering_kinetic_equation(this, Gp, R)
   
 <tr>
   
-  <td><span class="anchor" ></span>type(propagator),</td>
+  <td><span class="anchor" ></span>type(<a href='../type/propagator.html'>propagator</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -714,16 +594,17 @@ private pure subroutine spinscattering_kinetic_equation(this, Gp, R)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

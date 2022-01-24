@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Foundation</li>
@@ -141,14 +149,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/spin.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/spin.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/spin.f.html'>spin.f</a></li>
+     <li><a href='../sourcefile/spin.f90.html'>spin.f90</a></li>
     
   
      <li class="active">spin_m</li>
@@ -206,13 +214,13 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-inverse%7E2">inverse</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-inverse~3">inverse</a>
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-trace%7E2">trace</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-trace~3">trace</a>
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-sum%7E2">sum</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-sum~2">sum</a>
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-conjg%7E2">conjg</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-conjg~2">conjg</a>
       
       <a class="list-group-item" href="../module/spin_m.html#interface-norm2">norm2</a>
       
@@ -250,10 +258,12 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This module defines the data type 'spin', which represents 2×2 complex matrices in spin space. The module overloads
- common arithmetic operators to work with the new data type, and defines and exports the Pauli matrices as constants.
- To make it easier to interact with common differential equation solvers, which often operate on real state vectors,
- the assignment operator is overloaded in such a way that 'spin' can be easily imported/exported to a real vector(8).</p>
+    <p>This module defines the type 'spin', representing 2×2 complex matrices in
+spin space. The module overloads common arithmetic operators to work with
+the new data type, and defines and exports the Pauli matrices as constants.
+To make it easier to interact with common differential equation solvers,
+which often operate on real state vectors, the assignment operator is
+overloaded to make 'spin' easily importable/exportable to real vectors.</p>
       <br>
     
   
@@ -321,13 +331,13 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-inverse%7E2">inverse</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-inverse~3">inverse</a>
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-trace%7E2">trace</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-trace~3">trace</a>
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-sum%7E2">sum</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-sum~2">sum</a>
       
-      <a class="list-group-item" href="../module/spin_m.html#interface-conjg%7E2">conjg</a>
+      <a class="list-group-item" href="../module/spin_m.html#interface-conjg~2">conjg</a>
       
       <a class="list-group-item" href="../module/spin_m.html#interface-norm2">norm2</a>
       
@@ -463,14 +473,9 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-inverse%7E2"></span><h3>public interface <a href='../interface/inverse%7E2.html'>inverse</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-inverse~3"></span><h3>public interface <a href='../interface/inverse~3.html'>inverse</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Matrix inverse</p>
-  </div>
   
   <ul class="list-group">
   
@@ -544,14 +549,9 @@ private pure function spin_inv(this) result(r)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-trace%7E2"></span><h3>public interface <a href='../interface/trace%7E2.html'>trace</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-trace~3"></span><h3>public interface <a href='../interface/trace~3.html'>trace</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Matrix trace</p>
-  </div>
   
   <ul class="list-group">
   
@@ -561,7 +561,7 @@ private pure function spin_inv(this) result(r)
     
     
     <h3>
-private pure elemental function spin_trace(this) result(r)
+private elemental function spin_trace(this) result(r)
     
     
    
@@ -625,14 +625,9 @@ private pure elemental function spin_trace(this) result(r)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-sum%7E2"></span><h3>public interface <a href='../interface/sum%7E2.html'>sum</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-sum~2"></span><h3>public interface <a href='../interface/sum~2.html'>sum</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Matrix sum</p>
-  </div>
   
   <ul class="list-group">
   
@@ -706,14 +701,9 @@ private pure function spin_sum(this) result(r)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-conjg%7E2"></span><h3>public interface <a href='../interface/conjg%7E2.html'>conjg</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-conjg~2"></span><h3>public interface <a href='../interface/conjg~2.html'>conjg</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Complex conjugation</p>
-  </div>
   
   <ul class="list-group">
   
@@ -723,7 +713,7 @@ private pure function spin_sum(this) result(r)
     
     
     <h3>
-private pure elemental function spin_conjg(this) result(r)
+private elemental function spin_conjg(this) result(r)
     
     
    
@@ -791,11 +781,6 @@ private pure elemental function spin_conjg(this) result(r)
     
   </h3></div>
   
-  <div class="panel-body">
-    
-    <p>Matrix norm</p>
-  </div>
-  
   <ul class="list-group">
   
   
@@ -804,7 +789,7 @@ private pure elemental function spin_conjg(this) result(r)
     
     
     <h3>
-private pure elemental function spin_norm(this) result(r)
+private elemental function spin_norm(this) result(r)
     
     
    
@@ -884,35 +869,6 @@ private pure elemental function spin_norm(this) result(r)
   <div class="panel-body">
     
      
-     <h4>Components</h4>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-matrix%7E2"></span>complex(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>matrix</strong>(2,2)</td><td> =</td><td>0.0_wp</td><td><p>Encapsulate a spin matrix</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-     
      
           
      
@@ -923,22 +879,22 @@ private pure elemental function spin_norm(this) result(r)
        <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-spin'>spin</a></strong>  => cons_rscalar, cons_cscalar, cons_cmatrix, cons_rvector, cons_spin </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-assignment%28%3D%29%7E2'>assignment(=)</a></strong>  => assr_rscalar, assr_cscalar, assr_cmatrix, assr_rvector, assl_cmatrix, assl_rvector </td>
+       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-assignment%28%3D%29~2'>assignment(=)</a></strong>  => assr_rscalar, assr_cscalar, assr_cmatrix, assr_rvector, assl_cmatrix, assl_rvector </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28%2B%29%7E2'>operator(+)</a></strong>  => addl_rscalar, addr_rscalar, addl_cscalar, addr_cscalar, addl_cmatrix, addr_cmatrix, add_spin </td>
+       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28%2B%29~2'>operator(+)</a></strong>  => addl_rscalar, addr_rscalar, addl_cscalar, addr_cscalar, addl_cmatrix, addr_cmatrix, add_spin </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28-%29%7E2'>operator(-)</a></strong>  => subl_rscalar, subr_rscalar, subl_cscalar, subr_cscalar, subl_cmatrix, subr_cmatrix, sub_spin </td>
+       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28-%29~2'>operator(-)</a></strong>  => subl_rscalar, subr_rscalar, subl_cscalar, subr_cscalar, subl_cmatrix, subr_cmatrix, sub_spin </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28%2A%29%7E2'>operator(*)</a></strong>  => mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, mull_cmatrix, mulr_cmatrix, mul_spin </td>
+       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28ASTERISK%29~2'>operator(*)</a></strong>  => mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, mull_cmatrix, mulr_cmatrix, mul_spin </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28SLASH%29%7E2'>operator(/)</a></strong>  => divr_rscalar, divr_cscalar </td>
+       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28SLASH%29~2'>operator(/)</a></strong>  => divr_rscalar, divr_cscalar </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28%2A%2A%29%7E2'>operator(**)</a></strong>  => expr_iscalar </td>
+       <tr><td>generic, public :: <strong><a href='../type/spin.html#boundprocedure-operator%28ASTERISKASTERISK%29~2'>operator(**)</a></strong>  => expr_iscalar </td>
        <td></td></tr>
       
        </tbody>
@@ -966,16 +922,17 @@ private pure elemental function spin_norm(this) result(r)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

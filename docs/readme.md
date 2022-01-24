@@ -7,9 +7,9 @@ src_dir:             ../src/system
                      ../src/foundation
                      ../src/materials
                      ../src/programs
-exclude:             diffusion.f
-                     kinetic.f
-extensions:          f
+exclude:             diffusion.f90
+                     kinetic.f90
+extensions:          f90
 fixed_extensions:    
 fpp_extensions:
 display:             public

@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Foundation</li>
@@ -141,14 +149,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/math.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/math.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/math.f.html'>math.f</a></li>
+     <li><a href='../sourcefile/math.f90.html'>math.f90</a></li>
     
   
      <li class="active">math_m</li>
@@ -186,9 +194,9 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/math_m.html#interface-trace%7E3">trace</a>
+      <a class="list-group-item" href="../module/math_m.html#interface-trace">trace</a>
       
-      <a class="list-group-item" href="../module/math_m.html#interface-inverse%7E3">inverse</a>
+      <a class="list-group-item" href="../module/math_m.html#interface-inverse">inverse</a>
       
       <a class="list-group-item" href="../module/math_m.html#interface-diag">diag</a>
       
@@ -225,8 +233,8 @@
     
     <div class="col-md-9" id='text'>
     <p>This file provides a common interface to a large library of mathematical
- functions and subroutines. See the documentation of individual interfaces
- below for more information about the contents of the mathematical library.</p>
+functions and subroutines. See the documentation of individual interfaces
+below for more information about the contents of the mathematical library.</p>
       <br>
     
   
@@ -239,9 +247,9 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href='../module/basic_m.html'>basic_m</a></li>
-    
     <li><a href='../module/calculus_m.html'>calculus_m</a></li>
+    
+    <li><a href='../module/basic_m.html'>basic_m</a></li>
     
     <li><a href='../module/matrix_m.html'>matrix_m</a></li>
     
@@ -278,9 +286,9 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/math_m.html#interface-trace%7E3">trace</a>
+      <a class="list-group-item" href="../module/math_m.html#interface-trace">trace</a>
       
-      <a class="list-group-item" href="../module/math_m.html#interface-inverse%7E3">inverse</a>
+      <a class="list-group-item" href="../module/math_m.html#interface-inverse">inverse</a>
       
       <a class="list-group-item" href="../module/math_m.html#interface-diag">diag</a>
       
@@ -326,7 +334,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-trace%7E3"></span><h3>public interface <a href='../interface/trace%7E3.html'>trace</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-trace"></span><h3>public interface <a href='../interface/trace.html'>trace</a>
     
   </h3></div>
   
@@ -356,7 +364,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
 
 
 
-<p>Calculate the trace of a general complex matrix.</p>
+<p>Calculates the trace of a general complex matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -381,7 +389,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix [n×m]</p></td>
   
 </tr>
@@ -411,7 +419,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-inverse%7E3"></span><h3>public interface <a href='../interface/inverse%7E3.html'>inverse</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-inverse"></span><h3>public interface <a href='../interface/inverse.html'>inverse</a>
     
   </h3></div>
   
@@ -441,7 +449,7 @@ public pure function <a href='../proc/matrix_inverse_re.html'>matrix_inverse_re<
 
 
 
-<p>Wrapper for matrix_inverse_cx that allows the procedure to be used for real matrices.</p>
+<p>Wrapper for matrix_inverse_cx that operates on real matrices.</p>
     
     <h4>Arguments</h4>
     
@@ -466,7 +474,7 @@ public pure function <a href='../proc/matrix_inverse_re.html'>matrix_inverse_re<
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix A [n×n]</p></td>
   
 </tr>
@@ -483,7 +491,7 @@ public pure function <a href='../proc/matrix_inverse_re.html'>matrix_inverse_re<
   
   
      <h4>Return Value <small>real(kind=wp),
-  dimension(size(A,1),size(A,1))</small></h4>
+  dimension(size(A, 1), size(A, 1))</small></h4>
   <p>Matrix R=A¯¹</p>
     
 
@@ -506,10 +514,10 @@ public pure function <a href='../proc/matrix_inverse_cx.html'>matrix_inverse_cx<
 
 
 
-<p>Invert a square n×n matrix using Gauss-Jordan elimination with partial pivoting.
- In the special case n=2, the inverse is evaluated using a cofactoring algorithm.
- [This implementation is based on Algorithm #2 in "Efficient matrix inversion via 
- Gauss-Jordan elimination and its parallelization" by E.S. Quintana et al. (1998)]</p>
+<p>Inverts a square matrix via Gauss-Jordan elimination with partial pivot
+(general) or a cofactoring algorithm (2x2 matrices). The implementation
+is based on Algorithm #2 in "Efficient matrix inversion via Gauss-Jordan
+elimination and its parallelization" by E.S. Quintana et al. (1998).</p>
     
     <h4>Arguments</h4>
     
@@ -534,7 +542,7 @@ public pure function <a href='../proc/matrix_inverse_cx.html'>matrix_inverse_cx<
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix A [n×n]</p></td>
   
 </tr>
@@ -551,7 +559,7 @@ public pure function <a href='../proc/matrix_inverse_cx.html'>matrix_inverse_cx<
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(size(A,1),size(A,1))</small></h4>
+  dimension(size(A, 1), size(A, 1))</small></h4>
   <p>Matrix R=A¯¹</p>
     
 
@@ -594,7 +602,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
 
 
 
-<p>Construct a block-diagonal matrix R from two general matrices A and B.</p>
+<p>Constructs a block-diagonal matrix R from two general matrices A and B.</p>
     
     <h4>Arguments</h4>
     
@@ -619,7 +627,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Left  matrix [n×m]</p></td>
   
 </tr>
@@ -634,7 +642,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>B</strong></td><td><p>Right matrix [p×q]</p></td>
   
 </tr>
@@ -651,7 +659,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(size(A,1)+size(B,1), size(A,2)+size(B,2))</small></h4>
+  dimension(size(A, 1) + size(B, 1), size(A, 2) + size(B, 2))</small></h4>
   <p>R = Diag(A,B)</p>
     
 
@@ -674,7 +682,7 @@ public pure function <a href='../proc/vector_diag.html'>vector_diag</a>(A) resul
 
 
 
-<p>Extract the diagonal of a general complex matrix.</p>
+<p>Extracts the diagonal of a general complex matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -699,7 +707,7 @@ public pure function <a href='../proc/vector_diag.html'>vector_diag</a>(A) resul
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix [n×m]</p></td>
   
 </tr>
@@ -716,7 +724,7 @@ public pure function <a href='../proc/vector_diag.html'>vector_diag</a>(A) resul
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(min(size(A,1),size(A,2)))</small></h4>
+  dimension(min(size(A, 1), size(A, 2)))</small></h4>
   <p>r = Diag(A)</p>
     
 
@@ -909,9 +917,10 @@ public pure function <a href='../proc/differentiate_array_re.html'>differentiate
 
 
 
-<p>This function calculates the numerical derivative of an array y with respect to x, using a central difference approximation
- at the interior points and forward/backward difference approximations at the exterior points. Note that since all the three
- approaches yield two-point approximations of the derivative, the mesh spacing of x does not necessarily have to be uniform.</p>
+<p>Calculates the numerical derivative of an array y wrt. x using central
+differences at the interior points and forward/backward differences at
+the exterior points. All three approaches yield two-point approximations
+of the derivatives, thus the mesh spacing does not have to be uniform.</p>
     
     <h4>Arguments</h4>
     
@@ -1091,8 +1100,8 @@ public pure function <a href='../proc/integrate_array_re.html'>integrate_array_r
 
 
 
-<p>This function calculates the integral of an array y with respect to x using a trapezoid
- approximation. Note that the mesh spacing of x does not necessarily have to be uniform.</p>
+<p>Calculates the integral of an array y wrt. x using the trapezoid
+method. The mesh spacing does not necessarily have to be uniform.</p>
     
     <h4>Arguments</h4>
     
@@ -1252,9 +1261,9 @@ public function <a href='../proc/integrate_range_re.html'>integrate_range_re</a>
 
 
 
-<p>This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on
- discrete numerical data, and subsequently evaluates the integral of the interpolation in the
- range (a,b). Note that the mesh spacing of x does not necessarily have to be uniform.</p>
+<p>Constructs a piecewise hermitian cubic interpolation of an array y(x)
+from discrete numerical data, and then integrates the interpolation in
+the range (a, b). The mesh spacing does not have to be uniform.</p>
     
     <h4>Arguments</h4>
     
@@ -1550,7 +1559,7 @@ public function <a href='../proc/interpolate_point_re.html'>interpolate_point_re
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>p</strong></td><td><p>Interpolation point p</p></td>
+  <td><strong>p</strong></td><td><p>Single point p</p></td>
   
 </tr>
 
@@ -1567,7 +1576,7 @@ public function <a href='../proc/interpolate_point_re.html'>interpolate_point_re
   
      <h4>Return Value <small>real(kind=wp)
   </small></h4>
-  <p>Interpolation result y(p)</p>
+  <p>Interpolation y(p)</p>
     
 
     </li>
@@ -1645,7 +1654,7 @@ public function <a href='../proc/interpolate_point_cx.html'>interpolate_point_cx
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>p</strong></td><td><p>Interpolation point p</p></td>
+  <td><strong>p</strong></td><td><p>Single point p</p></td>
   
 </tr>
 
@@ -1662,7 +1671,7 @@ public function <a href='../proc/interpolate_point_cx.html'>interpolate_point_cx
   
      <h4>Return Value <small>complex(kind=wp)
   </small></h4>
-  <p>Interpolation result y(p)</p>
+  <p>Interpolation y(p)</p>
     
 
     </li>
@@ -1684,8 +1693,9 @@ public function <a href='../proc/interpolate_array_re.html'>interpolate_array_re
 
 
 
-<p>This function constructs a piecewise hermitian cubic interpolation of an array y(x) based on discrete numerical data,
- and evaluates the interpolation at points p. Note that the mesh spacing of x does not necessarily have to be uniform.</p>
+<p>Constructs a piecewise hermitian cubic interpolation of an array y(x)
+based on discrete numerical data and evaluates the interpolation at p.
+Note that the mesh spacing does not necessarily have to be uniform.</p>
     
     <h4>Arguments</h4>
     
@@ -1741,7 +1751,7 @@ public function <a href='../proc/interpolate_array_re.html'>interpolate_array_re
   <td></td>
   
   <td>dimension(:)</td><td>::</td>
-  <td><strong>p</strong></td><td><p>Interpolation domain p</p></td>
+  <td><strong>p</strong></td><td><p>Point array p</p></td>
   
 </tr>
 
@@ -1758,7 +1768,7 @@ public function <a href='../proc/interpolate_array_re.html'>interpolate_array_re
   
      <h4>Return Value <small>real(kind=wp),
   dimension(size(p))</small></h4>
-  <p>Interpolation result y(p)</p>
+  <p>Interpolation y(p)</p>
     
 
     </li>
@@ -1836,7 +1846,7 @@ public function <a href='../proc/interpolate_array_cx.html'>interpolate_array_cx
   <td></td>
   
   <td>dimension(:)</td><td>::</td>
-  <td><strong>p</strong></td><td><p>Interpolation domain p</p></td>
+  <td><strong>p</strong></td><td><p>Point array p</p></td>
   
 </tr>
 
@@ -1853,7 +1863,7 @@ public function <a href='../proc/interpolate_array_cx.html'>interpolate_array_cx
   
      <h4>Return Value <small>complex(kind=wp),
   dimension(size(p))</small></h4>
-  <p>Interpolation result y(p)</p>
+  <p>Interpolation y(p)</p>
     
 
     </li>
@@ -1875,7 +1885,7 @@ public pure function <a href='../proc/interpolate_point_matrix_re.html'>interpol
 
 
 
-<p>Perform a Piecewise Cubic Hermitian Interpolation of a matrix function using Catmull-Rom splines.</p>
+<p>Interpolates a matrix function using Catmull-Rom splines.</p>
     
     <h4>Arguments</h4>
     
@@ -1915,7 +1925,7 @@ public pure function <a href='../proc/interpolate_point_matrix_re.html'>interpol
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:,:)</td><td>::</td>
+  <td>dimension(:, :, :)</td><td>::</td>
   <td><strong>y</strong></td><td><p>Function y(x)</p></td>
   
 </tr>
@@ -1931,7 +1941,7 @@ public pure function <a href='../proc/interpolate_point_matrix_re.html'>interpol
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>p</strong></td><td><p>Interpolation point p</p></td>
+  <td><strong>p</strong></td><td><p>Single point p</p></td>
   
 </tr>
 
@@ -1947,8 +1957,8 @@ public pure function <a href='../proc/interpolate_point_matrix_re.html'>interpol
   
   
      <h4>Return Value <small>real(kind=wp),
-  dimension(size(y,1),size(y,2))</small></h4>
-  <p>Interpolation result y(p)</p>
+  dimension(size(y, 1), size(y, 2))</small></h4>
+  <p>Interpolation y(p)</p>
     
 
     </li>
@@ -1990,7 +2000,7 @@ public pure subroutine <a href='../proc/linspace_array_re.html'>linspace_array_r
 
 
 
-<p>Populates an existing array with elements from <code>first</code> to <code>last</code>, inclusive.</p>
+<p>Populates an array with elements from <code>first</code> to <code>last</code>, inclusive.</p>
     
     <h4>Arguments</h4>
     
@@ -2086,16 +2096,17 @@ public pure subroutine <a href='../proc/linspace_array_re.html'>linspace_array_r
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

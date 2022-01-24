@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> System</li>
@@ -136,19 +144,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.9% of total for modules and submodules.">129 statements</a>
+    title=" 3.9% of total for modules and submodules.">130 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/stdio.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/stdio.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/stdio.f.html'>stdio.f</a></li>
+     <li><a href='../sourcefile/stdio.f90.html'>stdio.f90</a></li>
     
   
      <li class="active">stdio_m</li>
@@ -284,9 +292,9 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This file renames the ISO input/output units to the standard UNIX names, 
- defines the ANSI escape codes for colored output, and defines a number of 
- auxiliary subroutines for e.g. writing out error and warning messages.</p>
+    <p>This file renames the ISO input/output units to the standard UNIX names,
+defines the ANSI escape codes for colored output, and defines a number of
+auxiliary subroutines for e.g. writing out error and warning messages.</p>
       <br>
     
   
@@ -299,7 +307,7 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href="http://fortranwiki.org/fortran/show/ISO_FORTRAN_ENV">iso_fortran_env</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a></li>
     
   </ul>
       </li>
@@ -493,7 +501,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_none"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_none"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -507,7 +515,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_red"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_red"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -521,7 +529,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_green"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_green"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -535,7 +543,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_yellow"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_yellow"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -549,7 +557,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_blue"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_blue"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -563,7 +571,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_purple"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_purple"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -577,7 +585,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_cyan"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_cyan"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -591,7 +599,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_white"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-color_white"></span>character,</td>
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
@@ -618,11 +626,6 @@
     
   </h3></div>
   
-  <div class="panel-body">
-    
-    <p>Public interface for functions that dump results to files</p>
-  </div>
-  
   <ul class="list-group">
   
   
@@ -631,7 +634,7 @@
     
     
     <h3>
-public impure subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(filename, arrays, header)
+public subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(filename, arrays, header)
     
     
    
@@ -644,7 +647,7 @@ public impure subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(file
 
 
 
-<p>This subroutine is used to dump numerical arrays to an output file.</p>
+<p>Dump numerical arrays to an output file.</p>
     
     <h4>Arguments</h4>
     
@@ -717,7 +720,7 @@ public impure subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(file
     
     
     <h3>
-public impure subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(filename, scalar)
+public subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(filename, scalar)
     
     
    
@@ -730,7 +733,7 @@ public impure subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(file
 
 
 
-<p>This subroutine is used to dump a numerical result to an output file.</p>
+<p>Dump a numerical result to an output file.</p>
     
     <h4>Arguments</h4>
     
@@ -804,7 +807,7 @@ public impure subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(file
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-input"></span><h3>
-public impure function <a href='../proc/input.html'>input</a>(file) result(unit)
+public function <a href='../proc/input.html'>input</a>(file) result(unit)
     
     
    
@@ -819,7 +822,7 @@ public impure function <a href='../proc/input.html'>input</a>(file) result(unit)
 
 
 
-<p>This function is used to open an input file for reading.</p>
+<p>Open an input file for reading.</p>
     
     <h4>Arguments</h4>
     
@@ -872,7 +875,7 @@ public impure function <a href='../proc/input.html'>input</a>(file) result(unit)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-output"></span><h3>
-public impure function <a href='../proc/output.html'>output</a>(file) result(unit)
+public function <a href='../proc/output.html'>output</a>(file) result(unit)
     
     
    
@@ -887,7 +890,7 @@ public impure function <a href='../proc/output.html'>output</a>(file) result(uni
 
 
 
-<p>This function is used to open an output file for writing.</p>
+<p>Open an output file for writing.</p>
     
     <h4>Arguments</h4>
     
@@ -948,7 +951,7 @@ public impure function <a href='../proc/output.html'>output</a>(file) result(uni
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-message"></span><h3>
-public impure subroutine <a href='../proc/message.html'>message</a>(msg)
+public subroutine <a href='../proc/message.html'>message</a>(msg)
     
     
    
@@ -963,7 +966,7 @@ public impure subroutine <a href='../proc/message.html'>message</a>(msg)
 
 
 
-<p>This subroutine provides a way to report a status message.</p>
+<p>Provides a way to report a status message.</p>
     
     <h4>Arguments</h4>
     
@@ -984,7 +987,7 @@ public impure subroutine <a href='../proc/message.html'>message</a>(msg)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1007,7 +1010,7 @@ public impure subroutine <a href='../proc/message.html'>message</a>(msg)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-warning"></span><h3>
-public impure subroutine <a href='../proc/warning.html'>warning</a>(msg)
+public subroutine <a href='../proc/warning.html'>warning</a>(msg)
     
     
    
@@ -1022,7 +1025,7 @@ public impure subroutine <a href='../proc/warning.html'>warning</a>(msg)
 
 
 
-<p>This subroutine provides a way to report a warning message.</p>
+<p>Provides a way to report a warning message.</p>
     
     <h4>Arguments</h4>
     
@@ -1043,7 +1046,7 @@ public impure subroutine <a href='../proc/warning.html'>warning</a>(msg)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1066,7 +1069,7 @@ public impure subroutine <a href='../proc/warning.html'>warning</a>(msg)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-error"></span><h3>
-public impure subroutine <a href='../proc/error.html'>error</a>(msg)
+public subroutine <a href='../proc/error.html'>error</a>(msg)
     
     
    
@@ -1081,7 +1084,7 @@ public impure subroutine <a href='../proc/error.html'>error</a>(msg)
 
 
 
-<p>This subroutine provides a way to report an error message and halt the program.</p>
+<p>Provides a way to report an error message and halt the program.</p>
     
     <h4>Arguments</h4>
     
@@ -1102,7 +1105,7 @@ public impure subroutine <a href='../proc/error.html'>error</a>(msg)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1125,7 +1128,7 @@ public impure subroutine <a href='../proc/error.html'>error</a>(msg)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-status_head"></span><h3>
-public impure subroutine <a href='../proc/status_head.html'>status_head</a>(title)
+public subroutine <a href='../proc/status_head.html'>status_head</a>(title)
     
     
    
@@ -1140,8 +1143,8 @@ public impure subroutine <a href='../proc/status_head.html'>status_head</a>(titl
 
 
 
-<p>This subroutine is used to write boxed status messages to standard out;
- in particular, this routine writes out a boxed title with a timestamp.</p>
+<p>Provides a way to write boxed status messages to standard out; in
+particular, this routine writes out a boxed title with a timestamp.</p>
     
     <h4>Arguments</h4>
     
@@ -1185,7 +1188,7 @@ public impure subroutine <a href='../proc/status_head.html'>status_head</a>(titl
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-status_body"></span><h3>
-public impure subroutine <a href='../proc/status_body.html'>status_body</a>(title, value)
+public subroutine <a href='../proc/status_body.html'>status_body</a>(title, value)
     
     
    
@@ -1200,8 +1203,8 @@ public impure subroutine <a href='../proc/status_body.html'>status_body</a>(titl
 
 
 
-<p>This subroutine is used to write boxed status messages to standard out;
- in particular, this routine writes out the name and value of a variable.</p>
+<p>Provides a way to write boxed status messages to standard out; in
+particular, this routine writes out the name and value of a variable.</p>
     
     <h4>Arguments</h4>
     
@@ -1260,7 +1263,7 @@ public impure subroutine <a href='../proc/status_body.html'>status_body</a>(titl
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-status_foot"></span><h3>
-public impure subroutine <a href='../proc/status_foot.html'>status_foot</a>()
+public subroutine <a href='../proc/status_foot.html'>status_foot</a>()
     
     
    
@@ -1275,8 +1278,8 @@ public impure subroutine <a href='../proc/status_foot.html'>status_foot</a>()
 
 
 
-<p>This subroutine is used to write boxed status messages to standard out;
- in particular, this routine writes out the bottom edge of such a box.</p>
+<p>Provides a way to write boxed status messages to standard out; in
+particular, this routine writes out the bottom edge of such a box.</p>
     
     <h4>Arguments</h4>
     
@@ -1291,7 +1294,7 @@ public impure subroutine <a href='../proc/status_foot.html'>status_foot</a>()
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-status_box"></span><h3>
-public impure subroutine <a href='../proc/status_box.html'>status_box</a>(title)
+public subroutine <a href='../proc/status_box.html'>status_box</a>(title)
     
     
    
@@ -1306,7 +1309,7 @@ public impure subroutine <a href='../proc/status_box.html'>status_box</a>(title)
 
 
 
-<p>This subroutine is used to write boxed status messages to standard out.</p>
+<p>Provides a way to write boxed status messages to standard out.</p>
     
     <h4>Arguments</h4>
     
@@ -1350,7 +1353,7 @@ public impure subroutine <a href='../proc/status_box.html'>status_box</a>(title)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-dump_arrays"></span><h3>
-public impure subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(filename, arrays, header)
+public subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(filename, arrays, header)
     
     
    
@@ -1365,7 +1368,7 @@ public impure subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(file
 
 
 
-<p>This subroutine is used to dump numerical arrays to an output file.</p>
+<p>Dump numerical arrays to an output file.</p>
     
     <h4>Arguments</h4>
     
@@ -1439,7 +1442,7 @@ public impure subroutine <a href='../proc/dump_arrays.html'>dump_arrays</a>(file
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-dump_scalar"></span><h3>
-public impure subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(filename, scalar)
+public subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(filename, scalar)
     
     
    
@@ -1454,7 +1457,7 @@ public impure subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(file
 
 
 
-<p>This subroutine is used to dump a numerical result to an output file.</p>
+<p>Dump a numerical result to an output file.</p>
     
     <h4>Arguments</h4>
     
@@ -1524,16 +1527,17 @@ public impure subroutine <a href='../proc/dump_scalar.html'>dump_scalar</a>(file
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    
