@@ -272,7 +272,7 @@ We can then use a Bash loop to start multiple parallel simulations with differen
     for n in $(seq 0.0 0.1 1.0); do
       mkdir sim_${n};
       cd sim_${n};
-      nice converge ../helical.conf ${n} > output.log &
+      nice converge ../helical.conf ${n} &> output.log &
       cd ..;
     done
 
@@ -332,7 +332,7 @@ We then perform parallel simulations for magnetization angles \( \theta/\pi \in 
     for n in $(seq 0.0 0.1 1.0); do
       mkdir sim_${n};
       cd sim_${n};
-      nice critical ../spinvalve.conf ${n} > output.log &
+      nice critical ../spinvalve.conf ${n} &> output.log &
       cd ..;
     done
 
