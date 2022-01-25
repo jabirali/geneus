@@ -108,7 +108,7 @@ contains
                 write (stdout, '(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
             type is (double precision)
                 ! Double-precision reals
-                write (stdout, '(a,3x,a,g10.8,2x,a)') '│', title_, value, '│'
+                write (stdout, '(a,3x,a,f10.8,2x,a)') '│', title_, value, '│'
         end select
     end subroutine
 

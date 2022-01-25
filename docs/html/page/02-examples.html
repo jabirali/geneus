@@ -385,8 +385,9 @@ We can then use a Bash loop to start multiple parallel simulations with differen
 <span class="k">done</span>
 </code></pre></div>
 
+<p>The processes run in parallel in the background, each one writing its progress to a file <code>output.log</code> in the relevant subfolders.
+You can use the command <code>tail -f sim_0.2/output.log</code>, for example, to monitor the progress of one of the simulations.</p>
 <p>Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
-The processes run in parallel in the background, each one writing its progress to a file <code>output.log</code> in the relevant subfolders.
 The charge current is conserved, so we can extract it at any point in the ferromagnet; in this case, we use <code>tail -n 1</code> to extract it from the right end.
 In Bash, these results can then be collected by running:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
@@ -431,7 +432,7 @@ We then perform parallel simulations for magnetization angles <script type="math
 <div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
   <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
-  critical ../spinvalve.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  nice critical ../spinvalve.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> &gt; output.log <span class="p">&amp;</span>
   <span class="nb">cd</span> ..<span class="p">;</span>
 <span class="k">done</span>
 </code></pre></div>
@@ -476,7 +477,7 @@ However, in this case we will assume zero temperature and perpendicular magnetiz
 <div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
   <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
-  flow ../spinvalve2.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  nice flow ../spinvalve2.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>&gt; output.log <span class="p">&amp;</span>
   <span class="nb">cd</span> ..<span class="p">;</span>
 <span class="k">done</span>
 </code></pre></div>
@@ -484,8 +485,7 @@ However, in this case we will assume zero temperature and perpendicular magnetiz
 <p>According to the configuration file above, the order parameter is initially set to a small value <script type="math/tex"> \Delta = 0.01\Delta_0 </script>.
 The simulation program then performs a fixed number of selfconsistency iterations, and determines whether the order parameter is spontaneously increasing (&gt;1) or decreasing (&lt;1) compared to its initial value.
 This can be used to classify regions in parameter space as having a stable or unstable superconducting solution branch.</p>
-<p>The simulations should take about 10 min to complete. 
-The results can then be collected to a single output file:</p>
+<p>Upon completion, the results can then be collected to a single output file:</p>
 <div class="codehilite"><pre><span></span><code>cat sim_*/flow.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; flow.dat
 </code></pre></div>
 

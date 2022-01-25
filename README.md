@@ -25,6 +25,13 @@ compile the software via the following:
 The executables will then end up in the project subfolder `bin`. See
 the [documentation][docs] for more information on how to use these.
 
+Before running any simulations, it's recommended that you add
+
+	ulimit -s unlimited
+
+to your shell config (e.g. `~/.bashrc`). If not, limitations in stack size
+may result in crashes if you attempt to multiple simulations in parallel.
+
 ## Differences from v1
 In contrast to GENEUS v1, this branch only supports a single `cmake` build
 type, a single platform (Ubuntu x86-64), and a single compiler (GFortran).
