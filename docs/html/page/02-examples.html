@@ -209,17 +209,10 @@ This is what we have done in the example above: since both superconductors have 
 Note that since the order defaults to 1, it is optional to define it for the normal metal here.</p>
 <p>After saving the above configuration file in a suitable folder as e.g.  <code>josephson.conf</code>, open a terminal in that directory.
 The simulation can now be started using the <code>converge</code> program:</p>
-<div class="codehilite"><pre><span></span><code>converge josephson.conf <span class="p">&amp;</span>
+<div class="codehilite"><pre><span></span><code>converge josephson.conf
 </code></pre></div>
 
-<p>The simulation program should now run in the background.
-It will continuously write status information to the file <code>output.log</code>, while information about any errors that might occur is written to <code>error.log</code>.
-In order to track the progress of the simulation, you can use the command <code>tail</code>:</p>
-<div class="codehilite"><pre><span></span><code>tail -n +0 -f *.log
-</code></pre></div>
-
-<p>If you compiled the program using IFort, and have a modern processor (e.g. an Intel Core i7 in my case), the simulation should finish in less than a minute.
-During that time, it solves the Usadel equation as a function of position for 1000 energies in the range <script type="math/tex">(0,30\Delta_0)</script>.
+<p>The simulation program should now solve the Usadel equation as a function of position for 1000 energies in the range <script type="math/tex">(0,30\Delta_0)</script>.
 Physical observables such as the density of states and supercurrents are subsequently calculated from the propagators, and the results saved to DAT files.</p>
 <p>For this system, we may be especially interested in displaying the charge supercurrent in the system.
 If you have Gnuplot installed, you can visualize the results by running <code>gnuplot</code> in the terminal, and then typing:</p>
@@ -269,7 +262,7 @@ The goal will be to calculate the local density of states in the junction.</p>
 Note that there is no need to define boundary conditions for the "outer" interfaces: when no material is defined there, the program will automatically select vacuum boundary conditions.
 The only thing needed to perform a selfconsistent calculation in the superconductor, is to specify a positive order for that layer (in this case 2).
 The simulation can again be performed using the <code>converge</code> program:</p>
-<div class="codehilite"><pre><span></span><code>converge bilayer.conf <span class="p">&amp;</span>
+<div class="codehilite"><pre><span></span><code>converge bilayer.conf
 </code></pre></div>
 
 <p>The simulation program will alternate between solving the Usadel equation in the two layers.
@@ -278,9 +271,8 @@ This is because the state changes rapidly between iterations in the beginning, a
 This "bootstrap procedure" continues until the change in the Riccati parameters between iterations is below 1%.
 After that, the program start to perform proper selfconsistency iterations, where it both solves the Usadel equation and updates the order parameter.
 After each such iteration, the physical observables in the system is written to output files, making it possible to preview the results.
-Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.
-Using IFort and a modern processor, the entire simulation should require roughly 30 min to converge (using a default error tolerance of <script type="math/tex"> 10^{-8} </script> for the Riccati parameters).</p>
-<p>Once the simulation has finished, the relevant output file is <code>density.dat</code>.
+Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.</p>
+<p>Once the simulation finishes, the relevant output file is <code>density.dat</code>.
 The first three columns of this file correspond to the position, energy, and the spin-independent local density of states, respectively.
 The results are easily visualized as a contour plot in Gnuplot:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w">  </span><span class="s">&#39;Position&#39;</span><span class="w"></span>
@@ -323,16 +315,16 @@ As for the normal metals, we will treat these as reservoirs at voltages <script 
 </code></pre></div>
 
 <p>Save the configuration above as <code>voltage.conf</code>, and start the simulation:</p>
-<div class="codehilite"><pre><span></span><code>converge voltage.conf <span class="p">&amp;</span>
+<div class="codehilite"><pre><span></span><code>converge voltage.conf
 </code></pre></div>
 
 <p>By default, a convergence acceleration method is invoked every 8th selfconsistency iteration.
 For systems without phase gradients (i.e. charge supercurrents), this can speed up convergence by a factor 2-5x.
-However, for systems with such phase gradients, the convergence acceleration procedure fails miserably, and should be disabled.
+However, for systems with such phase gradients, this procedure often diverges and should be disabled.
 This is done by setting the parameter <code>boost</code> to false in the example above.</p>
 <p>Note that you explicitly need to set <code>nonequilibrium</code> to true in each layer where you wish to solve the out-of-equilibrium kinetic equations.
 Without this switch, the simulation program will assume that it is dealing with an equilibrium problem, and only solve the Usadel equation for the retarded propagators.</p>
-<p>The example above is among the slowest single-layer junctions you can simulate with the code: using IFort and a modern processor, it takes roughly 90 min to converge completely.
+<p>The example above is among the slowest single-layer junctions you can simulate with the code, typically taking a few hours to converge completely.
 This is because the code in general requires a large number of iterations to perform selfconsistent calculations with phase gradients, a problem that is further exacerbated by the lack of convergence acceleration.
 If you wish to perform some faster numerical experiments to explore the out-of-equilibrium functionality, I would recommend testing N/N/N systems first.</p>
 <p>Once the simulation finishes, the resistive current and supercurrent can be visualized together using Gnuplot:</p>
@@ -388,13 +380,13 @@ We can then use a Bash loop to start multiple parallel simulations with differen
 <div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
   <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
-  converge ../helical.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  nice converge ../helical.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> &gt; output.log <span class="p">&amp;</span>
   <span class="nb">cd</span> ..<span class="p">;</span>
 <span class="k">done</span>
 </code></pre></div>
 
-<p>With IFort and an Intel Core i7, it takes roughly 3 min for all the simulations to complete.
-Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
+<p>Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
+The processes run in parallel in the background, each one writing its progress to a file <code>output.log</code> in the relevant subfolders.
 The charge current is conserved, so we can extract it at any point in the ferromagnet; in this case, we use <code>tail -n 1</code> to extract it from the right end.
 In Bash, these results can then be collected by running:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
