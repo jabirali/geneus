@@ -38,6 +38,7 @@ contains
       if (this%information >= 0) then
         write(stdout,'(6x,a,1x,i4,1x,a,1x,i4,1x,a,f0.5,a1)',advance='no') &
           '[',n,'/',size(this%energy),']  E = ',this%energy(n), achar(13)
+        flush(stdout)
       end if
 
       ! Update the propagator pointers (bulk)
