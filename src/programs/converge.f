@@ -40,6 +40,7 @@ program converge_p
   stack % correlation   = output('correlation.dat')
   stack % magnetization = output('magnetization.dat')
   stack % density       = output('density.dat')
+  stack % triplets      = output('triplets.dat')
 
 
 

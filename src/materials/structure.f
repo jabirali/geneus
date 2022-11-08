@@ -31,6 +31,7 @@ module structure_m
     integer, allocatable :: magnetization     !! Output unit (allocate to write magnetizations to file)
     integer, allocatable :: distribution      !! Output unit (allocate to write distributions  to file)
     integer, allocatable :: density           !! Output unit (allocate to write density of states to file)
+    integer, allocatable :: triplets          !! Output unit (allocate to write triplet correlations to file)
   contains
     ! Basic construction and management
     procedure :: push                => structure_push                !! Construct a single layer
@@ -654,6 +655,17 @@ contains
           end do
           ! Newline
           write(this % distribution,'()')
+        end if
+
+        ! Write triplet correlations
+        if (allocated(this % triplets)) then
+          ! Energies
+          do n=1,size(ptr % energy)
+            write(this % triplets,'(*(es20.12e3,:,"	"))') &
+              z, ptr % energy(n), ptr % propagator(n,m) % triplets()
+          end do
+          ! Newline
+          write(this % triplets,'()')
         end if
 
         ! Write density of states

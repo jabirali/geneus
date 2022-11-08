@@ -65,7 +65,8 @@ module propagator_m
     procedure  :: supercurrent       => propagator_supercurrent                 !! Spectral supercurrents
     procedure  :: lossycurrent       => propagator_lossycurrent                 !! Spectral dissipative currents
     procedure  :: accumulation       => propagator_accumulation                 !! Spectral accumulations
-    procedure  :: correlation        => propagator_correlation                  !! Spectral correlations
+    procedure  :: correlation        => propagator_correlation                  !! Singlet correlations
+    procedure  :: triplets           => propagator_triplets                     !! Triplet correlations
     procedure  :: density            => propagator_density                      !! Spin-resolved density of states
 
     ! Miscellaneous utiliy functions for working with propagator objects
@@ -424,6 +425,26 @@ contains
 
     ! Trace out the singlet component
     r = trace((0.0_wp,-1.0_wp) * pauli2 * (f+conjg(ft)))/8
+  end function
+
+  pure function propagator_triplets(this) result(D)
+    !! Calculates the spin-triplet correlations.
+    class(propagator), intent(in) :: this
+    real(wp), dimension(0:15)   :: D
+
+    type(nambu) :: GR
+    type(spin)  :: f, ft
+
+    ! Extract the anomalous retarded propagator
+    GR = this % retarded()
+    f  = +GR % matrix(1:2,3:4) 
+    ft = -GR % matrix(3:4,1:2)
+
+    ! Calculate the triplet correlations
+    D(0:3) = re(trace(pauli*f))/2
+    D(4:7) = re(trace(pauli*ft))/2
+    D(8:11) = im(trace(pauli*f))/2
+    D(12:15) = im(trace(pauli*ft))/2
   end function
 
   pure function propagator_density(this) result(D)
