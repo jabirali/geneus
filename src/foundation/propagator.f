@@ -430,7 +430,7 @@ contains
   pure function propagator_triplets(this) result(D)
     !! Calculates the spin-triplet correlations.
     class(propagator), intent(in) :: this
-    real(wp), dimension(0:15)   :: D
+    real(wp), dimension(0:7)      :: D
 
     type(nambu) :: GR
     type(spin)  :: f, ft
@@ -441,10 +441,14 @@ contains
     ft = -GR % matrix(3:4,1:2)
 
     ! Calculate the triplet correlations
-    D(0:3) = re(trace(pauli*f))/2
-    D(4:7) = re(trace(pauli*ft))/2
-    D(8:11) = im(trace(pauli*f))/2
-    D(12:15) = im(trace(pauli*ft))/2
+    D(0) = re(f%matrix(1,1))
+    D(1) = im(f%matrix(1,1))
+    D(2) = re(ft%matrix(1,1))
+    D(3) = im(ft%matrix(1,1))
+    D(4) = re(f%matrix(2,2))
+    D(5) = im(f%matrix(2,2))
+    D(6) = re(ft%matrix(2,2))
+    D(7) = im(ft%matrix(2,2))
   end function
 
   pure function propagator_density(this) result(D)
