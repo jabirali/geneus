@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Materials</li>
@@ -141,14 +149,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/spinscattering.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/spinscattering.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/spinscattering.f.html'>spinscattering.f</a></li>
+     <li><a href='../sourcefile/spinscattering.f90.html'>spinscattering.f90</a></li>
     
   
      <li class="active">spinscattering_m</li>
@@ -235,7 +243,7 @@
     
     <div class="col-md-9" id='text'>
     <p>This submodule is included by conductor.f, and contains equations which model 
- spin-flip scattering, spin-orbit scattering, and magnetic orbital depairing.</p>
+spin-flip scattering, spin-orbit scattering, and magnetic orbital depairing.</p>
       <br>
     
   
@@ -248,9 +256,9 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href='../module/condmat_m.html'>condmat_m</a></li>
-    
     <li><a href='../module/material_m.html'>material_m</a></li>
+    
+    <li><a href='../module/condmat_m.html'>condmat_m</a></li>
     
   </ul>
       </li>
@@ -355,7 +363,7 @@
     
     
     <h3>
-public impure function <a href='../proc/spinscattering_construct.html'>spinscattering_construct</a>(parent) result(this)
+public function <a href='../proc/spinscattering_construct.html'>spinscattering_construct</a>(parent) result(this)
     
     
    
@@ -439,91 +447,6 @@ public impure function <a href='../proc/spinscattering_construct.html'>spinscatt
   <div class="panel-body">
     
      
-     <h4>Components</h4>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-material%7E2"></span>class(<a href='../type/material.html'>material</a>),</td>
-  
-  <td>public,</td>
-  <td>pointer</td><td>::</td>
-  <td><strong>material</strong></td><td>=> </td><td>null()</td><td><p>Pointer to the material modelled by this instance</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nambuv"></span>type(nambu),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>nambuv</strong></td><td></td><td></td><td><p>Pauli matrices spanning the 4×4 Spin-Nambu space</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-depairing"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>depairing</strong></td><td> =</td><td>0.0_wp</td><td><p>Orbital depairing coefficient</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinflip"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spinflip</strong></td><td> =</td><td>0.0_wp</td><td><p>Spin-flip  scattering coefficient (1/8τΔ)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinorbit%7E2"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spinorbit</strong></td><td> =</td><td>0.0_wp</td><td><p>Spin-orbit scattering coefficient (1/8τΔ)</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-     
      
      <h4>Constructor</h4>
        
@@ -535,7 +458,7 @@ public impure function <a href='../proc/spinscattering_construct.html'>spinscatt
              
              
              
-             <tr><td>public impure function <strong><a href='../proc/spinscattering_construct.html'>spinscattering_construct</a></strong>(parent)</td><td><p>Constructs a spinscattering object with a given parent material.</p></td></tr>
+             <tr><td>public  function <strong><a href='../proc/spinscattering_construct.html'>spinscattering_construct</a></strong>(parent)</td><td><p>Constructs a spinscattering object with a given parent material.</p></td></tr>
              
         
        </tbody>
@@ -547,10 +470,10 @@ public impure function <a href='../proc/spinscattering_construct.html'>spinscatt
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/spinscattering.html#boundprocedure-diffusion_equation%7E7'>diffusion_equation</a></strong>  => spinscattering_diffusion_equation </td>
+       <tr><td>procedure, public :: <strong><a href='../type/spinscattering.html#boundprocedure-diffusion_equation'>diffusion_equation</a></strong>  => spinscattering_diffusion_equation </td>
        <td><p>Diffusion equation</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/spinscattering.html#boundprocedure-kinetic_equation%7E5'>kinetic_equation</a></strong>  => spinscattering_kinetic_equation </td>
+       <tr><td>procedure, public :: <strong><a href='../type/spinscattering.html#boundprocedure-kinetic_equation'>kinetic_equation</a></strong>  => spinscattering_kinetic_equation </td>
        <td><p>Kinetic equation</p></td></tr>
       
        </tbody>
@@ -571,7 +494,7 @@ public impure function <a href='../proc/spinscattering_construct.html'>spinscatt
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-spinscattering_construct"></span><h3>
-public impure function <a href='../proc/spinscattering_construct.html'>spinscattering_construct</a>(parent) result(this)
+public function <a href='../proc/spinscattering_construct.html'>spinscattering_construct</a>(parent) result(this)
     
     
    
@@ -652,16 +575,17 @@ public impure function <a href='../proc/spinscattering_construct.html'>spinscatt
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

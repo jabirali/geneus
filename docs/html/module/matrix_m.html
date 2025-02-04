@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Foundation</li>
@@ -141,14 +149,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/matrix.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/matrix.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/matrix.f.html'>matrix.f</a></li>
+     <li><a href='../sourcefile/matrix.f90.html'>matrix.f90</a></li>
     
   
      <li class="active">matrix_m</li>
@@ -224,7 +232,8 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This file defines functions that perform some common matrix operations.</p>
+    <p>This module implements standard operations from linear algebra, including
+including matrix construction, inversion, commutation, and taking traces.</p>
       <br>
     
   
@@ -384,7 +393,7 @@ public pure function <a href='../proc/identity.html'>identity</a>(n) result(R)
   
   
      <h4>Return Value <small>real(kind=wp),
-  dimension(n,n)</small></h4>
+  dimension(n, n)</small></h4>
   <p>Identity matrix [n×n]</p>
     
 
@@ -410,7 +419,7 @@ public pure function <a href='../proc/matrix_inverse_re.html'>matrix_inverse_re<
 
 
 
-<p>Wrapper for matrix_inverse_cx that allows the procedure to be used for real matrices.</p>
+<p>Wrapper for matrix_inverse_cx that operates on real matrices.</p>
     
     <h4>Arguments</h4>
     
@@ -435,7 +444,7 @@ public pure function <a href='../proc/matrix_inverse_re.html'>matrix_inverse_re<
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix A [n×n]</p></td>
   
 </tr>
@@ -452,7 +461,7 @@ public pure function <a href='../proc/matrix_inverse_re.html'>matrix_inverse_re<
   
   
      <h4>Return Value <small>real(kind=wp),
-  dimension(size(A,1),size(A,1))</small></h4>
+  dimension(size(A, 1), size(A, 1))</small></h4>
   <p>Matrix R=A¯¹</p>
     
 
@@ -478,10 +487,10 @@ public pure function <a href='../proc/matrix_inverse_cx.html'>matrix_inverse_cx<
 
 
 
-<p>Invert a square n×n matrix using Gauss-Jordan elimination with partial pivoting.
- In the special case n=2, the inverse is evaluated using a cofactoring algorithm.
- [This implementation is based on Algorithm #2 in "Efficient matrix inversion via 
- Gauss-Jordan elimination and its parallelization" by E.S. Quintana et al. (1998)]</p>
+<p>Inverts a square matrix via Gauss-Jordan elimination with partial pivot
+(general) or a cofactoring algorithm (2x2 matrices). The implementation
+is based on Algorithm #2 in "Efficient matrix inversion via Gauss-Jordan
+elimination and its parallelization" by E.S. Quintana et al. (1998).</p>
     
     <h4>Arguments</h4>
     
@@ -506,7 +515,7 @@ public pure function <a href='../proc/matrix_inverse_cx.html'>matrix_inverse_cx<
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix A [n×n]</p></td>
   
 </tr>
@@ -523,7 +532,7 @@ public pure function <a href='../proc/matrix_inverse_cx.html'>matrix_inverse_cx<
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(size(A,1),size(A,1))</small></h4>
+  dimension(size(A, 1), size(A, 1))</small></h4>
   <p>Matrix R=A¯¹</p>
     
 
@@ -549,7 +558,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
 
 
 
-<p>Calculate the trace of a general complex matrix.</p>
+<p>Calculates the trace of a general complex matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -574,7 +583,7 @@ public pure function <a href='../proc/matrix_trace.html'>matrix_trace</a>(A) res
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix [n×m]</p></td>
   
 </tr>
@@ -617,7 +626,7 @@ public pure function <a href='../proc/commutator.html'>commutator</a>(A, B) resu
 
 
 
-<p>Calculate the commutator between two complex square matrices.</p>
+<p>Calculates the commutator between two complex square matrices.</p>
     
     <h4>Arguments</h4>
     
@@ -642,7 +651,7 @@ public pure function <a href='../proc/commutator.html'>commutator</a>(A, B) resu
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Left  matrix [n×n]</p></td>
   
 </tr>
@@ -657,7 +666,7 @@ public pure function <a href='../proc/commutator.html'>commutator</a>(A, B) resu
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(size(A,1),size(A,1))</td><td>::</td>
+  <td>dimension(size(A, 1), size(A, 1))</td><td>::</td>
   <td><strong>B</strong></td><td><p>Right matrix [n×n]</p></td>
   
 </tr>
@@ -674,7 +683,7 @@ public pure function <a href='../proc/commutator.html'>commutator</a>(A, B) resu
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(size(A,1),size(A,1))</small></h4>
+  dimension(size(A, 1), size(A, 1))</small></h4>
   <p>Commutator R = [A,B]</p>
     
 
@@ -700,7 +709,7 @@ public pure function <a href='../proc/anticommutator.html'>anticommutator</a>(A,
 
 
 
-<p>Calculate the anticommutator between two complex square matrices.</p>
+<p>Calculates the anticommutator between two complex square matrices.</p>
     
     <h4>Arguments</h4>
     
@@ -725,7 +734,7 @@ public pure function <a href='../proc/anticommutator.html'>anticommutator</a>(A,
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Left  matrix [n×n]</p></td>
   
 </tr>
@@ -740,7 +749,7 @@ public pure function <a href='../proc/anticommutator.html'>anticommutator</a>(A,
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(size(A,1),size(A,1))</td><td>::</td>
+  <td>dimension(size(A, 1), size(A, 1))</td><td>::</td>
   <td><strong>B</strong></td><td><p>Right matrix [n×n]</p></td>
   
 </tr>
@@ -757,7 +766,7 @@ public pure function <a href='../proc/anticommutator.html'>anticommutator</a>(A,
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(size(A,1),size(A,1))</small></h4>
+  dimension(size(A, 1), size(A, 1))</small></h4>
   <p>Anticommutator R = {A,B}</p>
     
 
@@ -783,7 +792,7 @@ public pure function <a href='../proc/vector_diag.html'>vector_diag</a>(A) resul
 
 
 
-<p>Extract the diagonal of a general complex matrix.</p>
+<p>Extracts the diagonal of a general complex matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -808,7 +817,7 @@ public pure function <a href='../proc/vector_diag.html'>vector_diag</a>(A) resul
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Matrix [n×m]</p></td>
   
 </tr>
@@ -825,7 +834,7 @@ public pure function <a href='../proc/vector_diag.html'>vector_diag</a>(A) resul
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(min(size(A,1),size(A,2)))</small></h4>
+  dimension(min(size(A, 1), size(A, 2)))</small></h4>
   <p>r = Diag(A)</p>
     
 
@@ -851,7 +860,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
 
 
 
-<p>Construct a block-diagonal matrix R from two general matrices A and B.</p>
+<p>Constructs a block-diagonal matrix R from two general matrices A and B.</p>
     
     <h4>Arguments</h4>
     
@@ -876,7 +885,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>A</strong></td><td><p>Left  matrix [n×m]</p></td>
   
 </tr>
@@ -891,7 +900,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
   <td>intent(in),</td>
   <td></td>
   
-  <td>dimension(:,:)</td><td>::</td>
+  <td>dimension(:, :)</td><td>::</td>
   <td><strong>B</strong></td><td><p>Right matrix [p×q]</p></td>
   
 </tr>
@@ -908,7 +917,7 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
   
   
      <h4>Return Value <small>complex(kind=wp),
-  dimension(size(A,1)+size(B,1), size(A,2)+size(B,2))</small></h4>
+  dimension(size(A, 1) + size(B, 1), size(A, 2) + size(B, 2))</small></h4>
   <p>R = Diag(A,B)</p>
     
 
@@ -932,16 +941,17 @@ public pure function <a href='../proc/matrix_diag.html'>matrix_diag</a>(A, B) re
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

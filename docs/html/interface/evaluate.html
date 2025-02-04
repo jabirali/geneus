@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -126,25 +131,28 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 0.5% of total for procedures.</p>Including implementation: 102 statements, 18.0% of total for procedures.">3 statements</a>
+    title="<p> 0.5% of total for procedures.</p>Including implementation: 102 statements, 18.2% of total for procedures.">3 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/evaluate.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/evaluate.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/evaluate.f.html'>evaluate.f</a></li>
+     <li><a href='../sourcefile/evaluate.f90.html'>evaluate.f90</a></li>
     
      <li><a href='../module/evaluate_m.html'>evaluate_m</a></li>
     
@@ -219,10 +227,10 @@
     
     <div class="col-md-9" id='text'>
       <h2>public interface evaluate</h2>
-   <p>Public interface for various routines that evaluate mathematical expressions.</p>
+   
      
      
-    <br>
+    
 
      <section class="visible-xs visible-sm hidden-md">
        
@@ -285,7 +293,7 @@
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-evaluate_scalar_value"></span><h3>
-private impure subroutine evaluate_scalar_value(expression, value)
+private subroutine evaluate_scalar_value(expression, value)
     
     
    
@@ -296,7 +304,7 @@ private impure subroutine evaluate_scalar_value(expression, value)
 
 
 
-<p>This subroutine takes a scalar mathematical expression as input, and returns the value.</p><a href="../proc/evaluate_scalar_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Takes a scalar mathematical expression as input and returns the value.</p><a href="../proc/evaluate_scalar_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -317,12 +325,12 @@ private impure subroutine evaluate_scalar_value(expression, value)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>expression</strong></td><td><p>Scalar-valued mathematical expression</p></td>
+  <td><strong>expression</strong></td><td><p>Mathematical expression</p></td>
   
 </tr>
 
@@ -337,7 +345,7 @@ private impure subroutine evaluate_scalar_value(expression, value)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>value</strong></td><td><p>Result of parsing the expression</p></td>
+  <td><strong>value</strong></td><td><p>Parsed result</p></td>
   
 </tr>
 
@@ -355,7 +363,7 @@ private impure subroutine evaluate_scalar_value(expression, value)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-evaluate_scalar_field"></span><h3>
-private impure subroutine evaluate_scalar_field(expression, domain, value)
+private subroutine evaluate_scalar_field(expression, domain, value)
     
     
    
@@ -366,9 +374,7 @@ private impure subroutine evaluate_scalar_field(expression, domain, value)
 
 
 
-<p>This subroutine takes a scalar mathematical function of some variable 'z' as input,  along 
- with an array with discrete values for that variable 'z'.  It parses the provided function,
- evaluates it at each 'z'-value in the array, and then returns the discretized scalar field.</p><a href="../proc/evaluate_scalar_field.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Evaluates a scalar-valued function of 'z' at the provided values for 'z'.</p><a href="../proc/evaluate_scalar_field.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -389,12 +395,12 @@ private impure subroutine evaluate_scalar_field(expression, domain, value)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>expression</strong></td><td><p>Scalar-valued function of position 'z'</p></td>
+  <td><strong>expression</strong></td><td><p>Function of 'z'</p></td>
   
 </tr>
 
@@ -409,7 +415,7 @@ private impure subroutine evaluate_scalar_field(expression, domain, value)
   <td></td>
   
   <td>dimension(:)</td><td>::</td>
-  <td><strong>domain</strong></td><td><p>Domain of the independent variable 'z'</p></td>
+  <td><strong>domain</strong></td><td><p>Values of 'z'</p></td>
   
 </tr>
 
@@ -424,7 +430,7 @@ private impure subroutine evaluate_scalar_field(expression, domain, value)
   <td></td>
   
   <td>dimension(:), allocatable</td><td>::</td>
-  <td><strong>value</strong></td><td><p>Result of evaluating the field at each point of the domain</p></td>
+  <td><strong>value</strong></td><td><p>Parsed result</p></td>
   
 </tr>
 
@@ -442,7 +448,7 @@ private impure subroutine evaluate_scalar_field(expression, domain, value)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-evaluate_vector_value"></span><h3>
-private impure subroutine evaluate_vector_value(expression, value)
+private subroutine evaluate_vector_value(expression, value)
     
     
    
@@ -453,7 +459,7 @@ private impure subroutine evaluate_vector_value(expression, value)
 
 
 
-<p>This subroutine takes a vector mathematical expression as input, and returns the value.</p><a href="../proc/evaluate_vector_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Takes a vector mathematical expression as input and returns the value.</p><a href="../proc/evaluate_vector_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -474,12 +480,12 @@ private impure subroutine evaluate_vector_value(expression, value)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>expression</strong></td><td><p>Vector-valued mathematical expression</p></td>
+  <td><strong>expression</strong></td><td><p>Mathematical expression</p></td>
   
 </tr>
 
@@ -494,7 +500,7 @@ private impure subroutine evaluate_vector_value(expression, value)
   <td></td>
   
   <td>dimension(3)</td><td>::</td>
-  <td><strong>value</strong></td><td><p>Result of parsing the expression</p></td>
+  <td><strong>value</strong></td><td><p>Parsed result</p></td>
   
 </tr>
 
@@ -512,7 +518,7 @@ private impure subroutine evaluate_vector_value(expression, value)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-evaluate_vector_field"></span><h3>
-private impure subroutine evaluate_vector_field(expression, domain, value)
+private subroutine evaluate_vector_field(expression, domain, value)
     
     
    
@@ -523,9 +529,7 @@ private impure subroutine evaluate_vector_field(expression, domain, value)
 
 
 
-<p>This subroutine takes a vector mathematical function of some variable 'z' as input,  along 
- with an array with discrete values for that variable 'z'.  It parses the provided function,
- evaluates it at each 'z'-value in the array, and then returns the discretized scalar field.</p><a href="../proc/evaluate_vector_field.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Evaluates a vector-valued function of 'z' at the provided values for 'z'.</p><a href="../proc/evaluate_vector_field.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -546,12 +550,12 @@ private impure subroutine evaluate_vector_field(expression, domain, value)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>expression</strong></td><td><p>Vector-valued function of position 'z'</p></td>
+  <td><strong>expression</strong></td><td><p>Function of 'z'</p></td>
   
 </tr>
 
@@ -566,7 +570,7 @@ private impure subroutine evaluate_vector_field(expression, domain, value)
   <td></td>
   
   <td>dimension(:)</td><td>::</td>
-  <td><strong>domain</strong></td><td><p>Domain of the independent variable 'z'</p></td>
+  <td><strong>domain</strong></td><td><p>Values of 'z'</p></td>
   
 </tr>
 
@@ -580,8 +584,8 @@ private impure subroutine evaluate_vector_field(expression, domain, value)
   <td></td>
   <td></td>
   
-  <td>dimension(:,:), allocatable</td><td>::</td>
-  <td><strong>value</strong></td><td><p>Result of evaluating the field at each point of the domain</p></td>
+  <td>dimension(:, :), allocatable</td><td>::</td>
+  <td><strong>value</strong></td><td><p>Parsed result</p></td>
   
 </tr>
 
@@ -599,7 +603,7 @@ private impure subroutine evaluate_vector_field(expression, domain, value)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-evaluate_logical_value"></span><h3>
-private impure subroutine evaluate_logical_value(expression, value)
+private subroutine evaluate_logical_value(expression, value)
     
     
    
@@ -610,7 +614,7 @@ private impure subroutine evaluate_logical_value(expression, value)
 
 
 
-<p>This subroutine takes a scalar logical expression as input, and returns the value.</p><a href="../proc/evaluate_logical_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Takes a scalar logical expression as input and returns the value.</p><a href="../proc/evaluate_logical_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -631,12 +635,12 @@ private impure subroutine evaluate_logical_value(expression, value)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>expression</strong></td><td><p>Either the character 'T' or 'F'</p></td>
+  <td><strong>expression</strong></td><td><p>Character 'T' or 'F'</p></td>
   
 </tr>
 
@@ -651,7 +655,7 @@ private impure subroutine evaluate_logical_value(expression, value)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>value</strong></td><td><p>Result of parsing the expression</p></td>
+  <td><strong>value</strong></td><td><p>Parsed expression</p></td>
   
 </tr>
 
@@ -669,7 +673,7 @@ private impure subroutine evaluate_logical_value(expression, value)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-evaluate_integer_value"></span><h3>
-private impure subroutine evaluate_integer_value(expression, value)
+private subroutine evaluate_integer_value(expression, value)
     
     
    
@@ -680,7 +684,7 @@ private impure subroutine evaluate_integer_value(expression, value)
 
 
 
-<p>This subroutine takes a scalar integer expression as input, and returns the value.</p><a href="../proc/evaluate_integer_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Takes a scalar integer expression as input and returns the value.</p><a href="../proc/evaluate_integer_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -701,12 +705,12 @@ private impure subroutine evaluate_integer_value(expression, value)
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>expression</strong></td><td><p>String containing an integer</p></td>
+  <td><strong>expression</strong></td><td><p>Numerical expression</p></td>
   
 </tr>
 
@@ -721,7 +725,7 @@ private impure subroutine evaluate_integer_value(expression, value)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>value</strong></td><td><p>Result of parsing the expression</p></td>
+  <td><strong>value</strong></td><td><p>Parsed result</p></td>
   
 </tr>
 
@@ -747,16 +751,17 @@ private impure subroutine evaluate_integer_value(expression, value)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

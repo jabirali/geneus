@@ -74,17 +74,9 @@ After saving the above configuration file in a suitable folder as e.g.  `josephs
 The simulation can now be started using the `converge` program:
 
     :::bash
-    converge josephson.conf &
+    converge josephson.conf
 
-The simulation program should now run in the background.
-It will continuously write status information to the file `output.log`, while information about any errors that might occur is written to `error.log`.
-In order to track the progress of the simulation, you can use the command `tail`:
-
-    :::bash
-    tail -n +0 -f *.log
-
-If you compiled the program using IFort, and have a modern processor (e.g. an Intel Core i7 in my case), the simulation should finish in less than a minute.
-During that time, it solves the Usadel equation as a function of position for 1000 energies in the range \((0,30\Delta_0)\).
+The simulation program should now solve the Usadel equation as a function of position for 1000 energies in the range \((0,30\Delta_0)\).
 Physical observables such as the density of states and supercurrents are subsequently calculated from the propagators, and the results saved to DAT files.
 
 For this system, we may be especially interested in displaying the charge supercurrent in the system.
@@ -143,7 +135,7 @@ The only thing needed to perform a selfconsistent calculation in the superconduc
 The simulation can again be performed using the `converge` program:
 
     :::bash
-    converge bilayer.conf &
+    converge bilayer.conf
 
 The simulation program will alternate between solving the Usadel equation in the two layers.
 Note that for the first few iterations, the order parameter in the superconductor is locked to \(\Delta = \Delta_0\).
@@ -152,9 +144,8 @@ This "bootstrap procedure" continues until the change in the Riccati parameters 
 After that, the program start to perform proper selfconsistency iterations, where it both solves the Usadel equation and updates the order parameter.
 After each such iteration, the physical observables in the system is written to output files, making it possible to preview the results.
 Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.
-Using IFort and a modern processor, the entire simulation should require roughly 30 min to converge (using a default error tolerance of \( 10^{-8} \) for the Riccati parameters).
 
-Once the simulation has finished, the relevant output file is `density.dat`.
+Once the simulation finishes, the relevant output file is `density.dat`.
 The first three columns of this file correspond to the position, energy, and the spin-independent local density of states, respectively.
 The results are easily visualized as a contour plot in Gnuplot:
 
@@ -204,17 +195,17 @@ An appropriate configuration file for the system above is:
 Save the configuration above as `voltage.conf`, and start the simulation:
 
     :::bash
-    converge voltage.conf &
+    converge voltage.conf
 
 By default, a convergence acceleration method is invoked every 8th selfconsistency iteration.
 For systems without phase gradients (i.e. charge supercurrents), this can speed up convergence by a factor 2-5x.
-However, for systems with such phase gradients, the convergence acceleration procedure fails miserably, and should be disabled.
+However, for systems with such phase gradients, this procedure often diverges and should be disabled.
 This is done by setting the parameter `boost` to false in the example above.
 
 Note that you explicitly need to set `nonequilibrium` to true in each layer where you wish to solve the out-of-equilibrium kinetic equations.
 Without this switch, the simulation program will assume that it is dealing with an equilibrium problem, and only solve the Usadel equation for the retarded propagators.
 
-The example above is among the slowest single-layer junctions you can simulate with the code: using IFort and a modern processor, it takes roughly 90 min to converge completely.
+The example above is among the slowest single-layer junctions you can simulate with the code, typically taking a few hours to converge completely.
 This is because the code in general requires a large number of iterations to perform selfconsistent calculations with phase gradients, a problem that is further exacerbated by the lack of convergence acceleration.
 If you wish to perform some faster numerical experiments to explore the out-of-equilibrium functionality, I would recommend testing N/N/N systems first.
 
@@ -281,11 +272,13 @@ We can then use a Bash loop to start multiple parallel simulations with differen
     for n in $(seq 0.0 0.1 1.0); do
       mkdir sim_${n};
       cd sim_${n};
-      converge ../helical.conf ${n} &
+      nice converge ../helical.conf ${n} &> output.log &
       cd ..;
     done
 
-With IFort and an Intel Core i7, it takes roughly 3 min for all the simulations to complete.
+The processes run in parallel in the background, each one writing its progress to a file `output.log` in the relevant subfolders.
+You can use the command `tail -f sim_0.2/output.log`, for example, to monitor the progress of one of the simulations.
+
 Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
 The charge current is conserved, so we can extract it at any point in the ferromagnet; in this case, we use `tail -n 1` to extract it from the right end.
 In Bash, these results can then be collected by running:
@@ -339,7 +332,7 @@ We then perform parallel simulations for magnetization angles \( \theta/\pi \in 
     for n in $(seq 0.0 0.1 1.0); do
       mkdir sim_${n};
       cd sim_${n};
-      critical ../spinvalve.conf ${n} &
+      nice critical ../spinvalve.conf ${n} &> output.log &
       cd ..;
     done
 
@@ -390,7 +383,7 @@ Save the file above as e.g. `spinvalve2.conf`, and run the following commands to
     for n in $(seq 0.0 0.1 1.0); do
       mkdir sim_${n};
       cd sim_${n};
-      flow ../spinvalve2.conf ${n} &
+      nice flow ../spinvalve2.conf ${n} &> output.log &
       cd ..;
     done
 
@@ -398,8 +391,7 @@ According to the configuration file above, the order parameter is initially set 
 The simulation program then performs a fixed number of selfconsistency iterations, and determines whether the order parameter is spontaneously increasing (>1) or decreasing (<1) compared to its initial value.
 This can be used to classify regions in parameter space as having a stable or unstable superconducting solution branch.
 
-The simulations should take about 10 min to complete. 
-The results can then be collected to a single output file:
+Upon completion, the results can then be collected to a single output file:
 
     :::bash
     cat sim_*/flow.dat | cut -f 2,3 > flow.dat

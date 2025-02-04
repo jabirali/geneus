@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Materials</li>
@@ -136,19 +144,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 6.6% of total for modules and submodules.">218 statements</a>
+    title=" 6.6% of total for modules and submodules.">217 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/material.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/material.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/material.f.html'>material.f</a></li>
+     <li><a href='../sourcefile/material.f90.html'>material.f90</a></li>
     
   
      <li class="active">material_m</li>
@@ -225,9 +233,9 @@
     
     <div class="col-md-9" id='text'>
     <p>This module defines the data type 'material',  which models the state of a physical material for a discretized range of
- positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
- intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
- type defines the essential data structures and program structure, while the derived subtypes will define actual physics.</p>
+positions and energies. This is an abstract type, meaning that it is not intended to be instantiated on its own, but is
+intended as a base type for physical materials like conductors, superconductors, and ferromagnets. In other words, this
+type defines the essential data structures and program structure, while the derived subtypes will define actual physics.</p>
       <br>
     
   
@@ -240,9 +248,9 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href='../module/stdio_m.html'>stdio_m</a></li>
-    
     <li><a href='../module/condmat_m.html'>condmat_m</a></li>
+    
+    <li><a href='../module/stdio_m.html'>stdio_m</a></li>
     
   </ul>
       </li>
@@ -335,525 +343,6 @@
   <div class="panel-body">
     
      
-     <h4>Components</h4>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-length"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>length</strong></td><td> =</td><td>1.00_wp</td><td><p>Material length (L/ξ)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-thouless"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>thouless</strong></td><td> =</td><td>1.00_wp</td><td><p>Thouless energy (ħD/L²)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-scattering"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>scattering</strong></td><td> =</td><td>0.01_wp</td><td><p>Inelastic scattering (η/Δ₀)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-transparent_a"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>transparent_a</strong></td><td> =</td><td>.false.</td><td><p>Interface transparency (left)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-transparent_b"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>transparent_b</strong></td><td> =</td><td>.false.</td><td><p>Interface transparency (right)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-phaselock"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>phaselock</strong></td><td> =</td><td>.false.</td><td><p>Lock the center-of-mass phase?</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nonequilibrium"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nonequilibrium</strong></td><td> =</td><td>.false.</td><td><p>Equilibrium?</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-transverse"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>transverse</strong></td><td> =</td><td>.false.</td><td><p>Transverse potential gradients?</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-voltage"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>voltage</strong></td><td> =</td><td>0.00_wp</td><td><p>Voltage (eV/Δ₀)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-temperature"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>temperature</strong></td><td> =</td><td>0.01_wp</td><td><p>Temperature (T/Tc)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinvoltage"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spinvoltage</strong></td><td> =</td><td>0.00_wp</td><td><p>Spin-voltage (eVs/Δ₀)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spintemperature"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>spintemperature</strong></td><td> =</td><td>0.00_wp</td><td><p>Spin-temperature (Ts/Tc)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-spinaxis"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(1:3)</td><td>::</td>
-  <td><strong>spinaxis</strong></td><td> =</td><td>[0, 0, 1]</td><td><p>Spin quantization axis</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-energy"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>energy</strong>(:)</td><td></td><td></td><td><p>Energy domain</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-location"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>location</strong>(:)</td><td></td><td></td><td><p>Position domain</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-propagator"></span>type(propagator),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>propagator</strong>(:,:)</td><td></td><td></td><td><p>Propagator values</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-backup"></span>type(propagator),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>backup</strong>(:,:)</td><td></td><td></td><td><p>Propagator backups</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-density%7E3"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>density</strong>(:,:,:)</td><td></td><td></td><td><p>Spin-resolved density of states</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-supercurrent%7E3"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>supercurrent</strong>(:,:)</td><td></td><td></td><td><p>Charge, spin, heat, and spin-heat supercurrents</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-lossycurrent%7E3"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>lossycurrent</strong>(:,:)</td><td></td><td></td><td><p>Charge, spin, heat, and spin-heat dissipative currents</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-accumulation%7E3"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>accumulation</strong>(:,:)</td><td></td><td></td><td><p>Charge, spin, heat, and spin-heat accumulation</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-magnetization%7E3"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>magnetization</strong>(:,:)</td><td></td><td></td><td><p>Magnetization due to exchange and Zeeman effects</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-correlation%7E3"></span>complex(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>correlation</strong>(:)</td><td></td><td></td><td><p>Superconducting pair-correlations</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-order"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>order</strong></td><td> =</td><td>1</td><td><p>Simulation priority of this material</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-material_a"></span>class(<a href='../type/material.html'>material</a>),</td>
-  
-  <td>public,</td>
-  <td>pointer</td><td>::</td>
-  <td><strong>material_a</strong></td><td>=> </td><td>null()</td><td><p>Material to the left  (default: vacuum)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-material_b"></span>class(<a href='../type/material.html'>material</a>),</td>
-  
-  <td>public,</td>
-  <td>pointer</td><td>::</td>
-  <td><strong>material_b</strong></td><td>=> </td><td>null()</td><td><p>Material to the right (default: vacuum)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-iteration"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>iteration</strong></td><td> =</td><td>0</td><td><p>Used to keep track of selfconsistent iteration cycles</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-selfconsistent"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>selfconsistent</strong></td><td> =</td><td>.true.</td><td><p>Whether to selfconsistently calculate the superconducting gap</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-boost"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>boost</strong></td><td> =</td><td>.true.</td><td><p>Whether to use convergence acceleration methods</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-scaling"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>scaling</strong></td><td> =</td><td>128</td><td><p>Maximal mesh increase (range: 2^N, N&gt;1)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-method"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>method</strong></td><td> =</td><td>4</td><td><p>Runge—Kutta order (range: 2, 4, 6)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-control"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>control</strong></td><td> =</td><td>2</td><td><p>Error control (1: defect, 2: global error, 3: 1 then 2, 4: 1 and 2)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-tolerance"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>tolerance</strong></td><td> =</td><td>1e-10_wp</td><td><p>Error tolerance (maximum defect or global error)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-information"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>information</strong></td><td> =</td><td>0</td><td><p>Debug information (range: [-1,2])</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-difference%7E2"></span>real(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>difference</strong></td><td> =</td><td>1e+10_wp</td><td><p>Difference between iterations</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-type_string"></span>character(len=128),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>type_string</strong></td><td> =</td><td>'MATERIAL'</td><td><p>Name of this material</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-     
      
           
      
@@ -861,19 +350,19 @@
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(manipulate), public :: <strong><a href='../type/material.html#boundprocedure-construct%7E3'>construct</a></strong>  </td>
+       <tr><td>procedure(manipulate), public :: <strong><a href='../type/material.html#boundprocedure-construct~3'>construct</a></strong>  </td>
        <td><p>Construct  object</p></td></tr>
       
-       <tr><td>procedure(initialize), public :: <strong><a href='../type/material.html#boundprocedure-initialize%7E4'>initialize</a></strong>  </td>
+       <tr><td>procedure(initialize), public :: <strong><a href='../type/material.html#boundprocedure-initialize~4'>initialize</a></strong>  </td>
        <td><p>Initialize object</p></td></tr>
       
-       <tr><td>procedure(manipulate), public :: <strong><a href='../type/material.html#boundprocedure-update_prehook%7E8'>update_prehook</a></strong>  </td>
+       <tr><td>procedure(manipulate), public :: <strong><a href='../type/material.html#boundprocedure-update_prehook~7'>update_prehook</a></strong>  </td>
        <td><p>Executed before update</p></td></tr>
       
-       <tr><td>procedure(manipulate), public :: <strong><a href='../type/material.html#boundprocedure-update_posthook%7E5'>update_posthook</a></strong>  </td>
+       <tr><td>procedure(manipulate), public :: <strong><a href='../type/material.html#boundprocedure-update_posthook~5'>update_posthook</a></strong>  </td>
        <td><p>Executed after  update</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-update%7E2'>update</a></strong>  => material_update </td>
+       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-update~2'>update</a></strong>  => material_update </td>
        <td><p>Calculate propagators</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-update_diffusion'>update_diffusion</a></strong>  => diffusion_update </td>
@@ -882,31 +371,31 @@
        <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-update_kinetic'>update_kinetic</a></strong>  => kinetic_update </td>
        <td><p>Calculate propagators (nonequilibrium)</p></td></tr>
       
-       <tr><td>procedure(diffusion_equation), public :: <strong><a href='../type/material.html#boundprocedure-diffusion_equation%7E6'>diffusion_equation</a></strong>  </td>
+       <tr><td>procedure(diffusion_equation), public :: <strong><a href='../type/material.html#boundprocedure-diffusion_equation~7'>diffusion_equation</a></strong>  </td>
        <td><p>Diffusion equation</p></td></tr>
       
-       <tr><td>procedure(diffusion_equation_a), public :: <strong><a href='../type/material.html#boundprocedure-diffusion_equation_a%7E4'>diffusion_equation_a</a></strong>  </td>
+       <tr><td>procedure(diffusion_equation_a), public :: <strong><a href='../type/material.html#boundprocedure-diffusion_equation_a~4'>diffusion_equation_a</a></strong>  </td>
        <td><p>Boundary condition (left)</p></td></tr>
       
-       <tr><td>procedure(diffusion_equation_b), public :: <strong><a href='../type/material.html#boundprocedure-diffusion_equation_b%7E4'>diffusion_equation_b</a></strong>  </td>
+       <tr><td>procedure(diffusion_equation_b), public :: <strong><a href='../type/material.html#boundprocedure-diffusion_equation_b~4'>diffusion_equation_b</a></strong>  </td>
        <td><p>Boundary condition (right)</p></td></tr>
       
-       <tr><td>procedure(kinetic_equation), public :: <strong><a href='../type/material.html#boundprocedure-kinetic_equation%7E4'>kinetic_equation</a></strong>  </td>
+       <tr><td>procedure(kinetic_equation), public :: <strong><a href='../type/material.html#boundprocedure-kinetic_equation~5'>kinetic_equation</a></strong>  </td>
        <td><p>Kinetic equation</p></td></tr>
       
-       <tr><td>procedure(kinetic_equation_a), public :: <strong><a href='../type/material.html#boundprocedure-kinetic_equation_a%7E2'>kinetic_equation_a</a></strong>  </td>
+       <tr><td>procedure(kinetic_equation_a), public :: <strong><a href='../type/material.html#boundprocedure-kinetic_equation_a~2'>kinetic_equation_a</a></strong>  </td>
        <td><p>Boundary condition (left)</p></td></tr>
       
-       <tr><td>procedure(kinetic_equation_b), public :: <strong><a href='../type/material.html#boundprocedure-kinetic_equation_b%7E2'>kinetic_equation_b</a></strong>  </td>
+       <tr><td>procedure(kinetic_equation_b), public :: <strong><a href='../type/material.html#boundprocedure-kinetic_equation_b~2'>kinetic_equation_b</a></strong>  </td>
        <td><p>Boundary condition (right)</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-conf%7E6'>conf</a></strong>  => material_conf </td>
+       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-conf~6'>conf</a></strong>  => material_conf </td>
        <td><p>Configures material parameters</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-save%7E3'>save</a></strong>  => material_save </td>
+       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-save~3'>save</a></strong>  => material_save </td>
        <td><p>Saves the state of the material</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-load%7E3'>load</a></strong>  => material_load </td>
+       <tr><td>procedure, public :: <strong><a href='../type/material.html#boundprocedure-load~3'>load</a></strong>  => material_load </td>
        <td><p>Loads the state of the material</p></td></tr>
       
        </tbody>
@@ -929,7 +418,7 @@
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-material_conf"></span><h3>
-public impure subroutine <a href='../proc/material_conf.html'>material_conf</a>(this, key, val)
+public subroutine <a href='../proc/material_conf.html'>material_conf</a>(this, key, val)
     
     
    
@@ -980,7 +469,7 @@ public impure subroutine <a href='../proc/material_conf.html'>material_conf</a>(
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -995,7 +484,7 @@ public impure subroutine <a href='../proc/material_conf.html'>material_conf</a>(
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>character,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1018,7 +507,7 @@ public impure subroutine <a href='../proc/material_conf.html'>material_conf</a>(
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-material_load"></span><h3>
-public impure subroutine <a href='../proc/material_load.html'>material_load</a>(this)
+public subroutine <a href='../proc/material_load.html'>material_load</a>(this)
     
     
    
@@ -1088,16 +577,17 @@ public impure subroutine <a href='../proc/material_load.html'>material_load</a>(
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

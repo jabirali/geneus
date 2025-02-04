@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Foundation</li>
@@ -136,19 +144,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 9.4% of total for modules and submodules.">312 statements</a>
+    title=" 9.5% of total for modules and submodules.">312 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/nambu.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/nambu.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/nambu.f.html'>nambu.f</a></li>
+     <li><a href='../sourcefile/nambu.f90.html'>nambu.f90</a></li>
     
   
      <li class="active">nambu_m</li>
@@ -186,9 +194,9 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/nambu_m.html#interface-inverse">inverse</a>
+      <a class="list-group-item" href="../module/nambu_m.html#interface-inverse~2">inverse</a>
       
-      <a class="list-group-item" href="../module/nambu_m.html#interface-trace">trace</a>
+      <a class="list-group-item" href="../module/nambu_m.html#interface-trace~2">trace</a>
       
       <a class="list-group-item" href="../module/nambu_m.html#interface-sum">sum</a>
       
@@ -230,8 +238,9 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This module defines the data type 'nambu', which represents 4×4 complex matrices in spin and Nambu space. The module
- overloads arithmetic operators to work with the new type, and defines and exports the Pauli matrices as constants.</p>
+    <p>This module defines the new data type 'nambu', which represents 4×4 complex
+matrices in spin and particle-hole space. It overloads arithmetic operators
+to work with the new type and exports relevant Pauli matrices as constants.</p>
       <br>
     
   
@@ -244,9 +253,9 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href='../module/math_m.html'>math_m</a></li>
-    
     <li><a href='../module/spin_m.html'>spin_m</a></li>
+    
+    <li><a href='../module/math_m.html'>math_m</a></li>
     
   </ul>
       </li>
@@ -281,9 +290,9 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/nambu_m.html#interface-inverse">inverse</a>
+      <a class="list-group-item" href="../module/nambu_m.html#interface-inverse~2">inverse</a>
       
-      <a class="list-group-item" href="../module/nambu_m.html#interface-trace">trace</a>
+      <a class="list-group-item" href="../module/nambu_m.html#interface-trace~2">trace</a>
       
       <a class="list-group-item" href="../module/nambu_m.html#interface-sum">sum</a>
       
@@ -335,14 +344,9 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-inverse"></span><h3>public interface <a href='../interface/inverse.html'>inverse</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-inverse~2"></span><h3>public interface <a href='../interface/inverse~2.html'>inverse</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Matrix inverse</p>
-  </div>
   
   <ul class="list-group">
   
@@ -361,7 +365,7 @@ private pure function nambu_inv(this) result(r)
 
 
 
-<p>Calculate the inverse of the nambu matrix.</p>
+<p>Calculates the inverse of the nambu matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -416,14 +420,9 @@ private pure function nambu_inv(this) result(r)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-trace"></span><h3>public interface <a href='../interface/trace.html'>trace</a>
+  <div class="panel-heading codesum"><span class="anchor" id="interface-trace~2"></span><h3>public interface <a href='../interface/trace~2.html'>trace</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Matrix trace</p>
-  </div>
   
   <ul class="list-group">
   
@@ -433,7 +432,7 @@ private pure function nambu_inv(this) result(r)
     
     
     <h3>
-private pure elemental function nambu_trace(this) result(r)
+private elemental function nambu_trace(this) result(r)
     
     
    
@@ -442,7 +441,7 @@ private pure elemental function nambu_trace(this) result(r)
 
 
 
-<p>Calculate the trace of the nambu matrix.</p>
+<p>Calculates the trace of the nambu matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -501,11 +500,6 @@ private pure elemental function nambu_trace(this) result(r)
     
   </h3></div>
   
-  <div class="panel-body">
-    
-    <p>Matrix sum</p>
-  </div>
-  
   <ul class="list-group">
   
   
@@ -523,7 +517,7 @@ private pure function nambu_sum(this) result(r)
 
 
 
-<p>Calculate the sum of an array of nambu matrices.</p>
+<p>Calculates the sum of an array of nambu matrices.</p>
     
     <h4>Arguments</h4>
     
@@ -582,11 +576,6 @@ private pure function nambu_sum(this) result(r)
     
   </h3></div>
   
-  <div class="panel-body">
-    
-    <p>Complex conjugation</p>
-  </div>
-  
   <ul class="list-group">
   
   
@@ -595,7 +584,7 @@ private pure function nambu_sum(this) result(r)
     
     
     <h3>
-private pure elemental function nambu_conjg(this) result(r)
+private elemental function nambu_conjg(this) result(r)
     
     
    
@@ -604,7 +593,7 @@ private pure elemental function nambu_conjg(this) result(r)
 
 
 
-<p>Calculate the complex conjugate of the nambu matrix.</p>
+<p>Calculates the complex conjugate of the nambu matrix.</p>
     
     <h4>Arguments</h4>
     
@@ -662,11 +651,6 @@ private pure elemental function nambu_conjg(this) result(r)
   <div class="panel-heading codesum"><span class="anchor" id="interface-nambuv"></span><h3>public interface <a href='../interface/nambuv.html'>nambuv</a>
     
   </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Construct basis matrices</p>
-  </div>
   
   <ul class="list-group">
   
@@ -817,35 +801,6 @@ private pure function nambuv_vector(v) result(r)
   <div class="panel-body">
     
      
-     <h4>Components</h4>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-matrix"></span>complex(kind=wp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>matrix</strong>(4,4)</td><td> =</td><td>0.0_wp</td><td><p>Encapsulate a spin and Nambu space matrix</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-     
      
           
      
@@ -865,13 +820,13 @@ private pure function nambuv_vector(v) result(r)
        <tr><td>generic, public :: <strong><a href='../type/nambu.html#boundprocedure-operator%28-%29'>operator(-)</a></strong>  => subl_rscalar, subr_rscalar, subl_cscalar, subr_cscalar, subl_cmatrix, subr_cmatrix, sub_nambu </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/nambu.html#boundprocedure-operator%28%2A%29'>operator(*)</a></strong>  => mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, mull_cmatrix, mulr_cmatrix, mul_nambu </td>
+       <tr><td>generic, public :: <strong><a href='../type/nambu.html#boundprocedure-operator%28ASTERISK%29'>operator(*)</a></strong>  => mull_rscalar, mulr_rscalar, mull_cscalar, mulr_cscalar, mull_cmatrix, mulr_cmatrix, mul_nambu </td>
        <td></td></tr>
       
        <tr><td>generic, public :: <strong><a href='../type/nambu.html#boundprocedure-operator%28SLASH%29'>operator(/)</a></strong>  => divr_rscalar, divr_cscalar </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/nambu.html#boundprocedure-operator%28%2A%2A%29'>operator(**)</a></strong>  => expr_iscalar </td>
+       <tr><td>generic, public :: <strong><a href='../type/nambu.html#boundprocedure-operator%28ASTERISKASTERISK%29'>operator(**)</a></strong>  => expr_iscalar </td>
        <td></td></tr>
       
        </tbody>
@@ -899,16 +854,17 @@ private pure function nambuv_vector(v) result(r)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

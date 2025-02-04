@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Foundation</li>
@@ -136,19 +144,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="12.1% of total for modules and submodules.">399 statements</a>
+    title="11.9% of total for modules and submodules.">393 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/propagator.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/propagator.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/propagator.f.html'>propagator.f</a></li>
+     <li><a href='../sourcefile/propagator.f90.html'>propagator.f90</a></li>
     
   
      <li class="active">propagator_m</li>
@@ -222,12 +230,14 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This module defines the data type 'propagator', which represents the propagator at a given position and energy. 
- The equilibrium propagators (retarded and advanced) are stored internally using the Riccati parameters γ and γ~
- and their derivatives, while the nonequilibrium propagator (Keldysh) is represented by taking the traces of the
- distribution function and its derivatives. These quantities are together sufficient to reconstruct the full 8×8
- propagator and its derivatives, and can be used to calculate associated physical quantities such as the density
- of states, charge currents, spin currents, heat currents, spin-heat currents, and various accumulation effects.</p>
+    <p>This module defines a type 'propagator' which represents a propagator (also
+known as a Green's function) for a given position and energy. The equilibrium
+parts (i.e. retarded and advanced) are represented via the Riccati parameters
+γ, γ~ and their derivatives, while the nonequilibrium part (i.e. Keldysh part)
+is represented by the traces of the distribution function and its derivatives.
+These are together sufficient to reconstruct the full 8×8 propagator and its
+derivatives, and can be used to calculate the associated physical quantities
+such as the density of states, charge currents, spin currents, and so on.</p>
       <br>
     
   
@@ -240,11 +250,11 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href='../module/math_m.html'>math_m</a></li>
+    <li><a href='../module/nambu_m.html'>nambu_m</a></li>
     
     <li><a href='../module/spin_m.html'>spin_m</a></li>
     
-    <li><a href='../module/nambu_m.html'>nambu_m</a></li>
+    <li><a href='../module/math_m.html'>math_m</a></li>
     
   </ul>
       </li>
@@ -378,9 +388,9 @@ private pure function propagator_construct_riccati(g, gt, dg, dgt) result(this)
 
 
 
-<p>Construct an arbitrary state by explicitly providing the Riccati parameters.
- Unspecified Riccati parameters default to zero due to the spin constructors.
- The distribution function defaults to equilibrium at zero temperature.</p>
+<p>Construct an arbitrary state by explicitly providing Riccati parameters.
+Unspecified Riccati parameters default to zero due to spin constructors.
+The distribution function defaults to equilibrium at zero temperature.</p>
     
     <h4>Arguments</h4>
     
@@ -486,10 +496,10 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
 
 
 
-<p>Constructs a state corresponding to a BCS superconductor at some given energy,
- which may have an imaginary term representing inelastic scattering. The second
- argument 'gap' is used to provide the superconducting order parameter Δ.
- The distribution function defaults to equilibrium at zero temperature.</p>
+<p>Constructs the state of a a BCS superconductor at a given energy, which
+may have an imaginary term representing inelastic scattering. The second
+argument 'gap' is used to provide the superconducting order parameter Δ.
+The distribution function defaults to equilibrium at zero temperature.</p>
     
     <h4>Arguments</h4>
     
@@ -515,7 +525,7 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>energy</strong></td><td><p>Quasiparticle energy (including inelastic scattering contribution)</p></td>
+  <td><strong>energy</strong></td><td><p>Quasiparticle energy</p></td>
   
 </tr>
 
@@ -530,7 +540,7 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>gap</strong></td><td><p>Superconducting order parameter (including superconducting phase)</p></td>
+  <td><strong>gap</strong></td><td><p>Order parameter</p></td>
   
 </tr>
 
@@ -575,175 +585,6 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
   <div class="panel-body">
     
      
-     <h4>Components</h4>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-g"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>g</strong></td><td></td><td></td><td><p>Riccati parameter γ</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-gt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>gt</strong></td><td></td><td></td><td><p>Riccati parameter γ~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dg"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>dg</strong></td><td></td><td></td><td><p>Riccati parameter ∇γ</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dgt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>dgt</strong></td><td></td><td></td><td><p>Riccati parameter ∇γ~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-d2g"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>d2g</strong></td><td></td><td></td><td><p>Riccati parameter ∇²γ</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-d2gt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>d2gt</strong></td><td></td><td></td><td><p>Riccati parameter ∇²γ~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-n"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>N</strong></td><td></td><td></td><td><p>Riccati normalization N</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nt"></span>type(<a href='../type/spin.html'>spin</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>Nt</strong></td><td></td><td></td><td><p>Riccati normalization N~</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-h"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>h</strong></td><td> =</td><td>[1, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace H</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dh"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>dh</strong></td><td> =</td><td>[0, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace ∇H</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-d2h"></span>real(kind=wp),</td>
-  
-  <td>public,</td>
-  <td>dimension(0:7)</td><td>::</td>
-  <td><strong>d2h</strong></td><td> =</td><td>[0, 0, 0, 0, 0, 0, 0, 0]</td><td><p>Distribution-trace ∇²H</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-     
      
      <h4>Constructor</h4>
        
@@ -758,15 +599,15 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
              <tr><td>private pure function <strong>propagator_construct_vacuum</strong>()</td><td><p>Construct a vacuum propagator, i.e. a propagator which satisfies G=0.</p></td></tr>
              
              
-             <tr><td>private pure function <strong>propagator_construct_riccati</strong>(g, gt, dg, dgt)</td><td><p>Construct an arbitrary state by explicitly providing the Riccati parameters.
- Unspecified Riccati parameters default to zero due to the spin constructors.
- The distribution function defaults to equilibrium at zero temperature.</p></td></tr>
+             <tr><td>private pure function <strong>propagator_construct_riccati</strong>(g, gt, dg, dgt)</td><td><p>Construct an arbitrary state by explicitly providing Riccati parameters.
+Unspecified Riccati parameters default to zero due to spin constructors.
+The distribution function defaults to equilibrium at zero temperature.</p></td></tr>
              
              
-             <tr><td>private pure function <strong>propagator_construct_bcs</strong>(energy, gap)</td><td><p>Constructs a state corresponding to a BCS superconductor at some given energy,
- which may have an imaginary term representing inelastic scattering. The second
- argument 'gap' is used to provide the superconducting order parameter Δ.
- The distribution function defaults to equilibrium at zero temperature.</p></td></tr>
+             <tr><td>private pure function <strong>propagator_construct_bcs</strong>(energy, gap)</td><td><p>Constructs the state of a a BCS superconductor at a given energy, which
+may have an imaginary term representing inelastic scattering. The second
+argument 'gap' is used to provide the superconducting order parameter Δ.
+The distribution function defaults to equilibrium at zero temperature.</p></td></tr>
              
         
        </tbody>
@@ -779,28 +620,28 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
       <tbody>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-retarded'>retarded</a></strong>  => propagator_retarded </td>
-       <td><p>Retarded propagator G^R</p></td></tr>
+       <td><p>Retarded propagator Gᴿ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-retarded_gradient'>retarded_gradient</a></strong>  => propagator_retarded_gradient </td>
-       <td><p>Retarded propagator ∇G^R</p></td></tr>
+       <td><p>Retarded propagator ∇Gᴿ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-retarded_laplacian'>retarded_laplacian</a></strong>  => propagator_retarded_laplacian </td>
-       <td><p>Retarded propagator ∇²G^R</p></td></tr>
+       <td><p>Retarded propagator ∇²Gᴿ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-advanced'>advanced</a></strong>  => propagator_advanced </td>
-       <td><p>Advanced propagator G^A</p></td></tr>
+       <td><p>Advanced propagator Gᴬ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-advanced_gradient'>advanced_gradient</a></strong>  => propagator_advanced_gradient </td>
-       <td><p>Advanced propagator ∇G^A</p></td></tr>
+       <td><p>Advanced propagator ∇Gᴬ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-advanced_laplacian'>advanced_laplacian</a></strong>  => propagator_advanced_laplacian </td>
-       <td><p>Advanced propagator ∇²G^A</p></td></tr>
+       <td><p>Advanced propagator ∇²Gᴬ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-keldysh'>keldysh</a></strong>  => propagator_keldysh </td>
-       <td><p>Keldysh propagator G^K</p></td></tr>
+       <td><p>Keldysh propagator Gᴷ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-keldysh_gradient'>keldysh_gradient</a></strong>  => propagator_keldysh_gradient </td>
-       <td><p>Keldysh propagator ∇G^K</p></td></tr>
+       <td><p>Keldysh propagator ∇Gᴷ</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-distribution'>distribution</a></strong>  => propagator_distribution </td>
        <td><p>Distribution matrix H</p></td></tr>
@@ -821,16 +662,16 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
        <td><p>Condensate matrix ∇Q</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-selfenergy1'>selfenergy1</a></strong>  => propagator_selfenergy1 </td>
-       <td><p>Selfenergy matrix R₁</p></td></tr>
+       <td><p>Self-energy matrix R₁</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-selfenergy2'>selfenergy2</a></strong>  => propagator_selfenergy2 </td>
-       <td><p>Selfenergy matrix R₂</p></td></tr>
+       <td><p>Self-energy matrix R₂</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-supercurrent'>supercurrent</a></strong>  => propagator_supercurrent </td>
-       <td><p>Spectral supercurrents</p></td></tr>
+       <td><p>Spectral super currents</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-lossycurrent'>lossycurrent</a></strong>  => propagator_lossycurrent </td>
-       <td><p>Spectral dissipative currents</p></td></tr>
+       <td><p>Spectral lossy currents</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-accumulation'>accumulation</a></strong>  => propagator_accumulation </td>
        <td><p>Spectral accumulations</p></td></tr>
@@ -839,7 +680,7 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
        <td><p>Spectral correlations</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-density'>density</a></strong>  => propagator_density </td>
-       <td><p>Spin-resolved density of states</p></td></tr>
+       <td><p>Local density of states</p></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/propagator.html#boundprocedure-save'>save</a></strong>  => propagator_save </td>
        <td><p>Export Riccati parameters</p></td></tr>
@@ -872,16 +713,17 @@ private pure function propagator_construct_bcs(energy, gap) result(this)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

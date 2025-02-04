@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -167,26 +172,25 @@ The format used for these configuration files is simple but flexible: </p>
 <li>Everything after <code>#</code> is regarded as a comment, and ignored by the configuration parser.</li>
 </ul>
 <p>Here is a configuration file that describes the physical setup above:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># S/N/S Josephson junction</span>
-<span class="c1"># with π/2 phase difference</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># S/N/S Josephson junction</span><span class="w"></span>
+<span class="c1"># with π/2 phase difference</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="na">order:         0</span>
-  <span class="na">gap:           1.00</span>
-  <span class="na">phase:        +0.25</span>
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         0</span><span class="w"></span>
+<span class="w">  </span><span class="na">gap:           1.00</span><span class="w"></span>
+<span class="w">  </span><span class="na">phase:        +0.25</span><span class="w"></span>
 
-<span class="k">[conductor]</span>
-  <span class="na">order:         1</span>
-  <span class="na">length:        3.00</span>
-  <span class="na">conductance_a: 0.30</span>
-  <span class="na">conductance_b: 0.30</span>
+<span class="k">[conductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         1</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:        3.00</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_a: 0.30</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_b: 0.30</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="na">order:         0</span>
-  <span class="na">gap:           1.00</span>
-  <span class="na">phase:        -0.25</span>
-</pre></div>
-
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         0</span><span class="w"></span>
+<span class="w">  </span><span class="na">gap:           1.00</span><span class="w"></span>
+<span class="w">  </span><span class="na">phase:        -0.25</span><span class="w"></span>
+</code></pre></div>
 
 <p>Sections like <code>[superconductor]</code> and <code>[conductor]</code> specify that we wish to simulate an S/N/S junction.
 Below each section, the physical properties of that material layer is specified using key-value pairs.</p>
@@ -205,42 +209,31 @@ This is what we have done in the example above: since both superconductors have 
 Note that since the order defaults to 1, it is optional to define it for the normal metal here.</p>
 <p>After saving the above configuration file in a suitable folder as e.g.  <code>josephson.conf</code>, open a terminal in that directory.
 The simulation can now be started using the <code>converge</code> program:</p>
-<div class="codehilite"><pre><span></span>converge josephson.conf <span class="p">&amp;</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code>converge josephson.conf
+</code></pre></div>
 
-
-<p>The simulation program should now run in the background.
-It will continuously write status information to the file <code>output.log</code>, while information about any errors that might occur is written to <code>error.log</code>.
-In order to track the progress of the simulation, you can use the command <code>tail</code>:</p>
-<div class="codehilite"><pre><span></span>tail -n +0 -f *.log
-</pre></div>
-
-
-<p>If you compiled the program using IFort, and have a modern processor (e.g. an Intel Core i7 in my case), the simulation should finish in less than a minute.
-During that time, it solves the Usadel equation as a function of position for 1000 energies in the range <script type="math/tex">(0,30\Delta_0)</script>.
+<p>The simulation program should now solve the Usadel equation as a function of position for 1000 energies in the range <script type="math/tex">(0,30\Delta_0)</script>.
 Physical observables such as the density of states and supercurrents are subsequently calculated from the propagators, and the results saved to DAT files.</p>
 <p>For this system, we may be especially interested in displaying the charge supercurrent in the system.
 If you have Gnuplot installed, you can visualize the results by running <code>gnuplot</code> in the terminal, and then typing:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
-<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Charge current&#39;</span>
-<span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">-0</span><span class="mf">.012</span><span class="o">:</span><span class="mf">0.012</span><span class="p">]</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w"> </span><span class="s">&#39;Position&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">ylabel</span><span class="w"> </span><span class="s">&#39;Charge current&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">yrange</span><span class="w"> </span><span class="p">[</span><span class="mi">-0</span><span class="mf">.012</span><span class="o">:</span><span class="mf">0.012</span><span class="p">]</span><span class="w"></span>
 
-<span class="k">plot</span> <span class="s">&#39;supercurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span>
-</pre></div>
-
+<span class="k">plot</span><span class="w"> </span><span class="s">&#39;supercurrent.dat&#39;</span><span class="w"> </span><span class="nb">using</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="w"></span>
+</code></pre></div>
 
 <p>The data files are formatted using tab-separated values (TSV files), where the first two columns correspond to the position and charge current, respectively.
 If you wish to use a different visualization tool, it should be straight-forward to import the file <code>supercurrent.dat</code>, and plot the first two columns against each other.</p>
 <p>Another quantity that might be interesting for this system, is to look at the superconducting phase as a function of position.
 The file <code>correlation.dat</code> contains three data columns, which corresponds to the position, the gap magnitude, and the superconducting phase, respectively.
 Thus, this information can be plotted as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
-<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Superconducting phase&#39;</span>
-<span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">-0</span><span class="mf">.25</span><span class="o">:</span><span class="mf">0.25</span><span class="p">]</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w"> </span><span class="s">&#39;Position&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">ylabel</span><span class="w"> </span><span class="s">&#39;Superconducting phase&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">yrange</span><span class="w"> </span><span class="p">[</span><span class="mi">-0</span><span class="mf">.25</span><span class="o">:</span><span class="mf">0.25</span><span class="p">]</span><span class="w"></span>
 
-<span class="k">plot</span> <span class="s">&#39;correlation.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">3</span>
-</pre></div>
-
+<span class="k">plot</span><span class="w"> </span><span class="s">&#39;correlation.dat&#39;</span><span class="w"> </span><span class="nb">using</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="w"></span>
+</code></pre></div>
 
 <h3>Selfconsistent calculations</h3>
 <p>For the next example, we consider an S/F bilayer with spin-orbit coupling in the ferromagnet.
@@ -249,30 +242,28 @@ The ferromagnet has length <script type="math/tex"> L_{\mathrm{F}} = 0.5\xi </sc
 The spin-orbit coupling is in-plane; since the junction direction is along the <script type="math/tex">z</script>-axis, this corresponds to a Rashba Hamiltonian <script type="math/tex"> \mathcal{H}_{\mathrm{R}} \sim \alpha(p_y \sigma_x - p_x \sigma_y) </script> and Dresselhaus Hamiltonian <script type="math/tex"> \mathcal{H}_{\mathrm{D}} \sim \beta(p_y\sigma_y - p_x\sigma_x) </script>.
 The goal will be to calculate the local density of states in the junction.</p>
 <p>An appropriate configuration file for this system would be:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># S/F bilayer with SOC</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># S/F bilayer with SOC</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="na">order:         2</span>
-  <span class="na">length:        2.5</span>
-  <span class="na">conductance_b: 0.3</span>
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         2</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:        2.5</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_b: 0.3</span><span class="w"></span>
 
-<span class="k">[ferromagnet]</span>
-  <span class="na">order:         1</span>
-  <span class="na">length:        0.5</span>
-  <span class="na">rashba:        1.0</span>
-  <span class="na">dresselhaus:   1.0</span>
-  <span class="na">magnetization: [3,0,0]</span>
-  <span class="na">conductance_a: 0.3</span>
-</pre></div>
-
+<span class="k">[ferromagnet]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         1</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:        0.5</span><span class="w"></span>
+<span class="w">  </span><span class="na">rashba:        1.0</span><span class="w"></span>
+<span class="w">  </span><span class="na">dresselhaus:   1.0</span><span class="w"></span>
+<span class="w">  </span><span class="na">magnetization: [3,0,0]</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_a: 0.3</span><span class="w"></span>
+</code></pre></div>
 
 <p>Save this file as e.g. <code>bilayer.conf</code>.
 Note that there is no need to define boundary conditions for the "outer" interfaces: when no material is defined there, the program will automatically select vacuum boundary conditions.
 The only thing needed to perform a selfconsistent calculation in the superconductor, is to specify a positive order for that layer (in this case 2).
 The simulation can again be performed using the <code>converge</code> program:</p>
-<div class="codehilite"><pre><span></span>converge bilayer.conf <span class="p">&amp;</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>converge bilayer.conf
+</code></pre></div>
 
 <p>The simulation program will alternate between solving the Usadel equation in the two layers.
 Note that for the first few iterations, the order parameter in the superconductor is locked to <script type="math/tex">\Delta = \Delta_0</script>.
@@ -280,22 +271,20 @@ This is because the state changes rapidly between iterations in the beginning, a
 This "bootstrap procedure" continues until the change in the Riccati parameters between iterations is below 1%.
 After that, the program start to perform proper selfconsistency iterations, where it both solves the Usadel equation and updates the order parameter.
 After each such iteration, the physical observables in the system is written to output files, making it possible to preview the results.
-Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.
-Using IFort and a modern processor, the entire simulation should require roughly 30 min to converge (using a default error tolerance of <script type="math/tex"> 10^{-8} </script> for the Riccati parameters).</p>
-<p>Once the simulation has finished, the relevant output file is <code>density.dat</code>.
+Finally, every 8th iteration, a simple convergence acceleration procedure (Steffensen's method) is used predict what value the order parameter is converging towards, thus shortening the required simulation time.</p>
+<p>Once the simulation finishes, the relevant output file is <code>density.dat</code>.
 The first three columns of this file correspond to the position, energy, and the spin-independent local density of states, respectively.
 The results are easily visualized as a contour plot in Gnuplot:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span>  <span class="s">&#39;Position&#39;</span>
-<span class="k">set</span> <span class="nb">ylabel</span>  <span class="s">&#39;Energy&#39;</span>
-<span class="k">set</span> <span class="nb">title</span>   <span class="s">&#39;Density of states&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w">  </span><span class="s">&#39;Position&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">ylabel</span><span class="w">  </span><span class="s">&#39;Energy&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">title</span><span class="w">   </span><span class="s">&#39;Density of states&#39;</span><span class="w"></span>
 
-<span class="k">set</span> <span class="nb">yrange</span>  <span class="p">[</span><span class="mi">-3</span><span class="o">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="k">set</span> <span class="nb">cbrange</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="k">set</span><span class="w"> </span><span class="nb">yrange</span><span class="w">  </span><span class="p">[</span><span class="mi">-3</span><span class="o">:</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">cbrange</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
 
-<span class="k">set</span> <span class="nb">pm3d</span> <span class="n">map</span>
-<span class="k">splot</span> <span class="s">&#39;density.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="o">:</span><span class="mi">3</span>
-</pre></div>
-
+<span class="k">set</span><span class="w"> </span><span class="nb">pm3d</span><span class="w"> </span><span class="n">map</span><span class="w"></span>
+<span class="k">splot</span><span class="w"> </span><span class="s">&#39;density.dat&#39;</span><span class="w"> </span><span class="nb">using</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="o">:</span><span class="mi">3</span><span class="w"></span>
+</code></pre></div>
 
 <h3>Nonequilibrium calculations</h3>
 <p>In this section, we consider a voltage-biased N/S/N junction.
@@ -306,49 +295,46 @@ The superconductor is taken to have length <script type="math/tex"> L_{\mathrm{S
 Furthermore, due to the voltage bias, the system is necessarily out-of-equilibrium, which means that we also need to solve the kinetic equations numerically.
 As for the normal metals, we will treat these as reservoirs at voltages <script type="math/tex"> eV/\Delta_0 = \pm 0.1 </script>.</p>
 <p>An appropriate configuration file for the system above is:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># Voltage-biased superconductor</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Voltage-biased superconductor</span><span class="w"></span>
 
-<span class="k">[conductor]</span>
-  <span class="na">order:           0</span>
-  <span class="na">voltage:        -0.1</span>
+<span class="k">[conductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:           0</span><span class="w"></span>
+<span class="w">  </span><span class="na">voltage:        -0.1</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="na">order:           1</span>
-  <span class="na">nonequilibrium:  T</span>
-  <span class="na">boost:           F</span>
-  <span class="na">length:          5.0</span>
-  <span class="na">conductance_a:   0.3</span>
-  <span class="na">conductance_b:   0.3</span>
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:           1</span><span class="w"></span>
+<span class="w">  </span><span class="na">nonequilibrium:  T</span><span class="w"></span>
+<span class="w">  </span><span class="na">boost:           F</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:          5.0</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_a:   0.3</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_b:   0.3</span><span class="w"></span>
 
-<span class="k">[conductor]</span>
-  <span class="na">order:           0</span>
-  <span class="na">voltage:        +0.1</span>
-</pre></div>
-
+<span class="k">[conductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:           0</span><span class="w"></span>
+<span class="w">  </span><span class="na">voltage:        +0.1</span><span class="w"></span>
+</code></pre></div>
 
 <p>Save the configuration above as <code>voltage.conf</code>, and start the simulation:</p>
-<div class="codehilite"><pre><span></span>converge voltage.conf <span class="p">&amp;</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>converge voltage.conf
+</code></pre></div>
 
 <p>By default, a convergence acceleration method is invoked every 8th selfconsistency iteration.
 For systems without phase gradients (i.e. charge supercurrents), this can speed up convergence by a factor 2-5x.
-However, for systems with such phase gradients, the convergence acceleration procedure fails miserably, and should be disabled.
+However, for systems with such phase gradients, this procedure often diverges and should be disabled.
 This is done by setting the parameter <code>boost</code> to false in the example above.</p>
 <p>Note that you explicitly need to set <code>nonequilibrium</code> to true in each layer where you wish to solve the out-of-equilibrium kinetic equations.
 Without this switch, the simulation program will assume that it is dealing with an equilibrium problem, and only solve the Usadel equation for the retarded propagators.</p>
-<p>The example above is among the slowest single-layer junctions you can simulate with the code: using IFort and a modern processor, it takes roughly 90 min to converge completely.
+<p>The example above is among the slowest single-layer junctions you can simulate with the code, typically taking a few hours to converge completely.
 This is because the code in general requires a large number of iterations to perform selfconsistent calculations with phase gradients, a problem that is further exacerbated by the lack of convergence acceleration.
 If you wish to perform some faster numerical experiments to explore the out-of-equilibrium functionality, I would recommend testing N/N/N systems first.</p>
 <p>Once the simulation finishes, the resistive current and supercurrent can be visualized together using Gnuplot:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Position&#39;</span>
-<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Charge current&#39;</span>
-<span class="k">set</span> <span class="nb">yrange</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mf">0.002</span><span class="p">]</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w"> </span><span class="s">&#39;Position&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">ylabel</span><span class="w"> </span><span class="s">&#39;Charge current&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">yrange</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mf">0.002</span><span class="p">]</span><span class="w"></span>
 
-<span class="k">plot</span> <span class="s">&#39;supercurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span> <span class="nb">title</span> <span class="s">&#39;Super&#39;</span><span class="o">,</span> \
-     <span class="s">&#39;lossycurrent.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span> <span class="nb">title</span> <span class="s">&#39;Resistive&#39;</span>
-</pre></div>
-
+<span class="k">plot</span><span class="w"> </span><span class="s">&#39;supercurrent.dat&#39;</span><span class="w"> </span><span class="nb">using</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="w"> </span><span class="nb">title</span><span class="w"> </span><span class="s">&#39;Super&#39;</span><span class="o">,</span><span class="w"> </span>\<span class="w"></span>
+<span class="w">     </span><span class="s">&#39;lossycurrent.dat&#39;</span><span class="w"> </span><span class="nb">using</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="w"> </span><span class="nb">title</span><span class="w"> </span><span class="s">&#39;Resistive&#39;</span><span class="w"></span>
+</code></pre></div>
 
 <h3>Advanced functionality</h3>
 <p>In this section, we introduce some more advanced capabilities of the configuration format: mathematical expressions and command-line arguments.
@@ -372,53 +358,50 @@ However, we wish to investigate the current-phase relation for multiple phase di
 We therefore set the reservoir phases to <script type="math/tex"> \pm \delta\varphi/2 </script>, where the phase difference <script type="math/tex"> \delta\varphi </script> is provided as a command-line argument <code>{1}</code>.
 This allows us to perform simulations for different <script type="math/tex"> \delta\varphi </script> in parallel without having to write multiple configuration files.</p>
 <p>An appropriate configuration file is then:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># Josephson junction with a helical ferromagnet.</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Josephson junction with a helical ferromagnet.</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="na">order:         0</span>
-  <span class="na">phase:        -{1}/2</span>
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         0</span><span class="w"></span>
+<span class="w">  </span><span class="na">phase:        -{1}/2</span><span class="w"></span>
 
-<span class="k">[ferromagnet]</span>
-  <span class="na">length:        3.0</span>
-  <span class="na">magnetization: [3*cos(pi*z/2), 3*sin(pi*z/2), 1]</span>
-  <span class="na">conductance_a: 0.3</span>
-  <span class="na">conductance_b: 0.3</span>
+<span class="k">[ferromagnet]</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:        3.0</span><span class="w"></span>
+<span class="w">  </span><span class="na">magnetization: [3*cos(pi*z/2), 3*sin(pi*z/2), 1]</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_a: 0.3</span><span class="w"></span>
+<span class="w">  </span><span class="na">conductance_b: 0.3</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="na">order:         0</span>
-  <span class="na">phase:        +{1}/2</span>
-</pre></div>
-
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="na">order:         0</span><span class="w"></span>
+<span class="w">  </span><span class="na">phase:        +{1}/2</span><span class="w"></span>
+</code></pre></div>
 
 <p>Save this file as e.g. <code>helical.conf</code> and open a terminal in the same folder.
 We can then use a Bash loop to start multiple parallel simulations with different <script type="math/tex"> \delta\varphi \in \{ 0.0, 0.1, \ldots, 1.0 \} </script> in separate subdirectories:</p>
-<div class="codehilite"><pre><span></span><span class="k">for</span> n in <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
   <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
-  converge ../helical.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  nice converge ../helical.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> &gt; output.log <span class="p">&amp;</span>
   <span class="nb">cd</span> ..<span class="p">;</span>
 <span class="k">done</span>
-</pre></div>
+</code></pre></div>
 
-
-<p>With IFort and an Intel Core i7, it takes roughly 3 min for all the simulations to complete.
-Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
+<p>The processes run in parallel in the background, each one writing its progress to a file <code>output.log</code> in the relevant subfolders.
+You can use the command <code>tail -f sim_0.2/output.log</code>, for example, to monitor the progress of one of the simulations.</p>
+<p>Since the simulation results are scattered in multiple files in multiple folders, some postprocessing is required to collect the results afterwards.
 The charge current is conserved, so we can extract it at any point in the ferromagnet; in this case, we use <code>tail -n 1</code> to extract it from the right end.
 In Bash, these results can then be collected by running:</p>
-<div class="codehilite"><pre><span></span><span class="k">for</span> n in <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   <span class="nb">echo</span> -n <span class="si">${</span><span class="nv">n</span><span class="si">}</span> &gt;&gt; current.dat<span class="p">;</span>
   tail -n <span class="m">1</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span>/supercurrent.dat &gt;&gt; current.dat
 <span class="k">done</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>Finally, the resulting current-phase relation can be plotted using:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Charge current&#39;</span>
-<span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Phase difference&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">ylabel</span><span class="w"> </span><span class="s">&#39;Charge current&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w"> </span><span class="s">&#39;Phase difference&#39;</span><span class="w"></span>
 
-<span class="k">plot</span> <span class="s">&#39;current.dat&#39;</span> <span class="nb">using</span> <span class="mi">1</span><span class="o">:</span><span class="mi">3</span>
-</pre></div>
-
+<span class="k">plot</span><span class="w"> </span><span class="s">&#39;current.dat&#39;</span><span class="w"> </span><span class="nb">using</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="w"></span>
+</code></pre></div>
 
 <h3>Critical temperature</h3>
 <p>In all of the examples above, we have focused on a single program <code>converge</code>, which essentially calculates the steady-state solution for a physical system with known parameters.
@@ -429,48 +412,44 @@ The ideas behind this algorithm are explained in more detail in the appendix of 
 The ferromagnetic insulators are modelled as spin-active interfaces with spin-mixing conductances <script type="math/tex"> G_\varphi = 0.5G_{\mathrm{N}} </script>, where <script type="math/tex"> G_{\mathrm{N}} </script> is the normal-state conductance of the superconductor.
 Their magnetization directions are set to <script type="math/tex"> \boldsymbol{m} = [\cos(\pm\theta/2), \sin(\pm\theta/2), 0] </script>, where the relative magnetization angle <script type="math/tex"> \theta </script> will be provided as a command-line argument.</p>
 <p>An appropriate model for this spin-valve setup is:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># FI/S/FI Spin-valve setup.</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># FI/S/FI Spin-valve setup.</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="c1"># Material itself</span>
-  <span class="na">length:          1.0</span>
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Material itself</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:          1.0</span><span class="w"></span>
 
-  <span class="c1"># Left interface</span>
-  <span class="na">magnetization_a: [cos(-{1}*pi/2),sin(-{1}*pi/2),0]</span>
-  <span class="na">spinmixing_a:    0.5</span>
+<span class="w">  </span><span class="c1"># Left interface</span><span class="w"></span>
+<span class="w">  </span><span class="na">magnetization_a: [cos(-{1}*pi/2),sin(-{1}*pi/2),0]</span><span class="w"></span>
+<span class="w">  </span><span class="na">spinmixing_a:    0.5</span><span class="w"></span>
 
-  <span class="c1"># Right interface</span>
-  <span class="na">magnetization_b: [cos(+{1}*pi/2),sin(+{1}*pi/2),0]</span>
-  <span class="na">spinmixing_b:    0.5</span>
-</pre></div>
-
+<span class="w">  </span><span class="c1"># Right interface</span><span class="w"></span>
+<span class="w">  </span><span class="na">magnetization_b: [cos(+{1}*pi/2),sin(+{1}*pi/2),0]</span><span class="w"></span>
+<span class="w">  </span><span class="na">spinmixing_b:    0.5</span><span class="w"></span>
+</code></pre></div>
 
 <p>Save this configuration file as e.g. <code>spinvalve.conf</code> and open a terminal in the same folder.
 We then perform parallel simulations for magnetization angles <script type="math/tex"> \theta/\pi \in \{ 0.0, 0.1, \ldots, 1.0 \} </script>:</p>
-<div class="codehilite"><pre><span></span><span class="k">for</span> n in <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
   <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
-  critical ../spinvalve.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  nice critical ../spinvalve.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> &gt; output.log <span class="p">&amp;</span>
   <span class="nb">cd</span> ..<span class="p">;</span>
 <span class="k">done</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>These simulations may take a few hours to complete.
 When the simulations are finished, they will write both the command-line options used to invoke each process and the calculated critical temperature to <code>critical.dat</code> output files.
 The critical temperature result <script type="math/tex">T_{\mathrm{c}}</script> is normalized to the critical temperature <script type="math/tex">T_{\mathrm{cs}}</script> of a bulk superconductor.
 The results can be collected into a single output file as follows:</p>
-<div class="codehilite"><pre><span></span>cat sim_*/critical.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; critical.dat
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>cat sim_*/critical.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; critical.dat
+</code></pre></div>
 
 <p>It is then trivial to plot the results in Gnuplot:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Magnetization angle&#39;</span>
-<span class="k">set</span> <span class="nb">ylabel</span> <span class="s">&#39;Critical temperature&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w"> </span><span class="s">&#39;Magnetization angle&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">ylabel</span><span class="w"> </span><span class="s">&#39;Critical temperature&#39;</span><span class="w"></span>
 
-<span class="k">plot</span> <span class="s">&#39;critical.dat&#39;</span> <span class="nb">u</span> <span class="mi">1</span><span class="o">:</span><span class="mi">2</span> <span class="nb">notitle</span>
-</pre></div>
-
+<span class="k">plot</span><span class="w"> </span><span class="s">&#39;critical.dat&#39;</span><span class="w"> </span><span class="nb">u</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="w"> </span><span class="nb">notitle</span><span class="w"></span>
+</code></pre></div>
 
 <h3>Phase diagrams</h3>
 <p>In this example, we demonstrate another specialized program <code>flow</code>, which can be used to rapidly map out the phase diagram of a superconducting system.
@@ -478,48 +457,44 @@ The program is based on analysing the "flow" of the order parameter during selfc
 The program will be illustrated using a spin-valve setup similar to the previous section.
 However, in this case we will assume zero temperature and perpendicular magnetizations, and investigate how the spin-mixing conductance <script type="math/tex"> G_\varphi </script> affects the stability of superconductivity.</p>
 <p>An appropriate configuration file is:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># FI/S/FI Spin-valve setup.</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># FI/S/FI Spin-valve setup.</span><span class="w"></span>
 
-<span class="k">[superconductor]</span>
-  <span class="c1"># Material itself</span>
-  <span class="na">gap:             0.01</span>
-  <span class="na">length:          1.00</span>
+<span class="k">[superconductor]</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Material itself</span><span class="w"></span>
+<span class="w">  </span><span class="na">gap:             0.01</span><span class="w"></span>
+<span class="w">  </span><span class="na">length:          1.00</span><span class="w"></span>
 
-  <span class="c1"># Left interface</span>
-  <span class="na">magnetization_a: [1,0,0]</span>
-  <span class="na">spinmixing_a:    {1}</span>
+<span class="w">  </span><span class="c1"># Left interface</span><span class="w"></span>
+<span class="w">  </span><span class="na">magnetization_a: [1,0,0]</span><span class="w"></span>
+<span class="w">  </span><span class="na">spinmixing_a:    {1}</span><span class="w"></span>
 
-  <span class="c1"># Right interface</span>
-  <span class="na">magnetization_b: [0,1,0]</span>
-  <span class="na">spinmixing_b:    {1}</span>
-</pre></div>
-
+<span class="w">  </span><span class="c1"># Right interface</span><span class="w"></span>
+<span class="w">  </span><span class="na">magnetization_b: [0,1,0]</span><span class="w"></span>
+<span class="w">  </span><span class="na">spinmixing_b:    {1}</span><span class="w"></span>
+</code></pre></div>
 
 <p>Save the file above as e.g. <code>spinvalve2.conf</code>, and run the following commands to start the simulations:</p>
-<div class="codehilite"><pre><span></span><span class="k">for</span> n in <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span> n <span class="k">in</span> <span class="k">$(</span>seq <span class="m">0</span>.0 <span class="m">0</span>.1 <span class="m">1</span>.0<span class="k">)</span><span class="p">;</span> <span class="k">do</span>
   mkdir sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
   <span class="nb">cd</span> sim_<span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="p">;</span>
-  flow ../spinvalve2.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>
+  nice flow ../spinvalve2.conf <span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">&amp;</span>&gt; output.log <span class="p">&amp;</span>
   <span class="nb">cd</span> ..<span class="p">;</span>
 <span class="k">done</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>According to the configuration file above, the order parameter is initially set to a small value <script type="math/tex"> \Delta = 0.01\Delta_0 </script>.
 The simulation program then performs a fixed number of selfconsistency iterations, and determines whether the order parameter is spontaneously increasing (&gt;1) or decreasing (&lt;1) compared to its initial value.
 This can be used to classify regions in parameter space as having a stable or unstable superconducting solution branch.</p>
-<p>The simulations should take about 10 min to complete. 
-The results can then be collected to a single output file:</p>
-<div class="codehilite"><pre><span></span>cat sim_*/flow.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; flow.dat
-</pre></div>
-
+<p>Upon completion, the results can then be collected to a single output file:</p>
+<div class="codehilite"><pre><span></span><code>cat sim_*/flow.dat <span class="p">|</span> cut -f <span class="m">2</span>,3 &gt; flow.dat
+</code></pre></div>
 
 <p>They are then straight-forward to visualize in Gnuplot:</p>
-<div class="codehilite"><pre><span></span><span class="k">set</span> <span class="nb">xlabel</span> <span class="s">&#39;Spin-mixing conductance&#39;</span>
-<span class="k">set</span> <span class="nb">ytics</span> <span class="p">(</span><span class="s">&#39;Normal&#39;</span> <span class="mi">0</span><span class="o">,</span> <span class="s">&#39;Super&#39;</span> <span class="mi">1</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="k">set</span><span class="w"> </span><span class="nb">xlabel</span><span class="w"> </span><span class="s">&#39;Spin-mixing conductance&#39;</span><span class="w"></span>
+<span class="k">set</span><span class="w"> </span><span class="nb">ytics</span><span class="w"> </span><span class="p">(</span><span class="s">&#39;Normal&#39;</span><span class="w"> </span><span class="mi">0</span><span class="o">,</span><span class="w"> </span><span class="s">&#39;Super&#39;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
 
-<span class="k">plot</span> <span class="s">&#39;flow.dat&#39;</span> <span class="nb">u</span> <span class="mi">1</span><span class="o">:</span><span class="p">(</span><span class="err">$</span><span class="mi">2</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="nb">notitle</span>
-</pre></div>
+<span class="k">plot</span><span class="w"> </span><span class="s">&#39;flow.dat&#39;</span><span class="w"> </span><span class="nb">u</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="p">(</span><span class="err">$</span><span class="mi">2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="nb">notitle</span><span class="w"></span>
+</code></pre></div>
     </div>
     
     <div class="col-md-3 col-md-pull-9">
@@ -562,16 +537,17 @@ The results can then be collected to a single output file:</p>
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

@@ -74,8 +74,11 @@
         
         
             <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
         
             </ul>
+        
             </li>
 
 
@@ -94,6 +97,8 @@
 
 
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -128,6 +133,9 @@
      
      
      
+    <li><i class="fa fa-legal"></i> <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a></li> 
+     
+     
      
     
     <li><i class="fa fa-folder-open"></i> Foundation</li>
@@ -141,14 +149,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/basic.f"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/basic.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/basic.f.html'>basic.f</a></li>
+     <li><a href='../sourcefile/basic.f90.html'>basic.f90</a></li>
     
   
      <li class="active">basic_m</li>
@@ -244,10 +252,11 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This file defines a module containing the machine size of single-precision, double-precision, and quadruple-precision
- floating point numbers; to declare the floating point precision of a variable, use real(sp), real(dp), or real(qp) as
- the type of the variable. It also defines the working-precision, which will be the default kind for module procedures.
- As for module procedures, this library defines some common utility functions for working with e.g. complex numbers.</p>
+    <p>This module contains constants and functions for doing low-level numerics
+in Fortran. This includes standard real and complex precisions (sp, dp, qp),
+a "working precision" (wp) that is used as the default precision in GENEUS;
+some common numerical constants (like pi and the machine epsilon); as well
+as basic functions for e.g. constructing and deconstructing complex numbers.</p>
       <br>
     
   
@@ -260,7 +269,7 @@
       <li class="list-group-item">
   <ul class="list-inline">
     
-    <li><a href="http://fortranwiki.org/fortran/show/ISO_FORTRAN_ENV">iso_fortran_env</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a></li>
     
   </ul>
       </li>
@@ -432,7 +441,7 @@
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
-  <td><strong>inf</strong></td><td> =</td><td>huge(1.0_wp)</td><td><p>Numerical infinity</p></td>
+  <td><strong>inf</strong></td><td> =</td><td>huge(1.0_wp)</td><td><p>Infinity</p></td>
   
 </tr>
 
@@ -446,7 +455,7 @@
   
   <td>public,</td>
   <td>parameter</td><td>::</td>
-  <td><strong>eps</strong></td><td> =</td><td>epsilon(1.0_wp)</td><td><p>Numerical infinitesimal</p></td>
+  <td><strong>eps</strong></td><td> =</td><td>epsilon(1.0_wp)</td><td><p>Infinitesimal</p></td>
   
 </tr>
 
@@ -486,7 +495,7 @@
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-re"></span><h3>
-public pure elemental function <a href='../proc/re.html'>re</a>(z) result(x)
+public elemental function <a href='../proc/re.html'>re</a>(z) result(x)
     
     
    
@@ -554,7 +563,7 @@ public pure elemental function <a href='../proc/re.html'>re</a>(z) result(x)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-im"></span><h3>
-public pure elemental function <a href='../proc/im.html'>im</a>(z) result(y)
+public elemental function <a href='../proc/im.html'>im</a>(z) result(y)
     
     
    
@@ -622,7 +631,7 @@ public pure elemental function <a href='../proc/im.html'>im</a>(z) result(y)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-cx"></span><h3>
-public pure elemental function <a href='../proc/cx.html'>cx</a>(x, y) result(z)
+public elemental function <a href='../proc/cx.html'>cx</a>(x, y) result(z)
     
     
    
@@ -637,7 +646,7 @@ public pure elemental function <a href='../proc/cx.html'>cx</a>(x, y) result(z)
 
 
 
-<p>Returns the complex number z=x+iy.</p>
+<p>Returns the complex number z=x+iy.</p><a href="../proc/cx.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -705,7 +714,7 @@ public pure elemental function <a href='../proc/cx.html'>cx</a>(x, y) result(z)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-arg"></span><h3>
-public pure elemental function <a href='../proc/arg.html'>arg</a>(z) result(t)
+public elemental function <a href='../proc/arg.html'>arg</a>(z) result(t)
     
     
    
@@ -720,7 +729,7 @@ public pure elemental function <a href='../proc/arg.html'>arg</a>(z) result(t)
 
 
 
-<p>Returns the complex argument θ of a complex number z=r·exp(iθ). </p>
+<p>Returns the complex argument θ of a complex number z=r·exp(iθ).</p><a href="../proc/arg.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -789,7 +798,7 @@ public pure function <a href='../proc/unitvector.html'>unitvector</a>(v) result(
 
 
 <p>If the argument has a finite norm, then it will be rescaled to a unit
- vector. If that norm is zero, then a zero vector is returned instead.</p>
+vector. If that norm is zero, then a zero vector is returned instead.</p>
     
     <h4>Arguments</h4>
     
@@ -815,7 +824,7 @@ public pure function <a href='../proc/unitvector.html'>unitvector</a>(v) result(
   <td></td>
   
   <td>dimension(3)</td><td>::</td>
-  <td><strong>v</strong></td><td><p>Vector</p></td>
+  <td><strong>v</strong></td><td><p>Input vector</p></td>
   
 </tr>
 
@@ -883,7 +892,7 @@ public pure function <a href='../proc/nonzero.html'>nonzero</a>(v) result(r)
   <td></td>
   
   <td>dimension(:)</td><td>::</td>
-  <td><strong>v</strong></td><td><p>Vector</p></td>
+  <td><strong>v</strong></td><td><p>Input vector</p></td>
   
 </tr>
 
@@ -900,7 +909,7 @@ public pure function <a href='../proc/nonzero.html'>nonzero</a>(v) result(r)
   
      <h4>Return Value <small>logical
   </small></h4>
-  <p>Finite</p>
+  <p>Conclusion</p>
     
 
   </div>
@@ -923,16 +932,17 @@ public pure function <a href='../proc/nonzero.html'>nonzero</a>(v) result(r)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2018 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>GENEUS was developed by Jabir Ali Ouassou<br>&copy; 2022 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> GENEUS was developed by Jabir Ali Ouassou</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

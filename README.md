@@ -1,19 +1,55 @@
 # GENEUS: General Non-Equilibrium Usadel Solver
 
-GENEUS is a set of numerical programs for solving the Usadel diffusion equation in one-dimensional superconducting nanostructures, both in and out of equilibrium.
-The programs are quite flexible, being able to treat systems with e.g. magnetic elements, spin-orbit coupling, spin-dependent scattering, strongly polarized magnetic interfaces, voltage gradients, and temperature gradients.
-The suite also contains specialized programs for calculating the critical temperature and phase diagrams of all these hybrid structures.
-The programs are built to be user-friendly: they are configured using simple configuration files, which can include mathematical expressions to initialize the physical system, and the output is easily imported in e.g. Gnuplot or Matlab.
-Finally, the code is written in modern object-oriented Fortran, making it both simple and efficient.
+You are currently viewing an EXPERIMENTAL branch, which will eventually
+become GENEUS v2. This branch is not recommended for production use.
+Please see the `master` branch for the stable version [GENEUS v1][v1].
 
-This software was developed by [Jabir Ali Ouassou](https://orcid.org/0000-0002-3725-0885) during his doctoral research.
-The research was supervised by [Prof. Jacob Linder](https://folk.ntnu.no/jacobrun/) at the [Center for Quantum Spintronics](https://www.ntnu.edu/quspin), NTNU, Norway.
-The software itself is released under the [MIT open-source licence](https://github.com/jabirali/geneus/blob/master/LICENSE.md);
-this basically means that you are free to use it for any purpose, as long as you give credit where appropriate.
+## Quick start
+You need a recent version of GNU/Linux with GFortran v8.x and CMake v3.x.
+Note that the code currently segfaults when compiled with GFortran v9.x or
+higher; meanwhile, I would recommend that you either compile the code using
+an older GFortran version, or that you download precompiled GENEUS binaries. 
+If you use e.g. Ubuntu, the dependencies can be installed via:
 
-The project also relies on the external libraries [`bvp_solver`](http://cs.stmarys.ca/~muir/BVP_SOLVER_Webpage.shtml), [`fparser`](http://fparser.sourceforge.net/), and [`pchip`](https://people.sc.fsu.edu/~jburkardt/f_src/pchip/pchip.html).
-These are available under a mixture of open-source licences, as indicated in the source files themselves.
-For convenience, these libraries have been bundled with this software page, and their sources are located under [src/external](https://github.com/jabirali/geneus/tree/master/src/external).
+	sudo apt install cmake gfortran-8 gfortran-8-doc
+	sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-8 8
 
-For more information, see the 
-[documentation](https://jabirali.github.io/geneus/html/page/index.html).
+
+After cloning the repository and opening it in a terminal, you can then
+compile the software via the following:
+
+	./configure
+	cd build
+	make
+
+The executables will then end up in the project subfolder `bin`. See
+the [documentation][docs] for more information on how to use these.
+
+Before running any simulations, it's recommended that you add
+
+	ulimit -s unlimited
+
+to your shell config (e.g. `~/.bashrc`). If not, limitations in stack size
+may result in crashes if you attempt to multiple simulations in parallel.
+
+## Differences from v1
+In contrast to GENEUS v1, this branch only supports a single `cmake` build
+type, a single platform (Ubuntu x86-64), and a single compiler (GFortran).
+Narrowing down the debugging to one compilation target simplifies maintenance.
+The binaries are now also portable (fully static x86-64 binaries), meaning that
+they can be transferred between computers without requiring recompilation.
+
+One drawback of the above is performance. By dropping support for Intel Fortran,
+and switching to less aggressive compilation flags, GENEUS v2 runs up to an order
+of magnitude slower than v1 did. If this becomes a bottleneck, you are of course
+free to experiment with other compilation options; please don't be shy to reach
+out with potential bugfixes and optimizations in that case.
+
+I've attempted to make the code conform more to the conventions used
+in modern Fortran code, e.g. standard file extensions and line lengths.
+These updates were performed with the help of [fprettify][fp]. Hopefully,
+this should make the code easier to extend by others.
+
+[v1]: https://github.com/jabirali/geneus/tree/v1.0
+[docs]: https://jabirali.github.io/geneus/html/page/index.html
+[fp]: https://github.com/pseewald/fprettify
