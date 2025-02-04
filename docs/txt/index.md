@@ -20,4 +20,4 @@ These are available under a mixture of open-source licences, as indicated in the
 For convenience, these libraries have been bundled with this software page, and their sources are located under [src/external](https://github.com/jabirali/GENEUS/tree/master/src/external).
 
 For instructions on how to install GENEUS, continue to the [next part](01-installation.html) of the manual.
-After that, the different sections shown in the table of contents on the left will guide you through the use of the programs themselves.
+After that, the next section will guide you through the use of the programs themselves.

@@ -1,22 +1,18 @@
 # GENEUS: General Non-Equilibrium Usadel Solver
 
-You are currently viewing an EXPERIMENTAL branch, which will eventually
-become GENEUS v2. This branch is not recommended for production use.
-Please see the `master` branch for the stable version [GENEUS v1][v1].
-
 ## Quick start
 You need a recent version of GNU/Linux with GFortran v8.x and CMake v3.x.
-Note that the code currently segfaults when compiled with GFortran v9.x or
-higher; meanwhile, I would recommend that you either compile the code using
-an older GFortran version, or that you download precompiled GENEUS binaries. 
-If you use e.g. Ubuntu, the dependencies can be installed via:
+The code mostly works with GFortran v9.x but sometimes segfaults; I would
+therefore recommend that you either compile the code using an older GFortran
+version, or that you download precompiled GENEUS binaries.  If you use e.g.
+an older version of Ubuntu, the dependencies can be installed directly via:
 
 	sudo apt install cmake gfortran-8 gfortran-8-doc
 	sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-8 8
 
-
-After cloning the repository and opening it in a terminal, you can then
-compile the software via the following:
+On newer versions of Ubuntu, you might have to compile GFortran v8.x yourself
+if you want to use this.  After cloning the repository and opening it in a
+terminal, you can then compile the software via the following:
 
 	./configure
 	cd build
@@ -33,8 +29,8 @@ to your shell config (e.g. `~/.bashrc`). If not, limitations in stack size
 may result in crashes if you attempt to multiple simulations in parallel.
 
 ## Differences from v1
-In contrast to GENEUS v1, this branch only supports a single `cmake` build
-type, a single platform (Ubuntu x86-64), and a single compiler (GFortran).
+In contrast to GENEUS v1, the current version only supports a single `cmake`
+build type, a single platform (Ubuntu x86-64), and a single compiler (GFortran).
 Narrowing down the debugging to one compilation target simplifies maintenance.
 The binaries are now also portable (fully static x86-64 binaries), meaning that
 they can be transferred between computers without requiring recompilation.
