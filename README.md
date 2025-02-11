@@ -1,22 +1,19 @@
 # GENEUS: General Non-Equilibrium Usadel Solver
 
 ## Quick start
-You need a Linux/Unix system with GFortran v8.x and CMake v3.x. Note that the code is susceptible to segfaults when compiled with newer GFortran versions, although version v9.x also seems to work. It might not compile at all using older versions or other compilers. I would therefore recommend that you install specifically GFortran 8.2 if possible. If you use Ubuntu, the dependencies can be installed directly via:
+You need a Linux/Unix system with GFortran v8.x and CMake v3.x. Note that the code is susceptible to segfaults when compiled with newer GFortran versions, and might not compile at all using older versions or other compilers.
 
-	sudo apt install cmake gfortran-8 gfortran-8-doc
-	sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-8 8
+The code can be compiled as follows:
 
-On newer systems, you might have to [download GFortran](https://gfortran.meteodat.ch/download/x86_64/) from the official sources. After cloning the repository and opening it in a terminal, you can then compile the software via the following:
-
-	./configure
-	cd build
-	make
+    ./configure
+    cd build
+    make
 
 The executables will then end up in the project subfolder `bin`. See the [documentation][docs] for more information on how to use these binaries for physics simulations.
 
 Before running any simulations, it's recommended that you add
 
-	ulimit -s unlimited
+    ulimit -s unlimited
 
 to your shell config (e.g. `~/.bashrc`). If not, limitations in stack size may result in crashes if you attempt to multiple simulations in parallel.
 
