@@ -7,7 +7,7 @@ if [ -e build ]; then
 fi
 
 # Generate new makefile
-cmake -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1
+cmake -Wno-dev -DCMAKE_Fortran_COMPILER=gfortran -H. -Bbuild || exit 1
 
 # Instructions for users
 echo
