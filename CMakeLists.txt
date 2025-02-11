@@ -24,18 +24,18 @@ set(CMAKE_EXE_LINKER_FLAGS "-march=x86-64 -static -static-libgfortran")
 # Customize the compile flags per source type.
 file(GLOB lib77 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/*.f")
 foreach(src_name ${lib77})
-  set_property(SOURCE ${src_name} APPEND PROPERTY COMPILE_OPTIONS -Ofast -std=legacy -ffixed-form)
+  set_property(SOURCE ${src_name} APPEND PROPERTY COMPILE_OPTIONS -O2 -std=legacy -ffixed-form)
 endforeach()
 
 file(GLOB lib90 RELATIVE ${CMAKE_SOURCE_DIR} "src/external/*.f90")
 foreach(src_name ${lib90})
-  set_property(SOURCE ${src_name} APPEND PROPERTY COMPILE_OPTIONS -Ofast -std=legacy -ffree-form)
+  set_property(SOURCE ${src_name} APPEND PROPERTY COMPILE_OPTIONS -O2 -std=legacy -ffree-form)
 endforeach()
 
 file(GLOB lib08 RELATIVE ${CMAKE_SOURCE_DIR} "src/system/*.f90" "src/foundation/*.f90" "src/materials/*.f90")
 file(GLOB bin08 RELATIVE ${CMAKE_SOURCE_DIR} "src/programs/*.f90")
 foreach(src_name ${lib08} ${bin08})
-  set_property(SOURCE ${src_name} APPEND PROPERTY COMPILE_OPTIONS -Og -std=f2018 -ffree-form -fimplicit-none -frecursive -fcheck=all,no-array-temps)
+  set_property(SOURCE ${src_name} APPEND PROPERTY COMPILE_OPTIONS -O2 -std=f2018 -ffree-form -fimplicit-none -frecursive -fcheck=all,no-array-temps)
 endforeach()
 
 # Define the compile targets: one library, many programs.
