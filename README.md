@@ -1,5 +1,11 @@
 # GENEUS: General Non-Equilibrium Usadel Solver
 
+## Important notice
+
+I haven't actively maintained GENEUS for a while, and unfortunately it is currently in a broken state. It doesn't compile cleanly under the last versions of GFortran or Intel Fortran, and often crashes due to unidentified segfaults when compiled using old compiler versions that used to work. I would therefore not recommend using it unless you're comfortable debugging Fortran yourself.
+
+One alternative is to look at [this](https://github.com/jabirali/usadel) older Usadel solver; it's much slower and has fewer features, but last I checked the code still worked. Please also check out my newer [Bogoliubov-de Gennes package for Python](https://github.com/jabirali/bodge) if you want to model superconductivity in the clean limit.
+
 ## Quick start
 You need a Linux/Unix system with GFortran v8.x and CMake v3.x. Note that the code is susceptible to segfaults when compiled with newer GFortran versions, and might not compile at all using older versions or other compilers.
 
